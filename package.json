@@ -2,8 +2,8 @@
   "name": "@cartridge/explorer",
   "private": true,
   "version": "0.0.0",
-  "packageManager": "npm@8.5.0",
   "type": "module",
+  "packageManager": "pnpm@9.7.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -13,6 +13,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@cartridge/ui-next": "0.5.0-alpha.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.1.3"
