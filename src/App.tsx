@@ -1,9 +1,10 @@
 import "./App.css";
+import Home from "./modules/Home/page";
 
 function App() {
   return (
     <div className="bg-black h-screen w-screen flex justify-center items-center">
-      <p className=" text-white">Ohayo world!</p>
+      <Home />
     </div>
   );
 }
