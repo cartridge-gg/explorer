@@ -21,6 +21,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": false,
-    "allowJs": false
+    "allowJs": false,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   }
 }
