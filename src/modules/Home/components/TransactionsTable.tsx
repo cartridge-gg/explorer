@@ -32,8 +32,8 @@ const columns = [
   columnHelper.accessor("age", {
     header: "Age",
     cell: (info) => {
-      const date = dayjs(info.getValue() * 1000);
-      return dayjs().diff(date, "minute") + " minutes ago";
+      const date = Number(info.getValue());
+      return date;
     },
   }),
 ];
@@ -80,6 +80,15 @@ export default function TransactionTable(props: {
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  if (isBlocksLoading) {
+    return <div className="text-white p-4">Loading Transactions...</div>;
+  }
+
+  if (data.length === 0) {
+    return <div className="text-white p-4">No Transactions found</div>;
+  }
+
   return (
     <div className="bg-black text-white p-4 rounded-lg">
       <h1>Transaction Table</h1>

@@ -16,53 +16,53 @@ type Block = {
   age: string;
 };
 
+const columnHelper = createColumnHelper<Block>();
+
+const columns: ColumnDef<Block, string>[] = [
+  columnHelper.accessor("status", {
+    header: "Status",
+    cell: (info) => (
+      <span
+        className={`
+        ${
+          info.getValue() === "ACCEPTED_ON_L2"
+            ? "text-green-500"
+            : info.getValue() === "PENDING"
+            ? "text-yellow-500"
+            : "text-red-500"
+        }
+      `}
+      >
+        {info.getValue()}
+      </span>
+    ),
+  }),
+  columnHelper.accessor("number", {
+    header: "Block Number",
+    cell: (info) => info.renderValue(),
+  }),
+  columnHelper.accessor("hash", {
+    header: "Block Hash",
+    cell: (info) => (
+      <div className="max-w-[200px] overflow-hidden text-ellipsis">
+        {info.renderValue()}
+      </div>
+    ),
+  }),
+  columnHelper.accessor("age", {
+    header: "Age",
+    cell: (info) => {
+      const date = dayjs(Number(info.getValue()) * 1000);
+      return dayjs().diff(date, "minute") + " minutes ago";
+    },
+  }),
+];
+
 const BlocksTable: React.FC<{
   blocks: (BlockWithTxHashes | undefined)[];
   isBlocksLoading: boolean;
 }> = ({ isBlocksLoading, blocks }) => {
   const [data, setData] = useState<Block[]>([]);
-
-  const columnHelper = createColumnHelper<Block>();
-
-  const columns: ColumnDef<Block, string>[] = [
-    columnHelper.accessor("status", {
-      header: "Status",
-      cell: (info) => (
-        <span
-          className={`
-          ${
-            info.getValue() === "ACCEPTED_ON_L2"
-              ? "text-green-500"
-              : info.getValue() === "PENDING"
-              ? "text-yellow-500"
-              : "text-red-500"
-          }
-        `}
-        >
-          {info.getValue()}
-        </span>
-      ),
-    }),
-    columnHelper.accessor("number", {
-      header: "Block Number",
-      cell: (info) => info.renderValue(),
-    }),
-    columnHelper.accessor("hash", {
-      header: "Block Hash",
-      cell: (info) => (
-        <div className="max-w-[200px] overflow-hidden text-ellipsis">
-          {info.renderValue()}
-        </div>
-      ),
-    }),
-    columnHelper.accessor("age", {
-      header: "Age",
-      cell: (info) => {
-        const date = dayjs(Number(info) * 1000);
-        return dayjs().diff(date, "minute") + " minutes ago";
-      },
-    }),
-  ];
 
   useEffect(() => {
     if (isBlocksLoading || !blocks) return;
