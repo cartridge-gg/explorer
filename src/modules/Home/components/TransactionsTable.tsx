@@ -66,7 +66,7 @@ export default function TransactionTable(props: {
       }
 
       // check if we have enough transactions
-      if (transactions.length >= INITIAL_TRANSACTIONS_TO_DISPLAY) {
+      if (transactions?.length >= INITIAL_TRANSACTIONS_TO_DISPLAY) {
         break;
       }
     }
@@ -84,7 +84,7 @@ export default function TransactionTable(props: {
     return <div className="text-white p-4">Loading Transactions...</div>;
   }
 
-  if (data.length === 0) {
+  if (data?.length === 0) {
     return <div className="text-white p-4">No Transactions found</div>;
   }
 

@@ -68,7 +68,7 @@ const BlocksTable: React.FC<{
     if (isBlocksLoading || !blocks) return;
 
     const blocksData: Block[] = blocks
-      .filter((block): block is BlockWithTxHashes => block !== undefined)
+      .filter((block) => block !== undefined)
       .map((block) => ({
         number: block.block_number.toString(),
         status: block.status,
@@ -89,7 +89,7 @@ const BlocksTable: React.FC<{
     return <div className="text-white p-4">Loading blocks...</div>;
   }
 
-  if (data.length === 0) {
+  if (data?.length === 0) {
     return <div className="text-white p-4">No blocks found</div>;
   }
 
