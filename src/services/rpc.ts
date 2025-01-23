@@ -36,7 +36,6 @@ class RPC_METHODS {
   async fetchBlockWithTxHashes(
     block_number: number
   ): Promise<BlockWithTxHashes> {
-    console.log("fetchBlockWithTxHashes", block_number);
     const response = await this.fetch(rpc_spec.getBlockWithTxHashes, [
       { block_number },
     ]);

@@ -7,7 +7,6 @@ import {
 } from "@tanstack/react-table";
 import { BlockWithTxHashes } from "starknet";
 import { truncateString } from "@/utils/string";
-import dayjs from "dayjs";
 
 const INITIAL_TRANSACTIONS_TO_DISPLAY = 10;
 
