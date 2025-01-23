@@ -34,14 +34,16 @@ export default function Home() {
   return (
     <div>
       Home page
-      <BlocksTable
-        blocks={latestBlocks}
-        isBlocksLoading={isLatestBlocksLoading}
-      />
-      <TransactionTable
-        blocks={latestBlocks}
-        isBlocksLoading={isLatestBlocksLoading}
-      />
+      <div className="flex flex-row w-screen h-screen justify-center items-center">
+        <BlocksTable
+          blocks={latestBlocks}
+          isBlocksLoading={isLatestBlocksLoading}
+        />
+        <TransactionTable
+          blocks={latestBlocks}
+          isBlocksLoading={isLatestBlocksLoading}
+        />
+      </div>
     </div>
   );
 }
