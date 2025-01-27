@@ -7,12 +7,14 @@ import {
 } from "@tanstack/react-table";
 import { BlockWithTxHashes } from "starknet";
 import { truncateString } from "@/utils/string";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/constants/routes";
 
 const INITIAL_TRANSACTIONS_TO_DISPLAY = 10;
 
 type Transaction = {
   type: string;
-  hash: number;
+  hash: string;
   age: number;
 };
 
@@ -21,6 +23,7 @@ const columnHelper = createColumnHelper<Transaction>();
 const columns = [
   columnHelper.accessor("hash", {
     header: () => "Hash",
+    cell: (info) => truncateString(info.getValue()),
     footer: (info) => info.column.id,
   }),
   columnHelper.accessor("type", {
@@ -42,6 +45,7 @@ export default function TransactionTable(props: {
   isBlocksLoading: boolean;
 }) {
   const { isBlocksLoading, blocks } = props;
+  const navigate = useNavigate();
   const [data, setData] = React.useState<Transaction[]>([]);
 
   // filter out top 10 transactions from the latest blocks
@@ -60,7 +64,7 @@ export default function TransactionTable(props: {
       for (const transaction of blockTransactions) {
         transactions.push({
           type: transaction.type,
-          hash: truncateString(transaction.transaction_hash),
+          hash: transaction.transaction_hash,
           age: blocks[i].timestamp,
         });
       }
@@ -94,7 +98,7 @@ export default function TransactionTable(props: {
       <table className="w-full table-auto border-collapse">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="bg-gray-800">
+            <tr key={headerGroup.id} className="bg-black">
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
@@ -118,7 +122,18 @@ export default function TransactionTable(props: {
               className="border-b border-gray-700 hover:bg-gray-900"
             >
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="p-2 border border-gray-700">
+                <td
+                  onClick={() =>
+                    navigate(
+                      `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(
+                        ":txHash",
+                        cell.row.original.hash
+                      )}`
+                    )
+                  }
+                  key={cell.id}
+                  className="p-2 border border-gray-700"
+                >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
