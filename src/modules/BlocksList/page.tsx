@@ -1,39 +1,33 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   createColumnHelper,
   getCoreRowModel,
   useReactTable,
-  ColumnDef,
   flexRender,
 } from "@tanstack/react-table";
-import { BlockWithTxHashes } from "starknet";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { ROUTES } from "@/constants/routes";
+import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { getPaginatedBlockNumbers } from "@/utils/rpc_utils";
 
-type Block = {
-  number: string;
-  status: string;
-  hash: string;
-  age: string;
-};
+const ROWS_TO_RENDER = 10;
 
-const columnHelper = createColumnHelper<Block>();
+const columnHelper = createColumnHelper();
 
-const columns: ColumnDef<Block, string>[] = [
+const columns = [
   columnHelper.accessor("status", {
     header: "Status",
     cell: (info) => (
       <span
-        className={`
-        ${
+        className={
           info.getValue() === "ACCEPTED_ON_L2"
             ? "text-green-500"
             : info.getValue() === "PENDING"
             ? "text-yellow-500"
             : "text-red-500"
         }
-      `}
       >
         {info.getValue()}
       </span>
@@ -60,51 +54,65 @@ const columns: ColumnDef<Block, string>[] = [
   }),
 ];
 
-const BlocksTable: React.FC<{
-  blocks: (BlockWithTxHashes | undefined)[];
-  isBlocksLoading: boolean;
-}> = ({ isBlocksLoading, blocks }) => {
+const BlocksList = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState<Block[]>([]);
+  const [data, setData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isFetching, setIsFetching] = useState(false);
 
-  const handleNavigate = useCallback(() => {
-    navigate(ROUTES.BLOCKS_LIST.urlPath);
-  }, [navigate]);
+  const { data: latestBlockNumber } = useQuery({
+    queryKey: [QUERY_KEYS.getBlockNumber],
+    queryFn: () => RPC_PROVIDER.getBlockNumber(),
+  });
 
-  useEffect(() => {
-    if (isBlocksLoading || !blocks) return;
-
-    const blocksData: Block[] = blocks
-      .filter((block) => block !== undefined)
-      .map((block) => ({
+  const fetchBlocks = useMutation({
+    mutationFn: async (blockNumbers: number[]) => {
+      try {
+        setIsFetching(true);
+        const blockDataPromises = blockNumbers.map((blockNumber) =>
+          RPC_PROVIDER.getBlockWithTxs(blockNumber)
+        );
+        return Promise.all(blockDataPromises);
+      } catch (error) {
+        console.error("Error fetching blocks:", error);
+        return [];
+      } finally {
+        setIsFetching(false);
+      }
+    },
+    onSuccess: (blocks) => {
+      const newBlocks = blocks.map((block) => ({
         number: block.block_number.toString(),
         status: block.status,
         hash: block.block_hash,
         age: block.timestamp.toString(),
       }));
+      console.log("newBlocks", newBlocks);
+      setData(newBlocks); // Preserve previous data
+    },
+  });
 
-    setData(blocksData);
-  }, [blocks, isBlocksLoading]);
+  useEffect(() => {
+    if (!latestBlockNumber) return;
+
+    const blockNumbers = getPaginatedBlockNumbers(
+      latestBlockNumber - currentPage * ROWS_TO_RENDER,
+      ROWS_TO_RENDER
+    );
+
+    fetchBlocks.mutate(blockNumbers);
+  }, [latestBlockNumber, currentPage]);
 
   const table = useReactTable({
-    data,
+    data: data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
-
-  if (isBlocksLoading) {
-    return <div className="text-white p-4">Loading blocks...</div>;
-  }
-
-  if (data?.length === 0) {
-    return <div className="text-white p-4">No blocks found</div>;
-  }
 
   return (
     <div className="bg-black text-white p-4 rounded-lg">
       <div className="flex flex-row justify-between items-center">
         <h1>Blocks Table</h1>
-        <h1 onClick={handleNavigate}>Show all blocks</h1>
       </div>
       <table className="w-full table-auto border-collapse">
         <thead>
@@ -134,6 +142,7 @@ const BlocksTable: React.FC<{
             >
               {row.getVisibleCells().map((cell) => (
                 <td
+                  key={cell.id}
                   onClick={() =>
                     navigate(
                       `${ROUTES.BLOCK_DETAILS.urlPath.replace(
@@ -142,7 +151,6 @@ const BlocksTable: React.FC<{
                       )}`
                     )
                   }
-                  key={cell.id}
                   className="p-2 border border-gray-700"
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -152,8 +160,23 @@ const BlocksTable: React.FC<{
           ))}
         </tbody>
       </table>
+      <div className="flex justify-between mt-4">
+        <button
+          disabled={currentPage === 0}
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+          className="px-4 py-2 bg-gray-700 disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <button
+          onClick={() => setCurrentPage((prev) => prev + 1)}
+          className="px-4 py-2 bg-gray-700 disabled:opacity-50"
+        >
+          {isFetching ? "Loading..." : "Next"}
+        </button>
+      </div>
     </div>
   );
 };
 
-export default BlocksTable;
+export default BlocksList;

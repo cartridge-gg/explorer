@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -48,6 +48,10 @@ export default function TransactionTable(props: {
   const navigate = useNavigate();
   const [data, setData] = React.useState<Transaction[]>([]);
 
+  const handleNavigate = useCallback(() => {
+    navigate(ROUTES.TRANSACTION_LIST.urlPath);
+  }, [navigate]);
+
   // filter out top 10 transactions from the latest blocks
   useEffect(() => {
     if (isBlocksLoading || !blocks) return;
@@ -94,7 +98,11 @@ export default function TransactionTable(props: {
 
   return (
     <div className="bg-black text-white p-4 rounded-lg">
-      <h1>Transaction Table</h1>
+      <div className="flex flex-row justify-between items-center">
+        <h1>Transaction Table</h1>
+        <h1 onClick={handleNavigate}>Show all transactions</h1>
+      </div>
+
       <table className="w-full table-auto border-collapse">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
