@@ -2,7 +2,7 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { getPaginatedBlockNumbers } from "@/utils/rpc_utils";
 import BlocksTable from "./components/BlocksTable";
 import TransactionTable from "./components/TransactionsTable";
-import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider";
+import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 
 const POLLING_INTERVAL = import.meta.env.HOME_PAGE_DATA_POLLING_INTERVAL; // 3 seconds
 const INITIAL_BLOCKS_TO_FETCH = 10;
