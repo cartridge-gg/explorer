@@ -5,7 +5,6 @@ import { useParams } from "react-router-dom";
 export default function BlockDetails() {
   const { blockNumber } = useParams<{ blockNumber: string }>();
 
-  // Block Details Page
   const { data: BlockReceipt, isLoading } = useQuery({
     queryKey: [""],
     queryFn: () => RPC_PROVIDER.getBlock(BigInt(blockNumber ?? 0)),

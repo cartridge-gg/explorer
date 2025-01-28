@@ -87,8 +87,8 @@ const BlocksList = () => {
         hash: block.block_hash,
         age: block.timestamp.toString(),
       }));
-      console.log("newBlocks", newBlocks);
-      setData(newBlocks); // Preserve previous data
+
+      setData(newBlocks);
     },
   });
 

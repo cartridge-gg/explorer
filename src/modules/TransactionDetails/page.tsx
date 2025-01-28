@@ -5,7 +5,6 @@ import { useParams } from "react-router-dom";
 export default function TransactionDetails() {
   const { txHash } = useParams<{ txHash: string }>();
 
-  // Transaction Details Page
   const { data: TxnReceipt, isLoading } = useQuery({
     queryKey: [""],
     queryFn: () => RPC_PROVIDER.getTransactionReceipt(BigInt(txHash ?? 0)),
