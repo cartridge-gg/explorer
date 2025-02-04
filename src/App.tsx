@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
   return (
-    <div className="bg-black flex">
+    <div className="bg-white flex">
       {/* Home page - we can conditionally render any other flow if home page is not supposed to be shown */}
       <BrowserRouter>
         <Routes>

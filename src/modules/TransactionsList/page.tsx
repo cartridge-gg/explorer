@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ROUTES } from "@/constants/routes";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
-import { getPaginatedBlockNumbers } from "@/utils/rpc_utils";
+import { getPaginatedBlockNumbers } from "@/shared/utils/rpc_utils";
 
 const ROWS_TO_RENDER = 10;
 const BLOCKS_BATCH_SIZE = 5; // Number of blocks to fetch at once
