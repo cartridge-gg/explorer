@@ -7,11 +7,14 @@ import {
   createColumnHelper,
   getCoreRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import DataTable from "./components/DataTable";
+import DataTable from "./components/EventsTable";
+import TransactionsTable from "./components/TransactionsTable";
+import EventsTable from "./components/EventsTable";
 
 type TransactionTableData = {
   hash: string;
@@ -117,6 +120,16 @@ export default function BlockDetails() {
     steps: 0,
   });
 
+  const [transactionsPagination, setTransactionsPagination] = useState({
+    pageIndex: 0,
+    pageSize: 20,
+  });
+
+  const [eventsPagination, setEventsPagination] = useState({
+    pageIndex: 0,
+    pageSize: 20,
+  });
+
   const { data: BlockReceipt } = useQuery({
     queryKey: [""],
     queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockNumber ?? 0),
@@ -128,12 +141,26 @@ export default function BlockDetails() {
     columns: transaction_columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    state: {
+      pagination: {
+        pageIndex: transactionsPagination.pageIndex,
+        pageSize: transactionsPagination.pageSize,
+      },
+    },
   });
 
   const events_table = useReactTable({
     data: eventsData,
     columns: event_columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    state: {
+      pagination: {
+        pageIndex: eventsPagination.pageIndex,
+        pageSize: eventsPagination.pageSize,
+      },
+    },
   });
 
   const processBlockInformation = useCallback(async (transactions) => {
@@ -405,12 +432,24 @@ export default function BlockDetails() {
               </div>
             ) : null}
 
-            <div className=" px-2">
-              <DataTable
-                transaction_table={transaction_table}
-                show={selectedDataTab}
-                events_table={events_table}
-              />
+            <div className=" px-2 h-full pb-2">
+              {selectedDataTab === "Transactions" ? (
+                <TransactionsTable
+                  table={transaction_table}
+                  pagination={transactionsPagination}
+                  setPagination={setTransactionsPagination}
+                />
+              ) : selectedDataTab === "Events" ? (
+                <EventsTable
+                  table={events_table}
+                  pagination={eventsPagination}
+                  setPagination={setEventsPagination}
+                />
+              ) : (
+                <div className="p-4 text-center">
+                  <p className="text-black">No data found</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

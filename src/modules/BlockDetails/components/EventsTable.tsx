@@ -1,81 +1,53 @@
 import { ROUTES } from "@/constants/routes";
 import { padNumber } from "@/shared/utils/number";
 import { truncateString } from "@/shared/utils/string";
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function DataTable(props: {
-  transaction_table: any;
-  events_table: any;
-  show: string;
+export default function EventsTable(props: {
+  table: any;
+  pagination: any;
+  setPagination: any;
 }) {
   const navigate = useNavigate();
-  const { transaction_table, events_table, show } = props;
+  const { table, pagination, setPagination } = props;
 
-  if (show === "Transactions" && transaction_table) {
-    return (
-      <table className="w-full table-auto border-collapse">
-        <tbody>
-          {transaction_table.getRowModel().rows.map((row, index) => (
-            <tr
-              key={row.id}
-              className="text-xs"
-              onClick={() =>
-                navigate(
-                  `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(
-                    ":txHash",
-                    row.original.hash
-                  )}`
-                )
-              }
-            >
-              <td className="w-1 p-2 whitespace-nowrap cursor-pointer">
-                <div className="flex items-center overflow-hidden">
-                  <span className="whitespace-nowrap font-bold hover:text-blue-400 transition-all">
-                    # {padNumber(index + 1)}
-                  </span>
-                </div>
-              </td>
+  const handlePreviousPage = useCallback(() => {
+    if (pagination.pageIndex === 0) return;
+    setPagination((prev) => ({
+      ...prev,
+      pageIndex: prev.pageIndex - 1,
+    }));
+  }, [setPagination, pagination]);
 
-              <td className="w-full p-2 cursor-pointer">
-                <div className="flex items-center overflow-hidden">
-                  <span className="whitespace-nowrap hover:text-blue-400 transition-all">
-                    {row.original.hash_display}
-                  </span>
-                  <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
-                </div>
-              </td>
+  const handleNextPage = useCallback(() => {
+    if (pagination.pageIndex === table.getPageCount() - 1) return;
+    setPagination((prev) => ({
+      ...prev,
+      pageIndex: prev.pageIndex + 1,
+    }));
+  }, [setPagination, pagination, table]);
 
-              <td className="w-1 whitespace-nowrap p-2">
-                <div className="flex items-center">
-                  <span className="whitespace-nowrap uppercase text-right">
-                    {row.original.status}
-                  </span>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
-  }
-
-  if (show === "Events" && events_table) {
-    return (
+  return (
+    <div className=" w-full flex flex-col gap-4 justify-between h-full">
       <table className="w-full table-auto border-collapse border-spacing-12">
         <thead>
           <tr>
             <th className="p-2 text-left">#</th>
             <th className="p-2 text-left">Txn Hash</th>
-            <th className="p-2 text-right">From</th>
+            <th className="p-2 text-right">From Address</th>
           </tr>
         </thead>
         <tbody>
-          {events_table.getRowModel().rows.map((row, index) => (
+          {table.getRowModel().rows.map((row, index) => (
             <tr key={row.id} className="text-xs">
               <td className="p-2 cursor-pointer w-1/4">
                 <div className="flex items-center justify-start overflow-hidden">
                   <span className="whitespace-nowrap font-bold hover:text-blue-400 transition-all">
-                    # {padNumber(index + 1)}
+                    #
+                    {padNumber(
+                      index + 1 + pagination.pageIndex * pagination.pageSize
+                    )}
                   </span>
                   <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
                 </div>
@@ -111,6 +83,28 @@ export default function DataTable(props: {
           ))}
         </tbody>
       </table>
-    );
-  }
+
+      <div className="flex flex-row justify-between items-center mt-4 px-2">
+        <p>
+          Showing <strong>{pagination.pageIndex + 1}</strong> of{" "}
+          <strong>{table.getPageCount()}</strong> pages
+        </p>
+
+        <div className="flex flex-row gap-4">
+          <button
+            onClick={handlePreviousPage}
+            className="bg-[#4A4A4A] text-white px-4 py-2 "
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleNextPage}
+            className="bg-[#4A4A4A] text-white px-4 py-2 "
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
