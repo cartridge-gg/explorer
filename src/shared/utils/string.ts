@@ -5,7 +5,7 @@ export function truncateString(str: string, n: number = 6) {
     : str;
 }
 
-export function formatVariableToDisplay(variable: string) {
+export function formatSnakeCaseToDisplayValue(variable: string) {
   if (!variable) return "";
   return variable.replace(/_/g, " ").toUpperCase();
 }
