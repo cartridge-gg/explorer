@@ -4,3 +4,8 @@ export function truncateString(str: string, n: number = 6) {
     ? str.substring(0, n - 1) + "..." + str.substring(str?.length - n)
     : str;
 }
+
+export function formatVariableToDisplay(variable: string) {
+  if (!variable) return "";
+  return variable.replace(/_/g, " ").toUpperCase();
+}

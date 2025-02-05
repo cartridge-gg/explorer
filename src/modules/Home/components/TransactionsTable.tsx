@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -13,16 +13,12 @@ const INITIAL_TRANSACTIONS_TO_DISPLAY = 10;
 type Transaction = {
   hash_display: string;
   age: number;
+  hash: string;
 };
 
 const columnHelper = createColumnHelper<Transaction>();
 
 const columns = [
-  // columnHelper.accessor("type", {
-  //   header: () => "Type",
-  //   cell: (info) => info.renderValue(),
-  //   footer: (info) => info.column.id,
-  // }),
   columnHelper.accessor("hash_display", {
     header: () => "Hash",
     cell: (info) => info.getValue(),
@@ -62,6 +58,7 @@ export default function TransactionTable(props: {
         transactions.push({
           hash_display: `${transaction.transaction_hash} ( ${transaction.type} )`,
           age: blocks[i].timestamp,
+          hash: transaction.transaction_hash,
         });
       }
 
@@ -104,7 +101,7 @@ export default function TransactionTable(props: {
                 navigate(
                   `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(
                     ":txHash",
-                    row.original.hash_display
+                    row.original.hash
                   )}`
                 )
               }
