@@ -229,10 +229,8 @@ export default function TransactionDetails() {
 
     if (!calldata) return;
 
-    console.log("calldata", calldata);
     const transactions = decodeCalldata(calldata);
     setCallData(transactions);
-    console.log("transactions", transactions);
   }, [TransactionDetails]);
 
   useEffect(() => {
