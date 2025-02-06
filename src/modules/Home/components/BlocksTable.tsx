@@ -9,6 +9,10 @@ import { BlockWithTxHashes } from "starknet";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
+import relativeTime from "dayjs/plugin/relativeTime";
+import LinkArrow from "@/shared/icons/LinkArrow";
+
+dayjs.extend(relativeTime);
 
 type Block = {
   number: string;
@@ -34,8 +38,8 @@ const columns: ColumnDef<Block, string>[] = [
   columnHelper.accessor("age", {
     header: "Age",
     cell: (info) => {
-      const date = dayjs(Number(info.getValue()) * 1000);
-      return dayjs().diff(date, "minute") + " minutes ago";
+      console.log(dayjs.unix(Number(info.getValue()) * 1000).fromNow());
+      return dayjs.unix(Number(info.getValue()) * 1000).fromNow();
     },
   }),
 ];
@@ -59,7 +63,7 @@ const BlocksTable: React.FC<{
       .map((block) => ({
         number: block.block_number.toString(),
         hash: block.block_hash,
-        age: block.timestamp.toString(),
+        age: block.timestamp,
       }));
 
     setData(blocksData);
@@ -83,6 +87,13 @@ const BlocksTable: React.FC<{
     <div className="text-black rounded-lg w-full">
       <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
         <h1 className="text-white">Blocks</h1>
+        <div
+          onClick={handleNavigate}
+          className="flex flex-row items-center gap-2 cursor-pointer"
+        >
+          <h4 className="text-white">View all blocks</h4>
+          <LinkArrow color={"#fff"} />
+        </div>
       </div>
       <table className="w-full mt-2 table-auto border-collapse border-t border-b border-[#8E8E8E] border-l-4 border-r">
         <tbody>
@@ -117,9 +128,9 @@ const BlocksTable: React.FC<{
               </td>
 
               <td className="w-1 whitespace-nowrap p-2">
-                <div className="flex items-center">
-                  <span className="whitespace-nowrap">
-                    {row.original.age} min ago
+                <div className="flex items-center justify-end">
+                  <span className="whitespace-nowrap text-right">
+                    {dayjs.unix(row?.original?.age).fromNow()}
                   </span>
                 </div>
               </td>

@@ -15,6 +15,8 @@ import { useParams } from "react-router-dom";
 import TransactionsTable from "./components/TransactionsTable";
 import EventsTable from "./components/EventsTable";
 import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
+import dayjs from "dayjs";
+import { cairo } from "starknet";
 
 type TransactionTableData = {
   hash: string;
@@ -275,7 +277,13 @@ export default function BlockDetails() {
                 <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
                   Timestamp
                 </p>
-                <p>{BlockReceipt?.timestamp} ( Jan 19 2025 22:00:46 )</p>
+                <p>
+                  {BlockReceipt?.timestamp} ({" "}
+                  {dayjs
+                    .unix(BlockReceipt?.timestamp)
+                    .format("MMM D YYYY HH:mm:ss")}{" "}
+                  )
+                </p>
               </div>
               <div className="flex flex-col text-sm gap-1">
                 <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
@@ -301,11 +309,31 @@ export default function BlockDetails() {
             >
               <div className="flex flex-col text-sm  gap-1">
                 <p className=" w-fit font-bold text-black">GAS PRICE:</p>
-                <p>{BlockReceipt?.l1_gas_price?.price_in_fri} FRI</p>
+                <p>
+                  {BlockReceipt?.l1_gas_price?.price_in_fri
+                    ? formatNumber(
+                        Number(
+                          cairo.felt(BlockReceipt?.l1_gas_price?.price_in_fri)
+                        )
+                      )
+                    : 0}{" "}
+                  FRI
+                </p>
               </div>
               <div className="flex flex-col text-sm gap-1">
                 <p className=" w-fit font-bold text-black">DATA GAS PRICE:</p>
-                <p>{BlockReceipt?.l1_data_gas_price?.price_in_fri} FRI</p>
+                <p>
+                  {BlockReceipt?.l1_data_gas_price?.price_in_fri
+                    ? formatNumber(
+                        Number(
+                          cairo.felt(
+                            BlockReceipt?.l1_data_gas_price?.price_in_fri
+                          )
+                        )
+                      )
+                    : 0}{" "}
+                  FRI
+                </p>
               </div>
             </div>
             <div

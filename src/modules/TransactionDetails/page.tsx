@@ -17,6 +17,8 @@ import { useParams } from "react-router-dom";
 import EventsTable from "./components/EventsTable";
 import StorageDiffTable from "./components/StorageDiffTable";
 import { useScreen } from "@/shared/hooks/useScreen";
+import dayjs from "dayjs";
+import { cairo } from "starknet";
 
 const DataTabs = [
   "Calldata",
@@ -167,8 +169,8 @@ export default function TransactionDetails() {
       } else if (key === "data_availability") {
         setBlockComputeData((prev) => ({
           ...prev,
-          gas: prev.gas + receipt[key].l1_data_gas,
-          data_gas: prev.data_gas + receipt[key].l1_gas,
+          gas: prev.gas + receipt[key].l1_gas,
+          data_gas: prev.data_gas + receipt[key].l1_data_gas,
         }));
       } else {
         const key_map =
@@ -188,6 +190,7 @@ export default function TransactionDetails() {
 
   useEffect(() => {
     if (!TransactionReceipt) return;
+    console.log(TransactionReceipt);
     processTransactionReceipt();
   }, [TransactionReceipt, processTransactionReceipt]);
 
@@ -290,7 +293,13 @@ export default function TransactionDetails() {
                 <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
                   Timestamp
                 </p>
-                <p>{BlockDetails?.timestamp}</p>
+                <p>
+                  {BlockDetails?.timestamp} ({" "}
+                  {dayjs
+                    .unix(BlockDetails?.timestamp)
+                    .format("MMM D YYYY HH:mm:ss")}{" "}
+                  )
+                </p>
               </div>
               <div className="flex flex-col text-sm gap-1">
                 <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
@@ -319,8 +328,17 @@ export default function TransactionDetails() {
               className="flex flex-col h-fit gap-4 p-4 border-[#8E8E8E] border-l-4 border-t border-r"
             >
               <div className="flex flex-col text-sm  gap-1">
-                <p className=" w-fit font-bold text-black">GAS PRICE:</p>
-                <p>{TransactionReceipt?.actual_fee?.amount} FRI</p>
+                <p className=" w-fit font-bold text-black">ACTUAL FEE:</p>
+                <p>
+                  {TransactionReceipt?.actual_fee?.amount
+                    ? formatNumber(
+                        Number(
+                          cairo.felt(TransactionReceipt?.actual_fee?.amount)
+                        )
+                      )
+                    : 0}{" "}
+                  {TransactionReceipt?.actual_fee?.unit}
+                </p>
               </div>
             </div>
             <div

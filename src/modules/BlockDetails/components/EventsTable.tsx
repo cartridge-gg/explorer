@@ -1,13 +1,16 @@
 import { ROUTES } from "@/constants/routes";
 import { padNumber } from "@/shared/utils/number";
 import { truncateString } from "@/shared/utils/string";
+import { Table } from "@tanstack/react-table";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function EventsTable(props: {
-  table: any;
-  pagination: any;
-  setPagination: any;
+  table: Table<any>;
+  pagination: { pageIndex: number; pageSize: number };
+  setPagination: React.Dispatch<
+    React.SetStateAction<{ pageIndex: number; pageSize: number }>
+  >;
 }) {
   const navigate = useNavigate();
   const { table, pagination, setPagination } = props;
@@ -92,14 +95,16 @@ export default function EventsTable(props: {
 
         <div className="flex flex-row gap-4">
           <button
+            disabled={pagination.pageIndex === 0}
             onClick={handlePreviousPage}
-            className="bg-[#4A4A4A] text-white px-4 py-2 "
+            className="bg-[#4A4A4A] text-white px-4 py-2 disabled:opacity-50 "
           >
             Previous
           </button>
           <button
+            disabled={pagination.pageIndex === table.getPageCount() - 1}
             onClick={handleNextPage}
-            className="bg-[#4A4A4A] text-white px-4 py-2 "
+            className="bg-[#4A4A4A] text-white px-4 py-2 disabled:opacity-50"
           >
             Next
           </button>

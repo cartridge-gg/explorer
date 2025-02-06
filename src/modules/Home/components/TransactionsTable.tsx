@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -7,6 +7,8 @@ import {
 import { BlockWithTxHashes } from "starknet";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
+import dayjs from "dayjs";
+import LinkArrow from "@/shared/icons/LinkArrow";
 
 const INITIAL_TRANSACTIONS_TO_DISPLAY = 10;
 
@@ -40,6 +42,10 @@ export default function TransactionTable(props: {
   const { isBlocksLoading, blocks } = props;
   const navigate = useNavigate();
   const [data, setData] = React.useState<Transaction[]>([]);
+
+  const handleNavigate = useCallback(() => {
+    navigate(ROUTES.TRANSACTION_LIST.urlPath);
+  }, [navigate]);
 
   // filter out top 10 transactions from the latest blocks
   useEffect(() => {
@@ -89,6 +95,13 @@ export default function TransactionTable(props: {
     <div className=" text-black rounded-lg w-full">
       <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
         <h1 className="text-white">Transactions</h1>
+        <div
+          onClick={handleNavigate}
+          className="flex flex-row items-center gap-2 cursor-pointer"
+        >
+          <h4 className="text-white">View all transactions</h4>
+          <LinkArrow color={"#fff"} />
+        </div>
       </div>
 
       <table className="w-full mt-2 table-auto border-collapse border-t border-b border-[#8E8E8E] border-l-4 border-r">
@@ -115,10 +128,10 @@ export default function TransactionTable(props: {
                 </div>
               </td>
 
-              <td className="w-1 whitespace-nowrap p-2">
-                <div className="flex items-center">
+              <td className="w-1 whitespace-nowrap p-2 text-right">
+                <div className="flex items-center justify-end">
                   <span className="whitespace-nowrap">
-                    {row.original.age} min ago
+                    {dayjs.unix(row?.original?.age).fromNow()}
                   </span>
                 </div>
               </td>
