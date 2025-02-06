@@ -1,6 +1,5 @@
 import { ROUTES } from "@/constants/routes";
 import { padNumber } from "@/shared/utils/number";
-import { truncateString } from "@/shared/utils/string";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -34,7 +33,7 @@ export default function EventsTable(props: {
         <thead>
           <tr>
             <th className="p-2 text-left">#</th>
-            <th className="p-2 text-left">Txn Hash</th>
+            <th className="p-2 text-left">Block</th>
             <th className="p-2 text-right">From Address</th>
           </tr>
         </thead>
@@ -42,7 +41,7 @@ export default function EventsTable(props: {
           {table.getRowModel().rows.map((row, index) => (
             <tr key={row.id} className="text-xs">
               <td className="p-2 cursor-pointer">
-                <div className="flex items-center justify-start overflow-hidden">
+                <div className="flex items-center justify-center overflow-hidden">
                   <span className="whitespace-nowrap font-bold hover:text-blue-400 transition-all">
                     #
                     {padNumber(
@@ -53,29 +52,29 @@ export default function EventsTable(props: {
                 </div>
               </td>
 
-              <td className="p-2 cursor-pointer w-full">
+              <td className="p-2 cursor-pointer">
                 <div
                   onClick={() =>
                     navigate(
-                      `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(
-                        ":txHash",
-                        row.original.txn_hash
+                      `${ROUTES.BLOCK_DETAILS.urlPath.replace(
+                        ":blockNumber",
+                        row.original.block
                       )}`
                     )
                   }
-                  className="flex w-full items-center justify-center overflow-hidden"
+                  className="flex items-center justify-center overflow-hidden"
                 >
                   <span className="hover:text-blue-400 transition-all">
-                    {truncateString(row.original.txn_hash, 10)}
+                    {row.original.block}
                   </span>
-                  <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
                 </div>
               </td>
 
-              <td className=" p-2 w-1/3 text-center">
-                <div className="flex w-full items-center justify-end">
+              <td className=" p-2 text-center w-full">
+                <div className="flex items-center justify-end">
+                  <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
                   <span className="uppercase text-right truncate">
-                    {truncateString(row.original.from, 10)}
+                    {row.original.from}
                   </span>
                 </div>
               </td>

@@ -1,15 +1,11 @@
-import { ROUTES } from "@/constants/routes";
-import { padNumber } from "@/shared/utils/number";
 import { truncateString } from "@/shared/utils/string";
 import { useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 
-export default function EventsTable(props: {
+export default function StorageDiffTable(props: {
   table: any;
   pagination: any;
   setPagination: any;
 }) {
-  const navigate = useNavigate();
   const { table, pagination, setPagination } = props;
 
   const handlePreviousPage = useCallback(() => {
@@ -33,49 +29,43 @@ export default function EventsTable(props: {
       <table className="w-full table-auto border-collapse border-spacing-12">
         <thead>
           <tr>
-            <th className="p-2 text-left">#</th>
-            <th className="p-2 text-left">Txn Hash</th>
-            <th className="p-2 text-right">From Address</th>
+            <th className="p-2 text-left">Contract Address</th>
+            <th className="p-2 text-left">Key</th>
+            <th className="p-2 text-left">Value</th>
+            <th className="p-2 text-right">Block Number</th>
           </tr>
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row, index) => (
             <tr key={row.id} className="text-xs">
               <td className="p-2 cursor-pointer">
-                <div className="flex items-center justify-start overflow-hidden">
-                  <span className="whitespace-nowrap font-bold hover:text-blue-400 transition-all">
-                    #
-                    {padNumber(
-                      index + 1 + pagination.pageIndex * pagination.pageSize
-                    )}
+                <div className="flex items-center overflow-hidden">
+                  <span className="whitespace-nowrap hover:text-blue-400 transition-all">
+                    {truncateString(row.original.contract_address, 10)}
                   </span>
-                  <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
                 </div>
               </td>
 
-              <td className="p-2 cursor-pointer w-full">
-                <div
-                  onClick={() =>
-                    navigate(
-                      `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(
-                        ":txHash",
-                        row.original.txn_hash
-                      )}`
-                    )
-                  }
-                  className="flex w-full items-center justify-center overflow-hidden"
-                >
+              <td className="p-2 cursor-pointer">
+                <div className="flex items-center overflow-hidden">
                   <span className="hover:text-blue-400 transition-all">
-                    {truncateString(row.original.txn_hash, 10)}
+                    {truncateString(row.original.key, 10)}
                   </span>
-                  <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
                 </div>
               </td>
 
-              <td className=" p-2 w-1/3 text-center">
-                <div className="flex w-full items-center justify-end">
+              <td className=" p-2 text-center">
+                <div className="flex items-center">
                   <span className="uppercase text-right truncate">
-                    {truncateString(row.original.from, 10)}
+                    {truncateString(row.original.value)}
+                  </span>
+                </div>
+              </td>
+
+              <td className=" p-2 text-center">
+                <div className="flex items-center justify-end">
+                  <span className="uppercase text-right truncate">
+                    {row.original.block_number}
                   </span>
                 </div>
               </td>

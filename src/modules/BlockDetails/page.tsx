@@ -12,9 +12,9 @@ import {
 } from "@tanstack/react-table";
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import DataTable from "./components/EventsTable";
 import TransactionsTable from "./components/TransactionsTable";
 import EventsTable from "./components/EventsTable";
+import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
 
 type TransactionTableData = {
   hash: string;
@@ -28,18 +28,6 @@ type EventTableData = {
   txn_hash: string;
   from: string;
   age: string;
-};
-
-const execution_resources_key_map = {
-  bitwise_builtin_applications: "bitwise",
-  pedersen_builtin_applications: "pedersen",
-  range_check_builtin_applications: "range_check",
-  poseidon_builtin_applications: "posiedon",
-  steps: "steps",
-  ecdsa_builtin_applications: "ecdsa",
-  segment_arena_builtin: "segment_arena",
-  keccak_builtin_applications: "keccak",
-  memory_holes: "memory_holes",
 };
 
 const columnHelper = createColumnHelper<TransactionTableData>();
@@ -206,7 +194,7 @@ export default function BlockDetails() {
                     prev.data_gas + receipt.execution_resources[key].l1_gas,
                 }));
               } else {
-                const key_map = execution_resources_key_map[key];
+                const key_map = EXECUTION_RESOURCES_KEY_MAP[key];
                 if (key_map) {
                   setExecutionData((prev) => ({
                     ...prev,
@@ -237,6 +225,10 @@ export default function BlockDetails() {
     (tab: string) => {
       const column = transaction_table.getColumn("hash_display");
       column?.setFilterValue(tab);
+      setTransactionsPagination({
+        pageIndex: 0,
+        pageSize: 20,
+      });
       setSelectedTransactionType(tab);
     },
     [transaction_table]
@@ -258,7 +250,7 @@ export default function BlockDetails() {
         <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
           <h1 className="text-white">Blocks</h1>
         </div>
-        <div className=" flex flex-col lg:flex-row gap-4 py-4">
+        <div className=" flex flex-col lg:flex-row gap-4 pb-4">
           <div className=" flex flex-col gap-4">
             <div
               style={{
