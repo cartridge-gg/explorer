@@ -1,5 +1,5 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { getPaginatedBlockNumbers } from "@/utils/rpc_utils";
+import { getPaginatedBlockNumbers } from "@/shared/utils/rpc_utils";
 import BlocksTable from "./components/BlocksTable";
 import TransactionTable from "./components/TransactionsTable";
 import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
@@ -37,9 +37,8 @@ export default function Home() {
   const isBlocksLoading = latestBlocksQueries?.some((query) => query.isLoading);
 
   return (
-    <div className="flex flex-col w-screen h-screen justify-center items-center">
-      Home page
-      <div className="flex flex-row w-screen h-screen justify-center items-center">
+    <div className="flex flex-col w-full gap-8 px-2 py-4">
+      <div className="flex flex-col w-full gap-8">
         <BlocksTable blocks={latestBlocks} isBlocksLoading={isBlocksLoading} />
         <TransactionTable
           blocks={latestBlocks}

@@ -10,37 +10,18 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ROUTES } from "@/constants/routes";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
-import { getPaginatedBlockNumbers } from "@/utils/rpc_utils";
+import { getPaginatedBlockNumbers } from "@/shared/utils/rpc_utils";
+import { truncateString } from "@/shared/utils/string";
+import { useScreen } from "@/shared/hooks/useScreen";
 
-const ROWS_TO_RENDER = 10;
+const ROWS_TO_RENDER = 20;
 const BLOCKS_BATCH_SIZE = 5; // Number of blocks to fetch at once
 
 const columnHelper = createColumnHelper();
 
-const columns = [
-  columnHelper.accessor("type", {
-    header: "Type",
-    cell: (info) => info.getValue(),
-  }),
-  columnHelper.accessor("hash", {
-    header: "Transaction Hash",
-    cell: (info) => (
-      <div className="max-w-[200px] overflow-hidden text-ellipsis">
-        {info.renderValue()}
-      </div>
-    ),
-  }),
-  columnHelper.accessor("age", {
-    header: "Age",
-    cell: (info) => {
-      const date = dayjs(Number(info.getValue()) * 1000);
-      return dayjs().diff(date, "minute") + " minutes ago";
-    },
-  }),
-];
-
 const TransactionsTable = () => {
   const navigate = useNavigate();
+  const { isMobile } = useScreen();
   const [transactions, setTransactions] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [lastProcessedBlockIndex, setLastProcessedBlockIndex] = useState(0);
@@ -119,6 +100,27 @@ const TransactionsTable = () => {
     });
   }, [latestBlockNumber, currentPage]);
 
+  const columns = [
+    columnHelper.accessor("type", {
+      header: "Type",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor("hash", {
+      header: "Transaction Hash",
+      cell: (info) => (
+        <div className="">
+          {isMobile ? truncateString(info.renderValue()) : info.renderValue()}
+        </div>
+      ),
+    }),
+    columnHelper.accessor("age", {
+      header: "Age",
+      cell: (info) => {
+        return dayjs.unix(info.getValue()).fromNow();
+      },
+    }),
+  ];
+
   const table = useReactTable({
     data: transactions,
     columns,
@@ -126,57 +128,57 @@ const TransactionsTable = () => {
   });
 
   return (
-    <div className="bg-black text-white p-4 rounded-lg">
-      <div className="flex flex-row justify-between items-center">
-        <h1>Transactions Table</h1>
+    <div className=" text-white px-2 py-4 rounded-lg">
+      <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
+        <h1 className="text-white">Transactions List</h1>
       </div>
-      <table className="w-full table-auto border-collapse">
-        <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="bg-black">
-              {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  className="p-2 text-left border border-gray-700"
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr
-              key={row.id}
-              className="border-b border-gray-700 hover:bg-gray-900"
-            >
-              {row.getVisibleCells().map((cell) => (
-                <td
-                  key={cell.id}
-                  onClick={() =>
-                    navigate(
-                      `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(
-                        ":transactionHash",
-                        cell.row.original.hash
-                      )}`
-                    )
-                  }
-                  className="p-2 border border-gray-700"
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="flex justify-between mt-4">
+      <div className="overflow-x-auto md:w-full">
+        <table className="w-full mt-2 table-auto border-collapse border-t border-b border-[#8E8E8E] border-l-4 border-r">
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id} className="">
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    className="p-2 text-black font-bold text-left text-sm"
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="  text-black">
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    onClick={() =>
+                      navigate(
+                        `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(
+                          ":txHash",
+                          cell.row.original.hash
+                        )}`
+                      )
+                    }
+                    className="p-2 text-sm"
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex justify-center mt-4 gap-4">
         <button
           disabled={currentPage === 0}
           onClick={() => {

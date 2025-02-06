@@ -1,34 +1,29 @@
 import React, { useCallback, useEffect } from "react";
 import {
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { BlockWithTxHashes } from "starknet";
-import { truncateString } from "@/utils/string";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
+import dayjs from "dayjs";
+import LinkArrow from "@/shared/icons/LinkArrow";
 
 const INITIAL_TRANSACTIONS_TO_DISPLAY = 10;
 
 type Transaction = {
-  type: string;
-  hash: string;
+  hash_display: string;
   age: number;
+  hash: string;
 };
 
 const columnHelper = createColumnHelper<Transaction>();
 
 const columns = [
-  columnHelper.accessor("hash", {
+  columnHelper.accessor("hash_display", {
     header: () => "Hash",
-    cell: (info) => truncateString(info.getValue()),
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("type", {
-    header: () => "Type",
-    cell: (info) => info.renderValue(),
+    cell: (info) => info.getValue(),
     footer: (info) => info.column.id,
   }),
   columnHelper.accessor("age", {
@@ -67,9 +62,9 @@ export default function TransactionTable(props: {
       if (!blockTransactions) continue;
       for (const transaction of blockTransactions) {
         transactions.push({
-          type: transaction.type,
-          hash: transaction.transaction_hash,
+          hash_display: `${transaction.transaction_hash} ( ${transaction.type} )`,
           age: blocks[i].timestamp,
+          hash: transaction.transaction_hash,
         });
       }
 
@@ -97,58 +92,55 @@ export default function TransactionTable(props: {
   }
 
   return (
-    <div className="bg-black text-white p-4 rounded-lg">
-      <div className="flex flex-row justify-between items-center">
-        <h1>Transaction Table</h1>
-        <h1 onClick={handleNavigate}>Show all transactions</h1>
+    <div className=" text-black rounded-lg w-full">
+      <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
+        <h1 className="text-white">Transactions</h1>
+        <div
+          onClick={handleNavigate}
+          className="flex flex-row items-center gap-2 cursor-pointer"
+        >
+          <h4 className="text-white">View all transactions</h4>
+          <LinkArrow color={"#fff"} />
+        </div>
       </div>
 
-      <table className="w-full table-auto border-collapse">
-        <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="bg-black">
-              {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  className="p-2 text-left border border-gray-700"
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr
-              key={row.id}
-              className="border-b border-gray-700 hover:bg-gray-900"
-            >
-              {row.getVisibleCells().map((cell) => (
-                <td
-                  onClick={() =>
-                    navigate(
-                      `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(
-                        ":txHash",
-                        cell.row.original.hash
-                      )}`
-                    )
-                  }
-                  key={cell.id}
-                  className="p-2 border border-gray-700"
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+      <div className=" w-screen sm:w-full overflow-x-auto h-full flex">
+        <table className="w-full mt-2 table-auto border-collapse border-t border-b border-[#8E8E8E] border-l-4 border-r">
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr
+                key={row.id}
+                className="text-sm"
+                onClick={() =>
+                  navigate(
+                    `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(
+                      ":txHash",
+                      row.original.hash
+                    )}`
+                  )
+                }
+              >
+                <td className="w-full p-2 cursor-pointer">
+                  <div className="flex items-center overflow-hidden">
+                    <span className="whitespace-nowrap hover:text-blue-400 transition-all">
+                      {row.original.hash_display}
+                    </span>
+                    <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
+                  </div>
                 </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+
+                <td className="w-1 whitespace-nowrap p-2 text-right">
+                  <div className="flex items-center justify-end">
+                    <span className="whitespace-nowrap">
+                      {dayjs.unix(row?.original?.age).fromNow()}
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
