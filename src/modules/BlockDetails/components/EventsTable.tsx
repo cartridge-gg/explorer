@@ -32,7 +32,7 @@ export default function EventsTable(props: {
   }, [setPagination, pagination, table]);
 
   return (
-    <div className=" w-full flex flex-col gap-4 justify-between h-full">
+    <div className="flex px-4 relative flex-col max-w-screen justify-between h-full sm:w-full w-screen overflow-x-auto">
       <table className="w-full table-auto border-collapse border-spacing-12">
         <thead>
           <tr>
@@ -87,7 +87,7 @@ export default function EventsTable(props: {
         </tbody>
       </table>
 
-      <div className="flex flex-row justify-between items-center mt-4 px-2">
+      <div className="flex sticky sm:relative bottom-0 left-0 flex-row gap-4 sm:justify-between items-center mt-4">
         <p>
           Showing <strong>{pagination.pageIndex + 1}</strong> of{" "}
           <strong>{table.getPageCount()}</strong> pages

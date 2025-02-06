@@ -104,41 +104,43 @@ export default function TransactionTable(props: {
         </div>
       </div>
 
-      <table className="w-full mt-2 table-auto border-collapse border-t border-b border-[#8E8E8E] border-l-4 border-r">
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr
-              key={row.id}
-              className="text-sm"
-              onClick={() =>
-                navigate(
-                  `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(
-                    ":txHash",
-                    row.original.hash
-                  )}`
-                )
-              }
-            >
-              <td className="w-full p-2 cursor-pointer">
-                <div className="flex items-center overflow-hidden">
-                  <span className="whitespace-nowrap hover:text-blue-400 transition-all">
-                    {row.original.hash_display}
-                  </span>
-                  <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
-                </div>
-              </td>
+      <div className=" w-screen sm:w-full overflow-x-auto h-full flex">
+        <table className="w-full mt-2 table-auto border-collapse border-t border-b border-[#8E8E8E] border-l-4 border-r">
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr
+                key={row.id}
+                className="text-sm"
+                onClick={() =>
+                  navigate(
+                    `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(
+                      ":txHash",
+                      row.original.hash
+                    )}`
+                  )
+                }
+              >
+                <td className="w-full p-2 cursor-pointer">
+                  <div className="flex items-center overflow-hidden">
+                    <span className="whitespace-nowrap hover:text-blue-400 transition-all">
+                      {row.original.hash_display}
+                    </span>
+                    <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
+                  </div>
+                </td>
 
-              <td className="w-1 whitespace-nowrap p-2 text-right">
-                <div className="flex items-center justify-end">
-                  <span className="whitespace-nowrap">
-                    {dayjs.unix(row?.original?.age).fromNow()}
-                  </span>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                <td className="w-1 whitespace-nowrap p-2 text-right">
+                  <div className="flex items-center justify-end">
+                    <span className="whitespace-nowrap">
+                      {dayjs.unix(row?.original?.age).fromNow()}
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

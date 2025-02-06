@@ -8,4 +8,5 @@ export const EXECUTION_RESOURCES_KEY_MAP = {
   segment_arena_builtin: "segment_arena",
   keccak_builtin_applications: "keccak",
   memory_holes: "memory_holes",
+  ec_op_builtin_applications: "ec_op",
 };

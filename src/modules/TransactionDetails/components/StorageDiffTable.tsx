@@ -74,7 +74,7 @@ export default function StorageDiffTable(props: {
         </tbody>
       </table>
 
-      <div className="flex flex-row justify-between items-center mt-4 px-2">
+      <div className="flex sticky sm:relative bottom-0 left-0 flex-row gap-4 sm:justify-between items-center mt-4">
         <p>
           Showing <strong>{pagination.pageIndex + 1}</strong> of{" "}
           <strong>{table.getPageCount()}</strong> pages

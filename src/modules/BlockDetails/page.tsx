@@ -1,6 +1,9 @@
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { formatNumber } from "@/shared/utils/number";
-import { formatSnakeCaseToDisplayValue } from "@/shared/utils/string";
+import {
+  formatSnakeCaseToDisplayValue,
+  truncateString,
+} from "@/shared/utils/string";
 import { useQuery } from "@tanstack/react-query";
 import {
   ColumnDef,
@@ -17,6 +20,7 @@ import EventsTable from "./components/EventsTable";
 import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
+import { useScreen } from "@/shared/hooks/useScreen";
 
 type TransactionTableData = {
   hash: string;
@@ -86,6 +90,7 @@ const TransactionTypeTabs = ["All", "Invoke", "Deploy Account", "Declare"];
 
 export default function BlockDetails() {
   const { blockNumber } = useParams<{ blockNumber: string }>();
+  const { isMobile } = useScreen();
   const [transactionsData, setTransactionsData] = useState<
     TransactionTableData[]
   >([]);
@@ -265,7 +270,11 @@ export default function BlockDetails() {
                 <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
                   Hash
                 </p>
-                <p>{BlockReceipt?.block_hash}</p>
+                <p>
+                  {isMobile
+                    ? truncateString(BlockReceipt?.block_hash)
+                    : BlockReceipt?.block_hash}
+                </p>
               </div>
               <div className="flex flex-col text-sm gap-1">
                 <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
@@ -289,13 +298,21 @@ export default function BlockDetails() {
                 <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
                   State root
                 </p>
-                <p>{BlockReceipt?.new_root}</p>
+                <p>
+                  {isMobile
+                    ? truncateString(BlockReceipt?.new_root)
+                    : BlockReceipt?.new_root}
+                </p>
               </div>
               <div className="flex flex-col text-sm gap-1">
                 <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
                   Sequencer address
                 </p>
-                <p>{BlockReceipt?.sequencer_address}</p>
+                <p>
+                  {isMobile
+                    ? truncateString(BlockReceipt?.sequencer_address)
+                    : BlockReceipt?.sequencer_address}
+                </p>
               </div>
             </div>
             <div
@@ -415,7 +432,7 @@ export default function BlockDetails() {
             </div>
           </div>
           <div className="border w-full border-[#8E8E8E] flex flex-col gap-4 overflow-hidden">
-            <div className="flex flex-row text-center px-4 pt-5">
+            <div className="flex flex-col sm:flex-row text-center px-4 pt-5">
               {DataTabs.map((tab, index) => (
                 <div
                   key={index}
@@ -452,7 +469,7 @@ export default function BlockDetails() {
               </div>
             ) : null}
 
-            <div className=" px-2 h-full pb-2">
+            <div className=" h-full pb-2 w-full">
               {selectedDataTab === "Transactions" ? (
                 <TransactionsTable
                   table={transaction_table}

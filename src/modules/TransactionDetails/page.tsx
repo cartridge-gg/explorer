@@ -19,6 +19,8 @@ import StorageDiffTable from "./components/StorageDiffTable";
 import { useScreen } from "@/shared/hooks/useScreen";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
+import { decodeCalldata } from "@/shared/utils/rpc_utils";
+import CalldataDisplay from "./components/CalldataDisplay";
 
 const DataTabs = [
   "Calldata",
@@ -100,6 +102,8 @@ export default function TransactionDetails() {
     ecdsa: 0,
     segment_arena: 0,
     keccak: 0,
+    memory_holes: 0,
+    ec_op: 0,
   });
 
   const [blockComputeData, setBlockComputeData] = useState({
@@ -109,6 +113,7 @@ export default function TransactionDetails() {
   });
 
   const [eventsData, setEventsData] = useState([]);
+  const [callData, setCallData] = useState([]);
   const [eventsPagination, setEventsPagination] = useState({
     pageIndex: 0,
     pageSize: 20,
@@ -158,9 +163,9 @@ export default function TransactionDetails() {
       });
     }
 
+    const receipt = TransactionReceipt?.execution_resources;
     // process execution resources
     Object.keys(TransactionReceipt?.execution_resources).forEach((key) => {
-      const receipt = TransactionReceipt?.execution_resources;
       if (key === "steps") {
         setBlockComputeData((prev) => ({
           ...prev,
@@ -190,7 +195,6 @@ export default function TransactionDetails() {
 
   useEffect(() => {
     if (!TransactionReceipt) return;
-    console.log(TransactionReceipt);
     processTransactionReceipt();
   }, [TransactionReceipt, processTransactionReceipt]);
 
@@ -218,6 +222,23 @@ export default function TransactionDetails() {
     if (!TransactionTrace || !TransactionReceipt) return;
     processTransactionTrace();
   }, [TransactionReceipt, processTransactionTrace, TransactionTrace]);
+
+  const processTransactionDetails = useCallback(async () => {
+    // process calldata
+    const calldata = TransactionDetails?.calldata;
+
+    if (!calldata) return;
+
+    console.log("calldata", calldata);
+    const transactions = decodeCalldata(calldata);
+    setCallData(transactions);
+    console.log("transactions", transactions);
+  }, [TransactionDetails]);
+
+  useEffect(() => {
+    if (!TransactionDetails) return;
+    processTransactionDetails();
+  }, [TransactionDetails, processTransactionDetails]);
 
   const eventsTable = useReactTable({
     data: eventsData,
@@ -255,10 +276,10 @@ export default function TransactionDetails() {
           </h2>
         </div>
 
-        <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
+        <div className="flex flex-row  justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
           <h1 className="text-white">Transactions</h1>
         </div>
-        <div className=" flex flex-col lg:flex-row gap-4 pb-4">
+        <div className=" flex flex-col w-full lg:flex-row gap-4 pb-4">
           <div className=" flex flex-col gap-4">
             <div
               style={{
@@ -275,6 +296,14 @@ export default function TransactionDetails() {
                   {isMobile && TransactionReceipt?.transaction_hash
                     ? truncateString(TransactionReceipt?.transaction_hash)
                     : txHash}
+                </p>
+              </div>
+              <div className="flex flex-col text-sm gap-1">
+                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
+                  Status
+                </p>
+                <p className=" uppercase">
+                  {TransactionReceipt?.statusReceipt}
                 </p>
               </div>
               <div className="flex flex-col text-sm gap-1">
@@ -313,7 +342,7 @@ export default function TransactionDetails() {
                 </p>
                 <p>
                   {isMobile && TransactionDetails?.sender_address
-                    ? truncateString(TransactionDetails?.transaction_hash)
+                    ? truncateString(TransactionDetails?.sender_address)
                     : TransactionDetails?.sender_address}
                 </p>
               </div>
@@ -355,7 +384,7 @@ export default function TransactionDetails() {
                       <p className=" text-white">GAS</p>
                     </div>
                     <div className=" w-full block py-2 border border-[#DBDBDB]">
-                      <p>{blockComputeData.gas}</p>
+                      <p>{formatNumber(blockComputeData.gas)}</p>
                     </div>
                   </div>
                   <div className=" flex flex-row w-full">
@@ -363,7 +392,7 @@ export default function TransactionDetails() {
                       <p className=" text-white">DA GAS</p>
                     </div>
                     <div className=" w-full block py-2 border border-[#DBDBDB]">
-                      <p>{blockComputeData.data_gas}</p>
+                      <p>{formatNumber(blockComputeData.data_gas)}</p>
                     </div>
                   </div>
                 </div>
@@ -373,7 +402,7 @@ export default function TransactionDetails() {
                     <p className=" text-white">STEPS</p>
                   </div>
                   <div className=" w-full block py-2 border border-[#DBDBDB]">
-                    <p>{blockComputeData.steps}</p>
+                    <p>{formatNumber(blockComputeData.steps)}</p>
                   </div>
                 </div>
                 <div className=" flex flex-col">
@@ -419,8 +448,8 @@ export default function TransactionDetails() {
               </div>
             </div>
           </div>
-          <div className="border w-full border-[#8E8E8E] flex flex-col gap-4 overflow-hidden">
-            <div className="flex flex-row text-center px-4 pt-5">
+          <div className="border relative border-[#8E8E8E] flex flex-col gap-4 w-full overflow-y-auto max-h-[61.5rem]">
+            <div className="flex sticky top-0 bg-white flex-col sm:flex-row text-center px-4 pt-5 pb-4">
               {DataTabs.map((tab, index) => (
                 <div
                   key={index}
@@ -430,15 +459,17 @@ export default function TransactionDetails() {
                     color: selectedDataTab === tab ? "#fff" : "#000",
                   }}
                   onClick={() => setSelectedDataTab(tab)}
-                  className="w-full  border border-b-4 p-2 border-[#8E8E8E] uppercase cursor-pointer"
+                  className="w-full border border-b-4 p-2 border-[#8E8E8E] uppercase cursor-pointer"
                 >
                   <p>{tab}</p>
                 </div>
               ))}
             </div>
 
-            <div className=" px-2 h-full pb-2">
-              {selectedDataTab === "Events" ? (
+            <div className=" h-full pb-2 w-full">
+              {selectedDataTab === "Calldata" ? (
+                <CalldataDisplay calldata={callData} />
+              ) : selectedDataTab === "Events" ? (
                 <EventsTable
                   table={eventsTable}
                   pagination={eventsPagination}

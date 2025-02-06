@@ -28,13 +28,13 @@ export default function EventsTable(props: {
   }, [setPagination, pagination, table]);
 
   return (
-    <div className=" w-full flex flex-col gap-4 justify-between h-full">
-      <table className="w-full table-auto border-collapse border-spacing-12">
+    <div className="px-4 sm:w-full w-screen overflow-x-auto flex flex-col gap-4 justify-between h-full">
+      <table className="table-auto border-collapse border-spacing-12">
         <thead>
           <tr>
             <th className="p-2 text-left">#</th>
-            <th className="p-2 text-left">Block</th>
-            <th className="p-2 text-right">From Address</th>
+            <th className="p-2 text-left">From Address</th>
+            <th className="p-2 text-right">Block</th>
           </tr>
         </thead>
         <tbody>
@@ -48,7 +48,16 @@ export default function EventsTable(props: {
                       index + 1 + pagination.pageIndex * pagination.pageSize
                     )}
                   </span>
-                  <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
+                  <span className="sm:visible hidden flex-grow border-dotted border-b border-gray-500 mx-2"></span>
+                </div>
+              </td>
+
+              <td className=" p-2 text-center w-full">
+                <div className="flex items-center justify-start">
+                  <span className="sm:visible hidden flex-grow border-dotted border-b border-gray-500 mx-2"></span>
+                  <span className="uppercase text-right truncate">
+                    {row.original.from}
+                  </span>
                 </div>
               </td>
 
@@ -69,21 +78,12 @@ export default function EventsTable(props: {
                   </span>
                 </div>
               </td>
-
-              <td className=" p-2 text-center w-full">
-                <div className="flex items-center justify-end">
-                  <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
-                  <span className="uppercase text-right truncate">
-                    {row.original.from}
-                  </span>
-                </div>
-              </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <div className="flex flex-row justify-between items-center mt-4 px-2">
+      <div className="flex sticky sm:relative bottom-0 left-0 flex-row gap-4 sm:justify-between items-center mt-4">
         <p>
           Showing <strong>{pagination.pageIndex + 1}</strong> of{" "}
           <strong>{table.getPageCount()}</strong> pages

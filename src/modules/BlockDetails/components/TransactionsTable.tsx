@@ -32,7 +32,7 @@ export default function TransactionsTable(props: {
   }, [setPagination, pagination, table]);
 
   return (
-    <div className="flex flex-col w-full justify-between h-full">
+    <div className="px-4 flex relative flex-col max-w-screen justify-between h-full sm:w-full w-screen overflow-x-auto">
       <table className="w-full table-auto border-collapse">
         <tbody>
           {table.getRowModel().rows.map((row, index) => (
@@ -81,7 +81,7 @@ export default function TransactionsTable(props: {
       </table>
 
       {/* PAGINATION CONTROLS */}
-      <div className="flex flex-row justify-between items-center mt-4 px-2">
+      <div className="flex sticky sm:relative bottom-0 left-0 flex-row gap-4 sm:justify-between items-center mt-4">
         <p>
           Showing <strong>{pagination.pageIndex + 1}</strong> of{" "}
           <strong>{table.getPageCount()}</strong> pages
