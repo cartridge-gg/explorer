@@ -8,7 +8,7 @@ export default function CalldataDisplay(props: {
   );
   return (
     <div className="w-full flex flex-col gap-4 h-full px-2">
-      {[...props.calldata, ...props.calldata].map((data, index) => (
+      {props.calldata.map((data, index) => (
         <div
           onClick={() =>
             setExpanded((prev) => {
