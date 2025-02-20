@@ -18,7 +18,7 @@ import EventsTable from "./components/EventsTable";
 import StorageDiffTable from "./components/StorageDiffTable";
 import { useScreen } from "@/shared/hooks/useScreen";
 import dayjs from "dayjs";
-import { cairo } from "starknet";
+import { cairo, CallData, events } from "starknet";
 import { decodeCalldata } from "@/shared/utils/rpc_utils";
 import CalldataDisplay from "./components/CalldataDisplay";
 
@@ -35,6 +35,7 @@ type EventData = {
   txn_hash: string;
   from: string;
   block: number;
+  event_name: string;
 };
 
 const eventColumnHelper = createColumnHelper<EventData>();
@@ -46,6 +47,13 @@ const events_columns = [
   }),
   eventColumnHelper.accessor("from", {
     header: "from",
+    cell: (info) => {
+      const date = Number(info.getValue());
+      return date;
+    },
+  }),
+  eventColumnHelper.accessor("event_name", {
+    header: "Event Name",
     cell: (info) => {
       const date = Number(info.getValue());
       return date;
@@ -147,16 +155,37 @@ export default function TransactionDetails() {
   });
 
   const processTransactionReceipt = useCallback(async () => {
+    // check if events are already processed
+    if (eventsData.length > 0) return;
     // process events
     if (TransactionReceipt?.events) {
-      TransactionReceipt.events.forEach((event) => {
+      TransactionReceipt.events.forEach(async (event) => {
+        const contract_abi = await RPC_PROVIDER.getClassAt(
+          event.from_address
+        ).then((res) => res.abi);
+
+        const eventsC = await RPC_PROVIDER.getEvents({
+          address: event.from_address,
+          chunk_size: 10,
+        });
+        const abiEvents = events.getAbiEvents(contract_abi);
+        const abiStructs = CallData.getAbiStruct(contract_abi);
+        const abiEnums = CallData.getAbiEnum(contract_abi);
+        const parsedEvent = events.parseEvents(
+          eventsC.events,
+          abiEvents,
+          abiStructs,
+          abiEnums
+        );
+        console.log(parsedEvent);
         setEventsData((prev) => {
           return [
             ...prev,
             {
               txn_hash: TransactionReceipt.transaction_hash,
-              from: event.from_address,
+              from: truncateString(event.from_address),
               block: TransactionReceipt.block_number,
+              event_name: "event name",
             },
           ];
         });
@@ -191,7 +220,7 @@ export default function TransactionDetails() {
         }
       }
     });
-  }, [TransactionReceipt]);
+  }, [TransactionReceipt, eventsData.length]);
 
   useEffect(() => {
     if (!TransactionReceipt) return;
@@ -199,6 +228,8 @@ export default function TransactionDetails() {
   }, [TransactionReceipt, processTransactionReceipt]);
 
   const processTransactionTrace = useCallback(async () => {
+    // check if storage diffs are already processed
+    if (storageDiffData.length > 0) return;
     // process storage diffs
     if (TransactionTrace?.state_diff?.storage_diffs) {
       TransactionTrace?.state_diff?.storage_diffs?.forEach((storage_diff) => {
@@ -216,7 +247,7 @@ export default function TransactionDetails() {
         });
       });
     }
-  }, [TransactionTrace, TransactionReceipt]);
+  }, [TransactionTrace, TransactionReceipt, storageDiffData.length]);
 
   useEffect(() => {
     if (!TransactionTrace || !TransactionReceipt) return;

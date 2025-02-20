@@ -34,6 +34,7 @@ export default function EventsTable(props: {
           <tr>
             <th className="p-2 text-left">#</th>
             <th className="p-2 text-left">From Address</th>
+            <th className="p-2 text-left">Event Name</th>
             <th className="p-2 text-right">Block</th>
           </tr>
         </thead>
@@ -41,7 +42,7 @@ export default function EventsTable(props: {
           {table.getRowModel().rows.map((row, index) => (
             <tr key={row.id} className="text-xs">
               <td className="p-2 cursor-pointer">
-                <div className="flex items-center justify-center overflow-hidden">
+                <div className="flex justify-start overflow-hidden">
                   <span className="whitespace-nowrap font-bold hover:text-blue-400 transition-all">
                     #
                     {padNumber(
@@ -52,11 +53,19 @@ export default function EventsTable(props: {
                 </div>
               </td>
 
-              <td className=" p-2 text-center w-full">
+              <td className=" p-2 text-center">
                 <div className="flex items-center justify-start">
                   <span className="sm:visible hidden flex-grow border-dotted border-b border-gray-500 mx-2"></span>
                   <span className="uppercase text-right truncate">
                     {row.original.from}
+                  </span>
+                </div>
+              </td>
+
+              <td className="p-2 text-left">
+                <div className="flex items-center justify-start">
+                  <span className="uppercase text-right truncate">
+                    {row.original.event_name}
                   </span>
                 </div>
               </td>
@@ -71,7 +80,7 @@ export default function EventsTable(props: {
                       )}`
                     )
                   }
-                  className="flex items-center justify-center overflow-hidden"
+                  className="flex items-center justify-end overflow-hidden"
                 >
                   <span className="hover:text-blue-400 transition-all">
                     {row.original.block}
