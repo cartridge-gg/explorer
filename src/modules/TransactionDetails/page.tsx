@@ -19,7 +19,7 @@ import StorageDiffTable from "./components/StorageDiffTable";
 import { useScreen } from "@/shared/hooks/useScreen";
 import dayjs from "dayjs";
 import { cairo, CallData, events } from "starknet";
-import { decodeCalldata } from "@/shared/utils/rpc_utils";
+import { decodeCalldata, getEventName } from "@/shared/utils/rpc_utils";
 import CalldataDisplay from "./components/CalldataDisplay";
 
 const DataTabs = [
@@ -32,7 +32,7 @@ const DataTabs = [
 ];
 
 type EventData = {
-  txn_hash: string;
+  id: string;
   from: string;
   block: number;
   event_name: string;
@@ -40,8 +40,8 @@ type EventData = {
 
 const eventColumnHelper = createColumnHelper<EventData>();
 const events_columns = [
-  eventColumnHelper.accessor("txn_hash", {
-    header: () => "Hash",
+  eventColumnHelper.accessor("id", {
+    header: () => "id",
     cell: (info) => info.getValue(),
     footer: (info) => info.column.id,
   }),
@@ -157,16 +157,22 @@ export default function TransactionDetails() {
   const processTransactionReceipt = useCallback(async () => {
     // check if events are already processed
     if (eventsData.length > 0) return;
+
     // process events
     if (TransactionReceipt?.events) {
-      TransactionReceipt.events.forEach(async (event) => {
+      TransactionReceipt.events.forEach(async (event, event_index) => {
         const contract_abi = await RPC_PROVIDER.getClassAt(
           event.from_address
         ).then((res) => res.abi);
 
         const eventsC = await RPC_PROVIDER.getEvents({
           address: event.from_address,
-          chunk_size: 10,
+          chunk_size: 100,
+          keys: [event.keys],
+          from_block: {
+            block_number: TransactionReceipt.block_number,
+          },
+          to_block: { block_number: TransactionReceipt.block_number },
         });
         const abiEvents = events.getAbiEvents(contract_abi);
         const abiStructs = CallData.getAbiStruct(contract_abi);
@@ -177,15 +183,22 @@ export default function TransactionDetails() {
           abiStructs,
           abiEnums
         );
-        console.log(parsedEvent);
+
+        const eventDataMap = parsedEvent.filter(
+          (e) => e.transaction_hash === TransactionReceipt.transaction_hash
+        );
+
+        // get the key of the event obj which includes "::"
+        const eventKey =
+          Object.keys(eventDataMap[0]).find((key) => key.includes("::")) ?? "";
         setEventsData((prev) => {
           return [
             ...prev,
             {
-              txn_hash: TransactionReceipt.transaction_hash,
+              id: `${TransactionReceipt.transaction_hash}-${event_index}`,
               from: truncateString(event.from_address),
+              event_name: getEventName(eventKey),
               block: TransactionReceipt.block_number,
-              event_name: "event name",
             },
           ];
         });
@@ -269,8 +282,12 @@ export default function TransactionDetails() {
     processTransactionDetails();
   }, [TransactionDetails, processTransactionDetails]);
 
+  // sort events data by id
+
   const eventsTable = useReactTable({
-    data: eventsData,
+    data: eventsData.sort((a, b) => {
+      return b.id.localeCompare(a.id);
+    }),
     columns: events_columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

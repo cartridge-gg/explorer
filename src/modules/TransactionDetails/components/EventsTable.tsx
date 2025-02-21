@@ -1,5 +1,5 @@
 import { ROUTES } from "@/constants/routes";
-import { padNumber } from "@/shared/utils/number";
+import { truncateString } from "@/shared/utils/string";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -32,7 +32,7 @@ export default function EventsTable(props: {
       <table className="table-auto border-collapse border-spacing-12">
         <thead>
           <tr>
-            <th className="p-2 text-left">#</th>
+            <th className="p-2 text-left">ID</th>
             <th className="p-2 text-left">From Address</th>
             <th className="p-2 text-left">Event Name</th>
             <th className="p-2 text-right">Block</th>
@@ -42,12 +42,19 @@ export default function EventsTable(props: {
           {table.getRowModel().rows.map((row, index) => (
             <tr key={row.id} className="text-xs">
               <td className="p-2 cursor-pointer">
-                <div className="flex justify-start overflow-hidden">
-                  <span className="whitespace-nowrap font-bold hover:text-blue-400 transition-all">
-                    #
-                    {padNumber(
-                      index + 1 + pagination.pageIndex * pagination.pageSize
-                    )}
+                <div
+                  className="flex justify-start overflow-hidden"
+                  onClick={() =>
+                    navigate(
+                      `${ROUTES.EVENT_DETAILS.urlPath.replace(
+                        ":eventId",
+                        row.original.id
+                      )}`
+                    )
+                  }
+                >
+                  <span className="whitespace-nowrap hover:text-blue-400 transition-all">
+                    {truncateString(row.original.id)}
                   </span>
                   <span className="sm:visible hidden flex-grow border-dotted border-b border-gray-500 mx-2"></span>
                 </div>
@@ -64,7 +71,7 @@ export default function EventsTable(props: {
 
               <td className="p-2 text-left">
                 <div className="flex items-center justify-start">
-                  <span className="uppercase text-right truncate">
+                  <span className="text-right truncate">
                     {row.original.event_name}
                   </span>
                 </div>

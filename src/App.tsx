@@ -11,9 +11,15 @@ function App() {
         <Header />
         <Routes>
           {/* Loop over all the routes and render them */}
-          {Object.keys(ROUTES).map((routeKey) => {
+          {Object.keys(ROUTES).map((routeKey, index) => {
             const route = ROUTES[routeKey as keyof typeof ROUTES];
-            return <Route path={route.urlPath} element={route.component} />;
+            return (
+              <Route
+                key={index}
+                path={route.urlPath}
+                element={route.component}
+              />
+            );
           })}
         </Routes>
       </BrowserRouter>

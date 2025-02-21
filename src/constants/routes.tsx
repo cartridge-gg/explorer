@@ -27,7 +27,7 @@ export const ROUTES = {
     component: <BlocksList />,
   },
   EVENT_DETAILS: {
-    urlPath: "/event/:eventHash",
+    urlPath: "/event/:eventId",
     component: <EventDetails />,
   },
 };
