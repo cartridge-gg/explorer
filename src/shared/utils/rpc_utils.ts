@@ -36,8 +36,9 @@ export function decodeCalldata(calldata: string[]) {
 }
 
 // convert big int to hex
-export function convertToHex(value: bigint) {
-  return cairo.felt(value.toString());
+export function convertToHex(value: bigint | string) {
+  const anyValueToBigInt = BigInt(value);
+  return cairo.felt(anyValueToBigInt.toString());
 }
 
 // get formatted event name from event name
