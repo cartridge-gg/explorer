@@ -240,66 +240,80 @@ export default function EventDetails() {
               </h1>
             </div>
             <div className="flex flex-col w-full gap-4">
-              <div className="flex flex-col w-full gap-4">
-                <div className="flex flex-row justify-between items-center px-2 py-2 uppercase">
-                  <h1 className="text-black text-lg font-bold">Keys</h1>
-                </div>
+              {eventKeys.length > 0 ? (
+                <div className="flex flex-col w-full gap-4">
+                  <div className="flex flex-row justify-between items-center px-2 py-2 uppercase">
+                    <h1 className="text-black text-lg font-bold">Keys</h1>
+                  </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-[#D9D9D9] text-black">
-                        <th className="px-4 py-2 text-left">Input</th>
-                        <th className="px-4 py-2 text-left">Type</th>
-                        <th className="px-4 py-2 text-left">Data</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {eventKeys?.map((key) => {
-                        return (
-                          <tr className="border-b border-[#8E8E8E] border-dashed">
-                            <td className="px-4 py-2">{key.input}</td>
-                            <td className="px-4 py-2 break-all">
-                              {key.input_type}
-                            </td>
-                            <td className="px-4 py-2 break-all">{key.data}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-[#D9D9D9] text-black">
+                          <th className="px-4 py-2 text-left">Input</th>
+                          <th className="px-4 py-2 text-left">Type</th>
+                          <th className="px-4 py-2 text-left">Data</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {eventKeys?.map((key, index) => {
+                          return (
+                            <tr
+                              key={index}
+                              className="border-b border-[#8E8E8E] border-dashed"
+                            >
+                              <td className="px-4 py-2">{key.input}</td>
+                              <td className="px-4 py-2 break-all">
+                                {key.input_type}
+                              </td>
+                              <td className="px-4 py-2 break-all">
+                                {key.data}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col w-full gap-4">
-                <div className="flex flex-row justify-between items-center px-2 py-2 uppercase">
-                  <h1 className="text-black text-lg font-bold">Data</h1>
-                </div>
+              ) : null}
+              {eventData.length > 0 ? (
+                <div className="flex flex-col w-full gap-4">
+                  <div className="flex flex-row justify-between items-center px-2 py-2 uppercase">
+                    <h1 className="text-black text-lg font-bold">Data</h1>
+                  </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-[#D9D9D9] text-black">
-                        <th className="px-4 py-2 text-left">Input</th>
-                        <th className="px-4 py-2 text-left">Type</th>
-                        <th className="px-4 py-2 text-left">Data</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {eventData?.map((key) => {
-                        return (
-                          <tr className="border-b border-[#8E8E8E] border-dashed">
-                            <td className="px-4 py-2">{key.input}</td>
-                            <td className="px-4 py-2 break-all">
-                              {key.input_type}
-                            </td>
-                            <td className="px-4 py-2 break-all">{key.data}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-[#D9D9D9] text-black">
+                          <th className="px-4 py-2 text-left">Input</th>
+                          <th className="px-4 py-2 text-left">Type</th>
+                          <th className="px-4 py-2 text-left">Data</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {eventData?.map((key, index) => {
+                          return (
+                            <tr
+                              key={index}
+                              className="border-b border-[#8E8E8E] border-dashed"
+                            >
+                              <td className="px-4 py-2">{key.input}</td>
+                              <td className="px-4 py-2 break-all">
+                                {key.input_type}
+                              </td>
+                              <td className="px-4 py-2 break-all">
+                                {key.data}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
           </div>
         </div>
