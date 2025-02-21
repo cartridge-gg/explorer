@@ -34,3 +34,14 @@ export function decodeCalldata(calldata: string[]) {
 
   return transactions;
 }
+
+// convert big int to hex
+export function convertToHex(value: bigint | string) {
+  const anyValueToBigInt = BigInt(value);
+  return cairo.felt(anyValueToBigInt.toString());
+}
+
+// get formatted event name from event name
+export function getEventName(eventName: string) {
+  return eventName.split("::").pop() ?? "";
+}

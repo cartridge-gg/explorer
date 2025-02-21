@@ -1,5 +1,6 @@
 import BlockDetails from "@/modules/BlockDetails/page";
 import BlocksList from "@/modules/BlocksList/page";
+import EventDetails from "@/modules/EventDetails/page";
 import Home from "@/modules/Home/page";
 import TransactionDetails from "@/modules/TransactionDetails/page";
 import TransactionsList from "@/modules/TransactionsList/page";
@@ -24,5 +25,9 @@ export const ROUTES = {
   BLOCKS_LIST: {
     urlPath: "/blocks",
     component: <BlocksList />,
+  },
+  EVENT_DETAILS: {
+    urlPath: "/event/:eventId",
+    component: <EventDetails />,
   },
 };

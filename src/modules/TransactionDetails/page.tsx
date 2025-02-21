@@ -18,8 +18,8 @@ import EventsTable from "./components/EventsTable";
 import StorageDiffTable from "./components/StorageDiffTable";
 import { useScreen } from "@/shared/hooks/useScreen";
 import dayjs from "dayjs";
-import { cairo } from "starknet";
-import { decodeCalldata } from "@/shared/utils/rpc_utils";
+import { cairo, CallData, events } from "starknet";
+import { decodeCalldata, getEventName } from "@/shared/utils/rpc_utils";
 import CalldataDisplay from "./components/CalldataDisplay";
 
 const DataTabs = [
@@ -32,20 +32,28 @@ const DataTabs = [
 ];
 
 type EventData = {
-  txn_hash: string;
+  id: string;
   from: string;
   block: number;
+  event_name: string;
 };
 
 const eventColumnHelper = createColumnHelper<EventData>();
 const events_columns = [
-  eventColumnHelper.accessor("txn_hash", {
-    header: () => "Hash",
+  eventColumnHelper.accessor("id", {
+    header: () => "id",
     cell: (info) => info.getValue(),
     footer: (info) => info.column.id,
   }),
   eventColumnHelper.accessor("from", {
     header: "from",
+    cell: (info) => {
+      const date = Number(info.getValue());
+      return date;
+    },
+  }),
+  eventColumnHelper.accessor("event_name", {
+    header: "Event Name",
     cell: (info) => {
       const date = Number(info.getValue());
       return date;
@@ -147,15 +155,49 @@ export default function TransactionDetails() {
   });
 
   const processTransactionReceipt = useCallback(async () => {
+    // check if events are already processed
+    if (eventsData.length > 0) return;
+
     // process events
     if (TransactionReceipt?.events) {
-      TransactionReceipt.events.forEach((event) => {
+      TransactionReceipt.events.forEach(async (event, event_index) => {
+        const contract_abi = await RPC_PROVIDER.getClassAt(
+          event.from_address
+        ).then((res) => res.abi);
+
+        const eventsC = await RPC_PROVIDER.getEvents({
+          address: event.from_address,
+          chunk_size: 100,
+          keys: [event.keys],
+          from_block: {
+            block_number: TransactionReceipt.block_number,
+          },
+          to_block: { block_number: TransactionReceipt.block_number },
+        });
+        const abiEvents = events.getAbiEvents(contract_abi);
+        const abiStructs = CallData.getAbiStruct(contract_abi);
+        const abiEnums = CallData.getAbiEnum(contract_abi);
+        const parsedEvent = events.parseEvents(
+          eventsC.events,
+          abiEvents,
+          abiStructs,
+          abiEnums
+        );
+
+        const eventDataMap = parsedEvent.filter(
+          (e) => e.transaction_hash === TransactionReceipt.transaction_hash
+        );
+
+        // get the key of the event obj which includes "::"
+        const eventKey =
+          Object.keys(eventDataMap[0]).find((key) => key.includes("::")) ?? "";
         setEventsData((prev) => {
           return [
             ...prev,
             {
-              txn_hash: TransactionReceipt.transaction_hash,
-              from: event.from_address,
+              id: `${TransactionReceipt.transaction_hash}-${event_index}`,
+              from: truncateString(event.from_address),
+              event_name: getEventName(eventKey),
               block: TransactionReceipt.block_number,
             },
           ];
@@ -191,7 +233,7 @@ export default function TransactionDetails() {
         }
       }
     });
-  }, [TransactionReceipt]);
+  }, [TransactionReceipt, eventsData.length]);
 
   useEffect(() => {
     if (!TransactionReceipt) return;
@@ -199,6 +241,8 @@ export default function TransactionDetails() {
   }, [TransactionReceipt, processTransactionReceipt]);
 
   const processTransactionTrace = useCallback(async () => {
+    // check if storage diffs are already processed
+    if (storageDiffData.length > 0) return;
     // process storage diffs
     if (TransactionTrace?.state_diff?.storage_diffs) {
       TransactionTrace?.state_diff?.storage_diffs?.forEach((storage_diff) => {
@@ -216,7 +260,7 @@ export default function TransactionDetails() {
         });
       });
     }
-  }, [TransactionTrace, TransactionReceipt]);
+  }, [TransactionTrace, TransactionReceipt, storageDiffData.length]);
 
   useEffect(() => {
     if (!TransactionTrace || !TransactionReceipt) return;
@@ -238,8 +282,12 @@ export default function TransactionDetails() {
     processTransactionDetails();
   }, [TransactionDetails, processTransactionDetails]);
 
+  // sort events data by id
+
   const eventsTable = useReactTable({
-    data: eventsData,
+    data: eventsData.sort((a, b) => {
+      return b.id.localeCompare(a.id);
+    }),
     columns: events_columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
