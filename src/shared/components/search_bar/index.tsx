@@ -3,7 +3,7 @@ import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { Input } from "@cartridge/ui-next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function SearchBar() {
@@ -11,6 +11,29 @@ export default function SearchBar() {
   const [search, setSearch] = useState("");
   const { isMobile } = useScreen();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // on clicking outside of dropdown, close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const dropdown = document.querySelector(".search-dropdown");
+      const searchInput = document.querySelector(".search-input");
+
+      if (
+        isDropdownOpen &&
+        dropdown &&
+        !dropdown.contains(event.target as Node) &&
+        !searchInput?.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   const [resultType, setResultType] = useState<
     "transaction" | "block" | "contract" | "class" | "not found"
@@ -125,14 +148,14 @@ export default function SearchBar() {
   return (
     <div className="flex flex-col gap-2 relative">
       <Input
-        className=" relative border-l-4 border-[#8E8E8E] w-full lowercase px-2 focus:outline-none focus:ring-0"
+        className="search-input relative border-l-4 border-[#8E8E8E] w-full lowercase px-2 focus:outline-none focus:ring-0"
         placeholder="search"
         value={search}
         onChange={handleSearch}
       />
       {/* dropdown with results */}
       {isDropdownOpen && search.length > 0 ? (
-        <div className="absolute bottom-0 left-0 right-0 translate-y-full">
+        <div className="search-dropdown absolute bottom-0 left-0 right-0 translate-y-full">
           <div className="flex flex-col gap-2 bg-white p-2 border border-[#8E8E8E]">
             {resultType !== "not found" ? (
               <div
