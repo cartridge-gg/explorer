@@ -1,8 +1,14 @@
 "use client";
 import { RpcProvider } from "starknet";
 
+declare global {
+  interface Window {
+    RPC_URL?: string;
+  }
+}
+
 export const RPC_PROVIDER = new RpcProvider({
-  nodeUrl: import.meta.env.VITE_CHAIN_RPC,
+  nodeUrl: window.RPC_URL ?? import.meta.env.VITE_RPC_URL,
 });
 
 // useful for caching
