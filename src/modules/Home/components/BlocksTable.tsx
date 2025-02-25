@@ -11,14 +11,9 @@ import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import relativeTime from "dayjs/plugin/relativeTime";
 import LinkArrow from "@/shared/icons/LinkArrow";
+import { Block } from "@/types/types";
 
 dayjs.extend(relativeTime);
-
-type Block = {
-  number: string;
-  hash: string;
-  age: string;
-};
 
 const columnHelper = createColumnHelper<Block>();
 
