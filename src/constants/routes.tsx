@@ -1,5 +1,7 @@
 import BlockDetails from "@/modules/BlockDetails/page";
 import BlocksList from "@/modules/BlocksList/page";
+import ClassHashDetails from "@/modules/ClassHash/page";
+import ContractDetails from "@/modules/ContractDetails/page";
 import EventDetails from "@/modules/EventDetails/page";
 import Home from "@/modules/Home/page";
 import TransactionDetails from "@/modules/TransactionDetails/page";
@@ -29,5 +31,13 @@ export const ROUTES = {
   EVENT_DETAILS: {
     urlPath: "/event/:eventId",
     component: <EventDetails />,
+  },
+  CONTRACT_DETAILS: {
+    urlPath: "/contract/:contractAddress",
+    component: <ContractDetails />,
+  },
+  CLASS_HASH_DETAILS: {
+    urlPath: "/class-hash/:classHash",
+    component: <ClassHashDetails />,
   },
 };

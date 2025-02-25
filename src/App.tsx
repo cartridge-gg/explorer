@@ -6,7 +6,6 @@ import Header from "./shared/components/header";
 function App() {
   return (
     <div className="bg-white flex flex-col ">
-      {/* Home page - we can conditionally render any other flow if home page is not supposed to be shown */}
       <BrowserRouter>
         <Header />
         <Routes>
