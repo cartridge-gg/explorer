@@ -1,4 +1,5 @@
-import { cairo } from "starknet";
+import { cairo, shortString } from "starknet";
+import BN from "bn.js";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
@@ -35,13 +36,33 @@ export function decodeCalldata(calldata: string[]) {
   return transactions;
 }
 
-// convert big int to hex
-export function convertToHex(value: bigint | string) {
-  const anyValueToBigInt = BigInt(value);
-  return cairo.felt(anyValueToBigInt.toString());
-}
-
 // get formatted event name from event name
 export function getEventName(eventName: string) {
   return eventName.split("::").pop() ?? "";
 }
+
+export const convertValue = (value: string | number) => {
+  try {
+    let bnValue: BN;
+
+    // Convert input to BN
+    if (typeof value === "string") {
+      // Handle hex strings
+      if (value.toLowerCase().startsWith("0x")) {
+        bnValue = new BN(value.slice(2), 16);
+      } else {
+        bnValue = new BN(value);
+      }
+    } else {
+      bnValue = new BN(value);
+    }
+
+    return {
+      decimal: bnValue.toString(10),
+      hex: "0x" + bnValue.toString(16),
+      string: shortString.decodeShortString(bnValue.toString()),
+    };
+  } catch (_error) {
+    return null;
+  }
+};

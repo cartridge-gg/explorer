@@ -23,12 +23,12 @@ export default function Header() {
           <div className="w-full">
             <SearchBar />
           </div>
-          <div className="w-full flex flex-col md:flex-row gap-2 lg:justify-end justify-between">
+          {/* <div className="w-full flex flex-col md:flex-row gap-2 lg:justify-end justify-between">
             <InfoBlock left="Blocks" right="1,202,512" />
             <InfoBlock left="Txs" right="1,202,512" />
             <InfoBlock left="Classes" right="1,202,512" />
             <InfoBlock left="Contracts" right="1,202,512" />
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

@@ -21,20 +21,7 @@ import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
 import { useScreen } from "@/shared/hooks/useScreen";
-
-type TransactionTableData = {
-  hash: string;
-  type: "INVOKE" | "L1_HANDLER" | "DECLARE" | "DEPLOY" | "DEPLOY_ACCOUNT";
-  status: string;
-  hash_display: string;
-};
-
-type EventTableData = {
-  id: string;
-  txn_hash: string;
-  from: string;
-  age: string;
-};
+import { TransactionTableData, EventTableData } from "@/types/types";
 
 const columnHelper = createColumnHelper<TransactionTableData>();
 

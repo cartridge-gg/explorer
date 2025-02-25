@@ -8,7 +8,14 @@ import { useCallback, useEffect } from "react";
 import { useState } from "react";
 import { events } from "starknet";
 import { CallData } from "starknet";
-import { convertToHex } from "@/shared/utils/rpc_utils";
+import { convertValue } from "@/shared/utils/rpc_utils";
+import {
+  EventDataItem,
+  DisplayFormatTypes,
+  StarknetTransactionReceipt,
+} from "@/types/types";
+
+const DisplayFormat = ["decimal", "hex", "string"] as const;
 
 export default function EventDetails() {
   const { eventId } = useParams<{
@@ -17,9 +24,12 @@ export default function EventDetails() {
 
   const [txnHash, setTxnHash] = useState<string | null>(null);
   const [eventIndex, setEventIndex] = useState<string | null>(null);
-  const [eventData, setEventData] = useState([]);
-  const [eventKeys, setEventKeys] = useState([]);
+  const [eventData, setEventData] = useState<EventDataItem[]>([]);
+  const [eventKeys, setEventKeys] = useState<EventDataItem[]>([]);
   const [event, setEvent] = useState<Event | null>(null);
+  const [displayFormats, setDisplayFormats] = useState<
+    Record<string, DisplayFormatTypes>
+  >({});
 
   useEffect(() => {
     const [currentTxnHash, currentEventIndex] = eventId?.split("-") ?? [];
@@ -101,23 +111,21 @@ export default function EventDetails() {
       }
     });
 
-    const result_key: { input: string; input_type: string; data: string }[] =
-      [];
-    const result_data: { input: string; input_type: string; data: string }[] =
-      [];
+    const result_key: EventDataItem[] = [];
+    const result_data: EventDataItem[] = [];
     Object.keys(eventDataMap[eventDataKey[0]])?.forEach((key) => {
       if (eventKeyType[key]) {
-        const finalData = {
+        const finalData: EventDataItem = {
           input: key,
           input_type: eventKeyType[key],
-          data: convertToHex(eventDataMap[eventDataKey[0]][key]),
+          data: convertValue(eventDataMap[eventDataKey[0]][key])?.hex,
         };
         result_key.push(finalData);
       } else {
-        const finalData = {
+        const finalData: EventDataItem = {
           input: key,
           input_type: eventDataType[key],
-          data: convertToHex(eventDataMap[eventDataKey[0]][key]),
+          data: convertValue(eventDataMap[eventDataKey[0]][key])?.hex,
         };
         result_data.push(finalData);
       }
@@ -135,6 +143,13 @@ export default function EventDetails() {
   useEffect(() => {
     fetchEventDetails();
   }, [fetchEventDetails, txnHash, eventIndex]);
+
+  const handleFormatChange = (key: string, format: DisplayFormatTypes) => {
+    setDisplayFormats((prev) => ({
+      ...prev,
+      [key]: format,
+    }));
+  };
 
   return (
     <div className="flex flex-col w-full gap-8 px-2 py-4">
@@ -244,6 +259,21 @@ export default function EventDetails() {
                 <div className="flex flex-col w-full gap-4">
                   <div className="flex flex-row justify-between items-center px-2 py-2 uppercase">
                     <h1 className="text-black text-lg font-bold">Keys</h1>
+                    <div className="flex gap-2">
+                      {DisplayFormat.map((format) => (
+                        <button
+                          key={format}
+                          className={`px-2 py-1 text-xs ${
+                            (displayFormats["keys"] ?? "hex") === format
+                              ? "bg-[#4A4A4A] text-white"
+                              : "bg-gray-200"
+                          }`}
+                          onClick={() => handleFormatChange("keys", format)}
+                        >
+                          {format}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="overflow-x-auto">
@@ -257,6 +287,7 @@ export default function EventDetails() {
                       </thead>
                       <tbody>
                         {eventKeys?.map((key, index) => {
+                          const format = displayFormats["keys"] ?? "hex";
                           return (
                             <tr
                               key={index}
@@ -267,7 +298,12 @@ export default function EventDetails() {
                                 {key.input_type}
                               </td>
                               <td className="px-4 py-2 break-all">
-                                {key.data}
+                                {(() => {
+                                  const converted = convertValue(key.data);
+                                  return converted
+                                    ? converted[format]
+                                    : key.data;
+                                })()}
                               </td>
                             </tr>
                           );
@@ -281,6 +317,21 @@ export default function EventDetails() {
                 <div className="flex flex-col w-full gap-4">
                   <div className="flex flex-row justify-between items-center px-2 py-2 uppercase">
                     <h1 className="text-black text-lg font-bold">Data</h1>
+                    <div className="flex gap-2">
+                      {DisplayFormat.map((format) => (
+                        <button
+                          key={format}
+                          className={`px-2 py-1 text-xs ${
+                            (displayFormats["data"] ?? "hex") === format
+                              ? "bg-[#4A4A4A] text-white"
+                              : "bg-gray-200"
+                          }`}
+                          onClick={() => handleFormatChange("data", format)}
+                        >
+                          {format}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="overflow-x-auto">
@@ -293,18 +344,24 @@ export default function EventDetails() {
                         </tr>
                       </thead>
                       <tbody>
-                        {eventData?.map((key, index) => {
+                        {eventData?.map((item, index) => {
+                          const format = displayFormats["data"] ?? "hex";
                           return (
                             <tr
                               key={index}
                               className="border-b border-[#8E8E8E] border-dashed"
                             >
-                              <td className="px-4 py-2">{key.input}</td>
+                              <td className="px-4 py-2">{item.input}</td>
                               <td className="px-4 py-2 break-all">
-                                {key.input_type}
+                                {item.input_type}
                               </td>
                               <td className="px-4 py-2 break-all">
-                                {key.data}
+                                {(() => {
+                                  const converted = convertValue(item.data);
+                                  return converted
+                                    ? converted[format]
+                                    : item.data;
+                                })()}
                               </td>
                             </tr>
                           );
