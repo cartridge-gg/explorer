@@ -135,11 +135,12 @@ export default function SearchBar() {
       navigate(ROUTES.TRANSACTION_DETAILS.urlPath.replace(":txHash", search));
     } else if (resultType === "block") {
       navigate(ROUTES.BLOCK_DETAILS.urlPath.replace(":blockNumber", search));
-      // } else if (resultType === "contract") {
-      //   navigate(ROUTES.CONTRACT_DETAILS.urlPath.replace(":hash", search));
-      // } else if (resultType === "class") {
-      //   navigate(ROUTES.CLASS_DETAILS.urlPath.replace(":hash", search));
-      // }
+    } else if (resultType === "contract") {
+      navigate(
+        ROUTES.CONTRACT_DETAILS.urlPath.replace(":contractAddress", search)
+      );
+    } else if (resultType === "class") {
+      navigate(ROUTES.CLASS_HASH_DETAILS.urlPath.replace(":classHash", search));
     }
 
     setIsDropdownOpen(false);

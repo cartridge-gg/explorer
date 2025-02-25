@@ -1,4 +1,3 @@
-import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { formatNumber } from "@/shared/utils/number";
 import {
@@ -21,6 +20,7 @@ import dayjs from "dayjs";
 import { cairo, CallData, events } from "starknet";
 import { decodeCalldata, getEventName } from "@/shared/utils/rpc_utils";
 import CalldataDisplay from "./components/CalldataDisplay";
+import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
 
 const DataTabs = [
   "Calldata",
@@ -31,44 +31,47 @@ const DataTabs = [
   "Storage Diffs",
 ];
 
-type EventData = {
+interface ParsedEvent {
+  transaction_hash: string;
+  [key: string]: string | number;
+}
+
+interface EventData {
   id: string;
   from: string;
-  block: number;
   event_name: string;
-};
+  block: number;
+  data?: ParsedEvent;
+}
+
+interface StorageDiffData {
+  contract_address: string;
+  key: string;
+  value: string;
+  block_number: number;
+}
 
 const eventColumnHelper = createColumnHelper<EventData>();
 const events_columns = [
   eventColumnHelper.accessor("id", {
     header: () => "id",
     cell: (info) => info.getValue(),
-    footer: (info) => info.column.id,
   }),
   eventColumnHelper.accessor("from", {
     header: "from",
-    cell: (info) => {
-      const date = Number(info.getValue());
-      return date;
-    },
+    cell: (info) => info.getValue(),
   }),
   eventColumnHelper.accessor("event_name", {
     header: "Event Name",
-    cell: (info) => {
-      const date = Number(info.getValue());
-      return date;
-    },
+    cell: (info) => info.getValue(),
   }),
   eventColumnHelper.accessor("block", {
     header: "block",
-    cell: (info) => {
-      const date = Number(info.getValue());
-      return date;
-    },
+    cell: (info) => formatNumber(info.getValue()),
   }),
 ];
 
-const storageDiffColumnHelper = createColumnHelper<any>();
+const storageDiffColumnHelper = createColumnHelper<StorageDiffData>();
 const storage_diff_columns = [
   storageDiffColumnHelper.accessor("contract_address", {
     header: () => "Contract Address",
@@ -120,8 +123,10 @@ export default function TransactionDetails() {
     steps: 0,
   });
 
-  const [eventsData, setEventsData] = useState([]);
-  const [callData, setCallData] = useState([]);
+  const [eventsData, setEventsData] = useState<EventData[]>([]);
+  const [callData, setCallData] = useState<
+    { contract: string; selector: string; args: string[] }[]
+  >([]);
   const [eventsPagination, setEventsPagination] = useState({
     pageIndex: 0,
     pageSize: 20,
@@ -155,54 +160,92 @@ export default function TransactionDetails() {
   });
 
   const processTransactionReceipt = useCallback(async () => {
-    // check if events are already processed
-    if (eventsData.length > 0) return;
+    // Check if events are already processed
+    if (eventsData.length > 0 || !TransactionReceipt?.events) return;
 
-    // process events
-    if (TransactionReceipt?.events) {
-      TransactionReceipt.events.forEach(async (event, event_index) => {
-        const contract_abi = await RPC_PROVIDER.getClassAt(
-          event.from_address
-        ).then((res) => res.abi);
+    try {
+      // Group events by contract address while preserving original indices
+      const eventsByContract: Record<
+        string,
+        Array<{ event: EventData; originalIndex: number }>
+      > = TransactionReceipt?.events.reduce((acc, event, originalIndex) => {
+        const address = event.from_address;
+        if (!acc[address]) {
+          acc[address] = [];
+        }
+        acc[address].push({ event, originalIndex });
+        return acc;
+      }, {});
 
-        const eventsC = await RPC_PROVIDER.getEvents({
-          address: event.from_address,
-          chunk_size: 100,
-          keys: [event.keys],
-          from_block: {
-            block_number: TransactionReceipt.block_number,
-          },
-          to_block: { block_number: TransactionReceipt.block_number },
-        });
-        const abiEvents = events.getAbiEvents(contract_abi);
-        const abiStructs = CallData.getAbiStruct(contract_abi);
-        const abiEnums = CallData.getAbiEnum(contract_abi);
-        const parsedEvent = events.parseEvents(
-          eventsC.events,
-          abiEvents,
-          abiStructs,
-          abiEnums
-        );
+      // Process events for each contract
+      const processedEventsArrays = await Promise.all(
+        Object.entries(eventsByContract).map(
+          async ([address, eventEntries]) => {
+            // Fetch contract ABI once per contract
+            const { abi: contract_abi } = await RPC_PROVIDER.getClassAt(
+              address
+            );
 
-        const eventDataMap = parsedEvent.filter(
-          (e) => e.transaction_hash === TransactionReceipt.transaction_hash
-        );
+            // Get all events for this contract in one call
+            const eventsResponse = await RPC_PROVIDER.getEvents({
+              address,
+              chunk_size: 100,
+              keys: [eventEntries.map(({ event }) => event.keys).flat()],
+              from_block: { block_number: TransactionReceipt.block_number },
+              to_block: { block_number: TransactionReceipt.block_number },
+            });
 
-        // get the key of the event obj which includes "::"
-        const eventKey =
-          Object.keys(eventDataMap[0]).find((key) => key.includes("::")) ?? "";
-        setEventsData((prev) => {
-          return [
-            ...prev,
-            {
-              id: `${TransactionReceipt.transaction_hash}-${event_index}`,
-              from: truncateString(event.from_address),
-              event_name: getEventName(eventKey),
-              block: TransactionReceipt.block_number,
-            },
-          ];
-        });
-      });
+            // Parse events once per contract
+            const abiEvents = events.getAbiEvents(contract_abi);
+            const abiStructs = CallData.getAbiStruct(contract_abi);
+            const abiEnums = CallData.getAbiEnum(contract_abi);
+
+            const parsedEvents = events.parseEvents(
+              eventsResponse.events,
+              abiEvents,
+              abiStructs,
+              abiEnums
+            );
+
+            // Map events while preserving original indices
+            return eventEntries?.map(({ _, originalIndex }) => {
+              const matchingParsedEvent = parsedEvents.find(
+                (e: ParsedEvent) =>
+                  e.transaction_hash === TransactionReceipt.transaction_hash
+              );
+
+              const eventKey = matchingParsedEvent
+                ? Object.keys(matchingParsedEvent).find((key) =>
+                    key.includes("::")
+                  )
+                : "";
+
+              return {
+                originalIndex,
+                eventData: {
+                  id: `${TransactionReceipt?.transaction_hash}-${originalIndex}`,
+                  from: address,
+                  event_name: getEventName(eventKey || ""),
+                  block: TransactionReceipt?.block_number,
+                  data: matchingParsedEvent,
+                },
+              };
+            });
+          }
+        )
+      );
+
+      // Flatten and sort by original index to maintain event order
+      const processedEvents = processedEventsArrays
+        .flat()
+        .sort((a, b) => b.originalIndex - a.originalIndex)
+        .map(({ eventData }) => eventData);
+
+      // Update state once with all processed events in correct order
+      setEventsData(processedEvents);
+    } catch (error) {
+      console.error("Error processing transaction events:", error);
+      // Optionally set an error state here
     }
 
     const receipt = TransactionReceipt?.execution_resources;
@@ -285,9 +328,7 @@ export default function TransactionDetails() {
   // sort events data by id
 
   const eventsTable = useReactTable({
-    data: eventsData.sort((a, b) => {
-      return b.id.localeCompare(a.id);
-    }),
+    data: eventsData,
     columns: events_columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
