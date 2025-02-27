@@ -57,7 +57,7 @@ export default function WalletConnectModal({
             const name = connector.id || connector.name || "Unknown";
             const displayName =
               name === "controller"
-                ? "Cartridge Controller"
+                ? "Controller"
                 : name === "argentX"
                 ? "Argent X"
                 : name === "braavos"
@@ -102,7 +102,7 @@ export default function WalletConnectModal({
               onClick={() => handleConnect(cartridge_controller)}
               className="text-blue-500 hover:underline cursor-pointer"
             >
-              Create a Cartridge wallet
+              Create a Cartridge Controller
             </span>
           </p>
         </div>
