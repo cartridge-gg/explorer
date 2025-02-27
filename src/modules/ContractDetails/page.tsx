@@ -6,13 +6,7 @@ import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Contract } from "starknet";
 import { convertValue } from "@/shared/utils/rpc_utils";
 import { FunctionResult, DisplayFormatTypes } from "@/types/types";
-import {
-  Connector,
-  useAccount,
-  useConnect,
-  useDisconnect,
-  useContract,
-} from "@starknet-react/core";
+import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 import WalletConnectModal from "@/shared/components/wallet_connect/WalletConnectModal";
 
 const DataTabs = [
@@ -183,30 +177,6 @@ export default function ContractDetails() {
           data: null,
         },
       }));
-    }
-  };
-
-  const connectWallet = async () => {
-    try {
-      connect({ connector: connectors as Connector[] });
-    } catch (error) {
-      console.error("Error connecting wallet:", error);
-      setFunctionResults((prev) => ({
-        ...prev,
-        wallet: {
-          loading: false,
-          error: "Failed to connect wallet",
-          data: null,
-        },
-      }));
-    }
-  };
-
-  const disconnectWallet = async () => {
-    try {
-      await disconnect();
-    } catch (error) {
-      console.error("Error disconnecting wallet:", error);
     }
   };
 
