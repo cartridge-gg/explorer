@@ -3,10 +3,17 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { useCallback, useEffect, useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
-import { Contract, Account } from "starknet";
+import { Contract } from "starknet";
 import { convertValue } from "@/shared/utils/rpc_utils";
 import { FunctionResult, DisplayFormatTypes } from "@/types/types";
-import { connect, disconnect } from "get-starknet";
+import {
+  Connector,
+  useAccount,
+  useConnect,
+  useDisconnect,
+  useContract,
+} from "@starknet-react/core";
+import WalletConnectModal from "@/shared/components/wallet_connect/WalletConnectModal";
 
 const DataTabs = [
   // "Transactions",
@@ -27,6 +34,10 @@ interface FunctionInput {
 const DisplayFormat = ["decimal", "hex", "string"];
 
 export default function ContractDetails() {
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
+  const { address, account, status } = useAccount();
+
   const { contractAddress } = useParams<{
     contractAddress: string;
   }>();
@@ -34,9 +45,6 @@ export default function ContractDetails() {
   const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
   const [classHash, setClassHash] = useState<string | null>(null);
   const [contract, setContract] = useState<Contract | null>(null);
-  const [account, setAccount] = useState<Account | null>(null);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-
   const [readFunctions, setReadFunctions] = useState<
     {
       name: string;
@@ -64,6 +72,8 @@ export default function ContractDetails() {
   const [displayFormats, setDisplayFormats] = useState<
     Record<string, DisplayFormatTypes>
   >({});
+
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
 
   const fetchContractDetails = useCallback(async () => {
     if (!contractAddress) return;
@@ -178,17 +188,7 @@ export default function ContractDetails() {
 
   const connectWallet = async () => {
     try {
-      const starknet = await connect();
-      if (!starknet) throw new Error("Failed to connect to wallet");
-
-      await starknet.enable();
-      const address = starknet.selectedAddress;
-      setWalletAddress(address);
-
-      // Create account instance
-      if (starknet.account) {
-        setAccount(starknet.account);
-      }
+      connect({ connector: connectors as Connector[] });
     } catch (error) {
       console.error("Error connecting wallet:", error);
       setFunctionResults((prev) => ({
@@ -205,8 +205,6 @@ export default function ContractDetails() {
   const disconnectWallet = async () => {
     try {
       await disconnect();
-      setAccount(null);
-      setWalletAddress(null);
     } catch (error) {
       console.error("Error disconnecting wallet:", error);
     }
@@ -238,15 +236,14 @@ export default function ContractDetails() {
       const inputs =
         expandedFunctions[functionName]?.map((input) => input.value) || [];
 
-      // Create a new contract instance with the connected account
-      const contractWithSigner = new Contract(
-        contract.abi,
-        contract.address,
-        account
-      );
-
-      // Execute the transaction
-      const result = await contractWithSigner.invoke(functionName, inputs);
+      // Execute the transaction using account
+      const result = await account.execute([
+        {
+          contractAddress: contract.address,
+          entrypoint: functionName,
+          calldata: inputs,
+        },
+      ]);
 
       setFunctionResults((prev) => ({
         ...prev,
@@ -527,22 +524,35 @@ export default function ContractDetails() {
                 </div>
               ) : selectedDataTab === "Write Contract" ? (
                 <div className="flex flex-col gap-4 p-4">
-                  {/* Add Wallet Connection Section */}
-                  <div className="flex justify-between items-center p-4 bg-gray-50 border border-[#8E8E8E]">
+                  {/* Wallet Connection Section */}
+                  <div className="flex justify-between items-center p-4 bg-gray-50 border border-[#8E8E8E] mb-4">
                     <div className="flex flex-col">
                       <p className="text-sm font-medium">Wallet Status</p>
                       <p className="text-sm">
-                        {walletAddress
-                          ? `Connected: ${truncateString(walletAddress)}`
+                        {status === "connected" && address
+                          ? `Connected: ${truncateString(address)}`
+                          : status === "connecting"
+                          ? "Connecting..."
                           : "Not Connected"}
                       </p>
                     </div>
-                    <button
-                      onClick={walletAddress ? disconnectWallet : connectWallet}
-                      className="px-4 py-2 bg-[#4A4A4A] hover:bg-[#6E6E6E] text-white"
-                    >
-                      {walletAddress ? "Disconnect" : "Connect Wallet"}
-                    </button>
+                    <div className="flex gap-2">
+                      {status !== "connected" ? (
+                        <button
+                          onClick={() => setIsWalletModalOpen(true)}
+                          className="px-4 py-2 bg-[#4A4A4A] hover:bg-[#6E6E6E] text-white"
+                        >
+                          Connect Wallet
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => disconnect()}
+                          className="px-4 py-2 bg-[#4A4A4A] hover:bg-[#6E6E6E] text-white"
+                        >
+                          Disconnect
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {writeFunctions.map((func, index) => (
@@ -616,7 +626,7 @@ export default function ContractDetails() {
 
                             <button
                               className={`px-4 py-2 mt-2 w-fit ${
-                                !walletAddress
+                                !address
                                   ? "bg-gray-400 cursor-not-allowed"
                                   : functionResults[func.name]?.loading
                                   ? "bg-gray-400 cursor-not-allowed"
@@ -624,11 +634,10 @@ export default function ContractDetails() {
                               } text-white`}
                               onClick={() => handleWriteFunctionCall(func.name)}
                               disabled={
-                                !walletAddress ||
-                                functionResults[func.name]?.loading
+                                !address || functionResults[func.name]?.loading
                               }
                             >
-                              {!walletAddress
+                              {!address
                                 ? "Connect Wallet to Execute"
                                 : functionResults[func.name]?.loading
                                 ? "Executing..."
@@ -700,6 +709,12 @@ export default function ContractDetails() {
           </div>
         </div>
       </div>
+
+      {/* Wallet Connection Modal */}
+      <WalletConnectModal
+        isOpen={isWalletModalOpen}
+        onClose={() => setIsWalletModalOpen(false)}
+      />
     </div>
   );
 }
