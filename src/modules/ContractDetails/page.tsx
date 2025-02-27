@@ -5,8 +5,8 @@ import { useCallback, useEffect, useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Contract, Account } from "starknet";
 import { convertValue } from "@/shared/utils/rpc_utils";
-import { connect, disconnect } from "get-starknet";
 import { FunctionResult, DisplayFormatTypes } from "@/types/types";
+import { connect, disconnect } from "get-starknet";
 
 const DataTabs = [
   // "Transactions",
@@ -134,10 +134,6 @@ export default function ContractDetails() {
         [functionName]: functionInputs,
       };
     });
-  };
-
-  const useFunctionCall = <T,>(func: () => Promise<T>): FunctionResult<T> => {
-    // ... existing code ...
   };
 
   const handleFunctionCall = async (functionName: string) => {
