@@ -12,7 +12,7 @@ interface WalletConnectModalProps {
 
 // Map wallet names to their SVG logo paths
 const walletLogos: Record<string, string> = {
-  "Cartridge Controller": "/controller.svg",
+  Controller: "/controller.svg",
   "Argent X": "/argent.svg",
   Braavos: "/braavos.svg",
   "Argent Web Wallet": "/argent.svg",
