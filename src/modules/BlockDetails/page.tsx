@@ -22,6 +22,12 @@ import dayjs from "dayjs";
 import { cairo } from "starknet";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { TransactionTableData, EventTableData } from "@/types/types";
+import { Breadcrumb } from "@/shared/components/breadcrums";
+import { BreadcrumbList } from "@/shared/components/breadcrums";
+import { BreadcrumbLink } from "@/shared/components/breadcrums";
+import { BreadcrumbSeparator } from "@/shared/components/breadcrums";
+import { BreadcrumbItem } from "@/shared/components/breadcrums";
+import { BreadcrumbPage } from "@/shared/components/breadcrums";
 
 const columnHelper = createColumnHelper<TransactionTableData>();
 
@@ -237,9 +243,33 @@ export default function BlockDetails() {
   return (
     <div className="flex flex-col w-full gap-8 px-2 py-4">
       <div className="flex flex-col w-full gap-4">
-        <div>
-          <h2>. / explrr / blocks / #{blockNumber}</h2>
-        </div>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink className="" href="/">
+                .
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink className=" text-sm" href="/">
+                explrr
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink className=" text-sm" href="/blocks">
+                blocks
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className=" text-sm">
+                {blockNumber}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
         <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
           <h1 className="text-white">Blocks</h1>
@@ -312,7 +342,9 @@ export default function BlockDetails() {
               className="flex flex-col h-fit gap-4 p-4 border-[#8E8E8E] border-l-4 border-t border-r"
             >
               <div className="flex flex-col text-sm  gap-1">
-                <p className=" w-fit font-bold text-black">GAS PRICE:</p>
+                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
+                  GAS PRICE
+                </p>
                 <p>
                   {BlockReceipt?.l1_gas_price?.price_in_fri
                     ? formatNumber(
@@ -325,7 +357,9 @@ export default function BlockDetails() {
                 </p>
               </div>
               <div className="flex flex-col text-sm gap-1">
-                <p className=" w-fit font-bold text-black">DATA GAS PRICE:</p>
+                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
+                  DATA GAS PRICE
+                </p>
                 <p>
                   {BlockReceipt?.l1_data_gas_price?.price_in_fri
                     ? formatNumber(
@@ -350,7 +384,7 @@ export default function BlockDetails() {
               <div className="flex flex-col text-sm gap-4 w-full">
                 <div className="flex flex-row w-full text-center">
                   <div className=" flex flex-row w-full">
-                    <div className=" w-full block bg-[#8E8E8E] py-2">
+                    <div className=" w-full block bg-[#4A4A4A] py-2">
                       <p className=" text-white">GAS</p>
                     </div>
                     <div className=" w-full block py-2 border border-[#DBDBDB]">
@@ -358,7 +392,7 @@ export default function BlockDetails() {
                     </div>
                   </div>
                   <div className=" flex flex-row w-full">
-                    <div className=" w-full block bg-[#8E8E8E] py-2">
+                    <div className=" w-full block bg-[#4A4A4A] py-2">
                       <p className=" text-white">DA GAS</p>
                     </div>
                     <div className=" w-full block py-2 border border-[#DBDBDB]">
@@ -368,7 +402,7 @@ export default function BlockDetails() {
                 </div>
                 <div className=" w-full bg-[#8E8E8E] h-[1px]" />
                 <div className=" flex w-full flex-col text-center">
-                  <div className=" w-full block bg-[#8E8E8E] py-2">
+                  <div className=" w-full block bg-[#4A4A4A] py-2">
                     <p className=" text-white">STEPS</p>
                   </div>
                   <div className=" w-full block py-2 border border-[#DBDBDB]">

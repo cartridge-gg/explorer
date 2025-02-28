@@ -1,11 +1,14 @@
+import { ROUTES } from "@/constants/routes";
 import { truncateString } from "@/shared/utils/string";
 import { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function StorageDiffTable(props: {
   table: any;
   pagination: any;
   setPagination: any;
 }) {
+  const navigate = useNavigate();
   const { table, pagination, setPagination } = props;
 
   const handlePreviousPage = useCallback(() => {
@@ -39,7 +42,17 @@ export default function StorageDiffTable(props: {
           {table.getRowModel().rows.map((row, index) => (
             <tr key={row.id} className="text-xs">
               <td className="p-2 cursor-pointer">
-                <div className="flex items-center overflow-hidden">
+                <div
+                  onClick={() =>
+                    navigate(
+                      `${ROUTES.CONTRACT_DETAILS.urlPath.replace(
+                        ":contractAddress",
+                        row.original.contract_address
+                      )}`
+                    )
+                  }
+                  className="flex items-center overflow-hidden"
+                >
                   <span className="whitespace-nowrap hover:text-blue-400 transition-all">
                     {truncateString(row.original.contract_address, 10)}
                   </span>
@@ -48,9 +61,7 @@ export default function StorageDiffTable(props: {
 
               <td className="p-2 cursor-pointer">
                 <div className="flex items-center overflow-hidden">
-                  <span className="hover:text-blue-400 transition-all">
-                    {truncateString(row.original.key, 10)}
-                  </span>
+                  <span>{truncateString(row.original.key, 10)}</span>
                 </div>
               </td>
 
@@ -63,8 +74,18 @@ export default function StorageDiffTable(props: {
               </td>
 
               <td className=" p-2 text-center">
-                <div className="flex items-center justify-end">
-                  <span className="uppercase text-right truncate">
+                <div
+                  onClick={() =>
+                    navigate(
+                      `${ROUTES.BLOCK_DETAILS.urlPath.replace(
+                        ":blockNumber",
+                        row.original.block_number
+                      )}`
+                    )
+                  }
+                  className="flex items-center justify-end"
+                >
+                  <span className="uppercase text-right truncate hover:text-blue-400 transition-all cursor-pointer">
                     {row.original.block_number}
                   </span>
                 </div>

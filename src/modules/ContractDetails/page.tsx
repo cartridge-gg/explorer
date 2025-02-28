@@ -7,7 +7,15 @@ import { Contract } from "starknet";
 import { convertValue } from "@/shared/utils/rpc_utils";
 import { FunctionResult, DisplayFormatTypes } from "@/types/types";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import WalletConnectModal from "@/shared/components/wallet_connect/WalletConnectModal";
+import WalletConnectModal from "@/shared/components/wallet_connect";
+import { BreadcrumbPage, DropdownMenu } from "@cartridge/ui-next";
+import {
+  Breadcrumb,
+  BreadcrumbLink,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/shared/components/breadcrums";
 
 const DataTabs = [
   // "Transactions",
@@ -28,7 +36,6 @@ interface FunctionInput {
 const DisplayFormat = ["decimal", "hex", "string"];
 
 export default function ContractDetails() {
-  const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { address, account, status } = useAccount();
 
@@ -248,14 +255,35 @@ export default function ContractDetails() {
   return (
     <div className="flex flex-col w-full gap-8 px-2 py-4">
       <div className="flex flex-col w-full gap-4">
-        <div>
-          <h2>
-            . / explrr / contracts /{" "}
-            {isMobile && contractAddress
-              ? truncateString(contractAddress)
-              : contractAddress}
-          </h2>
-        </div>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink className="" href="/">
+                .
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink className=" text-sm" href="/">
+                explrr
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink className=" text-sm" href="/">
+                contracts
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className=" text-sm">
+                {isMobile && contractAddress
+                  ? truncateString(contractAddress)
+                  : contractAddress}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
         <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
           <h1 className="text-white">Contract</h1>
