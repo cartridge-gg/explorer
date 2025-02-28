@@ -76,7 +76,17 @@ export default function EventsTable(props: {
               </td>
 
               <td className=" p-2 w-1/3 text-center">
-                <div className="flex w-full items-center justify-end">
+                <div
+                  onClick={() =>
+                    navigate(
+                      `${ROUTES.CONTRACT_DETAILS.urlPath.replace(
+                        ":contractAddress",
+                        row.original.from
+                      )}`
+                    )
+                  }
+                  className="flex w-full items-center justify-end cursor-pointer hover:text-blue-400 transition-all"
+                >
                   <span className="uppercase text-right truncate">
                     {truncateString(row.original.from, 10)}
                   </span>
