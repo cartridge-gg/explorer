@@ -5,8 +5,6 @@ import {
   StarknetConfig,
   jsonRpcProvider,
   useInjectedConnectors,
-  argent,
-  braavos,
 } from "@starknet-react/core";
 import { Connector, InjectedConnector } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
@@ -14,10 +12,12 @@ import { constants } from "starknet";
 import { WebWalletConnector } from "starknetkit/webwallet";
 
 // TODO: not sure why this condition works when reversed
-const CHAIN_ID = import.meta.env.VITE_IS_TESTNET
-  ? constants.StarknetChainId.SN_MAIN
-  : constants.StarknetChainId.SN_SEPOLIA;
+const CHAIN_ID =
+  import.meta.env.VITE_IS_TESTNET === "true"
+    ? constants.StarknetChainId.SN_SEPOLIA
+    : constants.StarknetChainId.SN_MAIN;
 
+console.log(typeof import.meta.env.VITE_IS_TESTNET);
 export const cartridge_controller = new ControllerConnector({
   chains: [
     {
@@ -47,7 +47,7 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <StarknetConfig
-      chains={[import.meta.env.VITE_IS_TESTNET ? sepolia : mainnet]}
+      chains={[import.meta.env.VITE_IS_TESTNET === "true" ? sepolia : mainnet]}
       provider={providers}
       connectors={connectors}
     >
