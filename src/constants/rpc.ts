@@ -10,3 +10,6 @@ export const EXECUTION_RESOURCES_KEY_MAP = {
   memory_holes: "memory_holes",
   ec_op_builtin_applications: "ec_op",
 };
+
+export const RPC_URL = window.RPC_URL ?? import.meta.env.VITE_RPC_URL;
+export const CHAIN_ID = window.CHAIN_ID ?? import.meta.env.VITE_CHAIN_ID;
