@@ -11,20 +11,27 @@ import ControllerConnector from "@cartridge/connector/controller";
 import { WebWalletConnector } from "starknetkit/webwallet";
 import { CHAIN_ID, RPC_URL } from "@/constants/rpc";
 
-console.log(typeof import.meta.env.VITE_IS_TESTNET);
-export const cartridge_controller = new ControllerConnector({
-  chains: [
-    {
-      rpcUrl: RPC_URL,
-    },
-  ],
-  defaultChainId: CHAIN_ID,
-});
+const ENABLE_CONTROLLER = import.meta.env.VITE_ENABLE_CONTROLLER === "true";
 
-const connectors = [cartridge_controller];
+export const cartridge_controller = ENABLE_CONTROLLER
+  ? new ControllerConnector({
+      chains: [
+        {
+          rpcUrl: RPC_URL,
+        },
+      ],
+      defaultChainId: CHAIN_ID,
+    })
+  : null;
+
+const connectors = ENABLE_CONTROLLER
+  ? [cartridge_controller].filter(
+      (connector): connector is ControllerConnector => connector !== null
+    )
+  : [];
 
 export const availableConnectors: Connector[] = [
-  connectors[0],
+  ...connectors,
   new InjectedConnector({ options: { id: "argentX", name: "Argent X" } }),
   new InjectedConnector({ options: { id: "braavos", name: "Braavos" } }),
   new WebWalletConnector({ url: "https://web.argent.xyz" }),
