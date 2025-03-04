@@ -11,7 +11,8 @@ import ControllerConnector from "@cartridge/connector/controller";
 import { WebWalletConnector } from "starknetkit/webwallet";
 import { CHAIN_ID, RPC_URL } from "@/constants/rpc";
 
-const ENABLE_CONTROLLER = import.meta.env.VITE_ENABLE_CONTROLLER === "true";
+const ENABLE_CONTROLLER =
+  window.ENABLE_CONTROLLER ?? import.meta.env.VITE_ENABLE_CONTROLLER === "true";
 
 export const cartridge_controller = ENABLE_CONTROLLER
   ? new ControllerConnector({
