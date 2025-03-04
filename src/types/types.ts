@@ -98,6 +98,7 @@ export interface StarknetTransactionReceipt {
 declare global {
   interface Window {
     RPC_URL?: string;
+    CHAIN_ID?: string;
   }
 }
 
