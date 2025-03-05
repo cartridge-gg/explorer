@@ -54,6 +54,7 @@ export type TransactionType =
   | "DEPLOY_ACCOUNT";
 
 export type TransactionTableData = {
+  id: string;
   hash: string;
   type: TransactionType;
   status: string;

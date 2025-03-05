@@ -1,5 +1,5 @@
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
-import { formatNumber } from "@/shared/utils/number";
+import { formatNumber, padNumber } from "@/shared/utils/number";
 import {
   formatSnakeCaseToDisplayValue,
   truncateString,
@@ -14,74 +14,37 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import React, { useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import TransactionsTable from "./components/TransactionsTable";
-import EventsTable from "./components/EventsTable";
+import { useNavigate, useParams } from "react-router-dom";
 import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { TransactionTableData, EventTableData } from "@/types/types";
-import { Breadcrumb } from "@/shared/components/breadcrums";
-import { BreadcrumbList } from "@/shared/components/breadcrums";
-import { BreadcrumbLink } from "@/shared/components/breadcrums";
-import { BreadcrumbSeparator } from "@/shared/components/breadcrums";
-import { BreadcrumbItem } from "@/shared/components/breadcrums";
-import { BreadcrumbPage } from "@/shared/components/breadcrums";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  BreadcrumbLink,
+} from "@/shared/components/breadcrumbs";
+import {
+  DataTable,
+  TableCell,
+  TableHead,
+  TableHeader,
+} from "@/shared/components/dataTable";
+import { ROUTES } from "@/constants/routes";
 
 const columnHelper = createColumnHelper<TransactionTableData>();
 
-const transaction_columns: ColumnDef<TransactionTableData, any>[] = [
-  columnHelper.accessor("type", {
-    header: "Block Number",
-    cell: (info) => `#${info.renderValue()}`,
-  }),
-  columnHelper.accessor("hash_display", {
-    header: "Block Hash",
-    cell: (info) => (
-      <div className="max-w-[200px] overflow-hidden text-ellipsis">
-        {info.renderValue()}
-      </div>
-    ),
-    filterFn: (row, columnId, filterValue) => {
-      const rowValue: string = row.getValue(columnId);
-      if (filterValue === undefined || filterValue === "All") return true;
-      return rowValue.includes(filterValue.toUpperCase());
-    },
-  }),
-  columnHelper.accessor("status", {
-    header: "status",
-    cell: (info) => {
-      return info.renderValue();
-    },
-  }),
-];
-
 const eventColumnHelper = createColumnHelper<EventTableData>();
-
-const event_columns: ColumnDef<EventTableData, any>[] = [
-  eventColumnHelper.accessor("id", {
-    header: "ID",
-    cell: (info) => info.renderValue(),
-  }),
-  eventColumnHelper.accessor("txn_hash", {
-    header: "Transaction Hash",
-    cell: (info) => info.renderValue(),
-  }),
-  eventColumnHelper.accessor("from", {
-    header: "From",
-    cell: (info) => info.renderValue(),
-  }),
-  eventColumnHelper.accessor("age", {
-    header: "Age",
-    cell: (info) => info.renderValue(),
-  }),
-];
 
 const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
 const TransactionTypeTabs = ["All", "Invoke", "Deploy Account", "Declare"];
 
 export default function BlockDetails() {
+  const navigate = useNavigate();
   const { blockNumber } = useParams<{ blockNumber: string }>();
   const { isMobile } = useScreen();
   const [transactionsData, setTransactionsData] = useState<
@@ -124,6 +87,73 @@ export default function BlockDetails() {
     enabled: !!blockNumber,
   });
 
+  const navigateToTxn = useCallback(
+    (txnHash: string) => {
+      navigate(
+        `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(":txHash", txnHash)}`
+      );
+    },
+    [navigate]
+  );
+
+  const navigateToContract = useCallback(
+    (contractAddress: string) => {
+      navigate(
+        `${ROUTES.CONTRACT_DETAILS.urlPath.replace(
+          ":contractAddress",
+          contractAddress
+        )}`
+      );
+    },
+    [navigate]
+  );
+
+  const transaction_columns: ColumnDef<TransactionTableData, any>[] = [
+    columnHelper.accessor("id", {
+      header() {
+        return null;
+      },
+      cell: (info) => (
+        <TableCell className="w-1 font-bold text-left pr-4">
+          <span>#{info.renderValue()}</span>
+        </TableCell>
+      ),
+    }),
+    columnHelper.accessor("hash_display", {
+      header() {
+        return null;
+      },
+      cell: (info) => (
+        <TableCell
+          onClick={() => navigateToTxn(info.renderValue().split(" ")[0])}
+          className="w-full pr-4 flex items-center overflow-hidden hover:text-blue-400 transition-all cursor-pointer"
+        >
+          <span className="whitespace-nowrap ">
+            {isMobile
+              ? truncateString(info.renderValue(), 10)
+              : info.renderValue()}
+          </span>
+          <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
+        </TableCell>
+      ),
+      filterFn: (row, columnId, filterValue) => {
+        const rowValue: string = row.getValue(columnId);
+        if (filterValue === undefined || filterValue === "All") return true;
+        return rowValue.includes(filterValue.toUpperCase());
+      },
+    }),
+    columnHelper.accessor("status", {
+      header() {
+        return null;
+      },
+      cell: (info) => (
+        <TableCell className="w-1 text-right">
+          <span>{info.renderValue()}</span>
+        </TableCell>
+      ),
+    }),
+  ];
+
   const transaction_table = useReactTable<TransactionTableData>({
     data: transactionsData,
     columns: transaction_columns,
@@ -137,6 +167,61 @@ export default function BlockDetails() {
       },
     },
   });
+
+  const event_columns: ColumnDef<EventTableData, any>[] = [
+    eventColumnHelper.accessor("id", {
+      header() {
+        return (
+          <TableHead className="text-left">
+            <span>#</span>
+          </TableHead>
+        );
+      },
+      cell: (info) => (
+        <TableCell className="w-1 font-bold text-left pr-4">
+          <span>#{info.renderValue()}</span>
+        </TableCell>
+      ),
+    }),
+    eventColumnHelper.accessor("txn_hash", {
+      header() {
+        return (
+          <TableHead className="text-left">
+            <span>Txn Hash</span>
+          </TableHead>
+        );
+      },
+      cell: (info) => (
+        <TableCell
+          onClick={() => navigateToTxn(info.renderValue())}
+          className="w-full flex items-center overflow-hidden cursor-pointer pr-4 hover:text-blue-400 transition-all"
+        >
+          <span className="whitespace-nowrap">
+            {isMobile
+              ? truncateString(info.renderValue(), 10)
+              : info.renderValue()}
+          </span>
+          <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
+        </TableCell>
+      ),
+    }),
+    eventColumnHelper.accessor("from", {
+      header() {
+        return (
+          <TableHead className="text-right">
+            <span>From Address</span>
+          </TableHead>
+        );
+      },
+      cell: (info) => (
+        <TableCell className="w-1 cursor-pointer hover:text-blue-400 transition-all text-right">
+          <span onClick={() => navigateToContract(info.renderValue())}>
+            {truncateString(info.renderValue())}
+          </span>
+        </TableCell>
+      ),
+    }),
+  ];
 
   const events_table = useReactTable({
     data: eventsData,
@@ -155,6 +240,7 @@ export default function BlockDetails() {
     if (!transactions) return;
 
     const transactions_table_data: {
+      id: string;
       hash_display: string;
       type: string;
       status: string;
@@ -171,6 +257,7 @@ export default function BlockDetails() {
                   return [
                     ...prev,
                     {
+                      id: padNumber(prev.length + 1),
                       txn_hash: tx.transaction_hash,
                       from: event.from_address,
                     },
@@ -206,6 +293,7 @@ export default function BlockDetails() {
 
             // process info for transactions table
             transactions_table_data.push({
+              id: padNumber(transactions_table_data.length + 1),
               hash_display: `${
                 tx.transaction_hash
               } ( ${formatSnakeCaseToDisplayValue(tx.type)} )`,
@@ -492,13 +580,13 @@ export default function BlockDetails() {
 
             <div className=" h-full pb-2 w-full">
               {selectedDataTab === "Transactions" ? (
-                <TransactionsTable
+                <DataTable
                   table={transaction_table}
                   pagination={transactionsPagination}
                   setPagination={setTransactionsPagination}
                 />
               ) : selectedDataTab === "Events" ? (
-                <EventsTable
+                <DataTable
                   table={events_table}
                   pagination={eventsPagination}
                   setPagination={setEventsPagination}

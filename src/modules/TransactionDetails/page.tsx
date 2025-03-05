@@ -12,21 +12,23 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import EventsTable from "./components/EventsTable";
-import StorageDiffTable from "./components/StorageDiffTable";
+import { useNavigate, useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import dayjs from "dayjs";
 import { cairo, CallData, events } from "starknet";
 import { decodeCalldata, getEventName } from "@/shared/utils/rpc_utils";
 import CalldataDisplay from "./components/CalldataDisplay";
 import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
-import { Breadcrumb } from "@/shared/components/breadcrums";
-import { BreadcrumbList } from "@/shared/components/breadcrums";
-import { BreadcrumbPage } from "@/shared/components/breadcrums";
-import { BreadcrumbSeparator } from "@/shared/components/breadcrums";
-import { BreadcrumbItem } from "@/shared/components/breadcrums";
-import { BreadcrumbLink } from "@/shared/components/breadcrums";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  BreadcrumbItem,
+  BreadcrumbLink,
+} from "@/shared/components/breadcrumbs";
+import { ROUTES } from "@/constants/routes";
+import { DataTable, TableCell, TableHead } from "@/shared/components/dataTable";
 
 const DataTabs = [
   "Calldata",
@@ -58,56 +60,11 @@ interface StorageDiffData {
 }
 
 const eventColumnHelper = createColumnHelper<EventData>();
-const events_columns = [
-  eventColumnHelper.accessor("id", {
-    header: () => "id",
-    cell: (info) => info.getValue(),
-  }),
-  eventColumnHelper.accessor("from", {
-    header: "from",
-    cell: (info) => info.getValue(),
-  }),
-  eventColumnHelper.accessor("event_name", {
-    header: "Event Name",
-    cell: (info) => info.getValue(),
-  }),
-  eventColumnHelper.accessor("block", {
-    header: "block",
-    cell: (info) => formatNumber(info.getValue()),
-  }),
-];
 
 const storageDiffColumnHelper = createColumnHelper<StorageDiffData>();
-const storage_diff_columns = [
-  storageDiffColumnHelper.accessor("contract_address", {
-    header: () => "Contract Address",
-    cell: (info) => info.getValue(),
-    footer: (info) => info.column.id,
-  }),
-  storageDiffColumnHelper.accessor("key", {
-    header: "Key",
-    cell: (info) => {
-      const date = Number(info.getValue());
-      return date;
-    },
-  }),
-  storageDiffColumnHelper.accessor("value", {
-    header: "Value",
-    cell: (info) => {
-      const date = Number(info.getValue());
-      return date;
-    },
-  }),
-  storageDiffColumnHelper.accessor("block_number", {
-    header: "Block Number",
-    cell: (info) => {
-      const date = Number(info.getValue());
-      return date;
-    },
-  }),
-];
 
 export default function TransactionDetails() {
+  const navigate = useNavigate();
   const { txHash } = useParams<{ txHash: string }>();
   const { isMobile } = useScreen();
   const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
@@ -331,6 +288,104 @@ export default function TransactionDetails() {
     processTransactionDetails();
   }, [TransactionDetails, processTransactionDetails]);
 
+  const navigateToBlock = useCallback(
+    (block_number: string) => {
+      navigate(
+        `${ROUTES.BLOCK_DETAILS.urlPath.replace(":blockNumber", block_number)}`
+      );
+    },
+    [navigate]
+  );
+
+  const navigateToContract = useCallback(
+    (contract_address: string) => {
+      navigate(
+        `${ROUTES.CONTRACT_DETAILS.urlPath.replace(
+          ":contractAddress",
+          contract_address
+        )}`
+      );
+    },
+    [navigate]
+  );
+
+  const navigateToEvent = useCallback(
+    (event_id: string) => {
+      navigate(`${ROUTES.EVENT_DETAILS.urlPath.replace(":eventId", event_id)}`);
+    },
+    [navigate]
+  );
+  const events_columns = [
+    eventColumnHelper.accessor("id", {
+      header() {
+        return (
+          <TableHead className="w-1 text-left">
+            <span>ID</span>
+          </TableHead>
+        );
+      },
+      cell: (info) => (
+        <TableCell
+          className="flex pr-4 justify-start overflow-hidden cursor-pointer text-left"
+          onClick={() => navigateToEvent(info.getValue().toString())}
+        >
+          <span className="whitespace-nowrap hover:text-blue-400 transition-all">
+            {truncateString(info.getValue())}
+          </span>
+          <span className="sm:visible hidden flex-grow border-dotted border-b border-gray-500 mx-2"></span>
+        </TableCell>
+      ),
+    }),
+    eventColumnHelper.accessor("from", {
+      header() {
+        return (
+          <TableHead className="text-left">
+            <span>From Address</span>
+          </TableHead>
+        );
+      },
+      cell: (info) => (
+        <TableCell
+          onClick={() => navigateToContract(info.getValue())}
+          className="w-1 pr-4 text-left hover:text-blue-400 transition-all cursor-pointer"
+        >
+          <span>{truncateString(info.getValue())}</span>
+        </TableCell>
+      ),
+    }),
+    eventColumnHelper.accessor("event_name", {
+      header() {
+        return (
+          <TableHead className="text-left">
+            <span>Event Name</span>
+          </TableHead>
+        );
+      },
+      cell: (info) => (
+        <TableCell className="w-1 text-left pr-4">
+          <span>{info.getValue()}</span>
+        </TableCell>
+      ),
+    }),
+    eventColumnHelper.accessor("block", {
+      header() {
+        return (
+          <TableHead className="text-right">
+            <span>Block</span>
+          </TableHead>
+        );
+      },
+      cell: (info) => (
+        <TableCell
+          onClick={() => navigateToBlock(info.getValue().toString())}
+          className="w-1 text-xs text-right py-2 cursor-pointer hover:text-blue-400 transition-all"
+        >
+          <span>{info.getValue()}</span>
+        </TableCell>
+      ),
+    }),
+  ];
+
   // sort events data by id
 
   const eventsTable = useReactTable({
@@ -345,6 +400,80 @@ export default function TransactionDetails() {
       },
     },
   });
+
+  const storage_diff_columns = [
+    storageDiffColumnHelper.accessor("contract_address", {
+      header() {
+        return (
+          <TableHead className="text-left">
+            <span>Contract Address</span>
+          </TableHead>
+        );
+      },
+      cell: (info) => (
+        <TableCell
+          onClick={() => navigateToContract(info.getValue())}
+          className="text-left cursor-pointer hover:text-blue-400 transition-all pr-4"
+        >
+          <span>{truncateString(info.getValue())}</span>
+        </TableCell>
+      ),
+    }),
+    storageDiffColumnHelper.accessor("key", {
+      header() {
+        return (
+          <TableHead className="text-left">
+            <span>Key</span>
+          </TableHead>
+        );
+      },
+      cell: (info) => {
+        const key = info.getValue();
+        return (
+          <TableCell className="text-left pr-4">
+            <span className="uppercase">{truncateString(key)}</span>
+          </TableCell>
+        );
+      },
+    }),
+    storageDiffColumnHelper.accessor("value", {
+      header() {
+        return (
+          <TableHead className="text-left">
+            <span>Value</span>
+          </TableHead>
+        );
+      },
+      cell: (info) => {
+        const value = info.getValue();
+        return (
+          <TableCell className="text-left pr-4">
+            <span>{truncateString(value)}</span>
+          </TableCell>
+        );
+      },
+    }),
+    storageDiffColumnHelper.accessor("block_number", {
+      header() {
+        return (
+          <TableHead className="text-right">
+            <span>Block Number</span>
+          </TableHead>
+        );
+      },
+      cell: (info) => {
+        const block_number = info.getValue();
+        return (
+          <TableCell
+            onClick={() => navigateToBlock(block_number.toString())}
+            className="text-right cursor-pointer hover:text-blue-400 transition-all"
+          >
+            <span>{block_number}</span>
+          </TableCell>
+        );
+      },
+    }),
+  ];
 
   const storageDiffTable = useReactTable({
     data: storageDiffData,
@@ -586,7 +715,7 @@ export default function TransactionDetails() {
               {selectedDataTab === "Calldata" ? (
                 <CalldataDisplay calldata={callData} />
               ) : selectedDataTab === "Events" ? (
-                <EventsTable
+                <DataTable
                   table={eventsTable}
                   pagination={eventsPagination}
                   setPagination={setEventsPagination}
@@ -603,7 +732,7 @@ export default function TransactionDetails() {
                   ))}
                 </ul>
               ) : selectedDataTab === "Storage Diffs" ? (
-                <StorageDiffTable
+                <DataTable
                   table={storageDiffTable}
                   pagination={storageDiffPagination}
                   setPagination={setStorageDiffPagination}

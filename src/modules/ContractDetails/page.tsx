@@ -15,7 +15,7 @@ import {
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbSeparator,
-} from "@/shared/components/breadcrums";
+} from "@/shared/components/breadcrumbs";
 
 const DataTabs = [
   // "Transactions",
