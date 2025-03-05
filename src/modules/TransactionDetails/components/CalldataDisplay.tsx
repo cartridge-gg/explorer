@@ -20,7 +20,7 @@ export default function CalldataDisplay(props: {
           key={index}
           className="w-full flex flex-col gap-4 border border-gray-300 p-4 cursor-pointer"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
             <div className=" text-md font-bold">
               CONTRACT ADDRESS : {data.contract}
             </div>
