@@ -8,7 +8,8 @@ import { convertValue } from "@/shared/utils/rpc_utils";
 import { FunctionResult, DisplayFormatTypes } from "@/types/types";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import WalletConnectModal from "@/shared/components/wallet_connect";
-import { BreadcrumbPage } from "@cartridge/ui-next";
+import { BreadcrumbPage, SpinnerIcon } from "@cartridge/ui-next";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "./tab";
 import {
   Breadcrumb,
   BreadcrumbLink,
@@ -46,9 +47,9 @@ export default function ContractDetails() {
   const { isMobile } = useScreen();
   const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
   const [classHash, setClassHash] = useState<string | null>(null);
+  const [contractABI, setContractABI] = useState<string | undefined>();
+  const [sierraProgram, setSierraProgram] = useState<string | undefined>();
   const [contract, setContract] = useState<Contract | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [contractABI, setContractABI] = useState<Record<string, any> | undefined>();
   const [readFunctions, setReadFunctions] = useState<
     {
       name: string;
@@ -88,14 +89,19 @@ export default function ContractDetails() {
     setClassHash(classHash);
 
     // process contract functions
-    const { abi: contract_abi } = await RPC_PROVIDER.getClassAt(
+    const contractClass = await RPC_PROVIDER.getClassAt(
       contractAddress
     );
+
+    setContractABI(JSON.stringify(contractClass.abi, null, 2));
+    if ('sierra_program' in contractClass) {
+      setSierraProgram(JSON.stringify(contractClass.sierra_program, null, 2));
+    }
 
     const readFuncs: typeof readFunctions = [];
     const writeFuncs: typeof writeFunctions = [];
 
-    contract_abi.forEach((item) => {
+    contractClass.abi.forEach((item) => {
       if (item.type === "interface") {
         item.items.forEach((func) => {
           if (func.type === "function") {
@@ -124,9 +130,8 @@ export default function ContractDetails() {
     setReadFunctions(readFuncs);
     setWriteFunctions(writeFuncs);
 
-    const contract = new Contract(contract_abi, contractAddress, RPC_PROVIDER);
+    const contract = new Contract(contractClass.abi, contractAddress, RPC_PROVIDER);
     setContract(contract);
-    setContractABI(contract_abi);
   }, [contractAddress]);
 
   useEffect(() => {
@@ -708,14 +713,33 @@ export default function ContractDetails() {
                     )
                   }
                   case "Code": {
-                    return (
-                      <div className="p-4">
-                        <Editor
-                          className="min-h-[80vh]"
-                          defaultLanguage="json"
-                          defaultValue={JSON.stringify(contractABI, null, 2)}
-                        />
+                    if (!contractABI || !sierraProgram) return (
+                      <div className="flex justify-center items-center h-[400px]">
+                        <SpinnerIcon className="animate-spin" />
                       </div>
+                    )
+
+                    return (
+                      <Tabs defaultValue="abi" className="p-4">
+                        <TabsList className="w-[400px]">
+                          <TabsTrigger value="abi">Contract ABI</TabsTrigger>
+                          <TabsTrigger value="sierra">Sierra Bytecode</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="abi">
+                          <Editor
+                            className="min-h-[80vh]"
+                            defaultLanguage="json"
+                            defaultValue={contractABI}
+                          />
+                        </TabsContent>
+                        <TabsContent value="sierra">
+                          <Editor
+                            className="min-h-[80vh]"
+                            defaultLanguage="javascript"
+                            defaultValue={sierraProgram}
+                          />
+                        </TabsContent>
+                      </Tabs>
                     )
                   }
                   default: {
