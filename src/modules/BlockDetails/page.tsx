@@ -333,7 +333,7 @@ export default function BlockDetails() {
   }, [BlockReceipt, processBlockInformation]);
 
   return (
-    <div className="flex flex-col w-full gap-8 px-2 py-4">
+    <div className="flex flex-col w-full gap-8">
       <div className="flex flex-col w-full gap-4">
         <Breadcrumb>
           <BreadcrumbList>
