@@ -5,7 +5,7 @@ import Header from "./shared/components/header";
 
 function App() {
   return (
-    <div className="bg-white flex flex-col px-[45px] py-[25px]">
+    <div className="bg-white flex flex-col px-[20px] py-[25px] lg:px-[45px]">
       <BrowserRouter>
         <Header />
         <Routes>
