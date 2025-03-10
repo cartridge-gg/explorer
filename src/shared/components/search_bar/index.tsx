@@ -149,8 +149,8 @@ export default function SearchBar() {
   return (
     <div className="flex flex-col gap-2 relative">
       <Input
-        className="search-input relative border-l-4 border-[#8E8E8E] w-full lowercase px-2 focus:outline-none focus:ring-0"
-        placeholder="search"
+        className="search-input relative border-l-4 border-[#8E8E8E] w-full px-[15px] focus:outline-none focus:ring-0"
+        placeholder="Search"
         value={search}
         onChange={handleSearch}
       />
