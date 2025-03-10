@@ -514,8 +514,9 @@ export default function BlockDetails() {
                 </div>
               </SectionBox>
             </div>
-            <div className="border w-full border-[#8E8E8E] flex flex-col gap-4 overflow-hidden">
-              <div className="flex flex-col sm:flex-row text-center px-4 pt-5">
+
+            <div className="border w-full border-[#D0D0D0] flex flex-col gap-4 p-[15px] overflow-hidden rounded-md">
+              <div className="flex flex-col sm:flex-row text-center pt-5">
                 {DataTabs.map((tab, index) => (
                   <div
                     key={index}
@@ -533,7 +534,7 @@ export default function BlockDetails() {
               </div>
 
               {selectedDataTab === "Transactions" ? (
-                <div className="flex flex-row px-4 text-center">
+                <div className="flex flex-row text-center">
                   {TransactionTypeTabs.map((tab, index) => (
                     <div
                       key={index}
