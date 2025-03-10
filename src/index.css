@@ -4,5 +4,6 @@
 
 body {
   background-color: #fff;
-  font-family: monospace;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
 }
