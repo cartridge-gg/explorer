@@ -71,7 +71,7 @@ const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
-  <td ref={ref} className={cn("py-2 text-xs", className)} {...props} />
+  <td ref={ref} className={cn("py-2 text-sm", className)} {...props} />
 ));
 TableCell.displayName = "TableCell";
 
@@ -85,7 +85,7 @@ interface DataTableProps<T> {
 
 function DataTable<T>({ table, pagination, setPagination }: DataTableProps<T>) {
   return (
-    <div className="px-4 flex relative flex-col max-w-screen justify-between h-full sm:w-full w-screen overflow-x-auto">
+    <div className="flex relative flex-col max-w-screen justify-between h-full sm:w-full w-screen overflow-x-auto">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

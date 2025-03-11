@@ -25,7 +25,7 @@ export function SectionBox({
       style={customStyles}
       className={`${
         variant !== "full" ? "rounded-t-md" : "rounded-md"
-      } overflow-clip border border-[#D0D0D0]`}
+      } flex-grow border border-[#D0D0D0]`}
     >
       {title && <SectionBoxHeader title={title} />}
       <div className="flex flex-col gap-2  p-[15px]">{children}</div>

@@ -1,13 +1,17 @@
 import React from "react";
 
-interface PageHeaderProps {
+interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
   subtext?: React.ReactNode;
 }
 
-export default function PageHeader({ title, subtext }: PageHeaderProps) {
+export default function PageHeader({
+  title,
+  subtext,
+  ...props
+}: PageHeaderProps) {
   return (
-    <div className="rounded-md overflow-clip">
+    <div className="rounded-md overflow-clip" {...props}>
       <div className="px-4 bg-[#4A4A4A] h-[50px] flex items-center rounded-t-md">
         <h1 className="text-white uppercase text-lg">{title}</h1>
       </div>
