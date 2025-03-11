@@ -27,7 +27,7 @@ export function SectionBox({
         variant !== "full" ? "rounded-t-md" : "rounded-md"
       } flex-grow border border-[#D0D0D0]`}
     >
-      {title && <SectionBoxHeader title={title} />}
+      {title ? <SectionBoxHeader title={title} /> : <></>}
       <div className="flex flex-col gap-2  p-[15px]">{children}</div>
     </div>
   );
