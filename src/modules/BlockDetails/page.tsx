@@ -35,6 +35,10 @@ import {
   TableHeader,
 } from "@/shared/components/dataTable";
 import { ROUTES } from "@/constants/routes";
+import PageHeader from "@/shared/components/PageHeader";
+import DetailsPageContainer from "@/shared/components/DetailsPageContainer";
+import { SectionBox } from "@/shared/components/section/SectionBox";
+import { SectionBoxEntry } from "@/shared/components/section";
 
 const columnHelper = createColumnHelper<TransactionTableData>();
 
@@ -329,274 +333,240 @@ export default function BlockDetails() {
   }, [BlockReceipt, processBlockInformation]);
 
   return (
-    <div className="flex flex-col w-full gap-8 px-2 py-4">
-      <div className="flex flex-col w-full gap-4">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink className="" href="/">
-                .
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink className=" text-sm" href="/">
-                explrr
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink className=" text-sm" href="/blocks">
-                blocks
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className=" text-sm">
-                {blockNumber}
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+    <div className="w-full flex-grow gap-8">
+      <Breadcrumb className="mb-3">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink className="" href="/">
+              .
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink className=" text-sm" href="/">
+              explrr
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink className=" text-sm" href="/blocks">
+              blocks
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className=" text-sm">{blockNumber}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-        <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
-          <h1 className="text-white">Blocks</h1>
-        </div>
-        <div className=" flex flex-col lg:flex-row gap-4 pb-4">
-          <div className=" flex flex-col gap-4">
-            <div
-              style={{
-                borderBottomStyle: "dashed",
-                borderBottomWidth: "2px",
-              }}
-              className="flex flex-col gap-4 p-4 border-[#8E8E8E] border-l-4 border-t border-r"
-            >
-              <div className="flex flex-col text-sm  gap-2">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  Hash
-                </p>
-                <p>
-                  {isMobile
-                    ? truncateString(BlockReceipt?.block_hash)
-                    : BlockReceipt?.block_hash}
-                </p>
-              </div>
-              <div className="flex flex-col text-sm gap-1">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  Number
-                </p>
-                <p>{BlockReceipt?.block_number}</p>
-              </div>
-              <div className="flex flex-col text-sm gap-1">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  Timestamp
-                </p>
-                <p>
-                  {BlockReceipt?.timestamp} ({" "}
-                  {dayjs
-                    .unix(BlockReceipt?.timestamp)
-                    .format("MMM D YYYY HH:mm:ss")}{" "}
-                  )
-                </p>
-              </div>
-              <div className="flex flex-col text-sm gap-1">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  State root
-                </p>
-                <p>
-                  {isMobile
-                    ? truncateString(BlockReceipt?.new_root)
-                    : BlockReceipt?.new_root}
-                </p>
-              </div>
-              <div className="flex flex-col text-sm gap-1">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  Sequencer address
-                </p>
-                <p>
-                  {isMobile
-                    ? truncateString(BlockReceipt?.sequencer_address)
-                    : BlockReceipt?.sequencer_address}
-                </p>
-              </div>
-            </div>
-            <div
-              style={{
-                borderTopStyle: "dashed",
-                borderTopWidth: "2px",
-                borderBottomStyle: "dashed",
-                borderBottomWidth: "2px",
-              }}
-              className="flex flex-col h-fit gap-4 p-4 border-[#8E8E8E] border-l-4 border-t border-r"
-            >
-              <div className="flex flex-col text-sm  gap-1">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  GAS PRICE
-                </p>
-                <p>
-                  {BlockReceipt?.l1_gas_price?.price_in_fri
-                    ? formatNumber(
-                        Number(
-                          cairo.felt(BlockReceipt?.l1_gas_price?.price_in_fri)
+      <PageHeader
+        className="mb-6"
+        title={`Block #${blockNumber}`}
+        subtext={BlockReceipt?.status}
+      />
+
+      <div className="flex flex-col sl:flex-row sl:h-[66vh] gap-4">
+        <div className="flex flex-col gap-2 sl:overflow-y-scroll">
+          <SectionBox variant="upper-half">
+            <SectionBoxEntry
+              title="Hash"
+              value={
+                isMobile
+                  ? truncateString(BlockReceipt?.block_hash)
+                  : BlockReceipt?.block_hash
+              }
+            />
+
+            <SectionBoxEntry
+              title="Number"
+              value={BlockReceipt?.block_number}
+            />
+
+            <SectionBoxEntry
+              title="Timestamp"
+              value={`${BlockReceipt?.timestamp} (${dayjs
+                .unix(BlockReceipt?.timestamp)
+                .format("MMM D YYYY HH:mm:ss")})`}
+            />
+
+            <SectionBoxEntry
+              title="State root"
+              value={
+                isMobile
+                  ? truncateString(BlockReceipt?.new_root)
+                  : BlockReceipt?.new_root
+              }
+            />
+
+            <SectionBoxEntry
+              title="Sequencer address"
+              value={
+                isMobile
+                  ? truncateString(BlockReceipt?.sequencer_address)
+                  : BlockReceipt?.sequencer_address
+              }
+            />
+          </SectionBox>
+
+          <SectionBox title="Gas Prices" variant="upper-half">
+            <SectionBoxEntry
+              title="Gas price"
+              value={`${
+                BlockReceipt?.l1_gas_price?.price_in_fri
+                  ? formatNumber(
+                      Number(
+                        cairo.felt(BlockReceipt?.l1_gas_price?.price_in_fri)
+                      )
+                    )
+                  : 0
+              } FRI`}
+            />
+
+            <SectionBoxEntry
+              title="Data gas price"
+              value={`${
+                BlockReceipt?.l1_data_gas_price?.price_in_fri
+                  ? formatNumber(
+                      Number(
+                        cairo.felt(
+                          BlockReceipt?.l1_data_gas_price?.price_in_fri
                         )
                       )
-                    : 0}{" "}
-                  FRI
-                </p>
-              </div>
-              <div className="flex flex-col text-sm gap-1">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  DATA GAS PRICE
-                </p>
-                <p>
-                  {BlockReceipt?.l1_data_gas_price?.price_in_fri
-                    ? formatNumber(
-                        Number(
-                          cairo.felt(
-                            BlockReceipt?.l1_data_gas_price?.price_in_fri
-                          )
-                        )
-                      )
-                    : 0}{" "}
-                  FRI
-                </p>
-              </div>
-            </div>
-            <div
-              style={{
-                borderTopStyle: "dashed",
-                borderTopWidth: "2px",
-              }}
-              className="flex flex-col gap-4 p-4 border-[#8E8E8E] border-l-4 border-b border-r"
-            >
-              <div className="flex flex-col text-sm gap-4 w-full">
-                <div className="flex flex-row w-full text-center">
-                  <div className=" flex flex-row w-full">
-                    <div className=" w-full block bg-[#4A4A4A] py-2">
-                      <p className=" text-white">GAS</p>
-                    </div>
-                    <div className=" w-full block py-2 border border-[#DBDBDB]">
-                      <p>{formatNumber(blockComputeData.gas)}</p>
-                    </div>
-                  </div>
-                  <div className=" flex flex-row w-full">
-                    <div className=" w-full block bg-[#4A4A4A] py-2">
-                      <p className=" text-white">DA GAS</p>
-                    </div>
-                    <div className=" w-full block py-2 border border-[#DBDBDB]">
-                      <p>{formatNumber(blockComputeData.data_gas)}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className=" w-full bg-[#8E8E8E] h-[1px]" />
-                <div className=" flex w-full flex-col text-center">
+                    )
+                  : 0
+              } FRI`}
+            />
+          </SectionBox>
+
+          <SectionBox title="Execution Resources" variant="full">
+            <div className="flex flex-col text-sm gap-4 w-full">
+              <div className="flex flex-row w-full text-center">
+                <div className=" flex flex-row w-full">
                   <div className=" w-full block bg-[#4A4A4A] py-2">
-                    <p className=" text-white">STEPS</p>
+                    <p className=" text-white">GAS</p>
                   </div>
                   <div className=" w-full block py-2 border border-[#DBDBDB]">
-                    <p>{formatNumber(blockComputeData.steps)}</p>
+                    <p>{formatNumber(blockComputeData.gas)}</p>
                   </div>
                 </div>
-                <div className=" flex flex-col">
-                  <h2 className="text-md font-bold">BUILTINS COUNTER:</h2>
-                  <table className="w-full border-collapse mt-2">
-                    <tbody className=" text-center w-full">
-                      {Object.entries(executionData).map(
-                        ([key, value], index, array) => {
-                          const heading = formatSnakeCaseToDisplayValue(key);
-                          return index % 2 === 0 ? (
-                            <tr key={index} className="w-full flex ">
-                              <td className="p-1 bg-gray-100 w-1/2 border">
-                                {heading}
-                              </td>
-                              <td className="p-1 w-1/2 border">
-                                {formatNumber(value)}
-                              </td>
-
-                              {array[index + 1] ? (
-                                <>
-                                  <td className="p-1 bg-gray-100 w-1/2 border">
-                                    {formatSnakeCaseToDisplayValue(
-                                      array[index + 1][0]
-                                    )}
-                                  </td>
-                                  <td className="p-1 w-1/2 border">
-                                    {formatNumber(array[index + 1][1])}
-                                  </td>
-                                </>
-                              ) : (
-                                <>
-                                  <td className="w-1/2 border-l border-t p-1" />
-                                  <td className="w-1/2 border border-transparent p-1" />
-                                </>
-                              )}
-                            </tr>
-                          ) : null;
-                        }
-                      )}
-                    </tbody>
-                  </table>
+                <div className=" flex flex-row w-full">
+                  <div className=" w-full block bg-[#4A4A4A] py-2">
+                    <p className=" text-white">DA GAS</p>
+                  </div>
+                  <div className=" w-full block py-2 border border-[#DBDBDB]">
+                    <p>{formatNumber(blockComputeData.data_gas)}</p>
+                  </div>
                 </div>
               </div>
+              <div className=" w-full bg-[#8E8E8E] h-[1px]" />
+              <div className=" flex w-full flex-col text-center">
+                <div className=" w-full block bg-[#4A4A4A] py-2">
+                  <p className=" text-white">STEPS</p>
+                </div>
+                <div className=" w-full block py-2 border border-[#DBDBDB]">
+                  <p>{formatNumber(blockComputeData.steps)}</p>
+                </div>
+              </div>
+              <div className=" flex flex-col">
+                <h2 className="text-md font-bold">BUILTINS COUNTER:</h2>
+                <table className="w-full border-collapse mt-2">
+                  <tbody className=" text-center w-full">
+                    {Object.entries(executionData).map(
+                      ([key, value], index, array) => {
+                        const heading = formatSnakeCaseToDisplayValue(key);
+                        return index % 2 === 0 ? (
+                          <tr key={index} className="w-full flex ">
+                            <td className="p-1 bg-gray-100 w-1/2 border">
+                              {heading}
+                            </td>
+                            <td className="p-1 w-1/2 border">
+                              {formatNumber(value)}
+                            </td>
+
+                            {array[index + 1] ? (
+                              <>
+                                <td className="p-1 bg-gray-100 w-1/2 border">
+                                  {formatSnakeCaseToDisplayValue(
+                                    array[index + 1][0]
+                                  )}
+                                </td>
+                                <td className="p-1 w-1/2 border">
+                                  {formatNumber(array[index + 1][1])}
+                                </td>
+                              </>
+                            ) : (
+                              <>
+                                <td className="w-1/2 border-l border-t p-1" />
+                                <td className="w-1/2 border border-transparent p-1" />
+                              </>
+                            )}
+                          </tr>
+                        ) : null;
+                      }
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
+          </SectionBox>
+        </div>
+
+        <div className="border border-borderGray flex flex-col flex-grow gap-4 p-[15px] rounded-md">
+          <div className="flex flex-col sm:flex-row text-center pt-5">
+            {DataTabs.map((tab, index) => (
+              <div
+                key={index}
+                style={{
+                  backgroundColor: selectedDataTab === tab ? "#8E8E8E" : "#fff",
+                  color: selectedDataTab === tab ? "#fff" : "#000",
+                }}
+                onClick={() => setSelectedDataTab(tab)}
+                className="w-full  border border-b-4 p-2 border-[#8E8E8E] uppercase cursor-pointer"
+              >
+                <p>{tab}</p>
+              </div>
+            ))}
           </div>
-          <div className="border w-full border-[#8E8E8E] flex flex-col gap-4 overflow-hidden">
-            <div className="flex flex-col sm:flex-row text-center px-4 pt-5">
-              {DataTabs.map((tab, index) => (
+
+          {selectedDataTab === "Transactions" ? (
+            <div className="flex flex-row text-center">
+              {TransactionTypeTabs.map((tab, index) => (
                 <div
                   key={index}
                   style={{
                     backgroundColor:
-                      selectedDataTab === tab ? "#8E8E8E" : "#fff",
-                    color: selectedDataTab === tab ? "#fff" : "#000",
+                      selectedTransactionType === tab ? "#F3F3F3" : "#fff",
+                    fontWeight:
+                      selectedTransactionType === tab ? "bold" : "normal",
                   }}
-                  onClick={() => setSelectedDataTab(tab)}
-                  className="w-full  border border-b-4 p-2 border-[#8E8E8E] uppercase cursor-pointer"
+                  onClick={() => handleTransactionFilter(tab)}
+                  className="w-fit border border-b-4 py-1 px-4 border-[#DBDBDB] uppercase cursor-pointer"
                 >
                   <p>{tab}</p>
                 </div>
               ))}
             </div>
+          ) : null}
 
+          <div className=" h-full pb-2 w-full">
             {selectedDataTab === "Transactions" ? (
-              <div className="flex flex-row px-4 text-center">
-                {TransactionTypeTabs.map((tab, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      backgroundColor:
-                        selectedTransactionType === tab ? "#F3F3F3" : "#fff",
-                      fontWeight:
-                        selectedTransactionType === tab ? "bold" : "normal",
-                    }}
-                    onClick={() => handleTransactionFilter(tab)}
-                    className="w-fit border border-b-4 py-1 px-4 border-[#DBDBDB] uppercase cursor-pointer"
-                  >
-                    <p>{tab}</p>
-                  </div>
-                ))}
+              <DataTable
+                table={transaction_table}
+                pagination={transactionsPagination}
+                setPagination={setTransactionsPagination}
+              />
+            ) : selectedDataTab === "Events" ? (
+              <DataTable
+                table={events_table}
+                pagination={eventsPagination}
+                setPagination={setEventsPagination}
+              />
+            ) : (
+              <div className="p-4 text-center">
+                <p className="text-black">No data found</p>
               </div>
-            ) : null}
-
-            <div className=" h-full pb-2 w-full">
-              {selectedDataTab === "Transactions" ? (
-                <DataTable
-                  table={transaction_table}
-                  pagination={transactionsPagination}
-                  setPagination={setTransactionsPagination}
-                />
-              ) : selectedDataTab === "Events" ? (
-                <DataTable
-                  table={events_table}
-                  pagination={eventsPagination}
-                  setPagination={setEventsPagination}
-                />
-              ) : (
-                <div className="p-4 text-center">
-                  <p className="text-black">No data found</p>
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
