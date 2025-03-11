@@ -39,7 +39,7 @@ interface SectionBoxHeaderProps {
 
 function SectionBoxHeader({ title }: SectionBoxHeaderProps) {
   return (
-    <div className="px-[15px] py-[5px] bg-[#F1F1F1] border-b border-[#D0D0D0]  text-[black] uppercase font-bold">
+    <div className="px-[15px] py-[5px] bg-[#F1F1F1] border-b border-borderGray text-pimary uppercase font-bold">
       {title}
     </div>
   );

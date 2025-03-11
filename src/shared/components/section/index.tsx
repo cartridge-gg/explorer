@@ -6,7 +6,7 @@ export interface SectionBoxEntryProps {
 export function SectionBoxEntry({ title, value }: SectionBoxEntryProps) {
   return (
     <div>
-      <div className="font-bold uppercase">{title}</div>
+      <div className="font-bold uppercase mb-[2px]">{title}</div>
       <div className="">{value}</div>
     </div>
   );

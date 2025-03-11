@@ -3,6 +3,13 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      colors: {
+        transparent: "transparent",
+        white: "#ffffff",
+        black: "#262626",
+        primary: "#262626",
+        borderGray: "#D0D0D0",
+      },
       screens: {
         // `slightly large` as it sits between lg and xl
         sl: "1196px",

@@ -4,6 +4,7 @@
 
 body {
   background-color: #fff;
-  font-family: 'Space Mono', monospace;
+  font-family: "Space Mono", monospace;
   font-size: 11px;
+  color: theme("colors.primary");
 }

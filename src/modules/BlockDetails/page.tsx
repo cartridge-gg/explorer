@@ -334,7 +334,6 @@ export default function BlockDetails() {
 
   return (
     <div className="w-full flex-grow gap-8">
-      {/* <div className="flex flex-col w-full gap-4 outline outline-yellow-300"> */}
       <Breadcrumb className="mb-3">
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -513,7 +512,7 @@ export default function BlockDetails() {
           </SectionBox>
         </div>
 
-        <div className="border border-[#D0D0D0] flex flex-col flex-grow gap-4 p-[15px] rounded-md">
+        <div className="border border-borderGray flex flex-col flex-grow gap-4 p-[15px] rounded-md">
           <div className="flex flex-col sm:flex-row text-center pt-5">
             {DataTabs.map((tab, index) => (
               <div

@@ -12,7 +12,7 @@ export default function PageHeader({
 }: PageHeaderProps) {
   return (
     <div className="rounded-md overflow-clip" {...props}>
-      <div className="px-4 bg-[#4A4A4A] h-[50px] flex items-center rounded-t-md">
+      <div className="px-4 bg-primary h-[50px] flex items-center rounded-t-md">
         <h1 className="text-white uppercase text-lg">{title}</h1>
       </div>
 
