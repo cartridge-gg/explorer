@@ -39,6 +39,7 @@ import PageHeader from "@/shared/components/PageHeader";
 import DetailsPageContainer from "@/shared/components/DetailsPageContainer";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
+import SelectorHeader, { SelectItem } from "@/shared/components/SelectorHeader";
 
 const columnHelper = createColumnHelper<TransactionTableData>();
 
@@ -512,61 +513,56 @@ export default function BlockDetails() {
           </SectionBox>
         </div>
 
-        <div className="border border-borderGray flex flex-col flex-grow gap-4 p-[15px] rounded-md">
-          <div className="flex flex-col sm:flex-row text-center pt-5">
-            {DataTabs.map((tab, index) => (
-              <div
-                key={index}
-                style={{
-                  backgroundColor: selectedDataTab === tab ? "#8E8E8E" : "#fff",
-                  color: selectedDataTab === tab ? "#fff" : "#000",
-                }}
-                onClick={() => setSelectedDataTab(tab)}
-                className="w-full  border border-b-4 p-2 border-[#8E8E8E] uppercase cursor-pointer"
-              >
-                <p>{tab}</p>
-              </div>
+        <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+          <SelectorHeader
+            selected={DataTabs[0]}
+            onTabSelect={setSelectedDataTab}
+          >
+            {DataTabs.map((tab) => (
+              <SelectItem name={tab} />
             ))}
-          </div>
+          </SelectorHeader>
 
-          {selectedDataTab === "Transactions" ? (
-            <div className="flex flex-row text-center">
-              {TransactionTypeTabs.map((tab, index) => (
-                <div
-                  key={index}
-                  style={{
-                    backgroundColor:
-                      selectedTransactionType === tab ? "#F3F3F3" : "#fff",
-                    fontWeight:
-                      selectedTransactionType === tab ? "bold" : "normal",
-                  }}
-                  onClick={() => handleTransactionFilter(tab)}
-                  className="w-fit border border-b-4 py-1 px-4 border-[#DBDBDB] uppercase cursor-pointer"
-                >
-                  <p>{tab}</p>
-                </div>
-              ))}
-            </div>
-          ) : null}
-
-          <div className=" h-full pb-2 w-full">
+          <div className="mt-2 px-[15px] py-[17px] border border-borderGray rounded-md outline outline-red-500">
             {selectedDataTab === "Transactions" ? (
-              <DataTable
-                table={transaction_table}
-                pagination={transactionsPagination}
-                setPagination={setTransactionsPagination}
-              />
-            ) : selectedDataTab === "Events" ? (
-              <DataTable
-                table={events_table}
-                pagination={eventsPagination}
-                setPagination={setEventsPagination}
-              />
-            ) : (
-              <div className="p-4 text-center">
-                <p className="text-black">No data found</p>
+              <div className="flex flex-row text-center mb-3">
+                {TransactionTypeTabs.map((tab, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      backgroundColor:
+                        selectedTransactionType === tab ? "#F3F3F3" : "#fff",
+                      fontWeight:
+                        selectedTransactionType === tab ? "bold" : "normal",
+                    }}
+                    onClick={() => handleTransactionFilter(tab)}
+                    className="w-fit border border-b-4 py-1 px-4 border-[#DBDBDB] uppercase cursor-pointer"
+                  >
+                    <p>{tab}</p>
+                  </div>
+                ))}
               </div>
-            )}
+            ) : null}
+
+            <div className="w-full h-full">
+              {selectedDataTab === "Transactions" ? (
+                <DataTable
+                  table={transaction_table}
+                  pagination={transactionsPagination}
+                  setPagination={setTransactionsPagination}
+                />
+              ) : selectedDataTab === "Events" ? (
+                <DataTable
+                  table={events_table}
+                  pagination={eventsPagination}
+                  setPagination={setEventsPagination}
+                />
+              ) : (
+                <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
+                  <span className="text-[#D0D0D0]">No data found</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

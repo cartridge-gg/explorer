@@ -71,11 +71,11 @@ const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
-  <td ref={ref} className={cn("py-2 text-sm", className)} {...props} />
+  <td ref={ref} className={cn("py-[6px] text-sm", className)} {...props} />
 ));
 TableCell.displayName = "TableCell";
 
-interface DataTableProps<T> {
+interface DataTableProps<T> extends React.HTMLAttributes<HTMLDivElement> {
   table: TableType<T>;
   pagination: { pageIndex: number; pageSize: number };
   setPagination: React.Dispatch<
@@ -83,10 +83,15 @@ interface DataTableProps<T> {
   >;
 }
 
-function DataTable<T>({ table, pagination, setPagination }: DataTableProps<T>) {
+function DataTable<T>({
+  table,
+  pagination,
+  setPagination,
+  ...props
+}: DataTableProps<T>) {
   return (
-    <div className="flex relative flex-col max-w-screen justify-between h-full sm:w-full w-screen overflow-x-auto">
-      <Table>
+    <div className="sl:h-[50.4vh] sl:grid" {...props}>
+      <Table className="min-h-[200px] overflow-x-auto sl:overflow-y-scroll outline outline-pink-800">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -101,38 +106,37 @@ function DataTable<T>({ table, pagination, setPagination }: DataTableProps<T>) {
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="text-xs">
-                {row.getVisibleCells().map((cell) => {
-                  return flexRender(
-                    cell.column.columnDef.cell,
-                    cell.getContext()
-                  );
-                })}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell
-                colSpan={table.getAllColumns().length}
-                className="h-24 text-center text-sm text-gray-500"
-              >
-                No results found
-              </TableCell>
+        {table.getRowModel().rows.length ? (
+          table.getRowModel().rows.map((row) => (
+            <TableRow key={row.id} className="text-xs">
+              {row.getVisibleCells().map((cell) => {
+                return flexRender(
+                  cell.column.columnDef.cell,
+                  cell.getContext()
+                );
+              })}
             </TableRow>
-          )}
-        </TableBody>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell
+              colSpan={table.getAllColumns().length}
+              className="h-24 text-center text-sm text-gray-500"
+            >
+              No results found
+            </TableCell>
+          </TableRow>
+        )}
+        <TableBody></TableBody>
       </Table>
 
-      <div className="flex sticky sm:relative bottom-0 left-0 flex-row gap-4 sm:justify-between items-center mt-4">
-        <p>
+      <div className="mt-2 h-min flex flex-row gap-4 justify-between items-center">
+        <div>
           Showing <strong>{pagination.pageIndex + 1}</strong> of{" "}
           <strong>{table.getPageCount()}</strong> pages
-        </p>
+        </div>
 
-        <div className="flex flex-row gap-4">
+        <div className="flex flex-row gap-2">
           <button
             disabled={pagination.pageIndex === 0}
             onClick={() =>
@@ -141,7 +145,7 @@ function DataTable<T>({ table, pagination, setPagination }: DataTableProps<T>) {
                 pageIndex: Math.max(0, prev.pageIndex - 1),
               }))
             }
-            className="bg-[#4A4A4A] text-white px-4 py-2 disabled:opacity-50"
+            className="bg-[#4A4A4A] text-white px-2 disabled:opacity-50 uppercase"
           >
             Previous
           </button>
@@ -156,7 +160,7 @@ function DataTable<T>({ table, pagination, setPagination }: DataTableProps<T>) {
                 ),
               }))
             }
-            className="bg-[#4A4A4A] text-white px-4 py-2 disabled:opacity-50"
+            className="bg-[#4A4A4A] text-white px-4 py-[3px] disabled:opacity-50 uppercase"
           >
             Next
           </button>
