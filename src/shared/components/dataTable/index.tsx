@@ -6,13 +6,14 @@ const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
-  <div className="relative w-full overflow-auto">
-    <table
-      ref={ref}
-      className={cn("w-full table-auto border-collapse", className)}
-      {...props}
-    />
-  </div>
+  <table
+    ref={ref}
+    className={cn(
+      "w-full table-auto border-collapse border-spacing-0",
+      className
+    )}
+    {...props}
+  />
 ));
 Table.displayName = "Table";
 
@@ -20,7 +21,11 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("", className)} {...props} />
+  <thead
+    ref={ref}
+    className={cn("uppercase bg-[#F1F1F1]", className)}
+    {...props}
+  />
 ));
 TableHeader.displayName = "TableHeader";
 
@@ -63,7 +68,11 @@ const TableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
-  <th ref={ref} className={cn("py-2 font-bold", className)} {...props} />
+  <th
+    ref={ref}
+    className={cn("border border-borderGray  font-bold", className)}
+    {...props}
+  />
 ));
 TableHead.displayName = "TableHead";
 
@@ -71,7 +80,11 @@ const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
-  <td ref={ref} className={cn("py-[6px] text-sm", className)} {...props} />
+  <td
+    ref={ref}
+    className={cn("px-2 text-sm border border-borderGray", className)}
+    {...props}
+  />
 ));
 TableCell.displayName = "TableCell";
 
@@ -91,21 +104,22 @@ function DataTable<T>({
 }: DataTableProps<T>) {
   return (
     <div className="sl:h-[50.4vh] sl:grid" {...props}>
-      <Table className="min-h-[200px] overflow-x-auto sl:overflow-y-scroll outline outline-pink-800">
+      <Table className="min-h-[200px] overflow-x-auto sl:overflow-y-scroll">
         <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return header.isPlaceholder
-                  ? null
-                  : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    );
-              })}
-            </TableRow>
-          ))}
+          {table
+            .getHeaderGroups()
+            .map((headerGroup) =>
+              headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
+                </TableHead>
+              ))
+            )}
         </TableHeader>
+
         {table.getRowModel().rows.length ? (
           table.getRowModel().rows.map((row) => (
             <TableRow key={row.id} className="text-xs">

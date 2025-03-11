@@ -58,7 +58,6 @@ export type TransactionTableData = {
   hash: string;
   type: TransactionType;
   status: string;
-  hash_display: string;
 };
 
 // Event Table Types

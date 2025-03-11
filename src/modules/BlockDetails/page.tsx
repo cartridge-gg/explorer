@@ -28,12 +28,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbLink,
 } from "@/shared/components/breadcrumbs";
-import {
-  DataTable,
-  TableCell,
-  TableHead,
-  TableHeader,
-} from "@/shared/components/dataTable";
+import { DataTable, TableCell, TableHead } from "@/shared/components/dataTable";
 import { ROUTES } from "@/constants/routes";
 import PageHeader from "@/shared/components/PageHeader";
 import DetailsPageContainer from "@/shared/components/DetailsPageContainer";
@@ -115,30 +110,23 @@ export default function BlockDetails() {
 
   const transaction_columns: ColumnDef<TransactionTableData, any>[] = [
     columnHelper.accessor("id", {
-      header() {
-        return null;
-      },
+      header: "No",
       cell: (info) => (
         <TableCell className="w-1 font-bold text-left pr-4">
           <span>#{info.renderValue()}</span>
         </TableCell>
       ),
     }),
-    columnHelper.accessor("hash_display", {
-      header() {
-        return null;
-      },
+    columnHelper.accessor("hash", {
+      header: "Hash",
       cell: (info) => (
         <TableCell
-          onClick={() => navigateToTxn(info.renderValue().split(" ")[0])}
-          className="w-full pr-4 flex items-center overflow-hidden hover:text-blue-400 transition-all cursor-pointer"
+          onClick={() => navigateToTxn(info.renderValue())}
+          className="w-full hover:underline hover:text-gray-300 cursor-pointer whitespace-nowrap"
         >
-          <span className="whitespace-nowrap ">
-            {isMobile
-              ? truncateString(info.renderValue(), 10)
-              : info.renderValue()}
-          </span>
-          <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
+          {isMobile
+            ? truncateString(info.renderValue(), 10)
+            : info.renderValue()}
         </TableCell>
       ),
       filterFn: (row, columnId, filterValue) => {
@@ -147,14 +135,16 @@ export default function BlockDetails() {
         return rowValue.includes(filterValue.toUpperCase());
       },
     }),
-    columnHelper.accessor("status", {
-      header() {
-        return null;
-      },
+    columnHelper.accessor("type", {
+      header: "Type",
       cell: (info) => (
-        <TableCell className="w-1 text-right">
-          <span>{info.renderValue()}</span>
-        </TableCell>
+        <TableCell className="w-min">{info.renderValue()}</TableCell>
+      ),
+    }),
+    columnHelper.accessor("status", {
+      header: "Status",
+      cell: (info) => (
+        <TableCell className="w-min capitalize">{info.renderValue()}</TableCell>
       ),
     }),
   ];
@@ -165,6 +155,7 @@ export default function BlockDetails() {
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+
     state: {
       pagination: {
         pageIndex: transactionsPagination.pageIndex,
@@ -175,13 +166,7 @@ export default function BlockDetails() {
 
   const event_columns: ColumnDef<EventTableData, any>[] = [
     eventColumnHelper.accessor("id", {
-      header() {
-        return (
-          <TableHead className="text-left">
-            <span>#</span>
-          </TableHead>
-        );
-      },
+      header: "No",
       cell: (info) => (
         <TableCell className="w-1 font-bold text-left pr-4">
           <span>#{info.renderValue()}</span>
@@ -189,35 +174,22 @@ export default function BlockDetails() {
       ),
     }),
     eventColumnHelper.accessor("txn_hash", {
-      header() {
-        return (
-          <TableHead className="text-left">
-            <span>Txn Hash</span>
-          </TableHead>
-        );
-      },
+      header: "Transaction",
       cell: (info) => (
         <TableCell
           onClick={() => navigateToTxn(info.renderValue())}
-          className="w-full flex items-center overflow-hidden cursor-pointer pr-4 hover:text-blue-400 transition-all"
+          className="w-full  hover:underline hover:text-gray-300  cursor-pointer pr-4"
         >
           <span className="whitespace-nowrap">
             {isMobile
               ? truncateString(info.renderValue(), 10)
               : info.renderValue()}
           </span>
-          <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
         </TableCell>
       ),
     }),
     eventColumnHelper.accessor("from", {
-      header() {
-        return (
-          <TableHead className="text-right">
-            <span>From Address</span>
-          </TableHead>
-        );
-      },
+      header: "From Address",
       cell: (info) => (
         <TableCell className="w-1 cursor-pointer hover:text-blue-400 transition-all text-right">
           <span onClick={() => navigateToContract(info.renderValue())}>
@@ -246,7 +218,6 @@ export default function BlockDetails() {
 
     const transactions_table_data: {
       id: string;
-      hash_display: string;
       type: string;
       status: string;
       hash: string;
@@ -299,9 +270,9 @@ export default function BlockDetails() {
             // process info for transactions table
             transactions_table_data.push({
               id: padNumber(transactions_table_data.length + 1),
-              hash_display: `${
-                tx.transaction_hash
-              } ( ${formatSnakeCaseToDisplayValue(tx.type)} )`,
+              // hash_display: `${
+              //   tx.transaction_hash
+              // } ( ${formatSnakeCaseToDisplayValue(tx.type)} )`,
               type: tx.type,
               status: receipt.statusReceipt,
               hash: tx.transaction_hash,
@@ -523,7 +494,7 @@ export default function BlockDetails() {
             ))}
           </SelectorHeader>
 
-          <div className="mt-2 px-[15px] py-[17px] border border-borderGray rounded-md outline outline-red-500">
+          <div className="mt-2 px-[15px] py-[17px] border border-borderGray rounded-md">
             {selectedDataTab === "Transactions" ? (
               <div className="flex flex-row text-center mb-3">
                 {TransactionTypeTabs.map((tab, index) => (
