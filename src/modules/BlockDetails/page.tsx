@@ -60,7 +60,7 @@ export default function BlockDetails() {
     bitwise: 0,
     pedersen: 0,
     range_check: 0,
-    posiedon: 0,
+    poseidon: 0,
     ecdsa: 0,
     segment_arena: 0,
     keccak: 0,
@@ -123,7 +123,7 @@ export default function BlockDetails() {
       cell: (info) => (
         <TableCell
           onClick={() => navigateToTxn(info.renderValue())}
-          className="w-full hover:underline hover:text-gray-300 cursor-pointer whitespace-nowrap"
+          className="w-full px-[16px] text-left hover:underline hover:text-gray-300 cursor-pointer whitespace-nowrap transition-colors"
         >
           {isMobile
             ? truncateString(info.renderValue(), 10)
@@ -342,146 +342,182 @@ export default function BlockDetails() {
       <div className="flex flex-col sl:flex-row sl:h-[66vh] gap-4">
         <div className="flex flex-col gap-[6px] sl:overflow-y-scroll">
           <SectionBox variant="upper-half">
-            <SectionBoxEntry
-              title="Hash"
-              value={
-                isMobile
-                  ? truncateString(BlockReceipt?.block_hash)
-                  : BlockReceipt?.block_hash
-              }
-            />
+            <SectionBoxEntry title="Hash">
+              {isMobile
+                ? truncateString(BlockReceipt?.block_hash)
+                : BlockReceipt?.block_hash}
+            </SectionBoxEntry>
 
-            <SectionBoxEntry
-              title="Number"
-              value={BlockReceipt?.block_number}
-            />
+            <SectionBoxEntry title="Number">
+              {BlockReceipt?.block_number}
+            </SectionBoxEntry>
 
-            <SectionBoxEntry
-              title="Timestamp"
-              value={`${BlockReceipt?.timestamp} (${dayjs
+            <SectionBoxEntry title="Timestamp">
+              {`${BlockReceipt?.timestamp} (${dayjs
                 .unix(BlockReceipt?.timestamp)
                 .format("MMM D YYYY HH:mm:ss")})`}
-            />
+            </SectionBoxEntry>
 
-            <SectionBoxEntry
-              title="State root"
-              value={
-                isMobile
-                  ? truncateString(BlockReceipt?.new_root)
-                  : BlockReceipt?.new_root
-              }
-            />
+            <SectionBoxEntry title="State root">
+              {isMobile
+                ? truncateString(BlockReceipt?.new_root)
+                : BlockReceipt?.new_root}
+            </SectionBoxEntry>
 
-            <SectionBoxEntry
-              title="Sequencer address"
-              value={
-                isMobile
-                  ? truncateString(BlockReceipt?.sequencer_address)
-                  : BlockReceipt?.sequencer_address
-              }
-            />
+            <SectionBoxEntry title="Sequencer address">
+              {isMobile
+                ? truncateString(BlockReceipt?.sequencer_address)
+                : BlockReceipt?.sequencer_address}
+            </SectionBoxEntry>
           </SectionBox>
 
           <SectionBox title="Gas Prices" variant="upper-half">
-            <SectionBoxEntry
-              title="Gas price"
-              value={`${
-                BlockReceipt?.l1_gas_price?.price_in_fri
-                  ? formatNumber(
-                      Number(
-                        cairo.felt(BlockReceipt?.l1_gas_price?.price_in_fri)
-                      )
-                    )
-                  : 0
-              } FRI`}
-            />
+            <SectionBoxEntry title="L1 Gas Prices" bold={false}>
+              <table className="w-full">
+                <tbody>
+                  <tr>
+                    <th className="w-[67px]">ETH</th>
+                    <td>
+                      {BlockReceipt?.l1_gas_price
+                        ? formatNumber(
+                            Number(
+                              cairo.felt(
+                                BlockReceipt?.l1_gas_price?.price_in_wei
+                              )
+                            )
+                          )
+                        : 0}{" "}
+                      WEI
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="w-min">STRK</th>
+                    <td>
+                      {BlockReceipt?.l1_gas_price
+                        ? formatNumber(
+                            Number(
+                              cairo.felt(
+                                BlockReceipt?.l1_gas_price?.price_in_fri
+                              )
+                            )
+                          )
+                        : 0}{" "}
+                      FRI
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </SectionBoxEntry>
 
-            <SectionBoxEntry
-              title="Data gas price"
-              value={`${
-                BlockReceipt?.l1_data_gas_price?.price_in_fri
-                  ? formatNumber(
-                      Number(
-                        cairo.felt(
-                          BlockReceipt?.l1_data_gas_price?.price_in_fri
-                        )
-                      )
-                    )
-                  : 0
-              } FRI`}
-            />
+            <SectionBoxEntry title="L1 Data Gas Prices" bold={false}>
+              <table className="w-full">
+                <tbody>
+                  <tr>
+                    <th className="w-[67px]">ETH</th>
+                    <td>
+                      {BlockReceipt?.l1_data_gas_price
+                        ? formatNumber(
+                            Number(
+                              cairo.felt(
+                                BlockReceipt?.l1_data_gas_price?.price_in_wei
+                              )
+                            )
+                          )
+                        : 0}{" "}
+                      ETH
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="w-min">STRK</th>
+                    <td>
+                      {BlockReceipt?.l1_data_gas_price
+                        ? formatNumber(
+                            Number(
+                              cairo.felt(
+                                BlockReceipt?.l1_data_gas_price?.price_in_fri
+                              )
+                            )
+                          )
+                        : 0}{" "}
+                      FRI
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </SectionBoxEntry>
           </SectionBox>
 
           <SectionBox title="Execution Resources" variant="full">
-            <div className="flex flex-col text-sm gap-4 w-full">
-              <div className="flex flex-row w-full text-center">
-                <div className=" flex flex-row w-full">
-                  <div className=" w-full block bg-[#4A4A4A] py-2">
-                    <p className=" text-white">GAS</p>
-                  </div>
-                  <div className=" w-full block py-2 border border-[#DBDBDB]">
-                    <p>{formatNumber(blockComputeData.gas)}</p>
-                  </div>
-                </div>
-                <div className=" flex flex-row w-full">
-                  <div className=" w-full block bg-[#4A4A4A] py-2">
-                    <p className=" text-white">DA GAS</p>
-                  </div>
-                  <div className=" w-full block py-2 border border-[#DBDBDB]">
-                    <p>{formatNumber(blockComputeData.data_gas)}</p>
-                  </div>
-                </div>
-              </div>
-              <div className=" w-full bg-[#8E8E8E] h-[1px]" />
-              <div className=" flex w-full flex-col text-center">
-                <div className=" w-full block bg-[#4A4A4A] py-2">
-                  <p className=" text-white">STEPS</p>
-                </div>
-                <div className=" w-full block py-2 border border-[#DBDBDB]">
-                  <p>{formatNumber(blockComputeData.steps)}</p>
-                </div>
-              </div>
-              <div className=" flex flex-col">
-                <h2 className="text-md font-bold">BUILTINS COUNTER:</h2>
-                <table className="w-full border-collapse mt-2">
-                  <tbody className=" text-center w-full">
-                    {Object.entries(executionData).map(
-                      ([key, value], index, array) => {
-                        const heading = formatSnakeCaseToDisplayValue(key);
-                        return index % 2 === 0 ? (
-                          <tr key={index} className="w-full flex ">
-                            <td className="p-1 bg-gray-100 w-1/2 border">
-                              {heading}
-                            </td>
-                            <td className="p-1 w-1/2 border">
-                              {formatNumber(value)}
-                            </td>
+            <table className="w-full mb-1">
+              <thead>
+                <tr>
+                  <th colSpan={2}>GAS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th className="w-[90px]">L1 GAS</th>
+                  <td>{formatNumber(blockComputeData.gas)}</td>
+                </tr>
+                <tr>
+                  <th className="w-min">L1 DA GAS</th>
+                  <td>{formatNumber(blockComputeData.data_gas)}</td>
+                </tr>
+              </tbody>
+            </table>
 
-                            {array[index + 1] ? (
-                              <>
-                                <td className="p-1 bg-gray-100 w-1/2 border">
-                                  {formatSnakeCaseToDisplayValue(
-                                    array[index + 1][0]
-                                  )}
-                                </td>
-                                <td className="p-1 w-1/2 border">
-                                  {formatNumber(array[index + 1][1])}
-                                </td>
-                              </>
-                            ) : (
-                              <>
-                                <td className="w-1/2 border-l border-t p-1" />
-                                <td className="w-1/2 border border-transparent p-1" />
-                              </>
-                            )}
-                          </tr>
-                        ) : null;
-                      }
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <table className="w-full mb-1">
+              <thead>
+                <tr>
+                  <th>STEPS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{formatNumber(blockComputeData.steps)}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th colSpan={4} className="p-1 bg-gray-100 border">
+                    BUILTINS COUNTER
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody className="text-center">
+                {Object.entries(executionData).map(
+                  ([key, value], index, array) => {
+                    const heading = formatSnakeCaseToDisplayValue(key);
+                    return index % 2 === 0 ? (
+                      <tr key={index} className="w-full">
+                        <th className="w-[111px]">{heading}</th>
+                        <td>{formatNumber(value)}</td>
+
+                        {array[index + 1] ? (
+                          <>
+                            <th className="w-[111px]">
+                              {formatSnakeCaseToDisplayValue(
+                                array[index + 1][0]
+                              )}
+                            </th>
+                            <td>{formatNumber(array[index + 1][1])}</td>
+                          </>
+                        ) : (
+                          <>
+                            <th className="w-[111px]"></th>
+                            <td></td>
+                          </>
+                        )}
+                      </tr>
+                    ) : null;
+                  }
+                )}
+              </tbody>
+            </table>
           </SectionBox>
         </div>
 

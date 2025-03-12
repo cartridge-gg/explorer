@@ -8,3 +8,26 @@ body {
   font-size: 11px;
   color: theme("colors.primary");
 }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: 1px solid theme("colors.borderGray");
+}
+
+th,
+td {
+  text-align: center;
+  font-weight: normal;
+  padding-left: 8px;
+  padding-right: 8px;
+  border: 1px solid theme("colors.borderGray");
+}
+
+th {
+  background-color: #f3f3f3;
+}
+
+thead th {
+  font-weight: bold;
+}

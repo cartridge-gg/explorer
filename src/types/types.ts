@@ -108,7 +108,7 @@ export const EXECUTION_RESOURCES_KEY_MAP = {
   bitwise_builtin_applications: "bitwise",
   pedersen_builtin_applications: "pedersen",
   range_check_builtin_applications: "range_check",
-  poseidon_builtin_applications: "posiedon",
+  poseidon_builtin_applications: "poseidon",
   steps: "steps",
   ecdsa_builtin_applications: "ecdsa",
   segment_arena_builtin: "segment_arena",
