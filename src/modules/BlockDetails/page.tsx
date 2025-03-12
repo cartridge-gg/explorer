@@ -63,7 +63,7 @@ export default function BlockDetails() {
     bitwise: 0,
     pedersen: 0,
     range_check: 0,
-    posiedon: 0,
+    poseidon: 0,
     ecdsa: 0,
     segment_arena: 0,
     keccak: 0,
