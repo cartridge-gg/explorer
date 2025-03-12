@@ -70,7 +70,7 @@ const TableHead = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <th
     ref={ref}
-    className={cn("border border-borderGray font-bold", className)}
+    className={cn("h-[10px] border border-borderGray font-bold", className)}
     {...props}
   />
 ));
@@ -120,28 +120,29 @@ function DataTable<T>({
             )}
         </TableHeader>
 
-        {table.getRowModel().rows.length ? (
-          table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id} className="text-xs">
-              {row.getVisibleCells().map((cell) => {
-                return flexRender(
-                  cell.column.columnDef.cell,
-                  cell.getContext()
-                );
-              })}
+        <TableBody>
+          {table.getRowModel().rows.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id} className="text-xs">
+                {row.getVisibleCells().map((cell) => {
+                  return flexRender(
+                    cell.column.columnDef.cell,
+                    cell.getContext()
+                  );
+                })}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={table.getAllColumns().length}
+                className="h-24 text-center text-sm text-gray-500"
+              >
+                No results found
+              </TableCell>
             </TableRow>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell
-              colSpan={table.getAllColumns().length}
-              className="h-24 text-center text-sm text-gray-500"
-            >
-              No results found
-            </TableCell>
-          </TableRow>
-        )}
-        <TableBody></TableBody>
+          )}
+        </TableBody>
       </Table>
 
       <div className="mt-2 h-min flex flex-row gap-4 justify-between items-center">
