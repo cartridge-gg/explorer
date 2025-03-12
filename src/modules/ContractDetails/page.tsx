@@ -9,7 +9,7 @@ import { FunctionResult, DisplayFormatTypes } from "@/types/types";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import WalletConnectModal from "@/shared/components/wallet_connect";
 import { BreadcrumbPage, SpinnerIcon } from "@cartridge/ui-next";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "./tab";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/components/tab";
 import {
   Breadcrumb,
   BreadcrumbLink,
