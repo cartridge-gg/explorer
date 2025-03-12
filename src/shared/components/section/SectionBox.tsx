@@ -28,7 +28,7 @@ export function SectionBox({
       } flex-grow border border-[#D0D0D0]`}
     >
       {title ? <SectionBoxHeader title={title} /> : <></>}
-      <div className="flex flex-col gap-2  p-[15px]">{children}</div>
+      <div className="flex flex-col gap-2 p-[15px]">{children}</div>
     </div>
   );
 }

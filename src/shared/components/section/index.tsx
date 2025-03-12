@@ -1,13 +1,20 @@
 export interface SectionBoxEntryProps {
   title: string;
-  value: string;
+  children?: React.ReactNode;
+  bold?: boolean;
 }
 
-export function SectionBoxEntry({ title, value }: SectionBoxEntryProps) {
+export function SectionBoxEntry({
+  title,
+  children,
+  bold = true,
+}: SectionBoxEntryProps) {
   return (
     <div>
-      <div className="font-bold uppercase mb-[2px]">{title}</div>
-      <div className="">{value}</div>
+      <div className={`${bold ? "font-bold" : ""} uppercase mb-[5px]`}>
+        {title}
+      </div>
+      <div>{children}</div>
     </div>
   );
 }
