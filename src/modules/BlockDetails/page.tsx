@@ -28,13 +28,14 @@ import {
   BreadcrumbSeparator,
   BreadcrumbLink,
 } from "@/shared/components/breadcrumbs";
-import { DataTable, TableCell, TableHead } from "@/shared/components/dataTable";
+import { DataTable, TableCell } from "@/shared/components/dataTable";
 import { ROUTES } from "@/constants/routes";
 import PageHeader from "@/shared/components/PageHeader";
-import DetailsPageContainer from "@/shared/components/DetailsPageContainer";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
-import SelectorHeader, { SelectItem } from "@/shared/components/SelectorHeader";
+import { Selector, SelectorItem } from "@/shared/components/Selector";
+import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
+import TxTypeToggle from "./TransactionTypeToggle";
 
 const columnHelper = createColumnHelper<TransactionTableData>();
 
@@ -287,7 +288,7 @@ export default function BlockDetails() {
 
   const handleTransactionFilter = useCallback(
     (tab: string) => {
-      const column = transaction_table.getColumn("hash_display");
+      const column = transaction_table.getColumn("hash");
       column?.setFilterValue(tab);
       setTransactionsPagination({
         pageIndex: 0,
@@ -339,7 +340,7 @@ export default function BlockDetails() {
       />
 
       <div className="flex flex-col sl:flex-row sl:h-[66vh] gap-4">
-        <div className="flex flex-col gap-2 sl:overflow-y-scroll">
+        <div className="flex flex-col gap-[6px] sl:overflow-y-scroll">
           <SectionBox variant="upper-half">
             <SectionBoxEntry
               title="Hash"
@@ -485,34 +486,23 @@ export default function BlockDetails() {
         </div>
 
         <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-          <SelectorHeader
-            selected={DataTabs[0]}
+          <DetailsPageSelector
+            selected={(() => {
+              console.debug("initial selected", DataTabs[0]);
+              return DataTabs[0];
+            })()}
             onTabSelect={setSelectedDataTab}
-          >
-            {DataTabs.map((tab) => (
-              <SelectItem name={tab} />
-            ))}
-          </SelectorHeader>
+            items={DataTabs.map((tab) => ({
+              name: tab,
+              value: tab,
+            }))}
+          />
 
-          <div className="mt-2 px-[15px] py-[17px] border border-borderGray rounded-md">
+          <div className="flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray rounded-b-md">
             {selectedDataTab === "Transactions" ? (
-              <div className="flex flex-row text-center mb-3">
-                {TransactionTypeTabs.map((tab, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      backgroundColor:
-                        selectedTransactionType === tab ? "#F3F3F3" : "#fff",
-                      fontWeight:
-                        selectedTransactionType === tab ? "bold" : "normal",
-                    }}
-                    onClick={() => handleTransactionFilter(tab)}
-                    className="w-fit border border-b-4 py-1 px-4 border-[#DBDBDB] uppercase cursor-pointer"
-                  >
-                    <p>{tab}</p>
-                  </div>
-                ))}
-              </div>
+              <TxTypeToggle
+                onFilterChange={(type) => handleTransactionFilter(type)}
+              />
             ) : null}
 
             <div className="w-full h-full">
