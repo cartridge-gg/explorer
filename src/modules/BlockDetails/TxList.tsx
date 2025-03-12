@@ -107,7 +107,7 @@ export default function TxList({ transactions }: TxListProps) {
 
       <div className="sl:h-[50.4vh] sl:grid">
         <table className="min-h-[200px] overflow-x-auto sl:overflow-y-scroll">
-          <thead>
+          <thead className="uppercase">
             <tr>
               {table
                 .getHeaderGroups()
