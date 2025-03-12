@@ -322,8 +322,8 @@ export default function ContractDetails() {
           </div>
 
           {/* Data Tabs Section */}
-          <Tabs defaultValue="read-contract" className="border relative border-[#8E8E8E] flex flex-col gap-4 w-full overflow-y-auto max-h-[61.5rem]">
-            <TabsList className="p-4">
+          <Tabs defaultValue="read-contract" className="border relative border-[#8E8E8E] flex flex-col w-full overflow-y-auto max-h-[61.5rem]">
+            <TabsList>
               <TabsTrigger value="read-contract">Read Contract</TabsTrigger>
               <TabsTrigger value="write-contract">Write Contract</TabsTrigger>
               <TabsTrigger value="code">Code</TabsTrigger>
@@ -690,8 +690,8 @@ export default function ContractDetails() {
                   <SpinnerIcon className="animate-spin" />
                 </div>
               ) : (
-                <Tabs defaultValue="abi" className="relative flex flex-col gap-2">
-                  <TabsList className="max-w-[400px] p-4">
+                <Tabs defaultValue="abi" className="relative flex flex-col gap-2" variant="secondary" size="sm">
+                  <TabsList className="max-w-[400px]">
                     <TabsTrigger value="abi">Contract ABI</TabsTrigger>
                     <TabsTrigger value="sierra">Sierra Bytecode</TabsTrigger>
                   </TabsList>

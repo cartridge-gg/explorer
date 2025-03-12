@@ -26,6 +26,7 @@
     "@types/bn.js": "^5.1.6",
     "axios": "^1.7.9",
     "bn.js": "^5.2.1",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
     "get-starknet": "^3.3.3",
