@@ -28,15 +28,9 @@ import {
   BreadcrumbSeparator,
   BreadcrumbLink,
 } from "@/shared/components/breadcrumbs";
-import {
-  DataTable,
-  TableCell,
-  TableHead,
-  TableHeader,
-} from "@/shared/components/dataTable";
+import { DataTable, TableCell, TableHead } from "@/shared/components/dataTable";
 import { ROUTES } from "@/constants/routes";
 import PageHeader from "@/shared/components/PageHeader";
-import DetailsPageContainer from "@/shared/components/DetailsPageContainer";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 
