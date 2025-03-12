@@ -134,7 +134,7 @@ export function SelectorItem({
       // `margin-right: -1px;` to simulate `border-collapse`
       className={` ${
         className || ""
-      } mr-[-1px] w-full px-2 uppercase cursor-pointer hover:bg-gray-700`}
+      } ml-[-1px] border-l border-l-borderGray w-full px-2 uppercase cursor-pointer hover:bg-gray-700 flex text-center justify-center`}
       {...props}
     >
       {name}

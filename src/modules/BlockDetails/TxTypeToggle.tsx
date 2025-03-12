@@ -11,13 +11,14 @@ export default function TxTypeToggle({ onFilterChange }: TxTypeToggleProps) {
     <Selector
       selected={TxTypesTabs[0]}
       onTabSelect={onFilterChange}
-      className="w-min"
+      className="w-min rounded-sm"
     >
       {TxTypesTabs.map((type) => (
         <SelectorItem
+          key={type}
           name={type}
           value={type}
-          className="border-l border-l-borderGray w-max text-xs py-[2px]"
+          className="w-max text-xs py-[2px]"
         />
       ))}
     </Selector>

@@ -33,9 +33,9 @@ import { ROUTES } from "@/constants/routes";
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
-import { Selector, SelectorItem } from "@/shared/components/Selector";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
-import TxTypeToggle from "./TransactionTypeToggle";
+import TxTypeToggle from "./TxTypeToggle";
+import TxList from "./TxList";
 
 const columnHelper = createColumnHelper<TransactionTableData>();
 
@@ -108,62 +108,6 @@ export default function BlockDetails() {
     },
     [navigate]
   );
-
-  const transaction_columns: ColumnDef<TransactionTableData, any>[] = [
-    columnHelper.accessor("id", {
-      header: "No",
-      cell: (info) => (
-        <TableCell className="w-1 font-bold text-left pr-4">
-          <span>#{info.renderValue()}</span>
-        </TableCell>
-      ),
-    }),
-    columnHelper.accessor("hash", {
-      header: "Hash",
-      cell: (info) => (
-        <TableCell
-          onClick={() => navigateToTxn(info.renderValue())}
-          className="w-full px-[16px] text-left hover:underline hover:text-gray-300 cursor-pointer whitespace-nowrap transition-colors"
-        >
-          {isMobile
-            ? truncateString(info.renderValue(), 10)
-            : info.renderValue()}
-        </TableCell>
-      ),
-      filterFn: (row, columnId, filterValue) => {
-        const rowValue: string = row.getValue(columnId);
-        if (filterValue === undefined || filterValue === "All") return true;
-        return rowValue.includes(filterValue.toUpperCase());
-      },
-    }),
-    columnHelper.accessor("type", {
-      header: "Type",
-      cell: (info) => (
-        <TableCell className="w-min">{info.renderValue()}</TableCell>
-      ),
-    }),
-    columnHelper.accessor("status", {
-      header: "Status",
-      cell: (info) => (
-        <TableCell className="w-min capitalize">{info.renderValue()}</TableCell>
-      ),
-    }),
-  ];
-
-  const transaction_table = useReactTable<TransactionTableData>({
-    data: transactionsData,
-    columns: transaction_columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-
-    state: {
-      pagination: {
-        pageIndex: transactionsPagination.pageIndex,
-        pageSize: transactionsPagination.pageSize,
-      },
-    },
-  });
 
   const event_columns: ColumnDef<EventTableData, any>[] = [
     eventColumnHelper.accessor("id", {
@@ -285,19 +229,6 @@ export default function BlockDetails() {
 
     setTransactionsData(transactions_table_data);
   }, []);
-
-  const handleTransactionFilter = useCallback(
-    (tab: string) => {
-      const column = transaction_table.getColumn("hash");
-      column?.setFilterValue(tab);
-      setTransactionsPagination({
-        pageIndex: 0,
-        pageSize: 20,
-      });
-      setSelectedTransactionType(tab);
-    },
-    [transaction_table]
-  );
 
   useEffect(() => {
     if (!BlockReceipt) return;
@@ -523,10 +454,7 @@ export default function BlockDetails() {
 
         <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
           <DetailsPageSelector
-            selected={(() => {
-              console.debug("initial selected", DataTabs[0]);
-              return DataTabs[0];
-            })()}
+            selected={DataTabs[0]}
             onTabSelect={setSelectedDataTab}
             items={DataTabs.map((tab) => ({
               name: tab,
@@ -535,19 +463,9 @@ export default function BlockDetails() {
           />
 
           <div className="flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray rounded-b-md">
-            {selectedDataTab === "Transactions" ? (
-              <TxTypeToggle
-                onFilterChange={(type) => handleTransactionFilter(type)}
-              />
-            ) : null}
-
             <div className="w-full h-full">
               {selectedDataTab === "Transactions" ? (
-                <DataTable
-                  table={transaction_table}
-                  pagination={transactionsPagination}
-                  setPagination={setTransactionsPagination}
-                />
+                <TxList transactions={transactionsData} />
               ) : selectedDataTab === "Events" ? (
                 <DataTable
                   table={events_table}

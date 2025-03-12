@@ -106,28 +106,34 @@ function DataTable<T>({
     <div className="sl:h-[50.4vh] sl:grid" {...props}>
       <Table className="min-h-[200px] overflow-x-auto sl:overflow-y-scroll">
         <TableHeader>
-          {table
-            .getHeaderGroups()
-            .map((headerGroup) =>
-              headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-                </TableHead>
-              ))
-            )}
+          <TableRow>
+            {table
+              .getHeaderGroups()
+              .map((headerGroup) =>
+                headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </TableHead>
+                ))
+              )}
+          </TableRow>
         </TableHeader>
 
         <TableBody>
           {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
+            table.getRowModel().rows.map((row, id) => (
+              <TableRow key={id} onClick={() => {}}>
                 {row.getVisibleCells().map((cell) => {
-                  return flexRender(
-                    cell.column.columnDef.cell,
-                    cell.getContext()
+                  return (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
                   );
                 })}
               </TableRow>

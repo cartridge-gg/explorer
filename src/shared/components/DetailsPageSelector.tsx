@@ -31,10 +31,11 @@ export default function DetailsPageSelector({
       <Selector
         selected={selected}
         onTabSelect={onTabSelect}
-        className="text-center"
+        className="text-center rounded-sm"
       >
         {items.map((item) => (
           <SelectorItem
+            key={item.name}
             name={item.name}
             value={item.value}
             className="px-2 py-1"
