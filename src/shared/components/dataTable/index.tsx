@@ -81,11 +81,12 @@ interface DataTableProps<T> {
   setPagination: React.Dispatch<
     React.SetStateAction<{ pageIndex: number; pageSize: number }>
   >;
+  className?: string;
 }
 
-function DataTable<T>({ table, pagination, setPagination }: DataTableProps<T>) {
+function DataTable<T>({ table, pagination, setPagination, className }: DataTableProps<T>) {
   return (
-    <div className="flex relative flex-col max-w-screen justify-between h-full sm:w-full w-screen overflow-x-auto">
+    <div className={cn("flex relative flex-col max-w-screen justify-between h-full sm:w-full w-screen overflow-x-auto", className)}>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -94,9 +95,9 @@ function DataTable<T>({ table, pagination, setPagination }: DataTableProps<T>) {
                 return header.isPlaceholder
                   ? null
                   : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    );
+                    header.column.columnDef.header,
+                    header.getContext()
+                  );
               })}
             </TableRow>
           ))}

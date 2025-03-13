@@ -13,7 +13,7 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
 import dayjs from "dayjs";
@@ -32,20 +32,16 @@ import {
   DataTable,
   TableCell,
   TableHead,
-  TableHeader,
 } from "@/shared/components/dataTable";
 import { ROUTES } from "@/constants/routes";
 import PageHeader from "@/shared/components/PageHeader";
-import DetailsPageContainer from "@/shared/components/DetailsPageContainer";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/components/tab";
 
 const columnHelper = createColumnHelper<TransactionTableData>();
 
 const eventColumnHelper = createColumnHelper<EventTableData>();
-
-const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
-const TransactionTypeTabs = ["All", "Invoke", "Deploy Account", "Declare"];
 
 export default function BlockDetails() {
   const navigate = useNavigate();
@@ -54,10 +50,6 @@ export default function BlockDetails() {
   const [transactionsData, setTransactionsData] = useState<
     TransactionTableData[]
   >([]);
-  const [selectedDataTab, setSelectedDataTab] = React.useState(DataTabs[0]);
-  const [selectedTransactionType, setSelectedTransactionType] = React.useState(
-    TransactionTypeTabs[0]
-  );
   const [eventsData, setEventsData] = useState([]);
   const [executionData, setExecutionData] = useState({
     bitwise: 0,
@@ -297,9 +289,8 @@ export default function BlockDetails() {
             // process info for transactions table
             transactions_table_data.push({
               id: padNumber(transactions_table_data.length + 1),
-              hash_display: `${
-                tx.transaction_hash
-              } ( ${formatSnakeCaseToDisplayValue(tx.type)} )`,
+              hash_display: `${tx.transaction_hash
+                } ( ${formatSnakeCaseToDisplayValue(tx.type)} )`,
               type: tx.type,
               status: receipt.statusReceipt,
               hash: tx.transaction_hash,
@@ -320,7 +311,6 @@ export default function BlockDetails() {
         pageIndex: 0,
         pageSize: 20,
       });
-      setSelectedTransactionType(tab);
     },
     [transaction_table]
   );
@@ -406,12 +396,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_gas_price?.price_in_wei
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_gas_price?.price_in_wei
                             )
                           )
+                        )
                         : 0}{" "}
                       WEI
                     </td>
@@ -421,12 +411,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_gas_price?.price_in_fri
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_gas_price?.price_in_fri
                             )
                           )
+                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -443,12 +433,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_data_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_data_gas_price?.price_in_wei
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_data_gas_price?.price_in_wei
                             )
                           )
+                        )
                         : 0}{" "}
                       ETH
                     </td>
@@ -458,12 +448,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_data_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_data_gas_price?.price_in_fri
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_data_gas_price?.price_in_fri
                             )
                           )
+                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -547,63 +537,48 @@ export default function BlockDetails() {
           </SectionBox>
         </div>
 
-        <div className="border border-borderGray flex flex-col flex-grow gap-4 p-[15px] rounded-md">
-          <div className="flex flex-col sm:flex-row text-center pt-5">
-            {DataTabs.map((tab, index) => (
-              <div
-                key={index}
-                style={{
-                  backgroundColor: selectedDataTab === tab ? "#8E8E8E" : "#fff",
-                  color: selectedDataTab === tab ? "#fff" : "#000",
-                }}
-                onClick={() => setSelectedDataTab(tab)}
-                className="w-full  border border-b-4 p-2 border-[#8E8E8E] uppercase cursor-pointer"
-              >
-                <p>{tab}</p>
-              </div>
-            ))}
-          </div>
+        <Tabs defaultValue="transactions" className="border border-borderGray flex flex-col flex-grow p-[15px] rounded-md">
+          <TabsList>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="events">Events</TabsTrigger>
+            <TabsTrigger value="messages">Messages</TabsTrigger>
+            <TabsTrigger value="state-updates">State Updates</TabsTrigger>
+          </TabsList>
 
-          {selectedDataTab === "Transactions" ? (
-            <div className="flex flex-row text-center">
-              {TransactionTypeTabs.map((tab, index) => (
-                <div
-                  key={index}
-                  style={{
-                    backgroundColor:
-                      selectedTransactionType === tab ? "#F3F3F3" : "#fff",
-                    fontWeight:
-                      selectedTransactionType === tab ? "bold" : "normal",
-                  }}
-                  onClick={() => handleTransactionFilter(tab)}
-                  className="w-fit border border-b-4 py-1 px-4 border-[#DBDBDB] uppercase cursor-pointer"
-                >
-                  <p>{tab}</p>
-                </div>
-              ))}
-            </div>
-          ) : null}
+          <TabsContent value="transactions">
+            <Tabs defaultValue="all" size="sm" variant="secondary" onValueChange={handleTransactionFilter}>
+              <TabsList>
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="invoke">Invoke</TabsTrigger>
+                <TabsTrigger value="deploy-account">Deploy Account</TabsTrigger>
+                <TabsTrigger value="declare">Declare</TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-          <div className=" h-full pb-2 w-full">
-            {selectedDataTab === "Transactions" ? (
-              <DataTable
-                table={transaction_table}
-                pagination={transactionsPagination}
-                setPagination={setTransactionsPagination}
-              />
-            ) : selectedDataTab === "Events" ? (
-              <DataTable
-                table={events_table}
-                pagination={eventsPagination}
-                setPagination={setEventsPagination}
-              />
-            ) : (
-              <div className="p-4 text-center">
-                <p className="text-black">No data found</p>
-              </div>
-            )}
-          </div>
-        </div>
+            <DataTable
+              table={transaction_table}
+              pagination={transactionsPagination}
+              setPagination={setTransactionsPagination}
+              className="p-4"
+            />
+          </TabsContent>
+
+          <TabsContent value="events" className="p-4">
+            <DataTable
+              table={events_table}
+              pagination={eventsPagination}
+              setPagination={setEventsPagination}
+            />
+          </TabsContent>
+
+          <TabsContent value="messages" className="p-4 text-center">
+            <p>No data found</p>
+          </TabsContent>
+
+          <TabsContent value="state-updates" className="p-4 text-center">
+            <p>No data found</p>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
