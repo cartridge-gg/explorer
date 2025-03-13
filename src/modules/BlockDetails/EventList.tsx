@@ -1,30 +1,26 @@
-import React, { useCallback, useState } from "react";
+import { useScreen } from "@/shared/hooks/useScreen";
+import { truncateString } from "@/shared/utils/string";
+import { ROUTES } from "@/constants/routes";
+import { EventTableData } from "@/types/types";
 import {
   ColumnDef,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ROUTES } from "@/constants/routes";
-import TxTypeToggle from "./TxTypeToggle";
-import { TransactionTableData } from "@/types/types";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useScreen } from "@/shared/hooks/useScreen";
-import { truncateString } from "@/shared/utils/string";
 
-const TransactionTypeTabs = ["All", "Invoke", "Deploy Account", "Declare"];
-
-interface TxListProps {
-  transactions: TransactionTableData[];
+interface EventListProps {
+  events: EventTableData[];
 }
 
-export default function TxList({ transactions }: TxListProps) {
+export default function EventList({ events }: EventListProps) {
   const navigate = useNavigate();
   const { isMobile } = useScreen();
-
+  // https://explorer.cartridge.gg/contract/0x7f3eaec96dc9a97f658a6c93bd486646213921da9a07df6802a4ad12b9a9f89
   const navigateToTxn = useCallback(
     (txnHash: string) => {
       navigate(
@@ -34,17 +30,26 @@ export default function TxList({ transactions }: TxListProps) {
     [navigate]
   );
 
-  const [txType, setTxType] = React.useState(TransactionTypeTabs[0]);
+  const navigateToContract = useCallback(
+    (contractAddress: string) => {
+      navigate(
+        `${ROUTES.CONTRACT_DETAILS.urlPath.replace(
+          ":contractAddress",
+          contractAddress
+        )}`
+      );
+    },
+    [navigate]
+  );
 
-  const columnHelper = createColumnHelper<TransactionTableData>();
-
-  const transaction_columns: ColumnDef<TransactionTableData, any>[] = [
+  const columnHelper = createColumnHelper<EventTableData>();
+  const columns: ColumnDef<EventTableData, any>[] = [
     columnHelper.accessor("id", {
       header: "No",
       cell: (info) => info.renderValue(),
     }),
-    columnHelper.accessor("hash", {
-      header: "Hash",
+    columnHelper.accessor("txn_hash", {
+      header: "Transaction",
       cell: (info) => (
         <>
           {isMobile
@@ -52,19 +57,10 @@ export default function TxList({ transactions }: TxListProps) {
             : info.renderValue()}
         </>
       ),
-      filterFn: (row, columnId, filterValue) => {
-        const rowValue: string = row.getValue(columnId);
-        if (filterValue === undefined || filterValue === "All") return true;
-        return rowValue.includes(filterValue.toUpperCase());
-      },
     }),
-    columnHelper.accessor("type", {
-      header: "Type",
-      cell: (info) => <span>{info.renderValue()}</span>,
-    }),
-    columnHelper.accessor("status", {
-      header: "Status",
-      cell: (info) => <span>{info.renderValue()}</span>,
+    columnHelper.accessor("from", {
+      header: "From Address",
+      cell: (info) => truncateString(info.renderValue()),
     }),
   ];
 
@@ -73,38 +69,21 @@ export default function TxList({ transactions }: TxListProps) {
     pageSize: 20,
   });
 
-  const table = useReactTable<TransactionTableData>({
-    data: transactions,
-    columns: transaction_columns,
+  const table = useReactTable({
+    data: events,
+    columns: columns,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-
     state: {
       pagination: {
-        pageSize: pagination.pageSize,
         pageIndex: pagination.pageIndex,
+        pageSize: pagination.pageSize,
       },
     },
   });
 
-  const handleTransactionFilter = useCallback(
-    (type: string) => {
-      const column = table.getColumn("hash");
-      column?.setFilterValue(type);
-      setPagination({
-        pageIndex: 0,
-        pageSize: 20,
-      });
-      setTxType(type);
-    },
-    [table]
-  );
-
   return (
     <div className="flex flex-col gap-2">
-      <TxTypeToggle onFilterChange={(type) => handleTransactionFilter(type)} />
-
       <div className="sl:h-[50.4vh] sl:grid">
         <table className="min-h-[200px] overflow-x-auto sl:overflow-y-scroll">
           <thead className="uppercase">
@@ -127,27 +106,46 @@ export default function TxList({ transactions }: TxListProps) {
           <tbody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row, id) => (
-                <tr
-                  key={id}
-                  onClick={() => navigateToTxn(row.original.hash)}
-                  className="hover:bg-gray-100 cursor-pointer"
-                >
+                <tr key={id} className="hover:bg-gray-100 ">
                   {row.getVisibleCells().map((cell) => {
-                    return (
-                      <td
-                        key={cell.id}
-                        className={`${
-                          cell.column.id === "hash"
-                            ? "hover:underline text-left px-[15px]"
-                            : ""
-                        } `}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    );
+                    if (cell.column.id === "txn_hash") {
+                      return (
+                        <td
+                          key={cell.id}
+                          onClick={() => navigateToTxn(row.original.txn_hash)}
+                          className={
+                            "hover:underline cursor-pointer text-left px-[15px]"
+                          }
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      );
+                    } else if (cell.column.id === "from") {
+                      return (
+                        <td
+                          key={cell.id}
+                          onClick={() => navigateToContract(row.original.from)}
+                          className={"hover:underline cursor-pointer"}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      );
+                    } else {
+                      return (
+                        <td key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      );
+                    }
                   })}
                 </tr>
               ))
