@@ -5,16 +5,8 @@ import {
   truncateString,
 } from "@/shared/utils/string";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ColumnDef,
-  createColumnHelper,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
 import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
@@ -28,32 +20,24 @@ import {
   BreadcrumbSeparator,
   BreadcrumbLink,
 } from "@/shared/components/breadcrumbs";
-import { DataTable, TableCell, TableHead } from "@/shared/components/dataTable";
-import { ROUTES } from "@/constants/routes";
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
-
-const columnHelper = createColumnHelper<TransactionTableData>();
-
-const eventColumnHelper = createColumnHelper<EventTableData>();
+import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
+import TxList from "./TxList";
+import EventList from "./EventList";
 
 const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
-const TransactionTypeTabs = ["All", "Invoke", "Deploy Account", "Declare"];
 
 export default function BlockDetails() {
-  const navigate = useNavigate();
-  const { blockNumber } = useParams<{ blockNumber: string }>();
   const { isMobile } = useScreen();
-  const [transactionsData, setTransactionsData] = useState<
-    TransactionTableData[]
-  >([]);
+
   const [selectedDataTab, setSelectedDataTab] = React.useState(DataTabs[0]);
-  const [selectedTransactionType, setSelectedTransactionType] = React.useState(
-    TransactionTypeTabs[0]
-  );
-  const [eventsData, setEventsData] = useState([]);
-  const [executionData, setExecutionData] = useState({
+  const { blockNumber } = useParams<{ blockNumber: string }>();
+
+  const [txsTable, setTxsTable] = useState<TransactionTableData[]>([]);
+  const [eventsTable, setEventsTable] = useState<EventTableData[]>([]);
+  const [executionTable, setExecutionTable] = useState({
     bitwise: 0,
     pedersen: 0,
     range_check: 0,
@@ -69,168 +53,10 @@ export default function BlockDetails() {
     steps: 0,
   });
 
-  const [transactionsPagination, setTransactionsPagination] = useState({
-    pageIndex: 0,
-    pageSize: 20,
-  });
-
-  const [eventsPagination, setEventsPagination] = useState({
-    pageIndex: 0,
-    pageSize: 20,
-  });
-
   const { data: BlockReceipt } = useQuery({
     queryKey: [""],
     queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockNumber ?? 0),
     enabled: !!blockNumber,
-  });
-
-  const navigateToTxn = useCallback(
-    (txnHash: string) => {
-      navigate(
-        `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(":txHash", txnHash)}`
-      );
-    },
-    [navigate]
-  );
-
-  const navigateToContract = useCallback(
-    (contractAddress: string) => {
-      navigate(
-        `${ROUTES.CONTRACT_DETAILS.urlPath.replace(
-          ":contractAddress",
-          contractAddress
-        )}`
-      );
-    },
-    [navigate]
-  );
-
-  const transaction_columns: ColumnDef<TransactionTableData, any>[] = [
-    columnHelper.accessor("id", {
-      header() {
-        return null;
-      },
-      cell: (info) => (
-        <TableCell className="w-1 font-bold text-left pr-4">
-          <span>#{info.renderValue()}</span>
-        </TableCell>
-      ),
-    }),
-    columnHelper.accessor("hash_display", {
-      header() {
-        return null;
-      },
-      cell: (info) => (
-        <TableCell
-          onClick={() => navigateToTxn(info.renderValue().split(" ")[0])}
-          className="w-full px-[16px] text-left hover:text-blue-400 transition-colors cursor-pointer"
-        >
-          <span className="whitespace-nowrap ">
-            {isMobile
-              ? truncateString(info.renderValue(), 10)
-              : info.renderValue()}
-          </span>
-        </TableCell>
-      ),
-      filterFn: (row, columnId, filterValue) => {
-        const rowValue: string = row.getValue(columnId);
-        if (filterValue === undefined || filterValue === "All") return true;
-        return rowValue.includes(filterValue.toUpperCase());
-      },
-    }),
-    columnHelper.accessor("status", {
-      header() {
-        return null;
-      },
-      cell: (info) => (
-        <TableCell className="w-1 text-right">
-          <span>{info.renderValue()}</span>
-        </TableCell>
-      ),
-    }),
-  ];
-
-  const transaction_table = useReactTable<TransactionTableData>({
-    data: transactionsData,
-    columns: transaction_columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    state: {
-      pagination: {
-        pageIndex: transactionsPagination.pageIndex,
-        pageSize: transactionsPagination.pageSize,
-      },
-    },
-  });
-
-  const event_columns: ColumnDef<EventTableData, any>[] = [
-    eventColumnHelper.accessor("id", {
-      header() {
-        return (
-          <TableHead className="text-left">
-            <span>#</span>
-          </TableHead>
-        );
-      },
-      cell: (info) => (
-        <TableCell className="w-1 font-bold text-left pr-4">
-          <span>#{info.renderValue()}</span>
-        </TableCell>
-      ),
-    }),
-    eventColumnHelper.accessor("txn_hash", {
-      header() {
-        return (
-          <TableHead className="text-left">
-            <span>Txn Hash</span>
-          </TableHead>
-        );
-      },
-      cell: (info) => (
-        <TableCell
-          onClick={() => navigateToTxn(info.renderValue())}
-          className="w-full flex items-center overflow-hidden cursor-pointer pr-4 hover:text-blue-400 transition-all"
-        >
-          <span className="whitespace-nowrap">
-            {isMobile
-              ? truncateString(info.renderValue(), 10)
-              : info.renderValue()}
-          </span>
-          <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
-        </TableCell>
-      ),
-    }),
-    eventColumnHelper.accessor("from", {
-      header() {
-        return (
-          <TableHead className="text-right">
-            <span>From Address</span>
-          </TableHead>
-        );
-      },
-      cell: (info) => (
-        <TableCell className="w-1 cursor-pointer hover:text-blue-400 transition-all text-right">
-          <span onClick={() => navigateToContract(info.renderValue())}>
-            {truncateString(info.renderValue())}
-          </span>
-        </TableCell>
-      ),
-    }),
-  ];
-
-  const events_table = useReactTable({
-    data: eventsData,
-    columns: event_columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    state: {
-      pagination: {
-        pageIndex: eventsPagination.pageIndex,
-        pageSize: eventsPagination.pageSize,
-      },
-    },
   });
 
   const processBlockInformation = useCallback(async (transactions) => {
@@ -238,7 +64,6 @@ export default function BlockDetails() {
 
     const transactions_table_data: {
       id: string;
-      hash_display: string;
       type: string;
       status: string;
       hash: string;
@@ -250,7 +75,7 @@ export default function BlockDetails() {
             // process block events
             if (receipt?.events) {
               receipt.events.forEach((event) => {
-                setEventsData((prev) => {
+                setEventsTable((prev) => {
                   return [
                     ...prev,
                     {
@@ -280,7 +105,7 @@ export default function BlockDetails() {
               } else {
                 const key_map = EXECUTION_RESOURCES_KEY_MAP[key];
                 if (key_map) {
-                  setExecutionData((prev) => ({
+                  setExecutionTable((prev) => ({
                     ...prev,
                     [key_map]: prev[key_map] + receipt.execution_resources[key],
                   }));
@@ -291,9 +116,9 @@ export default function BlockDetails() {
             // process info for transactions table
             transactions_table_data.push({
               id: padNumber(transactions_table_data.length + 1),
-              hash_display: `${
-                tx.transaction_hash
-              } ( ${formatSnakeCaseToDisplayValue(tx.type)} )`,
+              // hash_display: `${
+              //   tx.transaction_hash
+              // } ( ${formatSnakeCaseToDisplayValue(tx.type)} )`,
               type: tx.type,
               status: receipt.statusReceipt,
               hash: tx.transaction_hash,
@@ -303,21 +128,8 @@ export default function BlockDetails() {
       })
     );
 
-    setTransactionsData(transactions_table_data);
+    setTxsTable(transactions_table_data);
   }, []);
-
-  const handleTransactionFilter = useCallback(
-    (tab: string) => {
-      const column = transaction_table.getColumn("hash_display");
-      column?.setFilterValue(tab);
-      setTransactionsPagination({
-        pageIndex: 0,
-        pageSize: 20,
-      });
-      setSelectedTransactionType(tab);
-    },
-    [transaction_table]
-  );
 
   useEffect(() => {
     if (!BlockReceipt) return;
@@ -360,7 +172,7 @@ export default function BlockDetails() {
       />
 
       <div className="flex flex-col sl:flex-row sl:h-[66vh] gap-4">
-        <div className="flex flex-col gap-2 sl:overflow-y-scroll">
+        <div className="flex flex-col gap-[6px] sl:overflow-y-scroll">
           <SectionBox variant="upper-half">
             <SectionBoxEntry title="Hash">
               {isMobile
@@ -509,7 +321,7 @@ export default function BlockDetails() {
               </thead>
 
               <tbody className="text-center">
-                {Object.entries(executionData).map(
+                {Object.entries(executionTable).map(
                   ([key, value], index, array) => {
                     const heading = formatSnakeCaseToDisplayValue(key);
                     return index % 2 === 0 ? (
@@ -541,61 +353,28 @@ export default function BlockDetails() {
           </SectionBox>
         </div>
 
-        <div className="border border-borderGray flex flex-col flex-grow gap-4 p-[15px] rounded-md">
-          <div className="flex flex-col sm:flex-row text-center pt-5">
-            {DataTabs.map((tab, index) => (
-              <div
-                key={index}
-                style={{
-                  backgroundColor: selectedDataTab === tab ? "#8E8E8E" : "#fff",
-                  color: selectedDataTab === tab ? "#fff" : "#000",
-                }}
-                onClick={() => setSelectedDataTab(tab)}
-                className="w-full  border border-b-4 p-2 border-[#8E8E8E] uppercase cursor-pointer"
-              >
-                <p>{tab}</p>
-              </div>
-            ))}
-          </div>
+        <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+          <DetailsPageSelector
+            selected={DataTabs[0]}
+            onTabSelect={setSelectedDataTab}
+            items={DataTabs.map((tab) => ({
+              name: tab,
+              value: tab,
+            }))}
+          />
 
-          {selectedDataTab === "Transactions" ? (
-            <div className="flex flex-row text-center">
-              {TransactionTypeTabs.map((tab, index) => (
-                <div
-                  key={index}
-                  style={{
-                    backgroundColor:
-                      selectedTransactionType === tab ? "#F3F3F3" : "#fff",
-                    fontWeight:
-                      selectedTransactionType === tab ? "bold" : "normal",
-                  }}
-                  onClick={() => handleTransactionFilter(tab)}
-                  className="w-fit border border-b-4 py-1 px-4 border-[#DBDBDB] uppercase cursor-pointer"
-                >
-                  <p>{tab}</p>
+          <div className="flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray rounded-b-md">
+            <div className="w-full h-full">
+              {selectedDataTab === "Transactions" ? (
+                <TxList transactions={txsTable} />
+              ) : selectedDataTab === "Events" ? (
+                <EventList events={eventsTable} />
+              ) : (
+                <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
+                  <span className="text-[#D0D0D0]">No data found</span>
                 </div>
-              ))}
+              )}
             </div>
-          ) : null}
-
-          <div className=" h-full pb-2 w-full">
-            {selectedDataTab === "Transactions" ? (
-              <DataTable
-                table={transaction_table}
-                pagination={transactionsPagination}
-                setPagination={setTransactionsPagination}
-              />
-            ) : selectedDataTab === "Events" ? (
-              <DataTable
-                table={events_table}
-                pagination={eventsPagination}
-                setPagination={setEventsPagination}
-              />
-            ) : (
-              <div className="p-4 text-center">
-                <p className="text-black">No data found</p>
-              </div>
-            )}
           </div>
         </div>
       </div>

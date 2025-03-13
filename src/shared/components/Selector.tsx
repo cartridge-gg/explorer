@@ -12,7 +12,7 @@ import React, {
  * This module provides a tab/selector component system with the following parts:
  *
  * 1. SelectorContext - Shares state between parent and child components
- * 2. Selector - Container component that manages selection state
+ * 2. Selector - Selector component that manages selection state
  * 3. SelectorItem - Individual tab items that can be selected
  *
  * These components work together through React's Context API to create
@@ -20,45 +20,46 @@ import React, {
  */
 
 interface SelectorContextType {
-  selected: string;
+  selected?: string;
   setSelected: (tab: string) => void;
 }
 
 /**
  * Context that allows SelectorItem components to access and modify
- * the currently selected tab state from their parent SelectorHeader
+ * the currently selected tab state from their parent Container
  */
 const SelectorContext = createContext<SelectorContextType | undefined>(
   undefined
 );
 
-interface SelectorHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface SelectorProps extends React.HTMLAttributes<HTMLDivElement> {
   selected?: string; // Initial selected tab
   onTabSelect?: (tab: string) => void; // Callback when selection changes
-  children: React.ReactNode; // Tab items (SelectorItem components)
 }
 
 /**
- * Container component that manages tab selection state
+ * The container component that manages tab selection state
  *
- * Wraps SelectorItem components and provides them with selection context
+ * Wraps Item components and provides them with selection context
  * through SelectorContext.Provider
  */
-export default function Selector({
-  selected: initialSelectedTab = "",
+export function Selector({
+  selected: initialSelectedTab,
   onTabSelect: onSelect,
   children,
   className,
   ...props
-}: SelectorHeaderProps) {
-  const [selected, setSelected] = useState(initialSelectedTab);
+}: SelectorProps) {
+  const [selected, setSelected] = useState<string | undefined>(
+    initialSelectedTab
+  );
 
   // Notify parent component of initial selection
   useEffect(() => {
     if (initialSelectedTab && onSelect) {
       onSelect(initialSelectedTab);
     }
-  }, [initialSelectedTab, onSelect]);
+  }, [initialSelectedTab]);
 
   // Handle tab selection and propagate changes to parent component
   const handleTabSelect = useCallback(
@@ -73,10 +74,10 @@ export default function Selector({
 
   return (
     <SelectorContext.Provider
-      value={{ selected: selected, setSelected: handleTabSelect }}
+      value={{ selected, setSelected: handleTabSelect }}
     >
       <div
-        className={`border border-borderGray flex border-collapse overflow-clip ${
+        className={`border border-borderGray flex overflow-hidden ${
           className || ""
         }`}
         {...props}
@@ -87,10 +88,7 @@ export default function Selector({
   );
 }
 
-/**
- * Props for the SelectorItem component
- */
-interface SelectorItemProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface SelectItemProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string; // Display name
   value: string; // The actual value
 }
@@ -98,7 +96,7 @@ interface SelectorItemProps extends React.HTMLAttributes<HTMLDivElement> {
 /**
  * Individual tab component that can be selected
  *
- * Must be used as a child of SelectorHeader to function properly
+ * Must be used as a child of Selector to function properly
  * as it relies on SelectorContext to access selection state
  */
 export function SelectorItem({
@@ -106,7 +104,7 @@ export function SelectorItem({
   value,
   className,
   ...props
-}: SelectorItemProps) {
+}: SelectItemProps) {
   const context = useContext(SelectorContext);
   if (!context) {
     throw new Error("SelectorItem must be used within a Selector");
@@ -122,8 +120,9 @@ export function SelectorItem({
   const itemStyle = React.useMemo<React.CSSProperties>(
     () => ({
       color: isSelected ? "#ffff" : "#000000",
-      backgroundColor: isSelected ? "#D0D0D0" : "#ffff",
+      backgroundColor: isSelected ? "#B0B0B0" : "#ffff",
       boxShadow: isSelected ? "inset 0px 1px 3px rgba(0, 0, 0, 0.25)" : "none",
+      fontWeight: isSelected ? "bold" : "normal",
     }),
     [isSelected]
   );
@@ -135,7 +134,7 @@ export function SelectorItem({
       // `margin-right: -1px;` to simulate `border-collapse`
       className={` ${
         className || ""
-      } mr-[-1px] w-full px-2  uppercase font-bold transition-colors ease-in duration-75 cursor-pointer`}
+      } ml-[-1px] border-l border-l-borderGray w-full px-2 uppercase cursor-pointer hover:bg-gray-700 flex text-center justify-center`}
       {...props}
     >
       {name}
