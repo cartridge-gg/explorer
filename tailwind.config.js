@@ -6,6 +6,10 @@ export default {
       colors: {
         primary: "#262626",
         borderGray: "#D0D0D0",
+        starknet: {
+          primary: "#FF4F0A",
+          secondary: "#29296E",
+        },
       },
       screens: {
         // `slightly large` as it sits between lg and xl
