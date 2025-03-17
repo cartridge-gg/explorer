@@ -324,7 +324,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                                   index !== array.length - 1 ? "border-b" : ""
                                 }`}
                               >
-                                <td className="px-2 py-1 text-left w-1/6 whitespace-nowrap">
+                                <td className="px-2 py-1 text-left w-1/6 ">
                                   <span className="font-bold mr-4">
                                     {index + 1}
                                   </span>
