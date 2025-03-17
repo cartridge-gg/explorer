@@ -58,7 +58,6 @@ export type TransactionTableData = {
   hash: string;
   type: TransactionType;
   status: string;
-  hash_display: string;
 };
 
 // Event Table Types
@@ -119,3 +118,6 @@ export const EXECUTION_RESOURCES_KEY_MAP = {
 } as const;
 
 export type ExecutionResourcesKeyMap = typeof EXECUTION_RESOURCES_KEY_MAP;
+
+export type StarknetChainId = "SN_MAIN" | "SN_SEPOLIA";
+export type ChainId = StarknetChainId | string;

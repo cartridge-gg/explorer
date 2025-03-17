@@ -5,16 +5,8 @@ import {
   truncateString,
 } from "@/shared/utils/string";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ColumnDef,
-  createColumnHelper,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
@@ -28,30 +20,25 @@ import {
   BreadcrumbSeparator,
   BreadcrumbLink,
 } from "@/shared/components/breadcrumbs";
-import {
-  DataTable,
-  TableCell,
-  TableHead,
-} from "@/shared/components/dataTable";
-import { ROUTES } from "@/constants/routes";
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/components/tab";
-
-const columnHelper = createColumnHelper<TransactionTableData>();
-
-const eventColumnHelper = createColumnHelper<EventTableData>();
+import TxList from "./TxList";
+import EventList from "./EventList";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/shared/components/tab";
 
 export default function BlockDetails() {
-  const navigate = useNavigate();
-  const { blockNumber } = useParams<{ blockNumber: string }>();
   const { isMobile } = useScreen();
-  const [transactionsData, setTransactionsData] = useState<
-    TransactionTableData[]
-  >([]);
-  const [eventsData, setEventsData] = useState([]);
-  const [executionData, setExecutionData] = useState({
+  const { blockNumber } = useParams<{ blockNumber: string }>();
+
+  const [txsTable, setTxsTable] = useState<TransactionTableData[]>([]);
+  const [eventsTable, setEventsTable] = useState<EventTableData[]>([]);
+  const [executionTable, setExecutionTable] = useState({
     bitwise: 0,
     pedersen: 0,
     range_check: 0,
@@ -67,180 +54,16 @@ export default function BlockDetails() {
     steps: 0,
   });
 
-  const [transactionsPagination, setTransactionsPagination] = useState({
-    pageIndex: 0,
-    pageSize: 20,
-  });
-
-  const [eventsPagination, setEventsPagination] = useState({
-    pageIndex: 0,
-    pageSize: 20,
-  });
-
   const { data: BlockReceipt } = useQuery({
     queryKey: [""],
     queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockNumber ?? 0),
     enabled: !!blockNumber,
   });
 
-  const navigateToTxn = useCallback(
-    (txnHash: string) => {
-      navigate(
-        `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(":txHash", txnHash)}`
-      );
-    },
-    [navigate]
-  );
-
-  const navigateToContract = useCallback(
-    (contractAddress: string) => {
-      navigate(
-        `${ROUTES.CONTRACT_DETAILS.urlPath.replace(
-          ":contractAddress",
-          contractAddress
-        )}`
-      );
-    },
-    [navigate]
-  );
-
-  const transaction_columns: ColumnDef<TransactionTableData, any>[] = [
-    columnHelper.accessor("id", {
-      header() {
-        return null;
-      },
-      cell: (info) => (
-        <TableCell className="w-1 font-bold text-left pr-4">
-          <span>#{info.renderValue()}</span>
-        </TableCell>
-      ),
-    }),
-    columnHelper.accessor("hash_display", {
-      header() {
-        return null;
-      },
-      cell: (info) => (
-        <TableCell
-          onClick={() => navigateToTxn(info.renderValue().split(" ")[0])}
-          className="w-full px-[16px] text-left hover:text-blue-400 transition-colors cursor-pointer"
-        >
-          <span className="whitespace-nowrap ">
-            {isMobile
-              ? truncateString(info.renderValue(), 10)
-              : info.renderValue()}
-          </span>
-        </TableCell>
-      ),
-      filterFn: (row, columnId, filterValue) => {
-        const rowValue: string = row.getValue(columnId);
-        if (filterValue === undefined || filterValue === "All") return true;
-        return rowValue.includes(filterValue.toUpperCase());
-      },
-    }),
-    columnHelper.accessor("status", {
-      header() {
-        return null;
-      },
-      cell: (info) => (
-        <TableCell className="w-1 text-right">
-          <span>{info.renderValue()}</span>
-        </TableCell>
-      ),
-    }),
-  ];
-
-  const transaction_table = useReactTable<TransactionTableData>({
-    data: transactionsData,
-    columns: transaction_columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    state: {
-      pagination: {
-        pageIndex: transactionsPagination.pageIndex,
-        pageSize: transactionsPagination.pageSize,
-      },
-    },
-  });
-
-  const event_columns: ColumnDef<EventTableData, any>[] = [
-    eventColumnHelper.accessor("id", {
-      header() {
-        return (
-          <TableHead className="text-left">
-            <span>#</span>
-          </TableHead>
-        );
-      },
-      cell: (info) => (
-        <TableCell className="w-1 font-bold text-left pr-4">
-          <span>#{info.renderValue()}</span>
-        </TableCell>
-      ),
-    }),
-    eventColumnHelper.accessor("txn_hash", {
-      header() {
-        return (
-          <TableHead className="text-left">
-            <span>Txn Hash</span>
-          </TableHead>
-        );
-      },
-      cell: (info) => (
-        <TableCell
-          onClick={() => navigateToTxn(info.renderValue())}
-          className="w-full flex items-center overflow-hidden cursor-pointer pr-4 hover:text-blue-400 transition-all"
-        >
-          <span className="whitespace-nowrap">
-            {isMobile
-              ? truncateString(info.renderValue(), 10)
-              : info.renderValue()}
-          </span>
-          <span className="flex-grow border-dotted border-b border-gray-500 mx-2"></span>
-        </TableCell>
-      ),
-    }),
-    eventColumnHelper.accessor("from", {
-      header() {
-        return (
-          <TableHead className="text-right">
-            <span>From Address</span>
-          </TableHead>
-        );
-      },
-      cell: (info) => (
-        <TableCell className="w-1 cursor-pointer hover:text-blue-400 transition-all text-right">
-          <span onClick={() => navigateToContract(info.renderValue())}>
-            {truncateString(info.renderValue())}
-          </span>
-        </TableCell>
-      ),
-    }),
-  ];
-
-  const events_table = useReactTable({
-    data: eventsData,
-    columns: event_columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    state: {
-      pagination: {
-        pageIndex: eventsPagination.pageIndex,
-        pageSize: eventsPagination.pageSize,
-      },
-    },
-  });
-
   const processBlockInformation = useCallback(async (transactions) => {
     if (!transactions) return;
 
-    const transactions_table_data: {
-      id: string;
-      hash_display: string;
-      type: string;
-      status: string;
-      hash: string;
-    }[] = [];
+    const transactions_table_data: TransactionTableData[] = [];
     await Promise.all(
       transactions.map((tx) => {
         return RPC_PROVIDER.getTransactionReceipt(tx.transaction_hash).then(
@@ -248,7 +71,7 @@ export default function BlockDetails() {
             // process block events
             if (receipt?.events) {
               receipt.events.forEach((event) => {
-                setEventsData((prev) => {
+                setEventsTable((prev) => {
                   return [
                     ...prev,
                     {
@@ -278,7 +101,7 @@ export default function BlockDetails() {
               } else {
                 const key_map = EXECUTION_RESOURCES_KEY_MAP[key];
                 if (key_map) {
-                  setExecutionData((prev) => ({
+                  setExecutionTable((prev) => ({
                     ...prev,
                     [key_map]: prev[key_map] + receipt.execution_resources[key],
                   }));
@@ -289,8 +112,10 @@ export default function BlockDetails() {
             // process info for transactions table
             transactions_table_data.push({
               id: padNumber(transactions_table_data.length + 1),
-              hash_display: `${tx.transaction_hash
-                } ( ${formatSnakeCaseToDisplayValue(tx.type)} )`,
+              // hash_display: `${
+              //   tx.transaction_hash
+              // } ( ${formatSnakeCaseToDisplayValue(tx.type)} )`,
+
               type: tx.type,
               status: receipt.statusReceipt,
               hash: tx.transaction_hash,
@@ -300,20 +125,8 @@ export default function BlockDetails() {
       })
     );
 
-    setTransactionsData(transactions_table_data);
+    setTxsTable(transactions_table_data);
   }, []);
-
-  const handleTransactionFilter = useCallback(
-    (tab: string) => {
-      const column = transaction_table.getColumn("hash_display");
-      column?.setFilterValue(tab);
-      setTransactionsPagination({
-        pageIndex: 0,
-        pageSize: 20,
-      });
-    },
-    [transaction_table]
-  );
 
   useEffect(() => {
     if (!BlockReceipt) return;
@@ -356,7 +169,7 @@ export default function BlockDetails() {
       />
 
       <div className="flex flex-col sl:flex-row sl:h-[66vh] gap-4">
-        <div className="flex flex-col gap-2 sl:overflow-y-scroll">
+        <div className="flex flex-col gap-[6px] sl:overflow-y-scroll">
           <SectionBox variant="upper-half">
             <SectionBoxEntry title="Hash">
               {isMobile
@@ -396,12 +209,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_gas_price
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              BlockReceipt?.l1_gas_price?.price_in_wei
+                            Number(
+                              cairo.felt(
+                                BlockReceipt?.l1_gas_price?.price_in_wei
+                              )
                             )
                           )
-                        )
                         : 0}{" "}
                       WEI
                     </td>
@@ -411,12 +224,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_gas_price
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              BlockReceipt?.l1_gas_price?.price_in_fri
+                            Number(
+                              cairo.felt(
+                                BlockReceipt?.l1_gas_price?.price_in_fri
+                              )
                             )
                           )
-                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -433,12 +246,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_data_gas_price
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              BlockReceipt?.l1_data_gas_price?.price_in_wei
+                            Number(
+                              cairo.felt(
+                                BlockReceipt?.l1_data_gas_price?.price_in_wei
+                              )
                             )
                           )
-                        )
                         : 0}{" "}
                       ETH
                     </td>
@@ -448,12 +261,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_data_gas_price
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              BlockReceipt?.l1_data_gas_price?.price_in_fri
+                            Number(
+                              cairo.felt(
+                                BlockReceipt?.l1_data_gas_price?.price_in_fri
+                              )
                             )
                           )
-                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -505,7 +318,7 @@ export default function BlockDetails() {
               </thead>
 
               <tbody className="text-center">
-                {Object.entries(executionData).map(
+                {Object.entries(executionTable).map(
                   ([key, value], index, array) => {
                     const heading = formatSnakeCaseToDisplayValue(key);
                     return index % 2 === 0 ? (
@@ -537,46 +350,31 @@ export default function BlockDetails() {
           </SectionBox>
         </div>
 
-        <Tabs defaultValue="transactions" className="border border-borderGray flex flex-col flex-grow p-[15px] rounded-md">
-          <TabsList>
+        <Tabs
+          defaultValue="transactions"
+          className="border border-borderGray flex flex-col flex-grow p-[15px] rounded-md"
+        >
+          <TabsList className="p-0 pb-4">
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
             <TabsTrigger value="state-updates">State Updates</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="transactions">
-            <Tabs defaultValue="all" size="sm" variant="secondary" onValueChange={handleTransactionFilter}>
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="invoke">Invoke</TabsTrigger>
-                <TabsTrigger value="deploy-account">Deploy Account</TabsTrigger>
-                <TabsTrigger value="declare">Declare</TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <DataTable
-              table={transaction_table}
-              pagination={transactionsPagination}
-              setPagination={setTransactionsPagination}
-              className="p-4"
-            />
+          <TabsContent className="h-full" value="transactions">
+            <TxList transactions={txsTable} />
           </TabsContent>
 
-          <TabsContent value="events" className="p-4">
-            <DataTable
-              table={events_table}
-              pagination={eventsPagination}
-              setPagination={setEventsPagination}
-            />
+          <TabsContent value="events" className="p-0 h-full">
+            <EventList events={eventsTable} />
           </TabsContent>
 
           <TabsContent value="messages" className="p-4 text-center">
-            <p>No data found</p>
+            <span className="text-[#D0D0D0]">No data found</span>
           </TabsContent>
 
           <TabsContent value="state-updates" className="p-4 text-center">
-            <p>No data found</p>
+            <span className="text-[#D0D0D0]">No data found</span>
           </TabsContent>
         </Tabs>
       </div>

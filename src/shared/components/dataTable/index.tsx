@@ -6,13 +6,14 @@ const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
-  <div className="relative w-full overflow-auto">
-    <table
-      ref={ref}
-      className={cn("w-full table-auto border-collapse", className)}
-      {...props}
-    />
-  </div>
+  <table
+    ref={ref}
+    className={cn(
+      "w-full table-auto border-collapse border-spacing-0",
+      className
+    )}
+    {...props}
+  />
 ));
 Table.displayName = "Table";
 
@@ -20,7 +21,11 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("", className)} {...props} />
+  <thead
+    ref={ref}
+    className={cn("uppercase bg-[#F1F1F1]", className)}
+    {...props}
+  />
 ));
 TableHeader.displayName = "TableHeader";
 
@@ -63,7 +68,11 @@ const TableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
-  <th ref={ref} className={cn("", className)} {...props} />
+  <th
+    ref={ref}
+    className={cn("h-[10px] border border-borderGray font-bold", className)}
+    {...props}
+  />
 ));
 TableHead.displayName = "TableHead";
 
@@ -71,11 +80,15 @@ const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
-  <td ref={ref} className={className} {...props} />
+  <td
+    ref={ref}
+    className={cn("px-2 text-sm border border-borderGray", className)}
+    {...props}
+  />
 ));
 TableCell.displayName = "TableCell";
 
-interface DataTableProps<T> {
+interface DataTableProps<T> extends React.HTMLAttributes<HTMLDivElement> {
   table: TableType<T>;
   pagination: { pageIndex: number; pageSize: number };
   setPagination: React.Dispatch<
@@ -84,32 +97,44 @@ interface DataTableProps<T> {
   className?: string;
 }
 
-function DataTable<T>({ table, pagination, setPagination, className }: DataTableProps<T>) {
+function DataTable<T>({
+  table,
+  pagination,
+  setPagination,
+  ...props
+}: DataTableProps<T>) {
   return (
-    <div className={cn("flex relative flex-col max-w-screen justify-between h-full sm:w-full w-screen overflow-x-auto", className)}>
-      <Table>
+    <div className="sl:h-[50.4vh] sl:grid" {...props}>
+      <Table className="min-h-[200px] overflow-x-auto sl:overflow-y-scroll">
         <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return header.isPlaceholder
-                  ? null
-                  : flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  );
-              })}
-            </TableRow>
-          ))}
+          <TableRow>
+            {table
+              .getHeaderGroups()
+              .map((headerGroup) =>
+                headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </TableHead>
+                ))
+              )}
+          </TableRow>
         </TableHeader>
+
         <TableBody>
           {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
+            table.getRowModel().rows.map((row, id) => (
+              <TableRow key={id} onClick={() => {}}>
                 {row.getVisibleCells().map((cell) => {
-                  return flexRender(
-                    cell.column.columnDef.cell,
-                    cell.getContext()
+                  return (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
                   );
                 })}
               </TableRow>
@@ -124,13 +149,13 @@ function DataTable<T>({ table, pagination, setPagination, className }: DataTable
         </TableBody>
       </Table>
 
-      <div className="flex sticky sm:relative bottom-0 left-0 flex-row gap-4 sm:justify-between items-center mt-4">
-        <p>
+      <div className="mt-2 h-min flex flex-row gap-4 justify-between items-center">
+        <div>
           Showing <strong>{pagination.pageIndex + 1}</strong> of{" "}
           <strong>{table.getPageCount()}</strong> pages
-        </p>
+        </div>
 
-        <div className="flex flex-row gap-4">
+        <div className="flex flex-row gap-2">
           <button
             disabled={pagination.pageIndex === 0}
             onClick={() =>
@@ -139,7 +164,7 @@ function DataTable<T>({ table, pagination, setPagination, className }: DataTable
                 pageIndex: Math.max(0, prev.pageIndex - 1),
               }))
             }
-            className="bg-[#4A4A4A] text-white px-4 py-2 disabled:opacity-50"
+            className="bg-[#4A4A4A] text-white px-2 disabled:opacity-50 uppercase"
           >
             Previous
           </button>
@@ -154,7 +179,7 @@ function DataTable<T>({ table, pagination, setPagination, className }: DataTable
                 ),
               }))
             }
-            className="bg-[#4A4A4A] text-white px-4 py-2 disabled:opacity-50"
+            className="bg-[#4A4A4A] text-white px-4 py-[3px] disabled:opacity-50 uppercase"
           >
             Next
           </button>
