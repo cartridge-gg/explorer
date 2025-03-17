@@ -29,7 +29,10 @@ import {
 } from "@/shared/components/breadcrumbs";
 import { ROUTES } from "@/constants/routes";
 import { DataTable, TableCell, TableHead } from "@/shared/components/dataTable";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/tab";
+import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
+import PageHeader from "@/shared/components/PageHeader";
+
+const DataTabs = ["Calldata", "Events", "Signature", "Storage Diffs"];
 
 interface ParsedEvent {
   transaction_hash: string;
@@ -76,6 +79,8 @@ export default function TransactionDetails() {
     data_gas: 0,
     steps: 0,
   });
+
+  const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
 
   const [eventsData, setEventsData] = useState<EventData[]>([]);
   const [callData, setCallData] = useState<
@@ -170,8 +175,8 @@ export default function TransactionDetails() {
 
               const eventKey = matchingParsedEvent
                 ? Object.keys(matchingParsedEvent).find((key) =>
-                  key.includes("::")
-                )
+                    key.includes("::")
+                  )
                 : "";
 
               return {
@@ -219,7 +224,7 @@ export default function TransactionDetails() {
       } else {
         const key_map =
           EXECUTION_RESOURCES_KEY_MAP[
-          key as keyof typeof EXECUTION_RESOURCES_KEY_MAP
+            key as keyof typeof EXECUTION_RESOURCES_KEY_MAP
           ];
         if (key_map) {
           setExecutionData((prev) => ({
@@ -310,14 +315,14 @@ export default function TransactionDetails() {
     eventColumnHelper.accessor("id", {
       header() {
         return (
-          <TableHead className="w-1 text-left">
+          <TableHead className="w-1 text-left border-0">
             <span>ID</span>
           </TableHead>
         );
       },
       cell: (info) => (
         <TableCell
-          className="flex pr-4 justify-start overflow-hidden cursor-pointer text-left"
+          className="flex border-0 pr-4 justify-start overflow-hidden cursor-pointer text-left"
           onClick={() => navigateToEvent(info.getValue().toString())}
         >
           <span className="whitespace-nowrap hover:text-blue-400 transition-all">
@@ -330,7 +335,7 @@ export default function TransactionDetails() {
     eventColumnHelper.accessor("from", {
       header() {
         return (
-          <TableHead className="text-left">
+          <TableHead className="text-left border-0">
             <span>From Address</span>
           </TableHead>
         );
@@ -338,7 +343,7 @@ export default function TransactionDetails() {
       cell: (info) => (
         <TableCell
           onClick={() => navigateToContract(info.getValue())}
-          className="w-1 pr-4 text-left hover:text-blue-400 transition-all cursor-pointer"
+          className="w-1 pr-4 border-0 text-left hover:text-blue-400 transition-all cursor-pointer"
         >
           <span>{truncateString(info.getValue())}</span>
         </TableCell>
@@ -347,13 +352,13 @@ export default function TransactionDetails() {
     eventColumnHelper.accessor("event_name", {
       header() {
         return (
-          <TableHead className="text-left">
+          <TableHead className="text-left border-0">
             <span>Event Name</span>
           </TableHead>
         );
       },
       cell: (info) => (
-        <TableCell className="w-1 text-left pr-4">
+        <TableCell className="w-1 text-left border-0 pr-4">
           <span>{info.getValue()}</span>
         </TableCell>
       ),
@@ -361,7 +366,7 @@ export default function TransactionDetails() {
     eventColumnHelper.accessor("block", {
       header() {
         return (
-          <TableHead className="text-right">
+          <TableHead className="text-right border-0">
             <span>Block</span>
           </TableHead>
         );
@@ -369,7 +374,7 @@ export default function TransactionDetails() {
       cell: (info) => (
         <TableCell
           onClick={() => navigateToBlock(info.getValue().toString())}
-          className="w-1 text-xs text-right py-2 cursor-pointer hover:text-blue-400 transition-all"
+          className="w-1 text-xs text-right border-0 py-2 cursor-pointer hover:text-blue-400 transition-all"
         >
           <span>{info.getValue()}</span>
         </TableCell>
@@ -396,7 +401,7 @@ export default function TransactionDetails() {
     storageDiffColumnHelper.accessor("contract_address", {
       header() {
         return (
-          <TableHead className="text-left">
+          <TableHead className="text-left border-0">
             <span>Contract Address</span>
           </TableHead>
         );
@@ -404,7 +409,7 @@ export default function TransactionDetails() {
       cell: (info) => (
         <TableCell
           onClick={() => navigateToContract(info.getValue())}
-          className="text-left cursor-pointer hover:text-blue-400 transition-all pr-4"
+          className="text-left border-0 cursor-pointer hover:text-blue-400 transition-all pr-4"
         >
           <span>{truncateString(info.getValue())}</span>
         </TableCell>
@@ -413,7 +418,7 @@ export default function TransactionDetails() {
     storageDiffColumnHelper.accessor("key", {
       header() {
         return (
-          <TableHead className="text-left">
+          <TableHead className="text-left border-0">
             <span>Key</span>
           </TableHead>
         );
@@ -430,7 +435,7 @@ export default function TransactionDetails() {
     storageDiffColumnHelper.accessor("value", {
       header() {
         return (
-          <TableHead className="text-left">
+          <TableHead className="text-left border-0">
             <span>Value</span>
           </TableHead>
         );
@@ -447,7 +452,7 @@ export default function TransactionDetails() {
     storageDiffColumnHelper.accessor("block_number", {
       header() {
         return (
-          <TableHead className="text-right">
+          <TableHead className="text-right border-0">
             <span>Block Number</span>
           </TableHead>
         );
@@ -457,7 +462,7 @@ export default function TransactionDetails() {
         return (
           <TableCell
             onClick={() => navigateToBlock(block_number.toString())}
-            className="text-right cursor-pointer hover:text-blue-400 transition-all"
+            className="text-right border-0 cursor-pointer hover:text-blue-400 transition-all"
           >
             <span>{block_number}</span>
           </TableCell>
@@ -480,7 +485,7 @@ export default function TransactionDetails() {
   });
 
   return (
-    <div className="flex flex-col w-full gap-8 px-2 py-4">
+    <div className="flex flex-col w-full gap-8 px-2 py-4 max-w-screen overflow-hidden">
       <div className="flex flex-col w-full gap-4">
         <Breadcrumb>
           <BreadcrumbList>
@@ -510,9 +515,12 @@ export default function TransactionDetails() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="flex flex-row  justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
-          <h1 className="text-white">Transactions</h1>
-        </div>
+        <PageHeader
+          className="mb-6"
+          title={`Transaction `}
+          subtext={TransactionReceipt?.finality_status}
+        />
+
         <div className=" flex flex-col w-full lg:flex-row gap-4 pb-4">
           <div className=" flex flex-col gap-4">
             <div
@@ -597,10 +605,10 @@ export default function TransactionDetails() {
                 <p>
                   {TransactionReceipt?.actual_fee?.amount
                     ? formatNumber(
-                      Number(
-                        cairo.felt(TransactionReceipt?.actual_fee?.amount)
+                        Number(
+                          cairo.felt(TransactionReceipt?.actual_fee?.amount)
+                        )
                       )
-                    )
                     : 0}{" "}
                   {TransactionReceipt?.actual_fee?.unit}
                 </p>
@@ -685,47 +693,51 @@ export default function TransactionDetails() {
             </div>
           </div>
 
-          <Tabs defaultValue="calldata" className="border relative border-[#8E8E8E] flex flex-col w-full overflow-y-auto max-h-[61.5rem]">
-            <TabsList>
-              <TabsTrigger value="calldata">Calldata</TabsTrigger>
-              <TabsTrigger value="events">Events</TabsTrigger>
-              <TabsTrigger value="signature">Signature</TabsTrigger>
-              <TabsTrigger value="storage-diffs">Storage Diffs</TabsTrigger>
-            </TabsList>
+          <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+            <DetailsPageSelector
+              selected={DataTabs[0]}
+              onTabSelect={setSelectedDataTab}
+              items={DataTabs.map((tab) => ({
+                name: tab,
+                value: tab,
+              }))}
+            />
 
-            <TabsContent value="calldata" className="p-4">
-              <CalldataDisplay calldata={callData} />
-            </TabsContent>
-
-            <TabsContent value="events" className="p-4">
-              <DataTable
-                table={eventsTable}
-                pagination={eventsPagination}
-                setPagination={setEventsPagination}
-              />
-            </TabsContent>
-
-            <TabsContent value="signature" className="p-4">
-              <ul className="w-full flex flex-col gap-2 p-4">
-                {TransactionDetails?.signature.map((signature, index) => (
-                  <li
-                    key={index}
-                    className="text-sm py-2 border-b border-[#8E8E8E]"
-                  >
-                    {signature}
-                  </li>
-                ))}
-              </ul>
-            </TabsContent>
-
-            <TabsContent value="storage-diffs" className="p-4">
-              <DataTable
-                table={storageDiffTable}
-                pagination={storageDiffPagination}
-                setPagination={setStorageDiffPagination}
-              />
-            </TabsContent>
-          </Tabs>
+            <div className="flex h-auto overflow-x-auto flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray rounded-b-md">
+              <div className="w-full h-auto overflow">
+                {selectedDataTab === "Calldata" ? (
+                  <CalldataDisplay calldata={callData} />
+                ) : selectedDataTab === "Events" ? (
+                  <DataTable
+                    table={eventsTable}
+                    pagination={eventsPagination}
+                    setPagination={setEventsPagination}
+                  />
+                ) : selectedDataTab === "Signature" ? (
+                  <ul className="w-full flex flex-col gap-2 p-4">
+                    {TransactionDetails?.signature.map((signature, index) => (
+                      <li
+                        key={index}
+                        className="text-sm py-2 border-b border-[#8E8E8E]"
+                      >
+                        {signature}
+                      </li>
+                    ))}
+                  </ul>
+                ) : selectedDataTab === "Storage Diffs" ? (
+                  <DataTable
+                    table={storageDiffTable}
+                    pagination={storageDiffPagination}
+                    setPagination={setStorageDiffPagination}
+                  />
+                ) : (
+                  <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
+                    <span className="text-[#D0D0D0]">No data found</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

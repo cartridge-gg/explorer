@@ -66,3 +66,18 @@ export const convertValue = (value: string | number) => {
     return null;
   }
 };
+
+// recurse throught an object and covert all values to hex
+export const convertObjectValuesToDisplayValues = (
+  obj: any,
+  type: "decimal" | "hex"
+) => {
+  for (const key in obj) {
+    if (typeof obj[key] === "object") {
+      convertObjectValuesToDisplayValues(obj[key], type);
+    } else {
+      obj[key] = convertValue(obj[key])?.[type];
+    }
+  }
+  return obj;
+};

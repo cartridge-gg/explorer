@@ -17,7 +17,7 @@ export default function PageHeader({
       </div>
 
       {subtext && (
-        <div className="px-4 bg-[#F1F1F1] border border-[#D0D0D0] border-t-0 h-[30px] flex items-center rounded-b-md">
+        <div className="px-4 bg-[#F1F1F1] border border-[#D0D0D0] border-t-0 h-[30px] flex items-center rounded-b-md capitalize">
           <div className="text-sm text-[#4A4A4A]">{subtext}</div>
         </div>
       )}

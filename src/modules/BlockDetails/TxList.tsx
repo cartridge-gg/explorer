@@ -59,7 +59,6 @@ export default function TxList({ transactions }: TxListProps) {
       cell: (info) => <span>{info.renderValue()}</span>,
       filterFn: (row, columnId, filterValue) => {
         const rowValue: string = row.getValue(columnId);
-        console.log("rowValue", rowValue, filterValue);
         if (filterValue === undefined || filterValue === "All") return true;
         return rowValue.includes(filterValue.toUpperCase());
       },
