@@ -8,11 +8,15 @@ import { cn } from "@cartridge/ui-next";
 const initialTabsContext: TabsContextValue = { variant: "primary", size: "md" }
 
 const tabListVariants = cva(
-  "flex sticky top-0 bg-white flex-col sm:flex-row text-center",
+  "flex sticky top-0 bg-white flex-col sm:flex-row text-center overflow-hidden",
   {
     variants: {
+      variant: {
+        primary: "",
+        secondary: "self-start border rounded-sm",
+      },
       size: {
-        sm: "px-4 pb-4",
+        // sm: "px-4 pb-4",
         md: "p-4"
       }
     },
@@ -23,15 +27,15 @@ const tabListVariants = cva(
 );
 
 const tabsTriggerVariants = cva(
-  "border border-b-4 bg-[#fff] uppercase cursor-pointer disabled:pointer-events-none disabled:opacity-50",
+  "bg-[#fff] uppercase cursor-pointer disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        primary: "flex-1 border-[#8E8E8E] text-[#000] data-[state=active]:bg-[#8E8E8E] data-[state=active]:text-[#fff]",
-        secondary: "data-[state=active]:font-bold data-[state=active]:bg-[#f3f3f3]",
+        primary: "border border-b-4 flex-1 border-[#8E8E8E] text-[#000] data-[state=active]:bg-[#8E8E8E] data-[state=active]:text-[#fff]",
+        secondary: "-ml-0.5 border-l data-[state=active]:font-bold data-[state=active]:bg-[#f3f3f3]",
       },
       size: {
-        sm: "px-4 py-1",
+        sm: "text-xs px-2 py-0.5",
         md: "p-2"
       }
     },
@@ -64,12 +68,12 @@ export const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >(({ className, ...props }, ref) => {
-  const { size } = React.useContext(TabsContext);
+  const { size, variant } = React.useContext(TabsContext);
   return (
     <TabsPrimitive.List
       ref={ref}
       className={cn(
-        tabListVariants({ size, className }),
+        tabListVariants({ size, variant, className }),
       )}
       {...props}
     />

@@ -13,7 +13,7 @@ import { TransactionTableData } from "@/types/types";
 import { useNavigate } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
-import { TxTypeToggle } from "@/shared/components/dataTable/TxTypeToggle";
+import { Tabs, TabsList, TabsTrigger } from "@/shared/components/tab";
 
 interface TxListProps {
   transactions: TransactionTableData[];
@@ -103,8 +103,13 @@ export function TxList({ transactions }: TxListProps) {
   );
 
   return (
-    <div className="flex flex-col gap-2 h-full">
-      <TxTypeToggle onFilterChange={(type) => handleTransactionFilter(type)} />
+    <Tabs defaultValue="all" size="sm" variant="secondary" onValueChange={handleTransactionFilter} className="flex flex-col gap-2">
+      <TabsList className="p-0">
+        <TabsTrigger value="all">All</TabsTrigger>
+        <TabsTrigger value="invoke">Invoke</TabsTrigger>
+        <TabsTrigger value="deploy">Deploy</TabsTrigger>
+        <TabsTrigger value="declare">Declare</TabsTrigger>
+      </TabsList>
 
       <div className="h-full flex flex-col gap-2">
         <table className="w-full h-full ">
@@ -196,6 +201,6 @@ export function TxList({ transactions }: TxListProps) {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </Tabs>
+  )
 }

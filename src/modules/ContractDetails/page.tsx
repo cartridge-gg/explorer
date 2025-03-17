@@ -282,7 +282,7 @@ export default function ContractDetails() {
             id: padNumber(i + 1),
             type: details.type,
             status: receipt.statusReceipt,
-            hash: hash,
+            hash,
           };
         })
       );
@@ -737,7 +737,7 @@ export default function ContractDetails() {
                   variant="secondary"
                   size="sm"
                 >
-                  <TabsList className="max-w-md p-0 pb-2">
+                  <TabsList className="max-w-md">
                     <TabsTrigger value="abi">Contract ABI</TabsTrigger>
                     <TabsTrigger value="sierra">Sierra Bytecode</TabsTrigger>
                   </TabsList>
@@ -760,13 +760,14 @@ export default function ContractDetails() {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
+      </div >
 
       {/* Wallet Connection Modal */}
-      <WalletConnectModal
+      < WalletConnectModal
         isOpen={isWalletModalOpen}
-        onClose={() => setIsWalletModalOpen(false)}
+        onClose={() => setIsWalletModalOpen(false)
+        }
       />
-    </div>
+    </div >
   );
 }
