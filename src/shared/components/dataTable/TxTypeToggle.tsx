@@ -6,7 +6,7 @@ interface TxTypeToggleProps {
   onFilterChange: (value: string) => void;
 }
 
-export default function TxTypeToggle({ onFilterChange }: TxTypeToggleProps) {
+export function TxTypeToggle({ onFilterChange }: TxTypeToggleProps) {
   return (
     <Selector
       selected={TxTypesTabs[0]}

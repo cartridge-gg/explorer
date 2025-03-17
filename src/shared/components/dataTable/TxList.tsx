@@ -9,17 +9,17 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ROUTES } from "@/constants/routes";
-import TxTypeToggle from "./TxTypeToggle";
 import { TransactionTableData } from "@/types/types";
 import { useNavigate } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
+import { TxTypeToggle } from "@/shared/components/dataTable/TxTypeToggle";
 
 interface TxListProps {
   transactions: TransactionTableData[];
 }
 
-export default function TxList({ transactions }: TxListProps) {
+export function TxList({ transactions }: TxListProps) {
   const navigate = useNavigate();
   const { isMobile } = useScreen();
 
@@ -137,11 +137,10 @@ export default function TxList({ transactions }: TxListProps) {
                     return (
                       <td
                         key={cell.id}
-                        className={`${
-                          cell.column.id === "hash"
-                            ? "hover:underline text-left px-[15px]"
-                            : ""
-                        } `}
+                        className={`${cell.column.id === "hash"
+                          ? "hover:underline text-left px-[15px]"
+                          : ""
+                          } `}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

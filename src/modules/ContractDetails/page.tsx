@@ -23,7 +23,9 @@ import {
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumbs";
 import { Editor } from "@monaco-editor/react";
-import { TransactionsTabsContent } from "./transactions";
+import { useQuery } from "@tanstack/react-query";
+import { padNumber } from "@/shared/utils/number";
+import { TxList } from "@/shared/components/dataTable/TxList";
 
 interface FunctionInput {
   name: string;
@@ -258,6 +260,38 @@ export default function ContractDetails() {
     }));
   };
 
+  const { data: txsTable } = useQuery({
+    queryKey: ["contract", "transactions", contractAddress],
+    queryFn: async () => {
+      const { events } = await RPC_PROVIDER.getEvents({
+        address: contractAddress!,
+        chunk_size: 1,
+        from_block: { block_number: 0 },
+        to_block: "latest",
+      });
+
+      const txHashes = [...new Set(events.map(event => event.transaction_hash))];
+
+      return Promise.all(
+        txHashes.map(async (hash, i) => {
+          const [receipt, details] = await Promise.all([
+            RPC_PROVIDER.getTransactionReceipt(hash),
+            RPC_PROVIDER.getTransactionByHash(hash)
+          ]);
+          return {
+            id: padNumber(i + 1),
+            type: details.type,
+            status: receipt.statusReceipt,
+            hash: hash,
+          };
+        })
+      );
+    },
+    initialData: [],
+    enabled: !!contractAddress
+  });
+
+
   return (
     <div className="flex flex-col w-full gap-8">
       <div className="flex flex-col w-full gap-4">
@@ -340,7 +374,9 @@ export default function ContractDetails() {
               <TabsTrigger value="code">Contract Code</TabsTrigger>
             </TabsList>
 
-            <TransactionsTabsContent />
+            <TabsContent value="transactions">
+              <TxList transactions={txsTable} />
+            </TabsContent>
 
             <TabsContent value="read-contract">
               <div className="flex flex-col gap-4">
