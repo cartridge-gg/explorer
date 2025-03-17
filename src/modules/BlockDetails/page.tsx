@@ -6,7 +6,15 @@ import {
 } from "@/shared/utils/string";
 import { useQuery } from "@tanstack/react-query";
 import React, { useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  ColumnDef,
+  createColumnHelper,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
@@ -20,24 +28,39 @@ import {
   BreadcrumbSeparator,
   BreadcrumbLink,
 } from "@/shared/components/breadcrumbs";
+import {
+  DataTable,
+  TableCell,
+  TableHead,
+} from "@/shared/components/dataTable";
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import TxList from "./TxList";
 import EventList from "./EventList";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/components/tab";
+import { ROUTES } from "@/constants/routes";
+
 
 const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
 
+const columnHelper = createColumnHelper<TransactionTableData>();
+
+const eventColumnHelper = createColumnHelper<EventTableData>();
+
 export default function BlockDetails() {
   const { isMobile } = useScreen();
-
-  const [selectedDataTab, setSelectedDataTab] = React.useState(DataTabs[0]);
+  const [transactionsData, setTransactionsData] = useState<
+    TransactionTableData[]
+  >([]);
+  const [eventsData, setEventsData] = useState([]);
   const { blockNumber } = useParams<{ blockNumber: string }>();
 
   const [txsTable, setTxsTable] = useState<TransactionTableData[]>([]);
   const [eventsTable, setEventsTable] = useState<EventTableData[]>([]);
   const [executionTable, setExecutionTable] = useState({
+  const [executionData, setExecutionData] = useState({
     bitwise: 0,
     pedersen: 0,
     range_check: 0,
@@ -119,6 +142,7 @@ export default function BlockDetails() {
               // hash_display: `${
               //   tx.transaction_hash
               // } ( ${formatSnakeCaseToDisplayValue(tx.type)} )`,
+
               type: tx.type,
               status: receipt.statusReceipt,
               hash: tx.transaction_hash,
@@ -130,6 +154,18 @@ export default function BlockDetails() {
 
     setTxsTable(transactions_table_data);
   }, []);
+
+  const handleTransactionFilter = useCallback(
+    (tab: string) => {
+      const column = transaction_table.getColumn("hash_display");
+      column?.setFilterValue(tab);
+      setTransactionsPagination({
+        pageIndex: 0,
+        pageSize: 20,
+      });
+    },
+    [transaction_table]
+  );
 
   useEffect(() => {
     if (!BlockReceipt) return;
@@ -212,12 +248,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_gas_price?.price_in_wei
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_gas_price?.price_in_wei
                             )
                           )
+                        )
                         : 0}{" "}
                       WEI
                     </td>
@@ -227,12 +263,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_gas_price?.price_in_fri
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_gas_price?.price_in_fri
                             )
                           )
+                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -249,12 +285,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_data_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_data_gas_price?.price_in_wei
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_data_gas_price?.price_in_wei
                             )
                           )
+                        )
                         : 0}{" "}
                       ETH
                     </td>
@@ -264,12 +300,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_data_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_data_gas_price?.price_in_fri
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_data_gas_price?.price_in_fri
                             )
                           )
+                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -353,30 +389,39 @@ export default function BlockDetails() {
           </SectionBox>
         </div>
 
-        <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-          <DetailsPageSelector
-            selected={DataTabs[0]}
-            onTabSelect={setSelectedDataTab}
-            items={DataTabs.map((tab) => ({
-              name: tab,
-              value: tab,
-            }))}
-          />
+        <Tabs defaultValue="transactions" className="border border-borderGray flex flex-col flex-grow p-[15px] rounded-md">
+          <TabsList>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="events">Events</TabsTrigger>
+            <TabsTrigger value="messages">Messages</TabsTrigger>
+            <TabsTrigger value="state-updates">State Updates</TabsTrigger>
+          </TabsList>
 
-          <div className="flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray rounded-b-md">
-            <div className="w-full h-full">
-              {selectedDataTab === "Transactions" ? (
-                <TxList transactions={txsTable} />
-              ) : selectedDataTab === "Events" ? (
-                <EventList events={eventsTable} />
-              ) : (
-                <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
-                  <span className="text-[#D0D0D0]">No data found</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+          <TabsContent value="transactions">
+            <Tabs defaultValue="all" size="sm" variant="secondary" onValueChange={handleTransactionFilter}>
+              <TabsList>
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="invoke">Invoke</TabsTrigger>
+                <TabsTrigger value="deploy-account">Deploy Account</TabsTrigger>
+                <TabsTrigger value="declare">Declare</TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <TxList transactions={txsTable} />
+          </TabsContent>
+
+          <TabsContent value="events" className="p-4">
+            <EventList events={eventsTable} />
+          </TabsContent>
+
+          <TabsContent value="messages" className="p-4 text-center">
+              <span className="text-[#D0D0D0]">No data found</span>
+          </TabsContent>
+
+          <TabsContent value="state-updates" className="p-4 text-center">
+             <span className="text-[#D0D0D0]">No data found</span>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

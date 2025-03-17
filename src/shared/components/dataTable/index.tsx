@@ -94,6 +94,7 @@ interface DataTableProps<T> extends React.HTMLAttributes<HTMLDivElement> {
   setPagination: React.Dispatch<
     React.SetStateAction<{ pageIndex: number; pageSize: number }>
   >;
+  className?: string;
 }
 
 function DataTable<T>({

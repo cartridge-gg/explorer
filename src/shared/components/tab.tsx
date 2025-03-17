@@ -23,11 +23,11 @@ const tabListVariants = cva(
 );
 
 const tabsTriggerVariants = cva(
-  "w-full border border-b-4 bg-[#fff] uppercase cursor-pointer disabled:pointer-events-none disabled:opacity-50",
+  "border border-b-4 bg-[#fff] uppercase cursor-pointer disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        primary: "border-[#8E8E8E] text-[#000] data-[state=active]:bg-[#8E8E8E] data-[state=active]:text-[#fff]",
+        primary: "flex-1 border-[#8E8E8E] text-[#000] data-[state=active]:bg-[#8E8E8E] data-[state=active]:text-[#fff]",
         secondary: "data-[state=active]:font-bold data-[state=active]:bg-[#f3f3f3]",
       },
       size: {
