@@ -29,15 +29,7 @@ import {
 } from "@/shared/components/breadcrumbs";
 import { ROUTES } from "@/constants/routes";
 import { DataTable, TableCell, TableHead } from "@/shared/components/dataTable";
-
-const DataTabs = [
-  "Calldata",
-  "Events",
-  "Signature",
-  "Internal Calls",
-  "Messages",
-  "Storage Diffs",
-];
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/tab";
 
 interface ParsedEvent {
   transaction_hash: string;
@@ -67,7 +59,6 @@ export default function TransactionDetails() {
   const navigate = useNavigate();
   const { txHash } = useParams<{ txHash: string }>();
   const { isMobile } = useScreen();
-  const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
   const [executionData, setExecutionData] = useState({
     bitwise: 0,
     pedersen: 0,
@@ -179,8 +170,8 @@ export default function TransactionDetails() {
 
               const eventKey = matchingParsedEvent
                 ? Object.keys(matchingParsedEvent).find((key) =>
-                    key.includes("::")
-                  )
+                  key.includes("::")
+                )
                 : "";
 
               return {
@@ -228,7 +219,7 @@ export default function TransactionDetails() {
       } else {
         const key_map =
           EXECUTION_RESOURCES_KEY_MAP[
-            key as keyof typeof EXECUTION_RESOURCES_KEY_MAP
+          key as keyof typeof EXECUTION_RESOURCES_KEY_MAP
           ];
         if (key_map) {
           setExecutionData((prev) => ({
@@ -606,10 +597,10 @@ export default function TransactionDetails() {
                 <p>
                   {TransactionReceipt?.actual_fee?.amount
                     ? formatNumber(
-                        Number(
-                          cairo.felt(TransactionReceipt?.actual_fee?.amount)
-                        )
+                      Number(
+                        cairo.felt(TransactionReceipt?.actual_fee?.amount)
                       )
+                    )
                     : 0}{" "}
                   {TransactionReceipt?.actual_fee?.unit}
                 </p>
@@ -693,57 +684,48 @@ export default function TransactionDetails() {
               </div>
             </div>
           </div>
-          <div className="border relative border-[#8E8E8E] flex flex-col gap-4 w-full overflow-y-auto max-h-[61.5rem]">
-            <div className="flex sticky top-0 bg-white flex-col sm:flex-row text-center px-4 pt-5 pb-4">
-              {DataTabs.map((tab, index) => (
-                <div
-                  key={index}
-                  style={{
-                    backgroundColor:
-                      selectedDataTab === tab ? "#8E8E8E" : "#fff",
-                    color: selectedDataTab === tab ? "#fff" : "#000",
-                  }}
-                  onClick={() => setSelectedDataTab(tab)}
-                  className="w-full border border-b-4 p-2 border-[#8E8E8E] uppercase cursor-pointer"
-                >
-                  <p>{tab}</p>
-                </div>
-              ))}
-            </div>
 
-            <div className=" h-full pb-2 w-full">
-              {selectedDataTab === "Calldata" ? (
-                <CalldataDisplay calldata={callData} />
-              ) : selectedDataTab === "Events" ? (
-                <DataTable
-                  table={eventsTable}
-                  pagination={eventsPagination}
-                  setPagination={setEventsPagination}
-                />
-              ) : selectedDataTab === "Signature" ? (
-                <ul className="w-full flex flex-col gap-2 p-4">
-                  {TransactionDetails?.signature.map((signature, index) => (
-                    <li
-                      key={index}
-                      className="text-sm py-2 border-b border-[#8E8E8E]"
-                    >
-                      {signature}
-                    </li>
-                  ))}
-                </ul>
-              ) : selectedDataTab === "Storage Diffs" ? (
-                <DataTable
-                  table={storageDiffTable}
-                  pagination={storageDiffPagination}
-                  setPagination={setStorageDiffPagination}
-                />
-              ) : (
-                <div className="p-4 text-center">
-                  <p className="text-black">No data found</p>
-                </div>
-              )}
-            </div>
-          </div>
+          <Tabs defaultValue="calldata" className="border relative border-[#8E8E8E] flex flex-col w-full overflow-y-auto max-h-[61.5rem]">
+            <TabsList>
+              <TabsTrigger value="calldata">Calldata</TabsTrigger>
+              <TabsTrigger value="events">Events</TabsTrigger>
+              <TabsTrigger value="signature">Signature</TabsTrigger>
+              <TabsTrigger value="storage-diffs">Storage Diffs</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="calldata" className="p-4">
+              <CalldataDisplay calldata={callData} />
+            </TabsContent>
+
+            <TabsContent value="events" className="p-4">
+              <DataTable
+                table={eventsTable}
+                pagination={eventsPagination}
+                setPagination={setEventsPagination}
+              />
+            </TabsContent>
+
+            <TabsContent value="signature" className="p-4">
+              <ul className="w-full flex flex-col gap-2 p-4">
+                {TransactionDetails?.signature.map((signature, index) => (
+                  <li
+                    key={index}
+                    className="text-sm py-2 border-b border-[#8E8E8E]"
+                  >
+                    {signature}
+                  </li>
+                ))}
+              </ul>
+            </TabsContent>
+
+            <TabsContent value="storage-diffs" className="p-4">
+              <DataTable
+                table={storageDiffTable}
+                pagination={storageDiffPagination}
+                setPagination={setStorageDiffPagination}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

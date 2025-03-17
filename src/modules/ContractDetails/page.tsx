@@ -322,7 +322,7 @@ export default function ContractDetails() {
           </div>
 
           {/* Data Tabs Section */}
-          <Tabs defaultValue="read-contract" className="border relative border-[#8E8E8E] flex flex-col w-full overflow-y-auto max-h-[61.5rem]">
+          <Tabs defaultValue="read-contract" size="sm" variant="secondary">
             <TabsList>
               <TabsTrigger value="read-contract">Read Contract</TabsTrigger>
               <TabsTrigger value="write-contract">Write Contract</TabsTrigger>
