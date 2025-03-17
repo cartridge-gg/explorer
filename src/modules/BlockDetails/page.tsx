@@ -5,16 +5,8 @@ import {
   truncateString,
 } from "@/shared/utils/string";
 import { useQuery } from "@tanstack/react-query";
-import React, { useCallback, useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import {
-  ColumnDef,
-  createColumnHelper,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+import { useCallback, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
@@ -28,39 +20,25 @@ import {
   BreadcrumbSeparator,
   BreadcrumbLink,
 } from "@/shared/components/breadcrumbs";
-import {
-  DataTable,
-  TableCell,
-  TableHead,
-} from "@/shared/components/dataTable";
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
-import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import TxList from "./TxList";
 import EventList from "./EventList";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/components/tab";
-import { ROUTES } from "@/constants/routes";
-
-
-const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
-
-const columnHelper = createColumnHelper<TransactionTableData>();
-
-const eventColumnHelper = createColumnHelper<EventTableData>();
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/shared/components/tab";
 
 export default function BlockDetails() {
   const { isMobile } = useScreen();
-  const [transactionsData, setTransactionsData] = useState<
-    TransactionTableData[]
-  >([]);
-  const [eventsData, setEventsData] = useState([]);
   const { blockNumber } = useParams<{ blockNumber: string }>();
 
   const [txsTable, setTxsTable] = useState<TransactionTableData[]>([]);
   const [eventsTable, setEventsTable] = useState<EventTableData[]>([]);
   const [executionTable, setExecutionTable] = useState({
-  const [executionData, setExecutionData] = useState({
     bitwise: 0,
     pedersen: 0,
     range_check: 0,
@@ -85,12 +63,7 @@ export default function BlockDetails() {
   const processBlockInformation = useCallback(async (transactions) => {
     if (!transactions) return;
 
-    const transactions_table_data: {
-      id: string;
-      type: string;
-      status: string;
-      hash: string;
-    }[] = [];
+    const transactions_table_data: TransactionTableData[] = [];
     await Promise.all(
       transactions.map((tx) => {
         return RPC_PROVIDER.getTransactionReceipt(tx.transaction_hash).then(
@@ -154,18 +127,6 @@ export default function BlockDetails() {
 
     setTxsTable(transactions_table_data);
   }, []);
-
-  const handleTransactionFilter = useCallback(
-    (tab: string) => {
-      const column = transaction_table.getColumn("hash_display");
-      column?.setFilterValue(tab);
-      setTransactionsPagination({
-        pageIndex: 0,
-        pageSize: 20,
-      });
-    },
-    [transaction_table]
-  );
 
   useEffect(() => {
     if (!BlockReceipt) return;
@@ -248,12 +209,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_gas_price
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              BlockReceipt?.l1_gas_price?.price_in_wei
+                            Number(
+                              cairo.felt(
+                                BlockReceipt?.l1_gas_price?.price_in_wei
+                              )
                             )
                           )
-                        )
                         : 0}{" "}
                       WEI
                     </td>
@@ -263,12 +224,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_gas_price
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              BlockReceipt?.l1_gas_price?.price_in_fri
+                            Number(
+                              cairo.felt(
+                                BlockReceipt?.l1_gas_price?.price_in_fri
+                              )
                             )
                           )
-                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -285,12 +246,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_data_gas_price
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              BlockReceipt?.l1_data_gas_price?.price_in_wei
+                            Number(
+                              cairo.felt(
+                                BlockReceipt?.l1_data_gas_price?.price_in_wei
+                              )
                             )
                           )
-                        )
                         : 0}{" "}
                       ETH
                     </td>
@@ -300,12 +261,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_data_gas_price
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              BlockReceipt?.l1_data_gas_price?.price_in_fri
+                            Number(
+                              cairo.felt(
+                                BlockReceipt?.l1_data_gas_price?.price_in_fri
+                              )
                             )
                           )
-                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -389,37 +350,31 @@ export default function BlockDetails() {
           </SectionBox>
         </div>
 
-        <Tabs defaultValue="transactions" className="border border-borderGray flex flex-col flex-grow p-[15px] rounded-md">
-          <TabsList>
+        <Tabs
+          defaultValue="transactions"
+          className="border border-borderGray flex flex-col flex-grow p-[15px] rounded-md"
+        >
+          <TabsList className="p-0 pb-4">
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
             <TabsTrigger value="state-updates">State Updates</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="transactions">
-            <Tabs defaultValue="all" size="sm" variant="secondary" onValueChange={handleTransactionFilter}>
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="invoke">Invoke</TabsTrigger>
-                <TabsTrigger value="deploy-account">Deploy Account</TabsTrigger>
-                <TabsTrigger value="declare">Declare</TabsTrigger>
-              </TabsList>
-            </Tabs>
-
+          <TabsContent className="h-full" value="transactions">
             <TxList transactions={txsTable} />
           </TabsContent>
 
-          <TabsContent value="events" className="p-4">
+          <TabsContent value="events" className="p-0 h-full">
             <EventList events={eventsTable} />
           </TabsContent>
 
           <TabsContent value="messages" className="p-4 text-center">
-              <span className="text-[#D0D0D0]">No data found</span>
+            <span className="text-[#D0D0D0]">No data found</span>
           </TabsContent>
 
           <TabsContent value="state-updates" className="p-4 text-center">
-             <span className="text-[#D0D0D0]">No data found</span>
+            <span className="text-[#D0D0D0]">No data found</span>
           </TabsContent>
         </Tabs>
       </div>

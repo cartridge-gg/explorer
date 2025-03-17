@@ -20,7 +20,6 @@ interface EventListProps {
 export default function EventList({ events }: EventListProps) {
   const navigate = useNavigate();
   const { isMobile } = useScreen();
-  // https://explorer.cartridge.gg/contract/0x7f3eaec96dc9a97f658a6c93bd486646213921da9a07df6802a4ad12b9a9f89
   const navigateToTxn = useCallback(
     (txnHash: string) => {
       navigate(
@@ -66,7 +65,7 @@ export default function EventList({ events }: EventListProps) {
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 20,
+    pageSize: 15,
   });
 
   const table = useReactTable({
@@ -83,9 +82,9 @@ export default function EventList({ events }: EventListProps) {
   });
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="sl:h-[50.4vh] sl:grid">
-        <table className="min-h-[200px] overflow-x-auto sl:overflow-y-scroll">
+    <div className="flex flex-col gap-2 h-full">
+      <div className="h-full flex flex-col gap-2">
+        <table className="overflow-x-auto p-0 h-full">
           <thead className="uppercase">
             <tr>
               {table
@@ -106,7 +105,7 @@ export default function EventList({ events }: EventListProps) {
           <tbody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row, id) => (
-                <tr key={id} className="hover:bg-gray-100 ">
+                <tr key={id} className="hover:bg-gray-100 h-5 ">
                   {row.getVisibleCells().map((cell) => {
                     if (cell.column.id === "txn_hash") {
                       return (

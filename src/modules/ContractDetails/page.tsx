@@ -9,7 +9,12 @@ import { FunctionResult, DisplayFormatTypes } from "@/types/types";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import WalletConnectModal from "@/shared/components/wallet_connect";
 import { BreadcrumbPage, SpinnerIcon } from "@cartridge/ui-next";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/components/tab";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/shared/components/tab";
 import {
   Breadcrumb,
   BreadcrumbLink,
@@ -55,7 +60,6 @@ export default function ContractDetails() {
     }[]
   >([]);
 
-
   const [expandedFunctions, setExpandedFunctions] = useState<
     Record<string, FunctionInput[]>
   >({});
@@ -78,12 +82,10 @@ export default function ContractDetails() {
     setClassHash(classHash);
 
     // process contract functions
-    const contractClass = await RPC_PROVIDER.getClassAt(
-      contractAddress
-    );
+    const contractClass = await RPC_PROVIDER.getClassAt(contractAddress);
 
     setContractABI(JSON.stringify(contractClass.abi, null, 2));
-    if ('sierra_program' in contractClass) {
+    if ("sierra_program" in contractClass) {
       setSierraProgram(JSON.stringify(contractClass.sierra_program, null, 2));
     }
 
@@ -119,7 +121,11 @@ export default function ContractDetails() {
     setReadFunctions(readFuncs);
     setWriteFunctions(writeFuncs);
 
-    const contract = new Contract(contractClass.abi, contractAddress, RPC_PROVIDER);
+    const contract = new Contract(
+      contractClass.abi,
+      contractAddress,
+      RPC_PROVIDER
+    );
     setContract(contract);
   }, [contractAddress]);
 
@@ -252,7 +258,7 @@ export default function ContractDetails() {
   };
 
   return (
-    <div className="flex flex-col w-full gap-8 px-2 py-4">
+    <div className="flex flex-col w-full gap-8">
       <div className="flex flex-col w-full gap-4">
         <Breadcrumb>
           <BreadcrumbList>
@@ -322,15 +328,18 @@ export default function ContractDetails() {
           </div>
 
           {/* Data Tabs Section */}
-          <Tabs defaultValue="read-contract" size="sm" variant="secondary">
-            <TabsList>
+          <Tabs
+            defaultValue="read-contract"
+            className="border border-borderGray flex flex-col flex-grow p-[15px] rounded-md"
+          >
+            <TabsList className="p-0 pb-4">
               <TabsTrigger value="read-contract">Read Contract</TabsTrigger>
               <TabsTrigger value="write-contract">Write Contract</TabsTrigger>
-              <TabsTrigger value="code">Code</TabsTrigger>
+              <TabsTrigger value="code">Contract Code</TabsTrigger>
             </TabsList>
 
             <TabsContent value="read-contract">
-              <div className="flex flex-col gap-4 px-4">
+              <div className="flex flex-col gap-4">
                 {readFunctions.map((func, index) => (
                   <div
                     key={index}
@@ -386,8 +395,7 @@ export default function ContractDetails() {
                                 className="border border-[#8E8E8E] p-2"
                                 placeholder={`Enter ${input.type}`}
                                 value={
-                                  expandedFunctions[func.name][idx]?.value ||
-                                  ""
+                                  expandedFunctions[func.name][idx]?.value || ""
                                 }
                                 onChange={(e) =>
                                   handleInputChange(
@@ -401,10 +409,11 @@ export default function ContractDetails() {
                           ))}
 
                           <button
-                            className={`px-4 py-2 mt-2 w-fit ${functionResults[func.name]?.loading
-                              ? "bg-gray-400 cursor-not-allowed"
-                              : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
-                              } text-white`}
+                            className={`px-4 py-2 mt-2 w-fit ${
+                              functionResults[func.name]?.loading
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
+                            } text-white`}
                             onClick={() => handleFunctionCall(func.name)}
                             disabled={functionResults[func.name]?.loading}
                           >
@@ -417,9 +426,7 @@ export default function ContractDetails() {
                           {functionResults[func.name] && (
                             <div className="mt-4">
                               {functionResults[func.name].loading ? (
-                                <div className="text-gray-600">
-                                  Loading...
-                                </div>
+                                <div className="text-gray-600">Loading...</div>
                               ) : functionResults[func.name].error ? (
                                 <div className="text-red-500 p-3 bg-red-50 border border-red-200">
                                   <p className="font-medium">Error:</p>
@@ -436,11 +443,12 @@ export default function ContractDetails() {
                                     <div className="flex gap-2">
                                       {DisplayFormat.map((format) => (
                                         <button
-                                          className={`px-2 py-1 text-xs ${(displayFormats[func.name] ??
-                                            "decimal") === format
-                                            ? "bg-[#4A4A4A] text-white"
-                                            : "bg-gray-200"
-                                            }`}
+                                          className={`px-2 py-1 text-xs ${
+                                            (displayFormats[func.name] ??
+                                              "decimal") === format
+                                              ? "bg-[#4A4A4A] text-white"
+                                              : "bg-gray-200"
+                                          }`}
                                           onClick={() =>
                                             handleFormatChange(
                                               func.name,
@@ -458,8 +466,7 @@ export default function ContractDetails() {
                                       const data =
                                         functionResults[func.name]?.data;
                                       const format =
-                                        displayFormats[func.name] ||
-                                        "decimal";
+                                        displayFormats[func.name] || "decimal";
 
                                       const safeStringify = (value: any) =>
                                         JSON.stringify(
@@ -478,8 +485,8 @@ export default function ContractDetails() {
                                               {format === "decimal"
                                                 ? safeStringify(item)
                                                 : convertValue(item)?.[
-                                                format
-                                                ] || safeStringify(item)}
+                                                    format
+                                                  ] || safeStringify(item)}
                                             </div>
                                           )
                                         );
@@ -490,7 +497,7 @@ export default function ContractDetails() {
                                           {format === "decimal"
                                             ? safeStringify(data)
                                             : convertValue(data)?.[format] ||
-                                            safeStringify(data)}
+                                              safeStringify(data)}
                                         </div>
                                       );
                                     })()}
@@ -507,7 +514,7 @@ export default function ContractDetails() {
               </div>
             </TabsContent>
 
-            <TabsContent value="write-contract" className="px-4">
+            <TabsContent value="write-contract" className="">
               {/* Wallet Connection Section */}
               <div className="flex justify-between items-center p-4 bg-gray-50 border border-[#8E8E8E] mb-4">
                 <div className="flex flex-col">
@@ -516,8 +523,8 @@ export default function ContractDetails() {
                     {status === "connected" && address
                       ? `Connected: ${truncateString(address)}`
                       : status === "connecting"
-                        ? "Connecting..."
-                        : "Not Connected"}
+                      ? "Connecting..."
+                      : "Not Connected"}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -595,8 +602,7 @@ export default function ContractDetails() {
                                 className="border border-[#8E8E8E] p-2 "
                                 placeholder={`Enter ${input.type}`}
                                 value={
-                                  expandedFunctions[func.name][idx]?.value ||
-                                  ""
+                                  expandedFunctions[func.name][idx]?.value || ""
                                 }
                                 onChange={(e) =>
                                   handleInputChange(
@@ -610,12 +616,13 @@ export default function ContractDetails() {
                           ))}
 
                           <button
-                            className={`px-4 py-2 mt-2 w-fit ${!address
-                              ? "bg-gray-400 cursor-not-allowed"
-                              : functionResults[func.name]?.loading
+                            className={`px-4 py-2 mt-2 w-fit ${
+                              !address
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : functionResults[func.name]?.loading
                                 ? "bg-gray-400 cursor-not-allowed"
                                 : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
-                              } text-white`}
+                            } text-white`}
                             onClick={() => handleWriteFunctionCall(func.name)}
                             disabled={
                               !address || functionResults[func.name]?.loading
@@ -624,36 +631,35 @@ export default function ContractDetails() {
                             {!address
                               ? "Connect Wallet to Execute"
                               : functionResults[func.name]?.loading
-                                ? "Executing..."
-                                : "Execute"}
+                              ? "Executing..."
+                              : "Execute"}
                           </button>
 
                           {/* Add transaction hash display if available */}
                           {functionResults[func.name]?.data
                             ?.transaction_hash && (
-                              <div className="mt-2 text-sm">
-                                <p className="font-medium">Transaction Hash:</p>
-                                <a
-                                  href={`/transactions/${functionResults[func.name].data
+                            <div className="mt-2 text-sm">
+                              <p className="font-medium">Transaction Hash:</p>
+                              <a
+                                href={`/transactions/${
+                                  functionResults[func.name].data
                                     .transaction_hash
-                                    }`}
-                                  className="text-blue-600 hover:text-blue-800 break-all"
-                                >
-                                  {
-                                    functionResults[func.name].data
-                                      .transaction_hash
-                                  }
-                                </a>
-                              </div>
-                            )}
+                                }`}
+                                className="text-blue-600 hover:text-blue-800 break-all"
+                              >
+                                {
+                                  functionResults[func.name].data
+                                    .transaction_hash
+                                }
+                              </a>
+                            </div>
+                          )}
 
                           {/* Result Display Section */}
                           {functionResults[func.name] && (
                             <div className="mt-4">
                               {functionResults[func.name].loading ? (
-                                <div className="text-gray-600">
-                                  Loading...
-                                </div>
+                                <div className="text-gray-600">Loading...</div>
                               ) : functionResults[func.name].error ? (
                                 <div className="text-red-500 p-3 bg-red-50 border border-red-200">
                                   <p className="font-medium">Error:</p>
@@ -663,9 +669,7 @@ export default function ContractDetails() {
                                 </div>
                               ) : functionResults[func.name].data !== null ? (
                                 <div className="bg-gray-50 p-3 border border-gray-200">
-                                  <p className="font-medium text-sm">
-                                    Result:
-                                  </p>
+                                  <p className="font-medium text-sm">Result:</p>
                                   <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words">
                                     {JSON.stringify(
                                       functionResults[func.name].data,
@@ -681,7 +685,8 @@ export default function ContractDetails() {
                       )}
                     </div>
                   </div>
-                ))}</div>
+                ))}
+              </div>
             </TabsContent>
 
             <TabsContent value="code">
@@ -690,19 +695,24 @@ export default function ContractDetails() {
                   <SpinnerIcon className="animate-spin" />
                 </div>
               ) : (
-                <Tabs defaultValue="abi" className="relative flex flex-col gap-2" variant="secondary" size="sm">
-                  <TabsList className="max-w-[400px]">
+                <Tabs
+                  defaultValue="abi"
+                  className="relative flex flex-col gap-2"
+                  variant="secondary"
+                  size="sm"
+                >
+                  <TabsList className="max-w-md p-0 pb-2">
                     <TabsTrigger value="abi">Contract ABI</TabsTrigger>
                     <TabsTrigger value="sierra">Sierra Bytecode</TabsTrigger>
                   </TabsList>
-                  <TabsContent value="abi" className="px-4">
+                  <TabsContent value="abi" className="px-0">
                     <Editor
                       className="min-h-[80vh]"
                       defaultLanguage="json"
                       defaultValue={contractABI}
                     />
                   </TabsContent>
-                  <TabsContent value="sierra" className="px-4">
+                  <TabsContent value="sierra" className="px-0">
                     <Editor
                       className="min-h-[80vh]"
                       defaultLanguage="javascript"

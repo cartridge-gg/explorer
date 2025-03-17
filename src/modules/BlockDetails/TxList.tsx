@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ColumnDef,
   createColumnHelper,
@@ -14,8 +14,6 @@ import { TransactionTableData } from "@/types/types";
 import { useNavigate } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
-
-const TransactionTypeTabs = ["All", "Invoke", "Deploy Account", "Declare"];
 
 interface TxListProps {
   transactions: TransactionTableData[];
@@ -33,8 +31,6 @@ export default function TxList({ transactions }: TxListProps) {
     },
     [navigate]
   );
-
-  const [txType, setTxType] = React.useState(TransactionTypeTabs[0]);
 
   const columnHelper = createColumnHelper<TransactionTableData>();
 
@@ -61,6 +57,12 @@ export default function TxList({ transactions }: TxListProps) {
     columnHelper.accessor("type", {
       header: "Type",
       cell: (info) => <span>{info.renderValue()}</span>,
+      filterFn: (row, columnId, filterValue) => {
+        const rowValue: string = row.getValue(columnId);
+        console.log("rowValue", rowValue, filterValue);
+        if (filterValue === undefined || filterValue === "All") return true;
+        return rowValue.includes(filterValue.toUpperCase());
+      },
     }),
     columnHelper.accessor("status", {
       header: "Status",
@@ -70,7 +72,7 @@ export default function TxList({ transactions }: TxListProps) {
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 20,
+    pageSize: 15,
   });
 
   const table = useReactTable<TransactionTableData>({
@@ -90,23 +92,22 @@ export default function TxList({ transactions }: TxListProps) {
 
   const handleTransactionFilter = useCallback(
     (type: string) => {
-      const column = table.getColumn("hash");
+      const column = table.getColumn("type");
       column?.setFilterValue(type);
       setPagination({
         pageIndex: 0,
-        pageSize: 20,
+        pageSize: 15,
       });
-      setTxType(type);
     },
     [table]
   );
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 h-full">
       <TxTypeToggle onFilterChange={(type) => handleTransactionFilter(type)} />
 
-      <div className="sl:h-[50.4vh] sl:grid">
-        <table className="min-h-[200px] overflow-x-auto sl:overflow-y-scroll">
+      <div className="h-full flex flex-col gap-2">
+        <table className="w-full h-full ">
           <thead className="uppercase">
             <tr>
               {table
@@ -130,7 +131,7 @@ export default function TxList({ transactions }: TxListProps) {
                 <tr
                   key={id}
                   onClick={() => navigateToTxn(row.original.hash)}
-                  className="hover:bg-gray-100 cursor-pointer"
+                  className="hover:bg-gray-100 cursor-pointer min-h-5"
                 >
                   {row.getVisibleCells().map((cell) => {
                     return (

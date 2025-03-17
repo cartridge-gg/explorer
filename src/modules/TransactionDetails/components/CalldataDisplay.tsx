@@ -27,19 +27,19 @@ export default function CalldataDisplay(props: {
             <div className="">{expanded[index] ? "Collapse" : "Expand"}</div>
           </div>
           <div className={`${expanded[index] ? "block" : "hidden"}`}>
-            <table className="w-full border border-gray-300">
+            <table className="w-full border-gray-300">
               <tbody>
                 <React.Fragment key={index}>
-                  <tr className="border-t">
-                    <td className="p-2 font-bold">Selector:</td>
-                    <td className="p-2">{data.selector}</td>
+                  <tr className="">
+                    <td className="p-2 font-bold text-left">Selector:</td>
+                    <td className="p-2 text-left">{data.selector}</td>
                   </tr>
-                  <tr className="border-t">
-                    <td className="p-2 font-bold flex justify-start">
+                  <tr className="">
+                    <td className="p-2 font-bold border-0 flex justify-start">
                       Arguments:
                     </td>
                     <td className="p-2">
-                      <ul className="">
+                      <ul className="text-left">
                         {data.args.map((arg, argIndex) => (
                           <li key={argIndex}>{arg}</li>
                         ))}

@@ -15,7 +15,7 @@ export default function ChainId() {
 function StarknetChainIdComponent({ id }: { id: StarknetChainId }) {
   const displayName = id === "SN_MAIN" ? "Mainnet" : "Sepolia";
   return (
-    <div className="w-[136px] uppercase text-left text-white rounded-md overflow-clip flex bg-starknet-primary px-3 py-1 items-center justify-between">
+    <div className="uppercase text-left flex-row-reverse text-white rounded-md overflow-clip flex bg-starknet-primary px-3 py-1 gap-6 items-center justify-between">
       <StarknetLogo width={13} />
       <div>{displayName}</div>
     </div>
