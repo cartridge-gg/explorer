@@ -107,6 +107,19 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
               matchingFunction = item;
             }
           }
+
+          if (item.type === "interface") {
+            item.items?.forEach((func: AbiItem) => {
+              if (func.type === "function") {
+                const funcNameSelector = hash.getSelectorFromName(
+                  func.name || ""
+                );
+                if (funcNameSelector === data.selector) {
+                  matchingFunction = func;
+                }
+              }
+            });
+          }
         });
 
         const formattedParams = data.args;
@@ -131,13 +144,21 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
         const formattedResponse: DecodedArg[] = [];
 
         if (Array.isArray(decoded)) {
-          decoded.forEach((arg, index) => {
+          if (inputs.length === 1) {
             formattedResponse.push({
-              value: arg,
-              name: inputs[index].name ?? "",
-              type: inputs[index].type ?? "",
+              value: decoded,
+              name: inputs[0]?.name,
+              type: inputs[0]?.type,
             });
-          });
+          } else {
+            decoded.forEach((arg, index) => {
+              formattedResponse.push({
+                value: arg,
+                name: inputs[index]?.name,
+                type: inputs[index]?.type,
+              });
+            });
+          }
         }
 
         setDecodedRawMap((prev) => ({
@@ -296,17 +317,17 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                           <tbody>
                             {item.data.map((arg, rowIndex, array) => (
                               <tr
-                                key={arg.name}
+                                key={rowIndex}
                                 className={`${
                                   rowIndex !== array.length - 1
                                     ? "border-b"
                                     : ""
                                 }`}
                               >
-                                <td className="px-2 py-1 text-left w-1/4 ">
+                                <td className="px-2 py-1 text-left align-top w-1/4 ">
                                   <span className="font-bold">{arg.name}</span>
                                 </td>
-                                <td className="px-2 py-1 text-left w-1/4 ">
+                                <td className="px-2 py-1 text-left w-1/4 align-top ">
                                   <span className="text-gray-500">
                                     {arg.type}
                                   </span>

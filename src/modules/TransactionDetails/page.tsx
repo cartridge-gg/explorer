@@ -17,7 +17,11 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { cairo, CallData, events } from "starknet";
 import { decodeCalldata, getEventName } from "@/shared/utils/rpc_utils";
 import CalldataDisplay from "./components/CalldataDisplay";
-import { CACHE_TIME, EXECUTION_RESOURCES_KEY_MAP, STALE_TIME } from "@/constants/rpc";
+import {
+  CACHE_TIME,
+  EXECUTION_RESOURCES_KEY_MAP,
+  STALE_TIME,
+} from "@/constants/rpc";
 import {
   Breadcrumb,
   BreadcrumbList,
