@@ -73,7 +73,7 @@ export const TabsList = React.forwardRef<
   switch (variant) {
     case "primary":
       return (
-        <div className="border border-borderGray rounded-t-md p-4 pt-8 mb-2" style={{
+        <div className="top-0 sticky border border-borderGray rounded-t-md p-4 pt-8 mb-2 bg-white z-10" style={{
           borderBottom: "dashed",
           borderBottomColor: "#B0B0B0",
         }}>
