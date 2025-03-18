@@ -179,7 +179,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
   }
 
   return (
-    <div className="space-y-2 flex-grow-0 flex-none">
+    <div className="space-y-2 pb-4 flex-none">
       <div className="sticky top-0 bg-white z-10 p-4">
         <Selector
           selected={selectedTab}

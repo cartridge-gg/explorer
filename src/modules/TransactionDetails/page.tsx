@@ -14,7 +14,6 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
-import dayjs from "dayjs";
 import { cairo, CallData, events } from "starknet";
 import { decodeCalldata, getEventName } from "@/shared/utils/rpc_utils";
 import CalldataDisplay from "./components/CalldataDisplay";
@@ -31,6 +30,9 @@ import { ROUTES } from "@/constants/routes";
 import { DataTable, TableCell, TableHead } from "@/shared/components/dataTable";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import PageHeader from "@/shared/components/PageHeader";
+import { SectionBoxEntry } from "@/shared/components/section";
+import { SectionBox } from "@/shared/components/section/SectionBox";
+import dayjs from "dayjs";
 
 const DataTabs = ["Calldata", "Events", "Signature", "Storage Diffs"];
 
@@ -58,6 +60,22 @@ const eventColumnHelper = createColumnHelper<EventData>();
 
 const storageDiffColumnHelper = createColumnHelper<StorageDiffData>();
 
+const FinalityStatus = ({ status }: { status: string }) => {
+  const status_color_map = {
+    succeeded: "bg-[#7BA797]",
+    reverted: "bg-[#C4806D]",
+  };
+  return (
+    <div
+      className={`text-white px-2 py-1 rounded-sm ${
+        status_color_map[status?.toLowerCase() as keyof typeof status_color_map]
+      }`}
+    >
+      {status}
+    </div>
+  );
+};
+
 export default function TransactionDetails() {
   const navigate = useNavigate();
   const { txHash } = useParams<{ txHash: string }>();
@@ -66,7 +84,7 @@ export default function TransactionDetails() {
     bitwise: 0,
     pedersen: 0,
     range_check: 0,
-    posiedon: 0,
+    poseidon: 0,
     ecdsa: 0,
     segment_arena: 0,
     keccak: 0,
@@ -226,6 +244,7 @@ export default function TransactionDetails() {
           EXECUTION_RESOURCES_KEY_MAP[
             key as keyof typeof EXECUTION_RESOURCES_KEY_MAP
           ];
+
         if (key_map) {
           setExecutionData((prev) => ({
             ...prev,
@@ -517,174 +536,225 @@ export default function TransactionDetails() {
         className="mb-6"
         title={`Transaction `}
         subtext={TransactionReceipt?.finality_status}
+        titleRightComponent={
+          <FinalityStatus status={TransactionReceipt?.execution_status} />
+        }
+        subtextRightComponent={
+          <div className="text-[#5D5D5D]">
+            {dayjs.unix(BlockDetails?.timestamp).format("MMM D YYYY HH:mm:ss")}{" "}
+          </div>
+        }
       />
 
       <div className="flex flex-col sl:flex-row sl:h-[66vh] gap-4">
         <div className="flex w-full sl:w-[35%] sl:min-w-[35%] sl:max-w-[35%] flex-col gap-4 sl:overflow-y-auto">
-          <div
-            style={{
-              borderBottomStyle: "dashed",
-              borderBottomWidth: "2px",
-            }}
-            className="flex flex-col gap-4 p-4 border-[#8E8E8E] border-l-4 border-t border-r"
-          >
-            <div className="flex flex-col text-sm  gap-2">
-              <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                Hash
-              </p>
-              <p>
-                {isMobile && TransactionReceipt?.transaction_hash
-                  ? truncateString(TransactionReceipt?.transaction_hash)
-                  : txHash}
-              </p>
-            </div>
-            <div className="flex flex-col text-sm gap-1">
-              <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                Status
-              </p>
-              <p className=" uppercase">{TransactionReceipt?.statusReceipt}</p>
-            </div>
-            <div className="flex flex-col text-sm gap-1">
-              <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                Type
-              </p>
-              <p>{TransactionDetails?.type}</p>
-            </div>
-            <div className="flex flex-col text-sm gap-1">
-              <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                Block Number
-              </p>
-              <p>{TransactionReceipt?.block_number}</p>
-            </div>
-            <div className="flex flex-col text-sm gap-1">
-              <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                Timestamp
-              </p>
-              <p>
-                {BlockDetails?.timestamp} ({" "}
-                {dayjs
-                  .unix(BlockDetails?.timestamp)
-                  .format("MMM D YYYY HH:mm:ss")}{" "}
-                )
-              </p>
-            </div>
-            <div className="flex flex-col text-sm gap-1">
-              <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                Nonce
-              </p>
-              <p>{TransactionDetails?.nonce}</p>
-            </div>
-            <div className="flex flex-col text-sm gap-1">
-              <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                Sender Address
-              </p>
-              <p>
-                {isMobile && TransactionDetails?.sender_address
-                  ? truncateString(TransactionDetails?.sender_address)
-                  : TransactionDetails?.sender_address}
-              </p>
-            </div>
-          </div>
-          <div
-            style={{
-              borderTopStyle: "dashed",
-              borderTopWidth: "2px",
-              borderBottomStyle: "dashed",
-              borderBottomWidth: "2px",
-            }}
-            className="flex flex-col h-fit gap-4 p-4 border-[#8E8E8E] border-l-4 border-t border-r"
-          >
-            <div className="flex flex-col text-sm  gap-1">
-              <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                ACTUAL FEE
-              </p>
-              <p>
-                {TransactionReceipt?.actual_fee?.amount
-                  ? formatNumber(
-                      Number(cairo.felt(TransactionReceipt?.actual_fee?.amount))
-                    )
-                  : 0}{" "}
-                {TransactionReceipt?.actual_fee?.unit}
-              </p>
-            </div>
-          </div>
-          <div
-            style={{
-              borderTopStyle: "dashed",
-              borderTopWidth: "2px",
-            }}
-            className="flex flex-col gap-4 p-4 border-[#8E8E8E] border-l-4 border-b border-r"
-          >
-            <div className="flex flex-col text-sm gap-4 w-full">
-              <div className="flex flex-row w-full text-center">
-                <div className=" flex flex-row w-full">
-                  <div className=" w-full block bg-[#4A4A4A] py-2">
-                    <p className=" text-white">GAS</p>
-                  </div>
-                  <div className=" w-full block py-2 border border-[#DBDBDB]">
-                    <p>{formatNumber(blockComputeData.gas)}</p>
-                  </div>
-                </div>
-                <div className=" flex flex-row w-full">
-                  <div className=" w-full block bg-[#4A4A4A] py-2">
-                    <p className=" text-white">DA GAS</p>
-                  </div>
-                  <div className=" w-full block py-2 border border-[#DBDBDB]">
-                    <p>{formatNumber(blockComputeData.data_gas)}</p>
-                  </div>
-                </div>
-              </div>
-              <div className=" w-full bg-[#8E8E8E] h-[1px]" />
-              <div className=" flex w-full flex-col text-center">
-                <div className=" w-full block bg-[#4A4A4A] py-2">
-                  <p className=" text-white">STEPS</p>
-                </div>
-                <div className=" w-full block py-2 border border-[#DBDBDB]">
-                  <p>{formatNumber(blockComputeData.steps)}</p>
-                </div>
-              </div>
-              <div className=" flex flex-col">
-                <h2 className="text-md font-bold">BUILTINS COUNTER:</h2>
-                <table className="w-full border-collapse mt-2">
-                  <tbody className=" text-center w-full">
-                    {Object.entries(executionData).map(
-                      ([key, value], index, array) => {
-                        const heading = formatSnakeCaseToDisplayValue(key);
-                        return index % 2 === 0 ? (
-                          <tr key={index} className="w-full flex ">
-                            <td className="p-1 bg-gray-100 w-1/2 border">
-                              {heading}
-                            </td>
-                            <td className="p-1 w-1/2 border">
-                              {formatNumber(value)}
-                            </td>
+          <SectionBox variant="upper-half">
+            <SectionBoxEntry title="Hash">
+              {isMobile
+                ? truncateString(TransactionReceipt?.transaction_hash)
+                : TransactionReceipt?.transaction_hash}
+            </SectionBoxEntry>
 
-                            {array[index + 1] ? (
-                              <>
-                                <td className="p-1 bg-gray-100 w-1/2 border">
-                                  {formatSnakeCaseToDisplayValue(
-                                    array[index + 1][0]
-                                  )}
-                                </td>
-                                <td className="p-1 w-1/2 border">
-                                  {formatNumber(array[index + 1][1])}
-                                </td>
-                              </>
-                            ) : (
-                              <>
-                                <td className="w-1/2 border-l border-t p-1" />
-                                <td className="w-1/2 border border-transparent p-1" />
-                              </>
-                            )}
-                          </tr>
-                        ) : null;
-                      }
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+            <SectionBoxEntry title="Block">
+              {TransactionReceipt?.block_number}
+            </SectionBoxEntry>
+          </SectionBox>
+
+          <SectionBox title="Sender" variant="upper-half">
+            <SectionBoxEntry title="Address">
+              {isMobile
+                ? truncateString(TransactionDetails?.sender_address)
+                : TransactionDetails?.sender_address}
+            </SectionBoxEntry>
+
+            <SectionBoxEntry title="Nonce">
+              {Number(TransactionDetails?.nonce)}
+            </SectionBoxEntry>
+          </SectionBox>
+
+          <SectionBox title="Resource Bounds" variant="upper-half">
+            <SectionBoxEntry title="L1 Gas Prices" bold={false}>
+              <table className="w-full">
+                <tbody>
+                  <tr>
+                    <th className="w-1/3">Max Amount</th>
+                    <td>
+                      {TransactionDetails?.resource_bounds?.l1_gas?.max_amount
+                        ? formatNumber(
+                            Number(
+                              cairo.felt(
+                                TransactionDetails?.resource_bounds?.l1_gas
+                                  ?.max_amount
+                              )
+                            )
+                          )
+                        : 0}{" "}
+                      WEI
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="w-1">Max Amount / Unit</th>
+                    <td>
+                      {TransactionDetails?.resource_bounds?.l1_gas
+                        ?.max_price_per_unit
+                        ? formatNumber(
+                            Number(
+                              cairo.felt(
+                                TransactionDetails?.resource_bounds?.l1_gas
+                                  ?.max_price_per_unit
+                              )
+                            )
+                          )
+                        : 0}{" "}
+                      FRI
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </SectionBoxEntry>
+            <SectionBoxEntry title="L2 Gas Prices" bold={false}>
+              <table className="w-full">
+                <tbody>
+                  <tr>
+                    <th className="w-1/3">Max Amount</th>
+                    <td>
+                      {TransactionDetails?.resource_bounds?.l2_gas?.max_amount
+                        ? formatNumber(
+                            Number(
+                              cairo.felt(
+                                TransactionDetails?.resource_bounds?.l2_gas
+                                  ?.max_amount
+                              )
+                            )
+                          )
+                        : 0}{" "}
+                      WEI
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="w-1">Max Amount / Unit</th>
+                    <td>
+                      {TransactionDetails?.resource_bounds?.l2_gas
+                        ?.max_price_per_unit
+                        ? formatNumber(
+                            Number(
+                              cairo.felt(
+                                TransactionDetails?.resource_bounds?.l2_gas
+                                  ?.max_price_per_unit
+                              )
+                            )
+                          )
+                        : 0}{" "}
+                      FRI
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </SectionBoxEntry>
+          </SectionBox>
+
+          <SectionBox title="DA Mode" variant="upper-half">
+            <table className="w-full">
+              <tbody>
+                <tr>
+                  <th className="w-1/3">Fee</th>
+                  <td>{TransactionDetails?.fee_data_availability_mode}</td>
+                </tr>
+                <tr>
+                  <th className="w-1/3">Nonce</th>
+                  <td>{TransactionDetails?.nonce_data_availability_mode}</td>
+                </tr>
+              </tbody>
+            </table>
+          </SectionBox>
+
+          {TransactionDetails?.tip ? (
+            <SectionBox title="Tip" variant="upper-half">
+              {TransactionDetails?.tip}
+            </SectionBox>
+          ) : null}
+
+          <SectionBox title="Actual Fee" variant="upper-half">
+            {TransactionReceipt?.actual_fee?.amount
+              ? formatNumber(
+                  Number(cairo.felt(TransactionReceipt?.actual_fee?.amount))
+                )
+              : 0}{" "}
+            {TransactionReceipt?.actual_fee?.unit}
+          </SectionBox>
+
+          <SectionBox title="Execution Resources" variant="full">
+            <table className="w-full mb-1">
+              <thead>
+                <tr>
+                  <th colSpan={2}>GAS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th className="w-[90px]">L1 GAS</th>
+                  <td>{formatNumber(blockComputeData.gas)}</td>
+                </tr>
+                <tr>
+                  <th className="w-min">L1 DA GAS</th>
+                  <td>{formatNumber(blockComputeData.data_gas)}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <table className="w-full mb-1">
+              <thead>
+                <tr>
+                  <th>STEPS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{formatNumber(blockComputeData.steps)}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th colSpan={4} className="p-1 bg-gray-100 border">
+                    BUILTINS COUNTER
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody className="text-center">
+                {Object.entries(executionData).map(
+                  ([key, value], index, array) => {
+                    const heading = formatSnakeCaseToDisplayValue(key);
+                    return index % 2 === 0 ? (
+                      <tr key={index} className="w-full">
+                        <th className="w-[111px]">{heading}</th>
+                        <td>{formatNumber(value)}</td>
+
+                        {array[index + 1] ? (
+                          <>
+                            <th className="w-[111px]">
+                              {formatSnakeCaseToDisplayValue(
+                                array[index + 1][0]
+                              )}
+                            </th>
+                            <td>{formatNumber(array[index + 1][1])}</td>
+                          </>
+                        ) : (
+                          <>
+                            <th className="w-[111px]"></th>
+                            <td></td>
+                          </>
+                        )}
+                      </tr>
+                    ) : null;
+                  }
+                )}
+              </tbody>
+            </table>
+          </SectionBox>
         </div>
 
         <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
