@@ -685,7 +685,7 @@ export default function TransactionDetails() {
             </div>
           </div>
 
-          <Tabs defaultValue="calldata" className="border relative border-[#8E8E8E] flex flex-col w-full overflow-y-auto max-h-[61.5rem]">
+          <Tabs defaultValue="calldata" className="flex flex-col flex-grow">
             <TabsList>
               <TabsTrigger value="calldata">Calldata</TabsTrigger>
               <TabsTrigger value="events">Events</TabsTrigger>

@@ -350,11 +350,8 @@ export default function BlockDetails() {
           </SectionBox>
         </div>
 
-        <Tabs
-          defaultValue="transactions"
-          className="border border-borderGray flex flex-col flex-grow p-[15px] rounded-md"
-        >
-          <TabsList className="p-0 pb-4">
+        <Tabs defaultValue="transactions">
+          <TabsList>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>

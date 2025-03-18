@@ -363,11 +363,8 @@ export default function ContractDetails() {
           </div>
 
           {/* Data Tabs Section */}
-          <Tabs
-            defaultValue="transactions"
-            className="border border-borderGray flex flex-col flex-grow p-[15px] rounded-md"
-          >
-            <TabsList className="p-0 pb-4">
+          <Tabs defaultValue="transactions">
+            <TabsList>
               <TabsTrigger value="transactions">Transactions</TabsTrigger>
               <TabsTrigger value="read-contract">Read Contract</TabsTrigger>
               <TabsTrigger value="write-contract">Write Contract</TabsTrigger>
