@@ -8,12 +8,12 @@ import { cn } from "@cartridge/ui-next";
 const initialTabsContext: TabsContextValue = { variant: "primary", size: "md" }
 
 const tabListVariants = cva(
-  "flex gap-px bg-[#B0B0B0] border border-[#B0B0B0] flex sticky top-0 flex-col sm:flex-row text-centclassName, er overflow-hidden",
+  "flex gap-px bg-[#B0B0B0] border border-[#B0B0B0] flex sticky top-0 flex-col sm:flex-row text-center",
   {
     variants: {
       variant: {
         primary: "",
-        secondary: "self-start border rounded-sm",
+        secondary: "self-start border rounded-sm overflow-hidden",
       },
       size: {
         sm: "",

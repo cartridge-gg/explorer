@@ -4,7 +4,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useCallback, useEffect, useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Contract } from "starknet";
-import { convertValue } from "@/shared/utils/rpc_utils";
+import { convertValue, isLocalNode } from "@/shared/utils/rpc_utils";
 import { FunctionResult, DisplayFormatTypes } from "@/types/types";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import WalletConnectModal from "@/shared/components/wallet_connect";
@@ -265,7 +265,7 @@ export default function ContractDetails() {
     queryFn: async () => {
       const { events } = await RPC_PROVIDER.getEvents({
         address: contractAddress!,
-        chunk_size: 1,
+        chunk_size: 100,
         from_block: { block_number: 0 },
         to_block: "latest",
       });
@@ -288,9 +288,8 @@ export default function ContractDetails() {
       );
     },
     initialData: [],
-    enabled: !!contractAddress
+    enabled: !!contractAddress && isLocalNode
   });
-
 
   return (
     <div className="flex flex-col w-full gap-8">
@@ -363,17 +362,19 @@ export default function ContractDetails() {
           </div>
 
           {/* Data Tabs Section */}
-          <Tabs defaultValue="transactions">
+          <Tabs defaultValue={isLocalNode ? "transactions" : "read-contract"}>
             <TabsList>
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
+              {isLocalNode && <TabsTrigger value="transactions">Transactions</TabsTrigger>}
               <TabsTrigger value="read-contract">Read Contract</TabsTrigger>
               <TabsTrigger value="write-contract">Write Contract</TabsTrigger>
               <TabsTrigger value="code">Contract Code</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="transactions">
-              <TxList transactions={txsTable} />
-            </TabsContent>
+            {isLocalNode && (
+              <TabsContent value="transactions">
+                <TxList transactions={txsTable} />
+              </TabsContent>
+            )}
 
             <TabsContent value="read-contract">
               <div className="flex flex-col gap-4">
