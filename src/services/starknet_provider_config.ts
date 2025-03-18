@@ -16,4 +16,10 @@ export const RPC_PROVIDER = new RpcProvider({
 export const QUERY_KEYS = {
   getBlockNumber: ["getBlockNumber"],
   getBlockWithTxs: ["getBlockWithTxs"],
+  getClassAt: ["getClassAt"],
+  getTransactionReceipt: ["getTransactionReceipt"],
+  getTransactionTrace: ["getTransactionTrace"],
+  getTransaction: ["getTransaction"],
+  getBlockWithTxHashes: ["getBlockWithTxHashes"],
+  getBlock: ["getBlock"],
 };

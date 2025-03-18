@@ -7,7 +7,11 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
+import {
+  CACHE_TIME,
+  EXECUTION_RESOURCES_KEY_MAP,
+  STALE_TIME,
+} from "@/constants/rpc";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
 import { useScreen } from "@/shared/hooks/useScreen";
@@ -25,17 +29,15 @@ import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 import TxList from "./TxList";
 import EventList from "./EventList";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/shared/components/tab";
+import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
+import { QUERY_KEYS } from "@/services/starknet_provider_config";
+
+const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
 
 export default function BlockDetails() {
   const { isMobile } = useScreen();
   const { blockNumber } = useParams<{ blockNumber: string }>();
-
+  const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
   const [txsTable, setTxsTable] = useState<TransactionTableData[]>([]);
   const [eventsTable, setEventsTable] = useState<EventTableData[]>([]);
   const [executionTable, setExecutionTable] = useState({
@@ -55,9 +57,11 @@ export default function BlockDetails() {
   });
 
   const { data: BlockReceipt } = useQuery({
-    queryKey: [""],
+    queryKey: [QUERY_KEYS.getBlockWithTxs, blockNumber],
     queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockNumber ?? 0),
     enabled: !!blockNumber,
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
   });
 
   const processBlockInformation = useCallback(async (transactions) => {
@@ -350,33 +354,30 @@ export default function BlockDetails() {
           </SectionBox>
         </div>
 
-        <Tabs
-          defaultValue="transactions"
-          className="border border-borderGray flex flex-col flex-grow p-[15px] rounded-md"
-        >
-          <TabsList className="p-0 pb-4">
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
-            <TabsTrigger value="events">Events</TabsTrigger>
-            <TabsTrigger value="messages">Messages</TabsTrigger>
-            <TabsTrigger value="state-updates">State Updates</TabsTrigger>
-          </TabsList>
+        <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+          <DetailsPageSelector
+            selected={DataTabs[0]}
+            onTabSelect={setSelectedDataTab}
+            items={DataTabs.map((tab) => ({
+              name: tab,
+              value: tab,
+            }))}
+          />
 
-          <TabsContent className="h-full" value="transactions">
-            <TxList transactions={txsTable} />
-          </TabsContent>
-
-          <TabsContent value="events" className="p-0 h-full">
-            <EventList events={eventsTable} />
-          </TabsContent>
-
-          <TabsContent value="messages" className="p-4 text-center">
-            <span className="text-[#D0D0D0]">No data found</span>
-          </TabsContent>
-
-          <TabsContent value="state-updates" className="p-4 text-center">
-            <span className="text-[#D0D0D0]">No data found</span>
-          </TabsContent>
-        </Tabs>
+          <div className="flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray rounded-b-md">
+            <div className="w-full h-full">
+              {selectedDataTab === "Transactions" ? (
+                <TxList transactions={txsTable} />
+              ) : selectedDataTab === "Events" ? (
+                <EventList events={eventsTable} />
+              ) : (
+                <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
+                  <span className="text-[#D0D0D0]">No data found</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

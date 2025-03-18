@@ -13,3 +13,8 @@ export const EXECUTION_RESOURCES_KEY_MAP = {
 
 export const RPC_URL = window.RPC_URL ?? import.meta.env.VITE_RPC_URL;
 export const CHAIN_ID = window.CHAIN_ID ?? import.meta.env.VITE_CHAIN_ID;
+
+
+// Cache constants
+export const CACHE_TIME = 1000 * 60 * 60 * 24; // 24 hours
+export const STALE_TIME = 1000 * 60 * 30; // 30 minutes

@@ -1,4 +1,4 @@
-import { RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { formatNumber } from "@/shared/utils/number";
 import {
   formatSnakeCaseToDisplayValue,
@@ -14,11 +14,14 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
-import dayjs from "dayjs";
 import { cairo, CallData, events } from "starknet";
 import { decodeCalldata, getEventName } from "@/shared/utils/rpc_utils";
 import CalldataDisplay from "./components/CalldataDisplay";
-import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
+import {
+  CACHE_TIME,
+  EXECUTION_RESOURCES_KEY_MAP,
+  STALE_TIME,
+} from "@/constants/rpc";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -29,7 +32,13 @@ import {
 } from "@/shared/components/breadcrumbs";
 import { ROUTES } from "@/constants/routes";
 import { DataTable, TableCell, TableHead } from "@/shared/components/dataTable";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/tab";
+import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
+import PageHeader from "@/shared/components/PageHeader";
+import { SectionBoxEntry } from "@/shared/components/section";
+import { SectionBox } from "@/shared/components/section/SectionBox";
+import dayjs from "dayjs";
+
+const DataTabs = ["Calldata", "Events", "Signature", "Storage Diffs"];
 
 interface ParsedEvent {
   transaction_hash: string;
@@ -55,6 +64,22 @@ const eventColumnHelper = createColumnHelper<EventData>();
 
 const storageDiffColumnHelper = createColumnHelper<StorageDiffData>();
 
+const FinalityStatus = ({ status }: { status: string }) => {
+  const status_color_map = {
+    succeeded: "bg-[#7BA797]",
+    reverted: "bg-[#C4806D]",
+  };
+  return (
+    <div
+      className={`text-white px-2 py-1 rounded-sm ${
+        status_color_map[status?.toLowerCase() as keyof typeof status_color_map]
+      }`}
+    >
+      {status}
+    </div>
+  );
+};
+
 export default function TransactionDetails() {
   const navigate = useNavigate();
   const { txHash } = useParams<{ txHash: string }>();
@@ -63,7 +88,7 @@ export default function TransactionDetails() {
     bitwise: 0,
     pedersen: 0,
     range_check: 0,
-    posiedon: 0,
+    poseidon: 0,
     ecdsa: 0,
     segment_arena: 0,
     keccak: 0,
@@ -76,6 +101,8 @@ export default function TransactionDetails() {
     data_gas: 0,
     steps: 0,
   });
+
+  const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
 
   const [eventsData, setEventsData] = useState<EventData[]>([]);
   const [callData, setCallData] = useState<
@@ -93,24 +120,34 @@ export default function TransactionDetails() {
   });
 
   const { data: TransactionReceipt } = useQuery({
-    queryKey: ["txn_receipt"],
-    queryFn: () => RPC_PROVIDER.getTransactionReceipt(txHash ?? 0),
+    queryKey: [QUERY_KEYS.getTransactionReceipt, txHash],
+    queryFn: () => RPC_PROVIDER.getTransactionReceipt(txHash || ""),
     enabled: !!txHash,
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
   });
 
   const { data: TransactionTrace } = useQuery({
-    queryKey: ["txn_trace"],
-    queryFn: () => RPC_PROVIDER.getTransactionTrace(txHash ?? 0),
+    queryKey: [QUERY_KEYS.getTransactionTrace, txHash],
+    queryFn: () => RPC_PROVIDER.getTransactionTrace(txHash || ""),
+    enabled: !!txHash,
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
   });
 
   const { data: TransactionDetails } = useQuery({
-    queryKey: ["txn_details"],
-    queryFn: () => RPC_PROVIDER.getTransactionByHash(txHash ?? 0),
+    queryKey: [QUERY_KEYS.getTransaction, txHash],
+    queryFn: () => RPC_PROVIDER.getTransaction(txHash || ""),
+    enabled: !!txHash,
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
   });
 
   const { data: BlockDetails } = useQuery({
-    queryKey: ["txn_block_details"],
+    queryKey: [QUERY_KEYS.getBlock, TransactionReceipt?.block_number],
     queryFn: () => RPC_PROVIDER.getBlock(TransactionReceipt?.block_number),
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
   });
 
   const processTransactionReceipt = useCallback(async () => {
@@ -170,8 +207,8 @@ export default function TransactionDetails() {
 
               const eventKey = matchingParsedEvent
                 ? Object.keys(matchingParsedEvent).find((key) =>
-                  key.includes("::")
-                )
+                    key.includes("::")
+                  )
                 : "";
 
               return {
@@ -219,8 +256,9 @@ export default function TransactionDetails() {
       } else {
         const key_map =
           EXECUTION_RESOURCES_KEY_MAP[
-          key as keyof typeof EXECUTION_RESOURCES_KEY_MAP
+            key as keyof typeof EXECUTION_RESOURCES_KEY_MAP
           ];
+
         if (key_map) {
           setExecutionData((prev) => ({
             ...prev,
@@ -310,27 +348,26 @@ export default function TransactionDetails() {
     eventColumnHelper.accessor("id", {
       header() {
         return (
-          <TableHead className="w-1 text-left">
+          <TableHead className="w-1 text-left border-0">
             <span>ID</span>
           </TableHead>
         );
       },
       cell: (info) => (
         <TableCell
-          className="flex pr-4 justify-start overflow-hidden cursor-pointer text-left"
+          className="flex border-0 pr-4 justify-start cursor-pointer text-left"
           onClick={() => navigateToEvent(info.getValue().toString())}
         >
           <span className="whitespace-nowrap hover:text-blue-400 transition-all">
             {truncateString(info.getValue())}
           </span>
-          <span className="sm:visible hidden flex-grow border-dotted border-b border-gray-500 mx-2"></span>
         </TableCell>
       ),
     }),
     eventColumnHelper.accessor("from", {
       header() {
         return (
-          <TableHead className="text-left">
+          <TableHead className="text-left border-0">
             <span>From Address</span>
           </TableHead>
         );
@@ -338,7 +375,7 @@ export default function TransactionDetails() {
       cell: (info) => (
         <TableCell
           onClick={() => navigateToContract(info.getValue())}
-          className="w-1 pr-4 text-left hover:text-blue-400 transition-all cursor-pointer"
+          className="w-1 pr-4 border-0 text-left hover:text-blue-400 transition-all cursor-pointer"
         >
           <span>{truncateString(info.getValue())}</span>
         </TableCell>
@@ -347,13 +384,13 @@ export default function TransactionDetails() {
     eventColumnHelper.accessor("event_name", {
       header() {
         return (
-          <TableHead className="text-left">
+          <TableHead className="text-left border-0">
             <span>Event Name</span>
           </TableHead>
         );
       },
       cell: (info) => (
-        <TableCell className="w-1 text-left pr-4">
+        <TableCell className="w-1 text-left border-0 pr-4">
           <span>{info.getValue()}</span>
         </TableCell>
       ),
@@ -361,7 +398,7 @@ export default function TransactionDetails() {
     eventColumnHelper.accessor("block", {
       header() {
         return (
-          <TableHead className="text-right">
+          <TableHead className="text-right border-0">
             <span>Block</span>
           </TableHead>
         );
@@ -369,7 +406,7 @@ export default function TransactionDetails() {
       cell: (info) => (
         <TableCell
           onClick={() => navigateToBlock(info.getValue().toString())}
-          className="w-1 text-xs text-right py-2 cursor-pointer hover:text-blue-400 transition-all"
+          className="w-1 text-right border-0 cursor-pointer hover:text-blue-400 transition-all"
         >
           <span>{info.getValue()}</span>
         </TableCell>
@@ -396,7 +433,7 @@ export default function TransactionDetails() {
     storageDiffColumnHelper.accessor("contract_address", {
       header() {
         return (
-          <TableHead className="text-left">
+          <TableHead className="text-left border-0">
             <span>Contract Address</span>
           </TableHead>
         );
@@ -404,7 +441,7 @@ export default function TransactionDetails() {
       cell: (info) => (
         <TableCell
           onClick={() => navigateToContract(info.getValue())}
-          className="text-left cursor-pointer hover:text-blue-400 transition-all pr-4"
+          className="text-left border-0 cursor-pointer hover:text-blue-400 transition-all pr-4"
         >
           <span>{truncateString(info.getValue())}</span>
         </TableCell>
@@ -413,7 +450,7 @@ export default function TransactionDetails() {
     storageDiffColumnHelper.accessor("key", {
       header() {
         return (
-          <TableHead className="text-left">
+          <TableHead className="text-left border-0">
             <span>Key</span>
           </TableHead>
         );
@@ -430,7 +467,7 @@ export default function TransactionDetails() {
     storageDiffColumnHelper.accessor("value", {
       header() {
         return (
-          <TableHead className="text-left">
+          <TableHead className="text-left border-0">
             <span>Value</span>
           </TableHead>
         );
@@ -447,7 +484,7 @@ export default function TransactionDetails() {
     storageDiffColumnHelper.accessor("block_number", {
       header() {
         return (
-          <TableHead className="text-right">
+          <TableHead className="text-right border-0">
             <span>Block Number</span>
           </TableHead>
         );
@@ -457,7 +494,7 @@ export default function TransactionDetails() {
         return (
           <TableCell
             onClick={() => navigateToBlock(block_number.toString())}
-            className="text-right cursor-pointer hover:text-blue-400 transition-all"
+            className="text-right border-0 cursor-pointer hover:text-blue-400 transition-all"
           >
             <span>{block_number}</span>
           </TableCell>
@@ -480,252 +517,308 @@ export default function TransactionDetails() {
   });
 
   return (
-    <div className="flex flex-col w-full gap-8 px-2 py-4">
-      <div className="flex flex-col w-full gap-4">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink className="" href="/">
-                .
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink className=" text-sm" href="/">
-                explrr
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink className=" text-sm" href="/txns">
-                transactions
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className=" text-sm">
-                {isMobile && txHash ? truncateString(txHash) : txHash}
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+    <div className="w-full flex-grow gap-8">
+      <Breadcrumb className="mb-3">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink className="" href="/">
+              .
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink className=" text-sm" href="/">
+              explrr
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink className=" text-sm" href="/txns">
+              transactions
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className=" text-sm">
+              {isMobile && txHash ? truncateString(txHash) : txHash}
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-        <div className="flex flex-row  justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
-          <h1 className="text-white">Transactions</h1>
-        </div>
-        <div className=" flex flex-col w-full lg:flex-row gap-4 pb-4">
-          <div className=" flex flex-col gap-4">
-            <div
-              style={{
-                borderBottomStyle: "dashed",
-                borderBottomWidth: "2px",
-              }}
-              className="flex flex-col gap-4 p-4 border-[#8E8E8E] border-l-4 border-t border-r"
-            >
-              <div className="flex flex-col text-sm  gap-2">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  Hash
-                </p>
-                <p>
-                  {isMobile && TransactionReceipt?.transaction_hash
-                    ? truncateString(TransactionReceipt?.transaction_hash)
-                    : txHash}
-                </p>
-              </div>
-              <div className="flex flex-col text-sm gap-1">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  Status
-                </p>
-                <p className=" uppercase">
-                  {TransactionReceipt?.statusReceipt}
-                </p>
-              </div>
-              <div className="flex flex-col text-sm gap-1">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  Type
-                </p>
-                <p>{TransactionDetails?.type}</p>
-              </div>
-              <div className="flex flex-col text-sm gap-1">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  Block Number
-                </p>
-                <p>{TransactionReceipt?.block_number}</p>
-              </div>
-              <div className="flex flex-col text-sm gap-1">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  Timestamp
-                </p>
-                <p>
-                  {BlockDetails?.timestamp} ({" "}
-                  {dayjs
-                    .unix(BlockDetails?.timestamp)
-                    .format("MMM D YYYY HH:mm:ss")}{" "}
-                  )
-                </p>
-              </div>
-              <div className="flex flex-col text-sm gap-1">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  Nonce
-                </p>
-                <p>{TransactionDetails?.nonce}</p>
-              </div>
-              <div className="flex flex-col text-sm gap-1">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  Sender Address
-                </p>
-                <p>
-                  {isMobile && TransactionDetails?.sender_address
-                    ? truncateString(TransactionDetails?.sender_address)
-                    : TransactionDetails?.sender_address}
-                </p>
-              </div>
-            </div>
-            <div
-              style={{
-                borderTopStyle: "dashed",
-                borderTopWidth: "2px",
-                borderBottomStyle: "dashed",
-                borderBottomWidth: "2px",
-              }}
-              className="flex flex-col h-fit gap-4 p-4 border-[#8E8E8E] border-l-4 border-t border-r"
-            >
-              <div className="flex flex-col text-sm  gap-1">
-                <p className=" w-fit font-bold  px-2 py-1 bg-[#D9D9D9] text-black">
-                  ACTUAL FEE
-                </p>
-                <p>
-                  {TransactionReceipt?.actual_fee?.amount
-                    ? formatNumber(
-                      Number(
-                        cairo.felt(TransactionReceipt?.actual_fee?.amount)
-                      )
-                    )
-                    : 0}{" "}
-                  {TransactionReceipt?.actual_fee?.unit}
-                </p>
-              </div>
-            </div>
-            <div
-              style={{
-                borderTopStyle: "dashed",
-                borderTopWidth: "2px",
-              }}
-              className="flex flex-col gap-4 p-4 border-[#8E8E8E] border-l-4 border-b border-r"
-            >
-              <div className="flex flex-col text-sm gap-4 w-full">
-                <div className="flex flex-row w-full text-center">
-                  <div className=" flex flex-row w-full">
-                    <div className=" w-full block bg-[#4A4A4A] py-2">
-                      <p className=" text-white">GAS</p>
-                    </div>
-                    <div className=" w-full block py-2 border border-[#DBDBDB]">
-                      <p>{formatNumber(blockComputeData.gas)}</p>
-                    </div>
-                  </div>
-                  <div className=" flex flex-row w-full">
-                    <div className=" w-full block bg-[#4A4A4A] py-2">
-                      <p className=" text-white">DA GAS</p>
-                    </div>
-                    <div className=" w-full block py-2 border border-[#DBDBDB]">
-                      <p>{formatNumber(blockComputeData.data_gas)}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className=" w-full bg-[#8E8E8E] h-[1px]" />
-                <div className=" flex w-full flex-col text-center">
-                  <div className=" w-full block bg-[#4A4A4A] py-2">
-                    <p className=" text-white">STEPS</p>
-                  </div>
-                  <div className=" w-full block py-2 border border-[#DBDBDB]">
-                    <p>{formatNumber(blockComputeData.steps)}</p>
-                  </div>
-                </div>
-                <div className=" flex flex-col">
-                  <h2 className="text-md font-bold">BUILTINS COUNTER:</h2>
-                  <table className="w-full border-collapse mt-2">
-                    <tbody className=" text-center w-full">
-                      {Object.entries(executionData).map(
-                        ([key, value], index, array) => {
-                          const heading = formatSnakeCaseToDisplayValue(key);
-                          return index % 2 === 0 ? (
-                            <tr key={index} className="w-full flex ">
-                              <td className="p-1 bg-gray-100 w-1/2 border">
-                                {heading}
-                              </td>
-                              <td className="p-1 w-1/2 border">
-                                {formatNumber(value)}
-                              </td>
+      <PageHeader
+        className="mb-6"
+        title={`Transaction `}
+        subtext={TransactionReceipt?.finality_status}
+        titleRightComponent={
+          <FinalityStatus status={TransactionReceipt?.execution_status} />
+        }
+        subtextRightComponent={
+          <div className="text-[#5D5D5D]">
+            {dayjs.unix(BlockDetails?.timestamp).format("MMM D YYYY HH:mm:ss")}{" "}
+          </div>
+        }
+      />
 
-                              {array[index + 1] ? (
-                                <>
-                                  <td className="p-1 bg-gray-100 w-1/2 border">
-                                    {formatSnakeCaseToDisplayValue(
-                                      array[index + 1][0]
-                                    )}
-                                  </td>
-                                  <td className="p-1 w-1/2 border">
-                                    {formatNumber(array[index + 1][1])}
-                                  </td>
-                                </>
-                              ) : (
-                                <>
-                                  <td className="w-1/2 border-l border-t p-1" />
-                                  <td className="w-1/2 border border-transparent p-1" />
-                                </>
+      <div className="flex flex-col sl:flex-row sl:h-[66vh] gap-4">
+        <div className="flex w-full sl:w-[35%] sl:min-w-[35%] sl:max-w-[35%] flex-col gap-[6px] sl:overflow-y-auto">
+          <SectionBox variant="upper-half">
+            <SectionBoxEntry title="Hash">
+              {isMobile
+                ? truncateString(TransactionReceipt?.transaction_hash)
+                : TransactionReceipt?.transaction_hash}
+            </SectionBoxEntry>
+
+            <SectionBoxEntry title="Block">
+              {TransactionReceipt?.block_number}
+            </SectionBoxEntry>
+          </SectionBox>
+
+          <SectionBox title="Sender" variant="upper-half">
+            <SectionBoxEntry title="Address">
+              {isMobile
+                ? truncateString(TransactionDetails?.sender_address)
+                : TransactionDetails?.sender_address}
+            </SectionBoxEntry>
+
+            <SectionBoxEntry title="Nonce">
+              {Number(TransactionDetails?.nonce)}
+            </SectionBoxEntry>
+          </SectionBox>
+
+          <SectionBox title="Resource Bounds" variant="upper-half">
+            <SectionBoxEntry title="L1 Gas Prices" bold={false}>
+              <table className="w-full">
+                <tbody>
+                  <tr>
+                    <th className="w-1/3">Max Amount</th>
+                    <td>
+                      {TransactionDetails?.resource_bounds?.l1_gas?.max_amount
+                        ? formatNumber(
+                            Number(
+                              cairo.felt(
+                                TransactionDetails?.resource_bounds?.l1_gas
+                                  ?.max_amount
+                              )
+                            )
+                          )
+                        : 0}{" "}
+                      WEI
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="w-1">Max Amount / Unit</th>
+                    <td>
+                      {TransactionDetails?.resource_bounds?.l1_gas
+                        ?.max_price_per_unit
+                        ? formatNumber(
+                            Number(
+                              cairo.felt(
+                                TransactionDetails?.resource_bounds?.l1_gas
+                                  ?.max_price_per_unit
+                              )
+                            )
+                          )
+                        : 0}{" "}
+                      FRI
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </SectionBoxEntry>
+            <SectionBoxEntry title="L2 Gas Prices" bold={false}>
+              <table className="w-full">
+                <tbody>
+                  <tr>
+                    <th className="w-1/3">Max Amount</th>
+                    <td>
+                      {TransactionDetails?.resource_bounds?.l2_gas?.max_amount
+                        ? formatNumber(
+                            Number(
+                              cairo.felt(
+                                TransactionDetails?.resource_bounds?.l2_gas
+                                  ?.max_amount
+                              )
+                            )
+                          )
+                        : 0}{" "}
+                      WEI
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="w-1">Max Amount / Unit</th>
+                    <td>
+                      {TransactionDetails?.resource_bounds?.l2_gas
+                        ?.max_price_per_unit
+                        ? formatNumber(
+                            Number(
+                              cairo.felt(
+                                TransactionDetails?.resource_bounds?.l2_gas
+                                  ?.max_price_per_unit
+                              )
+                            )
+                          )
+                        : 0}{" "}
+                      FRI
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </SectionBoxEntry>
+          </SectionBox>
+
+          <SectionBox title="DA Mode" variant="upper-half">
+            <table className="w-full">
+              <tbody>
+                <tr>
+                  <th className="w-1/3">Fee</th>
+                  <td>{TransactionDetails?.fee_data_availability_mode}</td>
+                </tr>
+                <tr>
+                  <th className="w-1/3">Nonce</th>
+                  <td>{TransactionDetails?.nonce_data_availability_mode}</td>
+                </tr>
+              </tbody>
+            </table>
+          </SectionBox>
+
+          {TransactionDetails?.tip ? (
+            <SectionBox title="Tip" variant="upper-half">
+              {TransactionDetails?.tip}
+            </SectionBox>
+          ) : null}
+
+          <SectionBox title="Actual Fee" variant="upper-half">
+            {TransactionReceipt?.actual_fee?.amount
+              ? formatNumber(
+                  Number(cairo.felt(TransactionReceipt?.actual_fee?.amount))
+                )
+              : 0}{" "}
+            {TransactionReceipt?.actual_fee?.unit}
+          </SectionBox>
+
+          <SectionBox title="Execution Resources" variant="full">
+            <table className="w-full mb-1">
+              <thead>
+                <tr>
+                  <th colSpan={2}>GAS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th className="w-[90px]">L1 GAS</th>
+                  <td>{formatNumber(blockComputeData.gas)}</td>
+                </tr>
+                <tr>
+                  <th className="w-min">L1 DA GAS</th>
+                  <td>{formatNumber(blockComputeData.data_gas)}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <table className="w-full mb-1">
+              <thead>
+                <tr>
+                  <th>STEPS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{formatNumber(blockComputeData.steps)}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th colSpan={4} className="p-1 bg-gray-100 border">
+                    BUILTINS COUNTER
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody className="text-center">
+                {Object.entries(executionData).map(
+                  ([key, value], index, array) => {
+                    const heading = formatSnakeCaseToDisplayValue(key);
+                    return index % 2 === 0 ? (
+                      <tr key={index} className="w-full">
+                        <th className="w-[111px]">{heading}</th>
+                        <td>{formatNumber(value)}</td>
+
+                        {array[index + 1] ? (
+                          <>
+                            <th className="w-[111px]">
+                              {formatSnakeCaseToDisplayValue(
+                                array[index + 1][0]
                               )}
-                            </tr>
-                          ) : null;
-                        }
-                      )}
-                    </tbody>
-                  </table>
+                            </th>
+                            <td>{formatNumber(array[index + 1][1])}</td>
+                          </>
+                        ) : (
+                          <>
+                            <th className="w-[111px]"></th>
+                            <td></td>
+                          </>
+                        )}
+                      </tr>
+                    ) : null;
+                  }
+                )}
+              </tbody>
+            </table>
+          </SectionBox>
+        </div>
+
+        <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+          <DetailsPageSelector
+            selected={DataTabs[0]}
+            onTabSelect={setSelectedDataTab}
+            items={DataTabs.map((tab) => ({
+              name: tab,
+              value: tab,
+            }))}
+          />
+
+          <div className="flex overflow-x-auto overflow-y-auto flex-col gap-3 mt-[6px] border border-borderGray rounded-b-md">
+            <div className=" flex-grow-0 h-full">
+              {selectedDataTab === "Calldata" ? (
+                <CalldataDisplay calldata={callData} />
+              ) : selectedDataTab === "Events" ? (
+                <div className="p-4 h-full">
+                  <DataTable
+                    table={eventsTable}
+                    pagination={eventsPagination}
+                    setPagination={setEventsPagination}
+                  />
                 </div>
-              </div>
+              ) : selectedDataTab === "Signature" ? (
+                <ul className="w-full flex flex-col gap-2 p-4">
+                  {TransactionDetails?.signature.map((signature, index) => (
+                    <li
+                      key={index}
+                      className="text-sm py-2 border-b border-[#8E8E8E]"
+                    >
+                      {signature}
+                    </li>
+                  ))}
+                </ul>
+              ) : selectedDataTab === "Storage Diffs" ? (
+                <div className="p-4 h-full">
+                  <DataTable
+                    table={storageDiffTable}
+                    pagination={storageDiffPagination}
+                    setPagination={setStorageDiffPagination}
+                  />
+                </div>
+              ) : (
+                <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
+                  <span className="text-[#D0D0D0]">No data found</span>
+                </div>
+              )}
             </div>
           </div>
-
-          <Tabs defaultValue="calldata" className="border relative border-[#8E8E8E] flex flex-col w-full overflow-y-auto max-h-[61.5rem]">
-            <TabsList>
-              <TabsTrigger value="calldata">Calldata</TabsTrigger>
-              <TabsTrigger value="events">Events</TabsTrigger>
-              <TabsTrigger value="signature">Signature</TabsTrigger>
-              <TabsTrigger value="storage-diffs">Storage Diffs</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="calldata" className="p-4">
-              <CalldataDisplay calldata={callData} />
-            </TabsContent>
-
-            <TabsContent value="events" className="p-4">
-              <DataTable
-                table={eventsTable}
-                pagination={eventsPagination}
-                setPagination={setEventsPagination}
-              />
-            </TabsContent>
-
-            <TabsContent value="signature" className="p-4">
-              <ul className="w-full flex flex-col gap-2 p-4">
-                {TransactionDetails?.signature.map((signature, index) => (
-                  <li
-                    key={index}
-                    className="text-sm py-2 border-b border-[#8E8E8E]"
-                  >
-                    {signature}
-                  </li>
-                ))}
-              </ul>
-            </TabsContent>
-
-            <TabsContent value="storage-diffs" className="p-4">
-              <DataTable
-                table={storageDiffTable}
-                pagination={storageDiffPagination}
-                setPagination={setStorageDiffPagination}
-              />
-            </TabsContent>
-          </Tabs>
         </div>
       </div>
     </div>

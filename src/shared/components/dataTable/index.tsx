@@ -80,11 +80,7 @@ const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
-  <td
-    ref={ref}
-    className={cn("px-2 text-sm border border-borderGray", className)}
-    {...props}
-  />
+  <td ref={ref} className={cn("px-2 py-0 text-sm ", className)} {...props} />
 ));
 TableCell.displayName = "TableCell";
 
@@ -104,8 +100,8 @@ function DataTable<T>({
   ...props
 }: DataTableProps<T>) {
   return (
-    <div className="sl:h-[50.4vh] sl:grid" {...props}>
-      <Table className="min-h-[200px] overflow-x-auto sl:overflow-y-scroll">
+    <div className="h-full flex flex-col justify-between " {...props}>
+      <Table className="overflow-x-auto sl:overflow-y-scroll">
         <TableHeader>
           <TableRow>
             {table
@@ -129,7 +125,7 @@ function DataTable<T>({
               <TableRow key={id} onClick={() => {}}>
                 {row.getVisibleCells().map((cell) => {
                   return (
-                    <TableCell key={cell.id}>
+                    <TableCell className="py-1" key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

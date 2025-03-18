@@ -8,7 +8,7 @@ import { convertValue } from "@/shared/utils/rpc_utils";
 import { FunctionResult, DisplayFormatTypes } from "@/types/types";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import WalletConnectModal from "@/shared/components/wallet_connect";
-import { BreadcrumbPage, SpinnerIcon } from "@cartridge/ui-next";
+import { BreadcrumbPage } from "@cartridge/ui-next";
 import {
   Tabs,
   TabsList,
@@ -23,6 +23,10 @@ import {
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumbs";
 import { Editor } from "@monaco-editor/react";
+
+import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
+
+const DataTabs = ["Read Contract", "Write Contract", "Contract Code"];
 
 interface FunctionInput {
   name: string;
@@ -51,6 +55,8 @@ export default function ContractDetails() {
       selector: string;
     }[]
   >([]);
+
+  const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
 
   const [writeFunctions, setWriteFunctions] = useState<
     {
@@ -327,402 +333,424 @@ export default function ContractDetails() {
             </div>
           </div>
 
-          {/* Data Tabs Section */}
-          <Tabs
-            defaultValue="read-contract"
-            className="border border-borderGray flex flex-col flex-grow p-[15px] rounded-md"
-          >
-            <TabsList className="p-0 pb-4">
-              <TabsTrigger value="read-contract">Read Contract</TabsTrigger>
-              <TabsTrigger value="write-contract">Write Contract</TabsTrigger>
-              <TabsTrigger value="code">Contract Code</TabsTrigger>
-            </TabsList>
+          <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+            <DetailsPageSelector
+              selected={DataTabs[0]}
+              onTabSelect={setSelectedDataTab}
+              items={DataTabs.map((tab) => ({
+                name: tab,
+                value: tab,
+              }))}
+            />
 
-            <TabsContent value="read-contract">
-              <div className="flex flex-col gap-4">
-                {readFunctions.map((func, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col p-4 border border-[#8E8E8E] border-dashed"
-                  >
-                    <div
-                      className="flex justify-between items-center cursor-pointer"
-                      onClick={() => {
-                        if (!expandedFunctions[func.name]) {
-                          setExpandedFunctions((prev) => ({
-                            ...prev,
-                            [func.name]: func.inputs.map((input) => ({
-                              name: input.name,
-                              type: input.type,
-                              value: "",
-                            })),
-                          }));
-                        } else {
-                          setExpandedFunctions((prev) => {
-                            const newState = { ...prev };
-                            delete newState[func.name];
-                            return newState;
-                          });
-                        }
-                      }}
-                    >
-                      <div className="flex flex-row gap-2 w-full flex-wrap">
-                        <p className=" font-bold">{func.name}</p>
-                        <div className="flex flex-row gap-2 flex-wrap text-gray-500">
-                          (
-                          {func.inputs.map((input, idx) => (
-                            <p key={idx} className="text-sm">
-                              {idx === 0 ? "" : ","}
-                              {input.name}
-                            </p>
-                          ))}
-                          )
-                        </div>
-                      </div>
-                      <span>{expandedFunctions[func.name] ? "−" : "+"}</span>
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                      {expandedFunctions[func.name] && (
-                        <div className="flex flex-col gap-4 pt-2">
-                          {func.inputs.map((input, idx) => (
-                            <div key={idx} className="flex flex-col gap-2">
-                              <label className="text-sm font-medium w-full">
-                                {input.name} ({input.type})
-                              </label>
-                              <input
-                                type="text"
-                                className="border border-[#8E8E8E] p-2"
-                                placeholder={`Enter ${input.type}`}
-                                value={
-                                  expandedFunctions[func.name][idx]?.value || ""
-                                }
-                                onChange={(e) =>
-                                  handleInputChange(
-                                    func.name,
-                                    idx,
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            </div>
-                          ))}
-
-                          <button
-                            className={`px-4 py-2 mt-2 w-fit ${
-                              functionResults[func.name]?.loading
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
-                            } text-white`}
-                            onClick={() => handleFunctionCall(func.name)}
-                            disabled={functionResults[func.name]?.loading}
-                          >
-                            {functionResults[func.name]?.loading
-                              ? "Querying..."
-                              : "Query"}
-                          </button>
-
-                          {/* Result Display Section */}
-                          {functionResults[func.name] && (
-                            <div className="mt-4">
-                              {functionResults[func.name].loading ? (
-                                <div className="text-gray-600">Loading...</div>
-                              ) : functionResults[func.name].error ? (
-                                <div className="text-red-500 p-3 bg-red-50 border border-red-200">
-                                  <p className="font-medium">Error:</p>
-                                  <p className="text-sm">
-                                    {functionResults[func.name].error}
-                                  </p>
-                                </div>
-                              ) : functionResults[func.name].data !== null ? (
-                                <div className="bg-gray-50 p-3 border border-gray-200">
-                                  <div className="flex flex-row items-center justify-between mb-4">
-                                    <p className="font-medium text-sm">
-                                      Result:
-                                    </p>
-                                    <div className="flex gap-2">
-                                      {DisplayFormat.map((format) => (
-                                        <button
-                                          className={`px-2 py-1 text-xs ${
-                                            (displayFormats[func.name] ??
-                                              "decimal") === format
-                                              ? "bg-[#4A4A4A] text-white"
-                                              : "bg-gray-200"
-                                          }`}
-                                          onClick={() =>
-                                            handleFormatChange(
-                                              func.name,
-                                              format
-                                            )
-                                          }
-                                        >
-                                          {format}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  </div>
-                                  <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words">
-                                    {(() => {
-                                      const data =
-                                        functionResults[func.name]?.data;
-                                      const format =
-                                        displayFormats[func.name] || "decimal";
-
-                                      const safeStringify = (value: any) =>
-                                        JSON.stringify(
-                                          value,
-                                          (_, v) =>
-                                            typeof v === "bigint"
-                                              ? v.toString()
-                                              : v,
-                                          2
-                                        );
-
-                                      if (Array.isArray(data)) {
-                                        return data.map(
-                                          (item: any, index: number) => (
-                                            <div key={index} className="mb-1">
-                                              {format === "decimal"
-                                                ? safeStringify(item)
-                                                : convertValue(item)?.[
-                                                    format
-                                                  ] || safeStringify(item)}
-                                            </div>
-                                          )
-                                        );
-                                      }
-
-                                      return (
-                                        <div className="mb-1">
-                                          {format === "decimal"
-                                            ? safeStringify(data)
-                                            : convertValue(data)?.[format] ||
-                                              safeStringify(data)}
-                                        </div>
-                                      );
-                                    })()}
-                                  </pre>
-                                </div>
-                              ) : null}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="write-contract" className="">
-              {/* Wallet Connection Section */}
-              <div className="flex justify-between items-center p-4 bg-gray-50 border border-[#8E8E8E] mb-4">
-                <div className="flex flex-col">
-                  <p className="text-sm font-medium">Wallet Status</p>
-                  <p className="text-sm">
-                    {status === "connected" && address
-                      ? `Connected: ${truncateString(address)}`
-                      : status === "connecting"
-                      ? "Connecting..."
-                      : "Not Connected"}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  {status !== "connected" ? (
-                    <button
-                      onClick={() => setIsWalletModalOpen(true)}
-                      className="px-4 py-2 bg-[#4A4A4A] hover:bg-[#6E6E6E] text-white"
-                    >
-                      Connect Wallet
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => disconnect()}
-                      className="px-4 py-2 bg-[#4A4A4A] hover:bg-[#6E6E6E] text-white"
-                    >
-                      Disconnect
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                {writeFunctions.map((func, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col p-4 border border-[#8E8E8E] border-dashed"
-                  >
-                    <div
-                      className="flex justify-between items-center cursor-pointer"
-                      onClick={() => {
-                        if (!expandedFunctions[func.name]) {
-                          setExpandedFunctions((prev) => ({
-                            ...prev,
-                            [func.name]: func.inputs.map((input) => ({
-                              name: input.name,
-                              type: input.type,
-                              value: "",
-                            })),
-                          }));
-                        } else {
-                          setExpandedFunctions((prev) => {
-                            const newState = { ...prev };
-                            delete newState[func.name];
-                            return newState;
-                          });
-                        }
-                      }}
-                    >
-                      <div className="flex flex-row gap-2 w-full flex-wrap">
-                        <p className="font-bold">{func.name}</p>
-                        <div className="flex flex-row gap-2 flex-wrap text-gray-500">
-                          (
-                          {func.inputs.map((input, idx) => (
-                            <p key={idx} className="text-sm">
-                              {idx === 0 ? "" : ","}
-                              {input.name}
-                            </p>
-                          ))}
-                          )
-                        </div>
-                      </div>
-                      <span>{expandedFunctions[func.name] ? "−" : "+"}</span>
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                      {expandedFunctions[func.name] && (
-                        <div className="flex flex-col gap-4 pt-4">
-                          {func.inputs.map((input, idx) => (
-                            <div key={idx} className="flex flex-col gap-2">
-                              <label className="text-sm font-medium w-full">
-                                {input.name} ({input.type})
-                              </label>
-                              <input
-                                type="text"
-                                className="border border-[#8E8E8E] p-2 "
-                                placeholder={`Enter ${input.type}`}
-                                value={
-                                  expandedFunctions[func.name][idx]?.value || ""
-                                }
-                                onChange={(e) =>
-                                  handleInputChange(
-                                    func.name,
-                                    idx,
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            </div>
-                          ))}
-
-                          <button
-                            className={`px-4 py-2 mt-2 w-fit ${
-                              !address
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : functionResults[func.name]?.loading
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
-                            } text-white`}
-                            onClick={() => handleWriteFunctionCall(func.name)}
-                            disabled={
-                              !address || functionResults[func.name]?.loading
+            <div className="flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray rounded-b-md">
+              <div className="w-full h-full">
+                {selectedDataTab === "Read Contract" ? (
+                  <div className="flex flex-col gap-4">
+                    {readFunctions.map((func, index) => (
+                      <div
+                        key={index}
+                        className="flex flex-col p-4 border border-[#8E8E8E] border-dashed"
+                      >
+                        <div
+                          className="flex justify-between items-center cursor-pointer"
+                          onClick={() => {
+                            if (!expandedFunctions[func.name]) {
+                              setExpandedFunctions((prev) => ({
+                                ...prev,
+                                [func.name]: func.inputs.map((input) => ({
+                                  name: input.name,
+                                  type: input.type,
+                                  value: "",
+                                })),
+                              }));
+                            } else {
+                              setExpandedFunctions((prev) => {
+                                const newState = { ...prev };
+                                delete newState[func.name];
+                                return newState;
+                              });
                             }
-                          >
-                            {!address
-                              ? "Connect Wallet to Execute"
-                              : functionResults[func.name]?.loading
-                              ? "Executing..."
-                              : "Execute"}
-                          </button>
-
-                          {/* Add transaction hash display if available */}
-                          {functionResults[func.name]?.data
-                            ?.transaction_hash && (
-                            <div className="mt-2 text-sm">
-                              <p className="font-medium">Transaction Hash:</p>
-                              <a
-                                href={`/transactions/${
-                                  functionResults[func.name].data
-                                    .transaction_hash
-                                }`}
-                                className="text-blue-600 hover:text-blue-800 break-all"
-                              >
-                                {
-                                  functionResults[func.name].data
-                                    .transaction_hash
-                                }
-                              </a>
+                          }}
+                        >
+                          <div className="flex flex-row gap-2 w-full flex-wrap">
+                            <p className=" font-bold">{func.name}</p>
+                            <div className="flex flex-row gap-2 flex-wrap text-gray-500">
+                              (
+                              {func.inputs.map((input, idx) => (
+                                <p key={idx} className="text-sm">
+                                  {idx === 0 ? "" : ","}
+                                  {input.name}
+                                </p>
+                              ))}
+                              )
                             </div>
-                          )}
+                          </div>
+                          <span>
+                            {expandedFunctions[func.name] ? "−" : "+"}
+                          </span>
+                        </div>
 
-                          {/* Result Display Section */}
-                          {functionResults[func.name] && (
-                            <div className="mt-4">
-                              {functionResults[func.name].loading ? (
-                                <div className="text-gray-600">Loading...</div>
-                              ) : functionResults[func.name].error ? (
-                                <div className="text-red-500 p-3 bg-red-50 border border-red-200">
-                                  <p className="font-medium">Error:</p>
-                                  <p className="text-sm">
-                                    {functionResults[func.name].error}
-                                  </p>
+                        <div className="flex flex-col gap-2">
+                          {expandedFunctions[func.name] && (
+                            <div className="flex flex-col gap-4 pt-2">
+                              {func.inputs.map((input, idx) => (
+                                <div key={idx} className="flex flex-col gap-2">
+                                  <label className="text-sm font-medium w-full">
+                                    {input.name} ({input.type})
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="border border-[#8E8E8E] p-2"
+                                    placeholder={`Enter ${input.type}`}
+                                    value={
+                                      expandedFunctions[func.name][idx]
+                                        ?.value || ""
+                                    }
+                                    onChange={(e) =>
+                                      handleInputChange(
+                                        func.name,
+                                        idx,
+                                        e.target.value
+                                      )
+                                    }
+                                  />
                                 </div>
-                              ) : functionResults[func.name].data !== null ? (
-                                <div className="bg-gray-50 p-3 border border-gray-200">
-                                  <p className="font-medium text-sm">Result:</p>
-                                  <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words">
-                                    {JSON.stringify(
-                                      functionResults[func.name].data,
-                                      null,
-                                      2
-                                    )}
-                                  </pre>
+                              ))}
+
+                              <button
+                                className={`px-4 py-2 mt-2 w-fit ${
+                                  functionResults[func.name]?.loading
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
+                                } text-white`}
+                                onClick={() => handleFunctionCall(func.name)}
+                                disabled={functionResults[func.name]?.loading}
+                              >
+                                {functionResults[func.name]?.loading
+                                  ? "Querying..."
+                                  : "Query"}
+                              </button>
+
+                              {functionResults[func.name] && (
+                                <div className="mt-4">
+                                  {functionResults[func.name].loading ? (
+                                    <div className="text-gray-600">
+                                      Loading...
+                                    </div>
+                                  ) : functionResults[func.name].error ? (
+                                    <div className="text-red-500 p-3 bg-red-50 border border-red-200">
+                                      <p className="font-medium">Error:</p>
+                                      <p className="text-sm">
+                                        {functionResults[func.name].error}
+                                      </p>
+                                    </div>
+                                  ) : functionResults[func.name].data !==
+                                    null ? (
+                                    <div className="bg-gray-50 p-3 border border-gray-200">
+                                      <div className="flex flex-row items-center justify-between mb-4">
+                                        <p className="font-medium text-sm">
+                                          Result:
+                                        </p>
+                                        <div className="flex gap-2">
+                                          {DisplayFormat.map((format) => (
+                                            <button
+                                              className={`px-2 py-1 text-xs ${
+                                                (displayFormats[func.name] ??
+                                                  "decimal") === format
+                                                  ? "bg-[#4A4A4A] text-white"
+                                                  : "bg-gray-200"
+                                              }`}
+                                              onClick={() =>
+                                                handleFormatChange(
+                                                  func.name,
+                                                  format as DisplayFormatTypes
+                                                )
+                                              }
+                                            >
+                                              {format}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      </div>
+                                      <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words">
+                                        {(() => {
+                                          const data =
+                                            functionResults[func.name]?.data;
+                                          const format =
+                                            displayFormats[func.name] ||
+                                            "decimal";
+
+                                          const safeStringify = (value: any) =>
+                                            JSON.stringify(
+                                              value,
+                                              (_, v) =>
+                                                typeof v === "bigint"
+                                                  ? v.toString()
+                                                  : v,
+                                              2
+                                            );
+
+                                          if (Array.isArray(data)) {
+                                            return data.map(
+                                              (item: any, index: number) => (
+                                                <div
+                                                  key={index}
+                                                  className="mb-1"
+                                                >
+                                                  {format === "decimal"
+                                                    ? safeStringify(item)
+                                                    : convertValue(item)?.[
+                                                        format
+                                                      ] || safeStringify(item)}
+                                                </div>
+                                              )
+                                            );
+                                          }
+
+                                          return (
+                                            <div className="mb-1">
+                                              {format === "decimal"
+                                                ? safeStringify(data)
+                                                : convertValue(data)?.[
+                                                    format
+                                                  ] || safeStringify(data)}
+                                            </div>
+                                          );
+                                        })()}
+                                      </pre>
+                                    </div>
+                                  ) : null}
                                 </div>
-                              ) : null}
+                              )}
                             </div>
                           )}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </TabsContent>
+                ) : selectedDataTab === "Write Contract" ? (
+                  <>
+                    <div className="flex justify-between items-center p-4 bg-gray-50 border border-[#8E8E8E] mb-4">
+                      <div className="flex flex-col">
+                        <p className="text-sm font-medium">Wallet Status</p>
+                        <p className="text-sm">
+                          {status === "connected" && address
+                            ? `Connected: ${truncateString(address)}`
+                            : status === "connecting"
+                            ? "Connecting..."
+                            : "Not Connected"}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        {status !== "connected" ? (
+                          <button
+                            onClick={() => setIsWalletModalOpen(true)}
+                            className="px-4 py-2 bg-[#4A4A4A] hover:bg-[#6E6E6E] text-white"
+                          >
+                            Connect Wallet
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => disconnect()}
+                            className="px-4 py-2 bg-[#4A4A4A] hover:bg-[#6E6E6E] text-white"
+                          >
+                            Disconnect
+                          </button>
+                        )}
+                      </div>
+                    </div>
 
-            <TabsContent value="code">
-              {!contractABI || !sierraProgram ? (
-                <div className="flex justify-center items-center h-[400px]">
-                  <SpinnerIcon className="animate-spin" />
-                </div>
-              ) : (
-                <Tabs
-                  defaultValue="abi"
-                  className="relative flex flex-col gap-2"
-                  variant="secondary"
-                  size="sm"
-                >
-                  <TabsList className="max-w-md p-0 pb-2">
-                    <TabsTrigger value="abi">Contract ABI</TabsTrigger>
-                    <TabsTrigger value="sierra">Sierra Bytecode</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="abi" className="px-0">
-                    <Editor
-                      className="min-h-[80vh]"
-                      defaultLanguage="json"
-                      defaultValue={contractABI}
-                    />
-                  </TabsContent>
-                  <TabsContent value="sierra" className="px-0">
-                    <Editor
-                      className="min-h-[80vh]"
-                      defaultLanguage="javascript"
-                      defaultValue={sierraProgram}
-                    />
-                  </TabsContent>
-                </Tabs>
-              )}
-            </TabsContent>
-          </Tabs>
+                    <div className="flex flex-col gap-4">
+                      {writeFunctions.map((func, index) => (
+                        <div
+                          key={index}
+                          className="flex flex-col p-4 border border-[#8E8E8E] border-dashed"
+                        >
+                          <div
+                            className="flex justify-between items-center cursor-pointer"
+                            onClick={() => {
+                              if (!expandedFunctions[func.name]) {
+                                setExpandedFunctions((prev) => ({
+                                  ...prev,
+                                  [func.name]: func.inputs.map((input) => ({
+                                    name: input.name,
+                                    type: input.type,
+                                    value: "",
+                                  })),
+                                }));
+                              } else {
+                                setExpandedFunctions((prev) => {
+                                  const newState = { ...prev };
+                                  delete newState[func.name];
+                                  return newState;
+                                });
+                              }
+                            }}
+                          >
+                            <div className="flex flex-row gap-2 w-full flex-wrap">
+                              <p className="font-bold">{func.name}</p>
+                              <div className="flex flex-row gap-2 flex-wrap text-gray-500">
+                                (
+                                {func.inputs.map((input, idx) => (
+                                  <p key={idx} className="text-sm">
+                                    {idx === 0 ? "" : ","}
+                                    {input.name}
+                                  </p>
+                                ))}
+                                )
+                              </div>
+                            </div>
+                            <span>
+                              {expandedFunctions[func.name] ? "−" : "+"}
+                            </span>
+                          </div>
+
+                          <div className="flex flex-col gap-2">
+                            {expandedFunctions[func.name] && (
+                              <div className="flex flex-col gap-4 pt-4">
+                                {func.inputs.map((input, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="flex flex-col gap-2"
+                                  >
+                                    <label className="text-sm font-medium w-full">
+                                      {input.name} ({input.type})
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className="border border-[#8E8E8E] p-2 "
+                                      placeholder={`Enter ${input.type}`}
+                                      value={
+                                        expandedFunctions[func.name][idx]
+                                          ?.value || ""
+                                      }
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          func.name,
+                                          idx,
+                                          e.target.value
+                                        )
+                                      }
+                                    />
+                                  </div>
+                                ))}
+
+                                <button
+                                  className={`px-4 py-2 mt-2 w-fit ${
+                                    !address
+                                      ? "bg-gray-400 cursor-not-allowed"
+                                      : functionResults[func.name]?.loading
+                                      ? "bg-gray-400 cursor-not-allowed"
+                                      : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
+                                  } text-white`}
+                                  onClick={() =>
+                                    handleWriteFunctionCall(func.name)
+                                  }
+                                  disabled={
+                                    !address ||
+                                    functionResults[func.name]?.loading
+                                  }
+                                >
+                                  {!address
+                                    ? "Connect Wallet to Execute"
+                                    : functionResults[func.name]?.loading
+                                    ? "Executing..."
+                                    : "Execute"}
+                                </button>
+
+                                {functionResults[func.name]?.data
+                                  ?.transaction_hash && (
+                                  <div className="mt-2 text-sm">
+                                    <p className="font-medium">
+                                      Transaction Hash:
+                                    </p>
+                                    <a
+                                      href={`/transactions/${
+                                        functionResults[func.name].data
+                                          .transaction_hash
+                                      }`}
+                                      className="text-blue-600 hover:text-blue-800 break-all"
+                                    >
+                                      {
+                                        functionResults[func.name].data
+                                          .transaction_hash
+                                      }
+                                    </a>
+                                  </div>
+                                )}
+
+                                {functionResults[func.name] && (
+                                  <div className="mt-4">
+                                    {functionResults[func.name].loading ? (
+                                      <div className="text-gray-600">
+                                        Loading...
+                                      </div>
+                                    ) : functionResults[func.name].error ? (
+                                      <div className="text-red-500 p-3 bg-red-50 border border-red-200">
+                                        <p className="font-medium">Error:</p>
+                                        <p className="text-sm">
+                                          {functionResults[func.name].error}
+                                        </p>
+                                      </div>
+                                    ) : functionResults[func.name].data !==
+                                      null ? (
+                                      <div className="bg-gray-50 p-3 border border-gray-200">
+                                        <p className="font-medium text-sm">
+                                          Result:
+                                        </p>
+                                        <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words">
+                                          {JSON.stringify(
+                                            functionResults[func.name].data,
+                                            null,
+                                            2
+                                          )}
+                                        </pre>
+                                      </div>
+                                    ) : null}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : selectedDataTab === "Contract Code" ? (
+                  <Tabs
+                    defaultValue="abi"
+                    className="relative flex flex-col gap-2"
+                    variant="secondary"
+                    size="sm"
+                  >
+                    <TabsList className="max-w-md p-0 pb-2">
+                      <TabsTrigger value="abi">Contract ABI</TabsTrigger>
+                      <TabsTrigger value="sierra">Sierra Bytecode</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="abi" className="px-0">
+                      <Editor
+                        className="min-h-[80vh]"
+                        defaultLanguage="json"
+                        defaultValue={contractABI}
+                      />
+                    </TabsContent>
+                    <TabsContent value="sierra" className="px-0">
+                      <Editor
+                        className="min-h-[80vh]"
+                        defaultLanguage="javascript"
+                        defaultValue={sierraProgram}
+                      />
+                    </TabsContent>
+                  </Tabs>
+                ) : (
+                  <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
+                    <span className="text-[#D0D0D0]">No data found</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
