@@ -7,6 +7,7 @@ import {
   convertObjectValuesToDisplayValues,
   convertValue,
 } from "@/shared/utils/rpc_utils";
+import { ArrowRightIcon } from "lucide-react";
 
 const TxTypesTabs = ["Decoded", "Raw"] as const;
 const ConvertValueTabs = ["decimal", "hex"] as const;
@@ -121,8 +122,6 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
 
         const formattedResponse: DecodedArg[] = [];
 
-        console.log(decoded);
-
         decoded?.forEach((arg, index) => {
           formattedResponse.push({
             value: arg,
@@ -140,15 +139,6 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
           ...prev,
           [data.selector]: "decimal",
         }));
-
-        console.log({
-          contract: data.contract,
-          function_name: matchingFunction?.name || "",
-          selector: data.selector,
-          data: formattedResponse,
-          params: inputs.map((inp) => inp.name),
-          raw_args: data.args,
-        });
 
         return {
           contract: data.contract,
@@ -189,26 +179,28 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
   }
 
   return (
-    <div className="space-y-6 max-h-screen overflow-y-auto">
-      <Selector
-        selected={selectedTab}
-        onTabSelect={(value) =>
-          setSelectedTab(value as (typeof TxTypesTabs)[number])
-        }
-        className="w-min rounded-sm sticky top-0 bg-white z-10"
-      >
-        {TxTypesTabs.map((type) => (
-          <SelectorItem
-            key={type}
-            name={type}
-            value={type}
-            className="w-max text-xs py-[2px]"
-          />
-        ))}
-      </Selector>
+    <div className="space-y-2 flex-grow-0 flex-none">
+      <div className="sticky top-0 bg-white z-10 p-4">
+        <Selector
+          selected={selectedTab}
+          onTabSelect={(value) =>
+            setSelectedTab(value as (typeof TxTypesTabs)[number])
+          }
+          className="w-min rounded-sm bg-white z-10"
+        >
+          {TxTypesTabs.map((type) => (
+            <SelectorItem
+              key={type}
+              name={type}
+              value={type}
+              className="w-max text-xs py-[2px]"
+            />
+          ))}
+        </Selector>
+      </div>
 
       {selectedTab === "Decoded" ? (
-        <div className="flex flex-col">
+        <div className="flex flex-grow-0 flex-col px-4">
           <div className="flex flex-col border">
             {decodedCalldata.map((item) => (
               <div
@@ -222,21 +214,24 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                   );
                 }}
               >
-                <h3 className="px-4 py-2 cursor-pointer">
+                <div className="px-4 flex flex-row items-center gap-2 py-2 cursor-pointer">
                   <span className="underline">
                     {truncateString(item.contract)}
                   </span>
-                  - <span className="font-bold">fn</span> {item.function_name}()
-                </h3>
+                  <span>
+                    <ArrowRightIcon className="w-3 h-3" />
+                  </span>
+                  <span className="font-bold">fn</span> {item.function_name}()
+                </div>
 
                 {expandedItem.includes(item.selector) ? (
                   <div
                     onClick={(e) => {
                       e.stopPropagation();
                     }}
-                    className="flex border-t shadow-inner flex-col gap-1 bg-[#F1F1F1] p-2"
+                    className="flex flex-grow-0 border-t cursor-default shadow-inner flex-col gap-1 bg-[#F1F1F1] p-2"
                   >
-                    <div className="flex w-full justify-between">
+                    <div className="flex justify-between">
                       <Selector
                         selected={decodedRawMap[item.selector]}
                         onTabSelect={(value) =>
@@ -297,7 +292,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                                 }`}
                               >
                                 <td className="px-2 py-1 text-left w-1/4 ">
-                                  <span className="font-bold">{arg.name}:</span>
+                                  <span className="font-bold">{arg.name}</span>
                                 </td>
                                 <td className="px-2 py-1 text-left w-1/4 ">
                                   <span className="text-gray-500">
@@ -349,29 +344,31 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
           </div>
         </div>
       ) : (
-        <table className="w-full border">
-          <tbody>
-            {calldata.map((item) => {
-              let current_count = 0;
-              return item.args.map((arg, index, array) => {
-                current_count++;
-                return (
-                  <tr
-                    key={current_count}
-                    className={`${
-                      index !== array.length - 1 ? "border-b" : ""
-                    }`}
-                  >
-                    <td className="px-4 py-2 text-left">
-                      <span className="font-bold mr-4">{current_count}</span>{" "}
-                      {arg}
-                    </td>
-                  </tr>
-                );
-              });
-            })}
-          </tbody>
-        </table>
+        <div className="px-4">
+          <table className="w-full border">
+            <tbody>
+              {calldata.map((item) => {
+                let current_count = 0;
+                return item.args.map((arg, index, array) => {
+                  current_count++;
+                  return (
+                    <tr
+                      key={current_count}
+                      className={`${
+                        index !== array.length - 1 ? "border-b" : ""
+                      }`}
+                    >
+                      <td className="px-4 py-2 text-left">
+                        <span className="font-bold mr-4">{current_count}</span>{" "}
+                        {arg}
+                      </td>
+                    </tr>
+                  );
+                });
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
