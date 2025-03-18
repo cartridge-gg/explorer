@@ -163,8 +163,6 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
 
     const decoded = await Promise.all(decodedPromises);
 
-    console.log(decoded);
-
     setDecodedCalldata(decoded);
   }, [calldata]);
 
