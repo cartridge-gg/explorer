@@ -7,7 +7,11 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
+import {
+  CACHE_TIME,
+  EXECUTION_RESOURCES_KEY_MAP,
+  STALE_TIME,
+} from "@/constants/rpc";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
 import { useScreen } from "@/shared/hooks/useScreen";
@@ -26,6 +30,7 @@ import { SectionBoxEntry } from "@/shared/components/section";
 import TxList from "./TxList";
 import EventList from "./EventList";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
+import { QUERY_KEYS } from "@/services/starknet_provider_config";
 
 const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
 
@@ -52,9 +57,11 @@ export default function BlockDetails() {
   });
 
   const { data: BlockReceipt } = useQuery({
-    queryKey: [""],
+    queryKey: [QUERY_KEYS.getBlockWithTxs, blockNumber],
     queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockNumber ?? 0),
     enabled: !!blockNumber,
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
   });
 
   const processBlockInformation = useCallback(async (transactions) => {

@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect, useMemo } from "react";
-import { RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { AbiEntry, CallData, FunctionAbi, hash } from "starknet";
 import { Selector, SelectorItem } from "@/shared/components/Selector";
 import { truncateString } from "@/shared/utils/string";
@@ -9,6 +9,8 @@ import {
 } from "@/shared/utils/rpc_utils";
 import { ArrowRightIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { STALE_TIME } from "@/constants/rpc";
+import { CACHE_TIME } from "@/constants/rpc";
 
 const TxTypesTabs = ["Decoded", "Raw"] as const;
 const ConvertValueTabs = ["decimal", "hex"] as const;
@@ -86,9 +88,10 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
       try {
         // Fetch contract ABI using React Query's cache
         const contractData = await queryClient.fetchQuery({
-          queryKey: ["contract-abi", data.contract],
+          queryKey: [QUERY_KEYS.getClassAt, data.contract],
           queryFn: () => RPC_PROVIDER.getClassAt(data.contract),
-          staleTime: 1000 * 60 * 60, // 1 hour
+          staleTime: STALE_TIME,
+          gcTime: CACHE_TIME,
         });
 
         const abi = contractData.abi;

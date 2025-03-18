@@ -1,4 +1,4 @@
-import { RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { formatNumber } from "@/shared/utils/number";
 import {
   formatSnakeCaseToDisplayValue,
@@ -17,7 +17,7 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { cairo, CallData, events } from "starknet";
 import { decodeCalldata, getEventName } from "@/shared/utils/rpc_utils";
 import CalldataDisplay from "./components/CalldataDisplay";
-import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
+import { CACHE_TIME, EXECUTION_RESOURCES_KEY_MAP, STALE_TIME } from "@/constants/rpc";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -116,24 +116,34 @@ export default function TransactionDetails() {
   });
 
   const { data: TransactionReceipt } = useQuery({
-    queryKey: ["txn_receipt"],
-    queryFn: () => RPC_PROVIDER.getTransactionReceipt(txHash ?? 0),
+    queryKey: [QUERY_KEYS.getTransactionReceipt, txHash],
+    queryFn: () => RPC_PROVIDER.getTransactionReceipt(txHash || ""),
     enabled: !!txHash,
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
   });
 
   const { data: TransactionTrace } = useQuery({
-    queryKey: ["txn_trace"],
-    queryFn: () => RPC_PROVIDER.getTransactionTrace(txHash ?? 0),
+    queryKey: [QUERY_KEYS.getTransactionTrace, txHash],
+    queryFn: () => RPC_PROVIDER.getTransactionTrace(txHash || ""),
+    enabled: !!txHash,
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
   });
 
   const { data: TransactionDetails } = useQuery({
-    queryKey: ["txn_details"],
-    queryFn: () => RPC_PROVIDER.getTransactionByHash(txHash ?? 0),
+    queryKey: [QUERY_KEYS.getTransaction, txHash],
+    queryFn: () => RPC_PROVIDER.getTransaction(txHash || ""),
+    enabled: !!txHash,
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
   });
 
   const { data: BlockDetails } = useQuery({
-    queryKey: ["txn_block_details"],
+    queryKey: [QUERY_KEYS.getBlock, TransactionReceipt?.block_number],
     queryFn: () => RPC_PROVIDER.getBlock(TransactionReceipt?.block_number),
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
   });
 
   const processTransactionReceipt = useCallback(async () => {
