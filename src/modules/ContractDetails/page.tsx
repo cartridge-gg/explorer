@@ -4,7 +4,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useCallback, useEffect, useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Contract } from "starknet";
-import { convertValue } from "@/shared/utils/rpc_utils";
+import { convertValue, isLocalNode } from "@/shared/utils/rpc_utils";
 import { FunctionResult, DisplayFormatTypes } from "@/types/types";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import WalletConnectModal from "@/shared/components/wallet_connect";
@@ -23,6 +23,9 @@ import {
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumbs";
 import { Editor } from "@monaco-editor/react";
+import { useQuery } from "@tanstack/react-query";
+import { padNumber } from "@/shared/utils/number";
+import { TxList } from "@/shared/components/dataTable/TxList";
 
 interface FunctionInput {
   name: string;
@@ -257,6 +260,37 @@ export default function ContractDetails() {
     }));
   };
 
+  const { data: txsTable } = useQuery({
+    queryKey: ["contract", "transactions", contractAddress],
+    queryFn: async () => {
+      const { events } = await RPC_PROVIDER.getEvents({
+        address: contractAddress!,
+        chunk_size: 100,
+        from_block: { block_number: 0 },
+        to_block: "latest",
+      });
+
+      const txHashes = [...new Set(events.map(event => event.transaction_hash))];
+
+      return Promise.all(
+        txHashes.map(async (hash, i) => {
+          const [receipt, details] = await Promise.all([
+            RPC_PROVIDER.getTransactionReceipt(hash),
+            RPC_PROVIDER.getTransactionByHash(hash)
+          ]);
+          return {
+            id: padNumber(i + 1),
+            type: details.type,
+            status: receipt.statusReceipt,
+            hash,
+          };
+        })
+      );
+    },
+    initialData: [],
+    enabled: !!contractAddress && isLocalNode
+  });
+
   return (
     <div className="flex flex-col w-full gap-8">
       <div className="flex flex-col w-full gap-4">
@@ -328,15 +362,19 @@ export default function ContractDetails() {
           </div>
 
           {/* Data Tabs Section */}
-          <Tabs
-            defaultValue="read-contract"
-            className="border border-borderGray flex flex-col flex-grow p-[15px] rounded-md"
-          >
-            <TabsList className="p-0 pb-4">
+          <Tabs defaultValue={isLocalNode ? "transactions" : "read-contract"}>
+            <TabsList>
+              {isLocalNode && <TabsTrigger value="transactions">Transactions</TabsTrigger>}
               <TabsTrigger value="read-contract">Read Contract</TabsTrigger>
               <TabsTrigger value="write-contract">Write Contract</TabsTrigger>
               <TabsTrigger value="code">Contract Code</TabsTrigger>
             </TabsList>
+
+            {isLocalNode && (
+              <TabsContent value="transactions">
+                <TxList transactions={txsTable} />
+              </TabsContent>
+            )}
 
             <TabsContent value="read-contract">
               <div className="flex flex-col gap-4">
@@ -409,11 +447,10 @@ export default function ContractDetails() {
                           ))}
 
                           <button
-                            className={`px-4 py-2 mt-2 w-fit ${
-                              functionResults[func.name]?.loading
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
-                            } text-white`}
+                            className={`px-4 py-2 mt-2 w-fit ${functionResults[func.name]?.loading
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
+                              } text-white`}
                             onClick={() => handleFunctionCall(func.name)}
                             disabled={functionResults[func.name]?.loading}
                           >
@@ -443,12 +480,11 @@ export default function ContractDetails() {
                                     <div className="flex gap-2">
                                       {DisplayFormat.map((format) => (
                                         <button
-                                          className={`px-2 py-1 text-xs ${
-                                            (displayFormats[func.name] ??
-                                              "decimal") === format
-                                              ? "bg-[#4A4A4A] text-white"
-                                              : "bg-gray-200"
-                                          }`}
+                                          className={`px-2 py-1 text-xs ${(displayFormats[func.name] ??
+                                            "decimal") === format
+                                            ? "bg-[#4A4A4A] text-white"
+                                            : "bg-gray-200"
+                                            }`}
                                           onClick={() =>
                                             handleFormatChange(
                                               func.name,
@@ -485,8 +521,8 @@ export default function ContractDetails() {
                                               {format === "decimal"
                                                 ? safeStringify(item)
                                                 : convertValue(item)?.[
-                                                    format
-                                                  ] || safeStringify(item)}
+                                                format
+                                                ] || safeStringify(item)}
                                             </div>
                                           )
                                         );
@@ -497,7 +533,7 @@ export default function ContractDetails() {
                                           {format === "decimal"
                                             ? safeStringify(data)
                                             : convertValue(data)?.[format] ||
-                                              safeStringify(data)}
+                                            safeStringify(data)}
                                         </div>
                                       );
                                     })()}
@@ -523,8 +559,8 @@ export default function ContractDetails() {
                     {status === "connected" && address
                       ? `Connected: ${truncateString(address)}`
                       : status === "connecting"
-                      ? "Connecting..."
-                      : "Not Connected"}
+                        ? "Connecting..."
+                        : "Not Connected"}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -616,13 +652,12 @@ export default function ContractDetails() {
                           ))}
 
                           <button
-                            className={`px-4 py-2 mt-2 w-fit ${
-                              !address
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : functionResults[func.name]?.loading
+                            className={`px-4 py-2 mt-2 w-fit ${!address
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : functionResults[func.name]?.loading
                                 ? "bg-gray-400 cursor-not-allowed"
                                 : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
-                            } text-white`}
+                              } text-white`}
                             onClick={() => handleWriteFunctionCall(func.name)}
                             disabled={
                               !address || functionResults[func.name]?.loading
@@ -631,29 +666,28 @@ export default function ContractDetails() {
                             {!address
                               ? "Connect Wallet to Execute"
                               : functionResults[func.name]?.loading
-                              ? "Executing..."
-                              : "Execute"}
+                                ? "Executing..."
+                                : "Execute"}
                           </button>
 
                           {/* Add transaction hash display if available */}
                           {functionResults[func.name]?.data
                             ?.transaction_hash && (
-                            <div className="mt-2 text-sm">
-                              <p className="font-medium">Transaction Hash:</p>
-                              <a
-                                href={`/transactions/${
-                                  functionResults[func.name].data
+                              <div className="mt-2 text-sm">
+                                <p className="font-medium">Transaction Hash:</p>
+                                <a
+                                  href={`/transactions/${functionResults[func.name].data
                                     .transaction_hash
-                                }`}
-                                className="text-blue-600 hover:text-blue-800 break-all"
-                              >
-                                {
-                                  functionResults[func.name].data
-                                    .transaction_hash
-                                }
-                              </a>
-                            </div>
-                          )}
+                                    }`}
+                                  className="text-blue-600 hover:text-blue-800 break-all"
+                                >
+                                  {
+                                    functionResults[func.name].data
+                                      .transaction_hash
+                                  }
+                                </a>
+                              </div>
+                            )}
 
                           {/* Result Display Section */}
                           {functionResults[func.name] && (
@@ -701,7 +735,7 @@ export default function ContractDetails() {
                   variant="secondary"
                   size="sm"
                 >
-                  <TabsList className="max-w-md p-0 pb-2">
+                  <TabsList className="max-w-md">
                     <TabsTrigger value="abi">Contract ABI</TabsTrigger>
                     <TabsTrigger value="sierra">Sierra Bytecode</TabsTrigger>
                   </TabsList>
@@ -724,13 +758,14 @@ export default function ContractDetails() {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
+      </div >
 
       {/* Wallet Connection Modal */}
-      <WalletConnectModal
+      < WalletConnectModal
         isOpen={isWalletModalOpen}
-        onClose={() => setIsWalletModalOpen(false)}
+        onClose={() => setIsWalletModalOpen(false)
+        }
       />
-    </div>
+    </div >
   );
 }

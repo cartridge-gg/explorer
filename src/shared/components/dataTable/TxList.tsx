@@ -9,17 +9,17 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ROUTES } from "@/constants/routes";
-import TxTypeToggle from "./TxTypeToggle";
 import { TransactionTableData } from "@/types/types";
 import { useNavigate } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
+import { Tabs, TabsList, TabsTrigger } from "@/shared/components/tab";
 
 interface TxListProps {
   transactions: TransactionTableData[];
 }
 
-export default function TxList({ transactions }: TxListProps) {
+export function TxList({ transactions }: TxListProps) {
   const navigate = useNavigate();
   const { isMobile } = useScreen();
 
@@ -103,8 +103,13 @@ export default function TxList({ transactions }: TxListProps) {
   );
 
   return (
-    <div className="flex flex-col gap-2 h-full">
-      <TxTypeToggle onFilterChange={(type) => handleTransactionFilter(type)} />
+    <Tabs defaultValue="all" size="sm" variant="secondary" onValueChange={handleTransactionFilter} className="flex flex-col gap-2">
+      <TabsList className="p-0">
+        <TabsTrigger value="all">All</TabsTrigger>
+        <TabsTrigger value="invoke">Invoke</TabsTrigger>
+        <TabsTrigger value="deploy">Deploy</TabsTrigger>
+        <TabsTrigger value="declare">Declare</TabsTrigger>
+      </TabsList>
 
       <div className="h-full flex flex-col gap-2">
         <table className="w-full h-full ">
@@ -137,11 +142,10 @@ export default function TxList({ transactions }: TxListProps) {
                     return (
                       <td
                         key={cell.id}
-                        className={`${
-                          cell.column.id === "hash"
-                            ? "hover:underline text-left px-[15px]"
-                            : ""
-                        } `}
+                        className={`${cell.column.id === "hash"
+                          ? "hover:underline text-left px-[15px]"
+                          : ""
+                          } `}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -197,6 +201,6 @@ export default function TxList({ transactions }: TxListProps) {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </Tabs>
+  )
 }

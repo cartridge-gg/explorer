@@ -23,7 +23,7 @@ import {
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
-import TxList from "./TxList";
+import { TxList } from "@/shared/components/dataTable/TxList";
 import EventList from "./EventList";
 import {
   Tabs,
@@ -209,12 +209,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_gas_price?.price_in_wei
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_gas_price?.price_in_wei
                             )
                           )
+                        )
                         : 0}{" "}
                       WEI
                     </td>
@@ -224,12 +224,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_gas_price?.price_in_fri
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_gas_price?.price_in_fri
                             )
                           )
+                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -246,12 +246,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_data_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_data_gas_price?.price_in_wei
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_data_gas_price?.price_in_wei
                             )
                           )
+                        )
                         : 0}{" "}
                       ETH
                     </td>
@@ -261,12 +261,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_data_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_data_gas_price?.price_in_fri
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_data_gas_price?.price_in_fri
                             )
                           )
+                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -350,11 +350,8 @@ export default function BlockDetails() {
           </SectionBox>
         </div>
 
-        <Tabs
-          defaultValue="transactions"
-          className="border border-borderGray flex flex-col flex-grow p-[15px] rounded-md"
-        >
-          <TabsList className="p-0 pb-4">
+        <Tabs defaultValue="transactions">
+          <TabsList>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
