@@ -154,16 +154,16 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
           contract: data.contract,
           function_name: "Error",
           selector: data.selector,
-          args: data.args.map((arg, index) => ({
-            name: `arg${index}`,
-            type: "unknown",
-            value: arg,
-          })),
+          data: [],
+          params: [],
+          raw_args: data.args,
         };
       }
     });
 
     const decoded = await Promise.all(decodedPromises);
+
+    console.log(decoded);
 
     setDecodedCalldata(decoded);
   }, [calldata]);
