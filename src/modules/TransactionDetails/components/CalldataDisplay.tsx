@@ -8,6 +8,7 @@ import {
   convertValue,
 } from "@/shared/utils/rpc_utils";
 import { ArrowRightIcon } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const TxTypesTabs = ["Decoded", "Raw"] as const;
 const ConvertValueTabs = ["decimal", "hex"] as const;
@@ -64,6 +65,7 @@ const ValueRenderer = ({
 };
 
 export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
+  const queryClient = useQueryClient();
   const [decodedCalldata, setDecodedCalldata] = useState<DecodedCalldata[]>([]);
 
   const [selectedTab, setSelectedTab] = useState<(typeof TxTypesTabs)[number]>(
@@ -82,36 +84,39 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
 
     const decodedPromises = calldata.map(async (data) => {
       try {
-        // Fetch contract ABI
-        const { abi } = await RPC_PROVIDER.getClassAt(data.contract);
+        // Fetch contract ABI using React Query's cache
+        const contractData = await queryClient.fetchQuery({
+          queryKey: ["contract-abi", data.contract],
+          queryFn: () => RPC_PROVIDER.getClassAt(data.contract),
+          staleTime: 1000 * 60 * 60, // 1 hour
+        });
+
+        const abi = contractData.abi;
 
         // Find the function that matches the selector
         let matchingFunction: AbiItem | undefined;
 
         // First check interfaces
         abi.forEach((item: AbiItem) => {
-          if (item.type === "interface") {
-            item.items?.forEach((func: AbiItem) => {
-              if (func.type === "function") {
-                const funcNameSelector = hash.getSelectorFromName(
-                  func.name || ""
-                );
-                if (funcNameSelector === data.selector) {
-                  matchingFunction = func;
-                }
-              }
-            });
+          if (item.type === "function") {
+            const funcNameSelector = hash.getSelectorFromName(item.name || "");
+            if (funcNameSelector === data.selector) {
+              matchingFunction = item;
+            }
           }
         });
 
         const formattedParams = data.args;
+
         const myCallData = new CallData(abi);
+
         const { inputs } = myCallData.parser
           .getLegacyFormat()
           .find(
             (abiItem: AbiEntry) => abiItem.name === matchingFunction?.name
           ) as FunctionAbi;
-        const inputsTypes = inputs.map((inp: any) => {
+
+        const inputsTypes = inputs.map((inp: { type: string }) => {
           return inp.type as string;
         });
 
@@ -122,13 +127,15 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
 
         const formattedResponse: DecodedArg[] = [];
 
-        decoded?.forEach((arg, index) => {
-          formattedResponse.push({
-            value: arg,
-            name: inputs[index].name,
-            type: inputs[index].type,
+        if (Array.isArray(decoded)) {
+          decoded.forEach((arg, index) => {
+            formattedResponse.push({
+              value: arg,
+              name: inputs[index].name ?? "",
+              type: inputs[index].type ?? "",
+            });
           });
-        });
+        }
 
         setDecodedRawMap((prev) => ({
           ...prev,
@@ -145,7 +152,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
           function_name: matchingFunction?.name || "",
           selector: data.selector,
           data: formattedResponse,
-          params: inputs.map((inp) => inp.name),
+          params: inputs.map((inp) => inp?.name),
           raw_args: data.args,
         };
       } catch (error) {
@@ -154,17 +161,21 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
           contract: data.contract,
           function_name: "Error",
           selector: data.selector,
-          data: [],
           params: [],
           raw_args: data.args,
+          data: data.args.map((arg, index) => ({
+            name: `arg${index}`,
+            type: "unknown",
+            value: arg,
+          })),
         };
       }
     });
 
     const decoded = await Promise.all(decodedPromises);
 
-    setDecodedCalldata(decoded);
-  }, [calldata]);
+    setDecodedCalldata(decoded as DecodedCalldata[]);
+  }, [calldata, queryClient]);
 
   useEffect(() => {
     fetchAndDecodeCalldata();
