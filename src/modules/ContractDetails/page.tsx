@@ -5,8 +5,8 @@ import { useCallback, useEffect, useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Contract } from "starknet";
 import { convertValue, isLocalNode } from "@/shared/utils/rpc_utils";
-import { FunctionResult, DisplayFormatTypes } from "@/types/types";
-import { useAccount, useDisconnect } from "@starknet-react/core";
+import { FunctionResult, DisplayFormatTypes, TransactionTableData } from "@/types/types";
+import { useAccount, useDisconnect, useEvents } from "@starknet-react/core";
 import WalletConnectModal from "@/shared/components/wallet_connect";
 import { BreadcrumbPage, SpinnerIcon } from "@cartridge/ui-next";
 import {
@@ -260,36 +260,50 @@ export default function ContractDetails() {
     }));
   };
 
-  const { data: txsTable } = useQuery({
+  const [txHashes, setTxHashes] = useState<string[]>([]);
+  useQuery({
     queryKey: ["contract", "transactions", contractAddress],
     queryFn: async () => {
-      const { events } = await RPC_PROVIDER.getEvents({
-        address: contractAddress!,
-        chunk_size: 100,
-        from_block: { block_number: 0 },
-        to_block: "latest",
-      });
+      let continuationToken = null;
+      const txHashes = new Set<string>();
 
-      const txHashes = [...new Set(events.map(event => event.transaction_hash))];
-
-      return Promise.all(
-        txHashes.map(async (hash, i) => {
-          const [receipt, details] = await Promise.all([
-            RPC_PROVIDER.getTransactionReceipt(hash),
-            RPC_PROVIDER.getTransactionByHash(hash)
-          ]);
-          return {
-            id: padNumber(i + 1),
-            type: details.type,
-            status: receipt.statusReceipt,
-            hash,
-          };
+      while (continuationToken !== undefined) {
+        const res = await RPC_PROVIDER.getEvents({
+          address: contractAddress!,
+          chunk_size: 100,
+          from_block: { block_number: 0 },
+          to_block: "latest",
+          continuation_token: continuationToken ?? undefined
+        });
+        continuationToken = res.continuation_token
+        res.events.forEach(e => {
+          txHashes.add(e.transaction_hash)
         })
-      );
+        setTxHashes(Array.from(txHashes))
+      }
+
     },
-    initialData: [],
     enabled: !!contractAddress && isLocalNode
   });
+
+  const [txsTable, setTxsTable] = useState<TransactionTableData[]>([]);
+  useEffect(() => {
+    if (!txHashes.length) return;
+    Promise.all(
+      Array.from(txHashes).map(async (hash, i) => {
+        const [receipt, details] = await Promise.all([
+          RPC_PROVIDER.getTransactionReceipt(hash),
+          RPC_PROVIDER.getTransactionByHash(hash)
+        ]);
+        return {
+          id: padNumber(i + 1),
+          type: details.type,
+          status: receipt.statusReceipt,
+          hash,
+        };
+      })
+    ).then(txs => setTxsTable(txs));
+  }, [txHashes, txHashes.length])
 
   return (
     <div className="flex flex-col w-full gap-8">
