@@ -274,7 +274,7 @@ export default function ContractDetails() {
   });
 
   const blockOffset = 10;
-  const nextFetchOffset = 3;
+  const fetchOffset = 5;
   const eventsQuery = useInfiniteQuery({
     queryKey: ["contract", contractAddress, "events"],
     queryFn: async ({ pageParam }) => {
@@ -307,7 +307,7 @@ export default function ContractDetails() {
     initialData: {
       pages: [],
     },
-    enabled: !!contractAddress && latestBlockQuery.isFetched && isLocalNode
+    enabled: !!contractAddress && !latestBlockQuery.isLoading && isLocalNode
   });
 
   type EventData = { block_number: number, transaction_hash: string };
@@ -327,7 +327,7 @@ export default function ContractDetails() {
   }, []);
   const [eventPagination, setEventPagination] = useState({
     pageIndex: 0,
-    pageSize: 3,
+    pageSize: 15,
   });
   const events = useMemo(() => eventsQuery.data?.pages.flat() ?? [], [eventsQuery.data])
 
@@ -341,16 +341,17 @@ export default function ContractDetails() {
     }
   });
 
-  const onNext = useCallback(() => {
-    setEventPagination((prev) => ({
-      ...prev,
-      pageIndex: Math.min(eventTable.getPageCount() - 1, prev.pageIndex + 1),
-    }));
-
-    if (eventTable.getPageCount() - 1 === eventPagination.pageIndex + nextFetchOffset && eventsQuery.hasNextPage) {
-      eventsQuery.fetchNextPage()
+  useEffect(() => {
+    if (
+      eventsQuery.isLoading ||
+      eventsQuery.isFetching ||
+      !eventsQuery.hasNextPage ||
+      (eventTable.getPageCount() - (eventPagination.pageIndex + 1)) > fetchOffset) {
+      return
     }
-  }, [eventTable, eventPagination, eventsQuery]);
+
+    eventsQuery.fetchNextPage()
+  }, [eventTable, eventPagination, fetchOffset, eventsQuery])
 
   return (
     <div className="flex flex-col w-full gap-8">
@@ -510,7 +511,12 @@ export default function ContractDetails() {
                           </button>
                           <button
                             disabled={eventPagination.pageIndex === eventTable.getPageCount() - 1}
-                            onClick={onNext}
+                            onClick={() => {
+                              setEventPagination((prev) => ({
+                                ...prev,
+                                pageIndex: Math.min(eventTable.getPageCount() - 1, prev.pageIndex + 1),
+                              }));
+                            }}
                             className="bg-[#4A4A4A] text-white px-4 py-[3px] disabled:opacity-50 uppercase"
                           >
                             Next
@@ -929,6 +935,6 @@ export default function ContractDetails() {
         isOpen={isWalletModalOpen}
         onClose={() => setIsWalletModalOpen(false)}
       />
-    </div>
+    </div >
   );
 }
