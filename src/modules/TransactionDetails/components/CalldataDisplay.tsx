@@ -212,8 +212,8 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
   }
 
   return (
-    <div className="space-y-2 pb-4 flex-none">
-      <div className="sticky top-0 bg-white z-10 p-4">
+    <div className="h-full space-y-3 grid grid-rows-[min-content_1fr]">
+      <div>
         <Selector
           selected={selectedTab}
           onTabSelect={(value) =>
@@ -233,12 +233,12 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
       </div>
 
       {selectedTab === "Decoded" ? (
-        <div className="flex flex-grow-0 flex-col px-4">
-          <div className="flex flex-col border">
-            {decodedCalldata.map((item) => (
+        <div className="overflow-auto">
+          <div className="flex flex-col">
+            {decodedCalldata.map((item, idx) => (
               <div
                 key={item.selector}
-                className="cursor-pointer border-b last:border-b-0"
+                className="w-full cursor-pointer"
                 onClick={() => {
                   setExpandedItem((prev) =>
                     prev.includes(item.selector)
@@ -247,14 +247,21 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                   );
                 }}
               >
-                <div className="px-4 flex flex-row items-center gap-2 py-2 cursor-pointer">
+                <div
+                  className={`bg-white sticky top-0 px-4 flex flex-row items-center gap-2 py-2 border border-borderGray ${
+                    // if the item is the last element, remove the bottom margin to avoid border overlapping
+                    idx === decodedCalldata.length - 1 ? "" : "mb-[-1px]"
+                  }`}
+                >
                   <span className="underline">
                     {truncateString(item.contract)}
                   </span>
                   <span>
                     <ArrowRightIcon className="w-3 h-3" />
                   </span>
-                  <span className="font-bold">fn</span> {item.function_name}()
+                  <span className="font-bold">fn</span>
+                  <span className="italic">{item.function_name}</span>
+                  <span>({item.params.map((arg) => arg).join(", ")})</span>
                 </div>
 
                 {expandedItem.includes(item.selector) ? (
@@ -262,9 +269,12 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                     onClick={(e) => {
                       e.stopPropagation();
                     }}
-                    className="flex flex-grow-0 border-t cursor-default shadow-inner flex-col gap-1 bg-[#F1F1F1] p-2"
+                    className={`border-x border-borderGray w-full cursor-default shadow-inner flex-col gap-3 bg-[#F1F1F1] p-3 ${
+                      // if the item is the last element, remove the bottom margin to avoid border overlapping
+                      idx === decodedCalldata.length - 1 ? "border-b" : ""
+                    }`}
                   >
-                    <div className="flex justify-between">
+                    <div className="flex gap-3 justify-between mb-3">
                       <Selector
                         selected={decodedRawMap[item.selector]}
                         onTabSelect={(value) =>
@@ -307,13 +317,9 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                       </Selector>
                     </div>
 
-                    <p className="text-sm text-gray-500 pt-2">
-                      ({item.params.map((arg) => arg).join(", ")})
-                    </p>
-
-                    <div className="bg-white border overflow-x-auto">
+                    <div className="bg-white border overflow-auto">
                       {decodedRawMap[item.selector] === "Decoded" ? (
-                        <table className="w-full ">
+                        <table className="overflow-x">
                           <tbody>
                             {item.data.map((arg, rowIndex, array) => (
                               <tr
@@ -324,15 +330,17 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                                     : ""
                                 }`}
                               >
-                                <td className="px-2 py-1 text-left align-top w-1/4 ">
+                                <td className="px-2 py-1 text-left align-top">
                                   <span className="font-bold">{arg.name}</span>
                                 </td>
-                                <td className="px-2 py-1 text-left w-1/4 align-top ">
+
+                                <td className="px-2 py-1 text-left align-top ">
                                   <span className="text-gray-500">
                                     {arg.type}
                                   </span>
                                 </td>
-                                <td className="px-2 py-1 text-left w-2/4 overflow-x-auto">
+
+                                <td className="px-2 py-1 text-left overflow-x-auto">
                                   <ValueRenderer
                                     value={arg.value}
                                     type={convertValueTabMap[item.selector]}
@@ -377,7 +385,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
           </div>
         </div>
       ) : (
-        <div className="px-4">
+        <div>
           <table className="w-full border">
             <tbody>
               {calldata.map((item) => {

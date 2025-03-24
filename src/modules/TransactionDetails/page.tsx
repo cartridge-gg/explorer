@@ -781,43 +781,41 @@ export default function TransactionDetails() {
             }))}
           />
 
-          <div className="flex overflow-x-auto overflow-y-auto flex-col gap-3 mt-[6px] border border-borderGray rounded-b-md">
-            <div className=" flex-grow-0 h-full">
-              {selectedDataTab === "Calldata" ? (
-                <CalldataDisplay calldata={callData} />
-              ) : selectedDataTab === "Events" ? (
-                <div className="p-4 h-full">
-                  <DataTable
-                    table={eventsTable}
-                    pagination={eventsPagination}
-                    setPagination={setEventsPagination}
-                  />
-                </div>
-              ) : selectedDataTab === "Signature" ? (
-                <ul className="w-full flex flex-col gap-2 p-4">
-                  {TransactionDetails?.signature.map((signature, index) => (
-                    <li
-                      key={index}
-                      className="text-sm py-2 border-b border-[#8E8E8E]"
-                    >
-                      {signature}
-                    </li>
-                  ))}
-                </ul>
-              ) : selectedDataTab === "Storage Diffs" ? (
-                <div className="p-4 h-full">
-                  <DataTable
-                    table={storageDiffTable}
-                    pagination={storageDiffPagination}
-                    setPagination={setStorageDiffPagination}
-                  />
-                </div>
-              ) : (
-                <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
-                  <span className="text-[#D0D0D0]">No data found</span>
-                </div>
-              )}
-            </div>
+          <div className="flex-grow flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray rounded-b-md overflow-auto">
+            {selectedDataTab === "Calldata" ? (
+              <CalldataDisplay calldata={callData} />
+            ) : selectedDataTab === "Events" ? (
+              <div className="p-4 h-full">
+                <DataTable
+                  table={eventsTable}
+                  pagination={eventsPagination}
+                  setPagination={setEventsPagination}
+                />
+              </div>
+            ) : selectedDataTab === "Signature" ? (
+              <ul className="w-full flex flex-col gap-2 p-4">
+                {TransactionDetails?.signature.map((signature, index) => (
+                  <li
+                    key={index}
+                    className="text-sm py-2 border-b border-[#8E8E8E]"
+                  >
+                    {signature}
+                  </li>
+                ))}
+              </ul>
+            ) : selectedDataTab === "Storage Diffs" ? (
+              <div className="p-4 h-full">
+                <DataTable
+                  table={storageDiffTable}
+                  pagination={storageDiffPagination}
+                  setPagination={setStorageDiffPagination}
+                />
+              </div>
+            ) : (
+              <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
+                <span className="text-[#D0D0D0]">No data found</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
