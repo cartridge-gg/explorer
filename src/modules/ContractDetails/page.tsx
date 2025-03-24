@@ -1,9 +1,9 @@
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
-import { Contract } from "starknet";
+import { Block, Contract } from "starknet";
 import WalletConnectModal from "@/shared/components/wallet_connect";
 import { BreadcrumbPage } from "@cartridge/ui-next";
 import {
@@ -11,7 +11,6 @@ import {
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumbs";
-
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
@@ -19,8 +18,10 @@ import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";
 import ContractReadInterface from "./components/ReadContractInterface";
 import ContractWriteInterface from "./components/WriteContractInterface";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useReactTable, getCoreRowModel, flexRender, getPaginationRowModel, ColumnDef, createColumnHelper } from "@tanstack/react-table";
 
-const DataTabs = ["Read Contract", "Write Contract"];
+const DataTabs = ["Events", "Read Contract", "Write Contract", "Contract Code"];
 
 export default function ContractDetails() {
   const { contractAddress } = useParams<{
@@ -107,6 +108,92 @@ export default function ContractDetails() {
   const { balances, isStrkLoading, isEthLoading } =
     useBalances(contractAddress);
 
+  const latestBlockQuery = useQuery({
+    queryKey: ["latestBlock"],
+    queryFn: () => RPC_PROVIDER.getBlock('latest')
+  });
+
+  const blockOffset = 10;
+  const nextFetchOffset = 3;
+  const eventsQuery = useInfiniteQuery({
+    queryKey: ["contract", contractAddress, "events"],
+    queryFn: async ({ pageParam }) => {
+      const events = [];
+      let continuationToken = null;
+      while (continuationToken === null || !!continuationToken) {
+        const res = await RPC_PROVIDER.getEvents({
+          address: contractAddress!,
+          chunk_size: 100,
+          from_block: pageParam.fromBlock,
+          to_block: pageParam.toBlock,
+          continuation_token: continuationToken ?? undefined
+        });
+        continuationToken = res.continuation_token;
+        events.push(...res.events);
+      }
+
+      return events
+    },
+    getNextPageParam: (_lastPage, _allPages, lastPageParam) => {
+      return {
+        fromBlock: { block_number: lastPageParam.fromBlock.block_number - blockOffset },
+        toBlock: { block_number: lastPageParam.toBlock.block_number - blockOffset }
+      };
+    },
+    initialPageParam: {
+      fromBlock: { block_number: latestBlockQuery.data ? latestBlockQuery.data.block_number - blockOffset : undefined } as Block,
+      toBlock: { block_number: latestBlockQuery.data ? latestBlockQuery.data.block_number : undefined } as Block,
+    },
+    initialData: {
+      pages: [],
+    },
+    enabled: !!contractAddress && latestBlockQuery.isFetched
+  });
+
+  type EventData = { block_number: number, transaction_hash: string };
+
+  const eventsColumns: ColumnDef<EventData, any>[] = useMemo(() => {
+    const columnHelper = createColumnHelper<EventData>();
+    return [
+      columnHelper.accessor("block_number", {
+        header: "Block Number",
+        cell: (info) => info.renderValue(),
+      }),
+      columnHelper.accessor("transaction_hash", {
+        header: "Transaction Hash",
+        cell: (info) => info.renderValue(),
+      }),
+    ]
+  }, []);
+  const [eventPagination, setEventPagination] = useState({
+    pageIndex: 0,
+    pageSize: 3,
+  });
+  const events = useMemo(() => {
+    return eventsQuery.data?.pages.flat() ?? []
+  }, [eventsQuery.data])
+
+  const eventTable = useReactTable({
+    data: events,
+    columns: eventsColumns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    state: {
+      pagination: eventPagination,
+    }
+  });
+
+  const onNext = useCallback(() => {
+    setEventPagination((prev) => ({
+      ...prev,
+      pageIndex: Math.min(eventTable.getPageCount() - 1, prev.pageIndex + 1),
+    }));
+
+    if (eventTable.getPageCount() - 1 === eventPagination.pageIndex + nextFetchOffset && eventsQuery.hasNextPage) {
+      eventsQuery.fetchNextPage()
+    }
+  }, [eventTable, eventPagination, eventsQuery]);
+
   return (
     <>
       <div className="w-full flex-grow gap-8">
@@ -154,8 +241,8 @@ export default function ContractDetails() {
                       {isStrkLoading
                         ? "0.00"
                         : balances.strk !== undefined
-                        ? (Number(balances.strk) / 10 ** 18).toString()
-                        : "N/A"}
+                          ? (Number(balances.strk) / 10 ** 18).toString()
+                          : "N/A"}
                     </td>
                   </tr>
 
@@ -165,8 +252,8 @@ export default function ContractDetails() {
                       {isEthLoading
                         ? "0.00"
                         : balances.eth !== undefined
-                        ? (Number(balances.eth) / 10 ** 18).toString()
-                        : "N/A"}
+                          ? (Number(balances.eth) / 10 ** 18).toString()
+                          : "N/A"}
                     </td>
                   </tr>
                 </tbody>
@@ -186,7 +273,93 @@ export default function ContractDetails() {
 
             <div className="bg-white flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray overflow-auto">
               <div className="w-full h-full overflow-auto">
-                {selectedDataTab === "Read Contract" ? (
+                {selectedDataTab === "Events" ? (
+                  <div className="flex flex-col gap-4">
+                    <div className="h-full flex flex-col gap-2">
+                      <table className="w-full h-full">
+                        <thead className="uppercase">
+                          <tr>
+                            {eventTable
+                              .getHeaderGroups()
+                              .map((headerGroup) =>
+                                headerGroup.headers.map((header) => (
+                                  <th key={header.id}>
+                                    {flexRender(
+                                      header.column.columnDef.header,
+                                      header.getContext()
+                                    )}
+                                  </th>
+                                ))
+                              )}
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {eventTable.getRowModel().rows.length ? (
+                            eventTable.getRowModel().rows.map((row, id) => (
+                              <tr
+                                key={id}
+                                // onClick={() => navigateTo(row.original.transaction_hash)}
+                                className="hover:bg-gray-100 cursor-pointer min-h-5"
+                              >
+                                {row.getVisibleCells().map((cell) => {
+                                  return (
+                                    <td
+                                      key={cell.id}
+                                      className={`${cell.column.id === "hash"
+                                        ? "hover:underline text-left px-[15px]"
+                                        : ""
+                                        } `}
+                                    >
+                                      {flexRender(
+                                        cell.column.columnDef.cell,
+                                        cell.getContext()
+                                      )}
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={eventTable.getAllColumns().length}>No results found</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+
+                      <div className="mt-2 h-min flex flex-row gap-4 justify-between items-center">
+                        <div>
+                          Showing <strong>{eventPagination.pageIndex + 1}</strong> of{" "}
+                          <strong>{eventTable.getPageCount()}</strong> pages
+                        </div>
+
+                        <div className="flex flex-row gap-2">
+                          <button
+                            disabled={eventPagination.pageIndex === 0}
+                            onClick={() =>
+                              setEventPagination((prev) => ({
+                                ...prev,
+                                pageIndex: Math.max(0, prev.pageIndex - 1),
+                              }))
+                            }
+                            className="bg-[#4A4A4A] text-white px-2 disabled:opacity-50 uppercase"
+                          >
+                            Previous
+                          </button>
+                          <button
+                            disabled={eventPagination.pageIndex === eventTable.getPageCount() - 1}
+                            onClick={onNext}
+                            className="bg-[#4A4A4A] text-white px-4 py-[3px] disabled:opacity-50 uppercase"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                ) : selectedDataTab === "Read Contract" ? (
                   <ContractReadInterface
                     contract={contract}
                     functions={readFunctions}
@@ -203,14 +376,15 @@ export default function ContractDetails() {
                 )}
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </div >
+        </div >
+      </div >
 
       {/* Wallet Connection Modal */}
       <WalletConnectModal
         isOpen={isWalletModalOpen}
-        onClose={() => setIsWalletModalOpen(false)}
+        onClose={() => setIsWalletModalOpen(false)
+        }
       />
     </>
   );
