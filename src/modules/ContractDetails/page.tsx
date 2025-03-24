@@ -4,7 +4,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Block, Contract } from "starknet";
-import { convertValue } from "@/shared/utils/rpc_utils";
+import { convertValue, isLocalNode } from "@/shared/utils/rpc_utils";
 import { FunctionResult, DisplayFormatTypes } from "@/types/types";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import WalletConnectModal from "@/shared/components/wallet_connect";
@@ -28,7 +28,10 @@ import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useReactTable, getCoreRowModel, flexRender, getPaginationRowModel, ColumnDef, createColumnHelper } from "@tanstack/react-table";
 
-const DataTabs = ["Events", "Read Contract", "Write Contract", "Contract Code"];
+const DataTabs = ["Read Contract", "Write Contract", "Contract Code"];
+if (isLocalNode) {
+  DataTabs.unshift("Events");
+}
 
 interface FunctionInput {
   name: string;
@@ -304,7 +307,7 @@ export default function ContractDetails() {
     initialData: {
       pages: [],
     },
-    enabled: !!contractAddress && latestBlockQuery.isFetched
+    enabled: !!contractAddress && latestBlockQuery.isFetched && isLocalNode
   });
 
   type EventData = { block_number: number, transaction_hash: string };
@@ -326,9 +329,7 @@ export default function ContractDetails() {
     pageIndex: 0,
     pageSize: 3,
   });
-  const events = useMemo(() => {
-    return eventsQuery.data?.pages.flat() ?? []
-  }, [eventsQuery.data])
+  const events = useMemo(() => eventsQuery.data?.pages.flat() ?? [], [eventsQuery.data])
 
   const eventTable = useReactTable({
     data: events,
@@ -433,7 +434,7 @@ export default function ContractDetails() {
 
             <div className="flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray rounded-b-md">
               <div className="w-full h-full">
-                {selectedDataTab == "Events" ? (
+                {selectedDataTab === "Events" && isLocalNode ? (
                   <div className="flex flex-col gap-4">
                     <div className="h-full flex flex-col gap-2">
                       <table className="w-full h-full">

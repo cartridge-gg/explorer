@@ -1,5 +1,6 @@
 import { cairo, shortString } from "starknet";
 import BN from "bn.js";
+import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
@@ -81,3 +82,5 @@ export const convertObjectValuesToDisplayValues = (
   }
   return obj;
 };
+
+export const isLocalNode = RPC_PROVIDER.channel.nodeUrl.startsWith("http://");
