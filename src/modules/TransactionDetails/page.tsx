@@ -37,6 +37,7 @@ import PageHeader from "@/shared/components/PageHeader";
 import { SectionBoxEntry } from "@/shared/components/section";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import dayjs from "dayjs";
+import SignatureDisplay from "./components/SignatureDisplay";
 
 const DataTabs = ["Calldata", "Events", "Signature", "Storage Diffs"];
 
@@ -793,16 +794,7 @@ export default function TransactionDetails() {
                 />
               </div>
             ) : selectedDataTab === "Signature" ? (
-              <ul className="w-full flex flex-col gap-2 p-4">
-                {TransactionDetails?.signature.map((signature, index) => (
-                  <li
-                    key={index}
-                    className="text-sm py-2 border-b border-[#8E8E8E]"
-                  >
-                    {signature}
-                  </li>
-                ))}
-              </ul>
+              <SignatureDisplay signature={TransactionDetails?.signature} />
             ) : selectedDataTab === "Storage Diffs" ? (
               <div className="p-4 h-full">
                 <DataTable
