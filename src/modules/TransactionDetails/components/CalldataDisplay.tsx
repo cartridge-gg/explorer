@@ -232,8 +232,8 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
         </Selector>
       </div>
 
-      {selectedTab === "Decoded" ? (
-        <div className="overflow-auto">
+      <div className="overflow-auto">
+        {selectedTab === "Decoded" ? (
           <Accordion
             items={() =>
               decodedCalldata.map((item) => (
@@ -365,24 +365,22 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
               ))
             }
           />
-        </div>
-      ) : (
-        <div>
+        ) : (
           <table className="w-full border">
             <tbody>
               {calldata.map((item) => {
-                let current_count = 0;
                 return item.args.map((arg, index, array) => {
-                  current_count++;
                   return (
                     <tr
-                      key={current_count}
+                      key={index}
                       className={`${
                         index !== array.length - 1 ? "border-b" : ""
                       }`}
                     >
-                      <td className="px-4 py-2 text-left">
-                        <span className="font-bold mr-4">{current_count}</span>{" "}
+                      <td className="px-4 text-left">
+                        <span className="font-bold mr-4 select-none">
+                          {index}
+                        </span>
                         {arg}
                       </td>
                     </tr>
@@ -391,8 +389,8 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
               })}
             </tbody>
           </table>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
