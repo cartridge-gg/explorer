@@ -4,6 +4,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Block, Contract } from "starknet";
+import { isLocalNode } from "@/shared/utils/rpc_utils";
 import WalletConnectModal from "@/shared/components/wallet_connect";
 import { BreadcrumbPage } from "@cartridge/ui-next";
 import {
@@ -21,7 +22,10 @@ import ContractWriteInterface from "./components/WriteContractInterface";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useReactTable, getCoreRowModel, flexRender, getPaginationRowModel, ColumnDef, createColumnHelper } from "@tanstack/react-table";
 
-const DataTabs = ["Events", "Read Contract", "Write Contract", "Contract Code"];
+const DataTabs = ["Read Contract", "Write Contract", "Contract Code"];
+if (isLocalNode) {
+  DataTabs.unshift("Events");
+}
 
 export default function ContractDetails() {
   const { contractAddress } = useParams<{
@@ -147,7 +151,7 @@ export default function ContractDetails() {
     initialData: {
       pages: [],
     },
-    enabled: !!contractAddress && latestBlockQuery.isFetched
+    enabled: !!contractAddress && latestBlockQuery.isFetched && isLocalNode
   });
 
   type EventData = { block_number: number, transaction_hash: string };
@@ -169,9 +173,7 @@ export default function ContractDetails() {
     pageIndex: 0,
     pageSize: 3,
   });
-  const events = useMemo(() => {
-    return eventsQuery.data?.pages.flat() ?? []
-  }, [eventsQuery.data])
+  const events = useMemo(() => eventsQuery.data?.pages.flat() ?? [], [eventsQuery.data])
 
   const eventTable = useReactTable({
     data: events,
@@ -273,7 +275,7 @@ export default function ContractDetails() {
 
             <div className="bg-white flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray overflow-auto">
               <div className="w-full h-full overflow-auto">
-                {selectedDataTab === "Events" ? (
+                {selectedDataTab === "Events" && isLocalNode ? (
                   <div className="flex flex-col gap-4">
                     <div className="h-full flex flex-col gap-2">
                       <table className="w-full h-full">
@@ -381,7 +383,7 @@ export default function ContractDetails() {
       </div >
 
       {/* Wallet Connection Modal */}
-      <WalletConnectModal
+      < WalletConnectModal
         isOpen={isWalletModalOpen}
         onClose={() => setIsWalletModalOpen(false)
         }
