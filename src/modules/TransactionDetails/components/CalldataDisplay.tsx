@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { STALE_TIME } from "@/constants/rpc";
 import { CACHE_TIME } from "@/constants/rpc";
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
+import FeltList from "@/shared/components/FeltList";
 
 const TxTypesTabs = ["Decoded", "Raw"] as const;
 const ConvertValueTabs = ["decimal", "hex"] as const;
@@ -366,29 +367,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
             }
           />
         ) : (
-          <table className="w-full border">
-            <tbody>
-              {calldata.map((item) => {
-                return item.args.map((arg, index, array) => {
-                  return (
-                    <tr
-                      key={index}
-                      className={`${
-                        index !== array.length - 1 ? "border-b" : ""
-                      }`}
-                    >
-                      <td className="px-4 text-left">
-                        <span className="font-bold mr-4 select-none">
-                          {index}
-                        </span>
-                        {arg}
-                      </td>
-                    </tr>
-                  );
-                });
-              })}
-            </tbody>
-          </table>
+          <FeltList list={calldata.flatMap((calldata) => calldata.args)} />
         )}
       </div>
     </div>
