@@ -11,6 +11,7 @@ import { ArrowRightIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { STALE_TIME } from "@/constants/rpc";
 import { CACHE_TIME } from "@/constants/rpc";
+import { Accordion, AccordionItem } from "@/shared/components/accordion";
 
 const TxTypesTabs = ["Decoded", "Raw"] as const;
 const ConvertValueTabs = ["decimal", "hex"] as const;
@@ -73,7 +74,6 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
   const [selectedTab, setSelectedTab] = useState<(typeof TxTypesTabs)[number]>(
     TxTypesTabs[0]
   );
-  const [expandedItem, setExpandedItem] = useState<string[]>([]);
   const [decodedRawMap, setDecodedRawMap] = useState<
     Record<string, (typeof TxTypesTabs)[number]>
   >({});
@@ -234,155 +234,137 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
 
       {selectedTab === "Decoded" ? (
         <div className="overflow-auto">
-          <div className="flex flex-col">
-            {decodedCalldata.map((item, idx) => (
-              <div
-                key={item.selector}
-                className="w-full cursor-pointer"
-                onClick={() => {
-                  setExpandedItem((prev) =>
-                    prev.includes(item.selector)
-                      ? prev.filter((s) => s !== item.selector)
-                      : [...prev, item.selector]
-                  );
-                }}
-              >
-                <div
-                  className={`bg-white sticky top-0 px-4 flex flex-row items-center gap-2 py-2 border border-borderGray ${
-                    // if the item is the last element, remove the bottom margin to avoid border overlapping
-                    idx === decodedCalldata.length - 1 ? "" : "mb-[-1px]"
-                  }`}
-                >
-                  <span className="underline">
-                    {truncateString(item.contract)}
-                  </span>
-                  <span>
-                    <ArrowRightIcon className="w-3 h-3" />
-                  </span>
-                  <span className="font-bold">fn</span>
-                  <span className="italic">{item.function_name}</span>
-                  <span>({item.params.map((arg) => arg).join(", ")})</span>
-                </div>
-
-                {expandedItem.includes(item.selector) ? (
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                    className={`border-x border-borderGray w-full cursor-default shadow-inner flex-col gap-3 bg-[#F1F1F1] p-3 ${
-                      // if the item is the last element, remove the bottom margin to avoid border overlapping
-                      idx === decodedCalldata.length - 1 ? "border-b" : ""
-                    }`}
-                  >
-                    <div className="flex gap-3 justify-between mb-3">
-                      <Selector
-                        selected={decodedRawMap[item.selector]}
-                        onTabSelect={(value) =>
-                          setDecodedRawMap((prev) => ({
-                            ...prev,
-                            [item.selector]:
-                              value as (typeof TxTypesTabs)[number],
-                          }))
-                        }
-                        className="w-min rounded-sm"
-                      >
-                        {TxTypesTabs.map((type) => (
-                          <SelectorItem
-                            key={type}
-                            name={type}
-                            value={type}
-                            className="w-max text-xs py-[2px]"
-                          />
-                        ))}
-                      </Selector>
-                      <Selector
-                        selected={convertValueTabMap[item.selector]}
-                        onTabSelect={(value) =>
-                          setConvertValueTabMap((prev) => ({
-                            ...prev,
-                            [item.selector]:
-                              value as (typeof ConvertValueTabs)[number],
-                          }))
-                        }
-                        className="w-min rounded-sm"
-                      >
-                        {ConvertValueTabs.map((type) => (
-                          <SelectorItem
-                            key={type}
-                            name={type}
-                            value={type}
-                            className="w-max text-xs py-[2px]"
-                          />
-                        ))}
-                      </Selector>
+          <Accordion
+            items={() =>
+              decodedCalldata.map((item) => (
+                <AccordionItem
+                  title={
+                    <div className="flex flex-row items-center gap-2">
+                      <span className="underline">
+                        {truncateString(item.contract)}
+                      </span>
+                      <span>
+                        <ArrowRightIcon className="w-3 h-3" />
+                      </span>
+                      <span className="font-bold">fn</span>
+                      <span className="italic">{item.function_name}</span>
+                      <span>({item.params.map((arg) => arg).join(", ")})</span>
                     </div>
+                  }
+                  content={
+                    <>
+                      <div className="flex gap-3 justify-between mb-3">
+                        <Selector
+                          selected={decodedRawMap[item.selector]}
+                          onTabSelect={(value) =>
+                            setDecodedRawMap((prev) => ({
+                              ...prev,
+                              [item.selector]:
+                                value as (typeof TxTypesTabs)[number],
+                            }))
+                          }
+                          className="w-min rounded-sm"
+                        >
+                          {TxTypesTabs.map((type) => (
+                            <SelectorItem
+                              key={type}
+                              name={type}
+                              value={type}
+                              className="w-max text-xs py-[2px]"
+                            />
+                          ))}
+                        </Selector>
+                        <Selector
+                          selected={convertValueTabMap[item.selector]}
+                          onTabSelect={(value) =>
+                            setConvertValueTabMap((prev) => ({
+                              ...prev,
+                              [item.selector]:
+                                value as (typeof ConvertValueTabs)[number],
+                            }))
+                          }
+                          className="w-min rounded-sm"
+                        >
+                          {ConvertValueTabs.map((type) => (
+                            <SelectorItem
+                              key={type}
+                              name={type}
+                              value={type}
+                              className="w-max text-xs py-[2px]"
+                            />
+                          ))}
+                        </Selector>
+                      </div>
 
-                    <div className="bg-white border overflow-auto">
-                      {decodedRawMap[item.selector] === "Decoded" ? (
-                        <table className="overflow-x">
-                          <tbody>
-                            {item.data.map((arg, rowIndex, array) => (
-                              <tr
-                                key={rowIndex}
-                                className={`${
-                                  rowIndex !== array.length - 1
-                                    ? "border-b"
-                                    : ""
-                                }`}
-                              >
-                                <td className="px-2 py-1 text-left align-top">
-                                  <span className="font-bold">{arg.name}</span>
-                                </td>
+                      <div className="bg-white border overflow-auto">
+                        {decodedRawMap[item.selector] === "Decoded" ? (
+                          <table className="overflow-x w-full">
+                            <tbody>
+                              {item.data.map((arg, rowIndex, array) => (
+                                <tr
+                                  key={rowIndex}
+                                  className={`${
+                                    rowIndex !== array.length - 1
+                                      ? "border-b"
+                                      : ""
+                                  }`}
+                                >
+                                  <td className="px-2 py-1 text-left align-top">
+                                    <span className="font-bold">
+                                      {arg.name}
+                                    </span>
+                                  </td>
 
-                                <td className="px-2 py-1 text-left align-top ">
-                                  <span className="text-gray-500">
-                                    {arg.type}
-                                  </span>
-                                </td>
+                                  <td className="px-2 py-1 text-left align-top ">
+                                    <span className="text-gray-500">
+                                      {arg.type}
+                                    </span>
+                                  </td>
 
-                                <td className="px-2 py-1 text-left overflow-x-auto">
-                                  <ValueRenderer
-                                    value={arg.value}
-                                    type={convertValueTabMap[item.selector]}
-                                  />
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      ) : (
-                        <table className="w-full ">
-                          <tbody>
-                            {item.raw_args.map((arg, index, array) => (
-                              <tr
-                                key={index}
-                                className={`${
-                                  index !== array.length - 1 ? "border-b" : ""
-                                }`}
-                              >
-                                <td className="px-2 py-1 text-left w-1/6 ">
-                                  <span className="font-bold mr-4">
-                                    {index + 1}
-                                  </span>
-                                </td>
-                                <td className="px-2 py-1 text-left w-5/6 overflow-x-auto">
-                                  {
-                                    convertValue(arg)?.[
-                                      convertValueTabMap[item.selector]
-                                    ]
-                                  }
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      )}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            ))}
-          </div>
+                                  <td className="px-2 py-1 text-left overflow-x-auto">
+                                    <ValueRenderer
+                                      value={arg.value}
+                                      type={convertValueTabMap[item.selector]}
+                                    />
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        ) : (
+                          <table className="w-full ">
+                            <tbody>
+                              {item.raw_args.map((arg, index, array) => (
+                                <tr
+                                  key={index}
+                                  className={`${
+                                    index !== array.length - 1 ? "border-b" : ""
+                                  }`}
+                                >
+                                  <td className="px-2 py-1 text-left w-1/6 ">
+                                    <span className="font-bold mr-4">
+                                      {index + 1}
+                                    </span>
+                                  </td>
+                                  <td className="px-2 py-1 text-left w-5/6 overflow-x-auto">
+                                    {
+                                      convertValue(arg)?.[
+                                        convertValueTabMap[item.selector]
+                                      ]
+                                    }
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        )}
+                      </div>
+                    </>
+                  }
+                />
+              ))
+            }
+          />
         </div>
       ) : (
         <div>
