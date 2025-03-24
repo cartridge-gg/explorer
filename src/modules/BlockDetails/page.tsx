@@ -172,8 +172,8 @@ export default function BlockDetails() {
         subtext={BlockReceipt?.status}
       />
 
-      <div className="flex flex-col sl:flex-row sl:h-[66vh] gap-4">
-        <div className="flex flex-col gap-[6px] sl:overflow-y-scroll">
+      <div className="flex flex-col sl:flex-row sl:h-[70vh] gap-4">
+        <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
           <SectionBox variant="upper-half">
             <SectionBoxEntry title="Hash">
               {isMobile
