@@ -786,7 +786,7 @@ export default function TransactionDetails() {
             {selectedDataTab === "Calldata" ? (
               <CalldataDisplay calldata={callData} />
             ) : selectedDataTab === "Events" ? (
-              <div className="p-4 h-full">
+              <div className="h-full">
                 <DataTable
                   table={eventsTable}
                   pagination={eventsPagination}
