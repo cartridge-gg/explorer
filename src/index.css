@@ -31,3 +31,13 @@ th {
 thead th {
   font-weight: bold;
 }
+
+::selection {
+  color: white;
+  background-color: theme("colors.highlight.primary");
+}
+
+.page-header-title::selection {
+  color: theme("colors.highlight.primary");
+  background-color: white;
+}

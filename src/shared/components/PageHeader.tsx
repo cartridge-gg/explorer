@@ -17,7 +17,9 @@ export default function PageHeader({
   return (
     <div className="rounded-md overflow-clip" {...props}>
       <div className="px-4 w-full justify-between bg-primary h-[50px] flex items-center rounded-t-md">
-        <h1 className="text-white uppercase text-lg">{title}</h1>
+        <h1 className="page-header-title text-white uppercase text-lg">
+          {title}
+        </h1>
         {titleRightComponent ? titleRightComponent : null}
       </div>
 

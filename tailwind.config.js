@@ -10,6 +10,10 @@ export default {
           primary: "#FF4F0A",
           secondary: "#29296E",
         },
+        highlight: {
+          primary: "#262626",
+          secondary: "white",
+        },
       },
       screens: {
         // `slightly large` as it sits between lg and xl
