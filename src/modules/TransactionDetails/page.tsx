@@ -796,7 +796,7 @@ export default function TransactionDetails() {
             ) : selectedDataTab === "Signature" ? (
               <SignatureDisplay signature={TransactionDetails?.signature} />
             ) : selectedDataTab === "Storage Diffs" ? (
-              <div className="p-4 h-full">
+              <div className="h-full">
                 <DataTable
                   table={storageDiffTable}
                   pagination={storageDiffPagination}
