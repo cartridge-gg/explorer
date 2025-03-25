@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { Selector, SelectorItem } from "./Selector";
 
-const FeltDisplayVariants = ["decimal", "hex"] as const;
+export const FeltDisplayVariants = ["decimal", "hex"] as const;
 
 type FeltDisplayToggleProps = {
   displayAs?: (typeof FeltDisplayVariants)[number];

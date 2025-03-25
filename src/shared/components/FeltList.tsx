@@ -6,11 +6,16 @@ type FeltListProps = {
    */
   list: bigint[];
   displayAs?: "hex" | "decimal";
+  /**
+   * Whether to display the index column
+   */
+  showIndex?: boolean;
 };
 
 export default function FeltList({
   list,
   displayAs = "decimal",
+  showIndex = true,
 }: FeltListProps) {
   return (
     <table className="w-full border">
@@ -21,9 +26,14 @@ export default function FeltList({
               key={index}
               className={`${index !== list.length - 1 ? "border-b" : ""}`}
             >
-              <td className="px-4 text-center font-bold select-none w-[20px]">
-                {index}
-              </td>
+              {showIndex ? (
+                <td className="px-4 text-center font-bold select-none w-[54px]">
+                  {index}
+                </td>
+              ) : (
+                <></>
+              )}
+
               <td className="px-4 text-left">
                 <FeltDisplay value={elem} displayAs={displayAs} />
               </td>

@@ -13,9 +13,9 @@ import { STALE_TIME } from "@/constants/rpc";
 import { CACHE_TIME } from "@/constants/rpc";
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
 import FeltList from "@/shared/components/FeltList";
+import { FeltDisplayVariants } from "@/shared/components/FeltDisplayAsToggle";
 
 const TxTypesTabs = ["Decoded", "Raw"] as const;
-const ConvertValueTabs = ["decimal", "hex"] as const;
 
 interface CalldataDisplayProps {
   calldata: {
@@ -78,8 +78,9 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
   const [decodedRawMap, setDecodedRawMap] = useState<
     Record<string, (typeof TxTypesTabs)[number]>
   >({});
+
   const [convertValueTabMap, setConvertValueTabMap] = useState<
-    Record<string, (typeof ConvertValueTabs)[number]>
+    Record<string, (typeof FeltDisplayVariants)[number]>
   >({});
 
   const fetchAndDecodeCalldata = useCallback(async () => {
@@ -275,18 +276,19 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                             />
                           ))}
                         </Selector>
+
                         <Selector
                           selected={convertValueTabMap[item.selector]}
                           onTabSelect={(value) =>
                             setConvertValueTabMap((prev) => ({
                               ...prev,
                               [item.selector]:
-                                value as (typeof ConvertValueTabs)[number],
+                                value as (typeof FeltDisplayVariants)[number],
                             }))
                           }
                           className="w-min rounded-sm"
                         >
-                          {ConvertValueTabs.map((type) => (
+                          {FeltDisplayVariants.map((type) => (
                             <SelectorItem
                               key={type}
                               name={type}
@@ -333,31 +335,10 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                             </tbody>
                           </table>
                         ) : (
-                          <table className="w-full ">
-                            <tbody>
-                              {item.raw_args.map((arg, index, array) => (
-                                <tr
-                                  key={index}
-                                  className={`${
-                                    index !== array.length - 1 ? "border-b" : ""
-                                  }`}
-                                >
-                                  <td className="px-2 py-1 text-left w-1/6 ">
-                                    <span className="font-bold mr-4">
-                                      {index + 1}
-                                    </span>
-                                  </td>
-                                  <td className="px-2 py-1 text-left w-5/6 overflow-x-auto">
-                                    {
-                                      convertValue(arg)?.[
-                                        convertValueTabMap[item.selector]
-                                      ]
-                                    }
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                          <FeltList
+                            list={item.raw_args}
+                            displayAs={convertValueTabMap[item.selector]}
+                          />
                         )}
                       </div>
                     </>
