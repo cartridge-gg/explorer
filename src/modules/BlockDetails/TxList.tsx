@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
 import {
   ColumnDef,
   createColumnHelper,
@@ -14,6 +14,7 @@ import { TransactionTableData } from "@/types/types";
 import { useNavigate } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
+import { useWindowDimensions } from "@/shared/hooks/useWindow";
 
 interface TxListProps {
   transactions: TransactionTableData[];
@@ -22,6 +23,7 @@ interface TxListProps {
 export default function TxList({ transactions }: TxListProps) {
   const navigate = useNavigate();
   const { isMobile } = useScreen();
+  const { height } = useWindowDimensions();
 
   const navigateToTxn = useCallback(
     (txnHash: string) => {
@@ -69,10 +71,37 @@ export default function TxList({ transactions }: TxListProps) {
     }),
   ];
 
+  // Calculate pageSize based on window height
+  const calculatePageSize = useCallback(() => {
+    // Fixed component height and row height
+    const componentHeight = height * 0.5; // 50% of the screen height (computed by hand)
+    const rowHeight = 20;
+
+    // Calculate how many rows can fit in the available height
+    const availableHeight = componentHeight;
+    const calculatedPageSize = Math.max(
+      5,
+      Math.floor(availableHeight / rowHeight)
+    );
+
+    return calculatedPageSize;
+  }, [height]);
+
+  // Memoize the page size calculation value
+  const pageSize = useMemo(calculatePageSize, [calculatePageSize]);
+
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 15,
+    pageSize,
   });
+
+  // Update pageSize when window height changes
+  useEffect(() => {
+    setPagination((prev) => ({
+      ...prev,
+      pageSize,
+    }));
+  }, [pageSize]);
 
   const table = useReactTable<TransactionTableData>({
     data: transactions,
@@ -95,18 +124,18 @@ export default function TxList({ transactions }: TxListProps) {
       column?.setFilterValue(type);
       setPagination({
         pageIndex: 0,
-        pageSize: 15,
+        pageSize,
       });
     },
-    [table]
+    [table, pageSize]
   );
 
   return (
-    <div className="flex flex-col gap-2 h-full">
+    <div className="h-full space-y-3 grid grid-rows-[min-content_1fr]">
       <TxTypeToggle onFilterChange={(type) => handleTransactionFilter(type)} />
 
-      <div className="h-full flex flex-col gap-2">
-        <table className="w-full h-full ">
+      <div className="grid grid-rows-[1fr_min-content] gap-3">
+        <table className="w-full h-min">
           <thead className="uppercase">
             <tr>
               {table
@@ -130,7 +159,7 @@ export default function TxList({ transactions }: TxListProps) {
                 <tr
                   key={id}
                   onClick={() => navigateToTxn(row.original.hash)}
-                  className="hover:bg-gray-100 cursor-pointer min-h-5"
+                  className="hover:bg-gray-100 cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => {
                     return (
@@ -138,7 +167,7 @@ export default function TxList({ transactions }: TxListProps) {
                         key={cell.id}
                         className={`${
                           cell.column.id === "hash"
-                            ? "hover:underline text-left px-[15px]"
+                            ? "hover:underline text-left px-[15px] "
                             : ""
                         } `}
                       >
