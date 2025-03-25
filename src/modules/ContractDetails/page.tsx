@@ -26,7 +26,7 @@ import { Editor } from "@monaco-editor/react";
 
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { useReactTable, getCoreRowModel, flexRender, getPaginationRowModel, ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { useReactTable, getCoreRowModel, flexRender, getPaginationRowModel, ColumnDef, createColumnHelper, getSortedRowModel } from "@tanstack/react-table";
 
 const DataTabs = ["Read Contract", "Write Contract", "Contract Code"];
 if (isLocalNode) {
@@ -336,6 +336,13 @@ export default function ContractDetails() {
     columns: eventsColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    initialState: {
+      sorting: [{
+        id: 'block_number',
+        desc: true
+      }]
+    },
     state: {
       pagination: eventPagination,
     }
