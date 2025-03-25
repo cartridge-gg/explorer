@@ -1,11 +1,17 @@
+import FeltDisplay from "./FeltDisplay";
+
 type FeltListProps = {
   /**
    * Array of felts to be displayed in the list
    */
-  list: string[];
+  list: bigint[];
+  displayAs?: "hex" | "decimal";
 };
 
-export default function FeltList({ list }: FeltListProps) {
+export default function FeltList({
+  list,
+  displayAs = "decimal",
+}: FeltListProps) {
   return (
     <table className="w-full border">
       <tbody>
@@ -18,7 +24,9 @@ export default function FeltList({ list }: FeltListProps) {
               <td className="px-4 text-center font-bold select-none w-[20px]">
                 {index}
               </td>
-              <td className="px-4 text-left">{elem}</td>
+              <td className="px-4 text-left">
+                <FeltDisplay value={elem} displayAs={displayAs} />
+              </td>
             </tr>
           );
         })}
