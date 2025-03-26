@@ -36,7 +36,7 @@ const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
 
 export default function BlockDetails() {
   const { isMobile } = useScreen();
-  const { blockNumber } = useParams<{ blockNumber: string }>();
+  const { blockNumberOrHash } = useParams<{ blockNumberOrHash: string }>();
   const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
   const [txsTable, setTxsTable] = useState<TransactionTableData[]>([]);
   const [eventsTable, setEventsTable] = useState<EventTableData[]>([]);
@@ -57,12 +57,13 @@ export default function BlockDetails() {
   });
 
   const { data: BlockReceipt } = useQuery({
-    queryKey: [QUERY_KEYS.getBlockWithTxs, blockNumber],
-    queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockNumber ?? 0),
-    enabled: !!blockNumber,
+    queryKey: [QUERY_KEYS.getBlockWithTxs, blockNumberOrHash],
+    queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockNumberOrHash ?? 0),
+    enabled: !!blockNumberOrHash,
     staleTime: STALE_TIME,
     gcTime: CACHE_TIME,
   });
+  console.log({ blockNumberOrHash, BlockReceipt })
 
   const processBlockInformation = useCallback(async (transactions) => {
     if (!transactions) return;
@@ -161,14 +162,14 @@ export default function BlockDetails() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className=" text-sm">{blockNumber}</BreadcrumbPage>
+            <BreadcrumbPage className=" text-sm">{blockNumberOrHash}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <PageHeader
         className="mb-6"
-        title={`Block #${blockNumber}`}
+        title={`Block ${blockNumberOrHash?.startsWith("0x") ? "" : "#"}${blockNumberOrHash}`}
         subtext={BlockReceipt?.status}
       />
 
@@ -213,12 +214,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_gas_price?.price_in_wei
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_gas_price?.price_in_wei
                             )
                           )
+                        )
                         : 0}{" "}
                       WEI
                     </td>
@@ -228,12 +229,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_gas_price?.price_in_fri
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_gas_price?.price_in_fri
                             )
                           )
+                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -250,12 +251,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_data_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_data_gas_price?.price_in_wei
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_data_gas_price?.price_in_wei
                             )
                           )
+                        )
                         : 0}{" "}
                       ETH
                     </td>
@@ -265,12 +266,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockReceipt?.l1_data_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockReceipt?.l1_data_gas_price?.price_in_fri
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockReceipt?.l1_data_gas_price?.price_in_fri
                             )
                           )
+                        )
                         : 0}{" "}
                       FRI
                     </td>
