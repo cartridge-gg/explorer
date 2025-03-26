@@ -37,7 +37,7 @@ export const ROUTES = {
     component: <ContractDetails />,
   },
   CLASS_HASH_DETAILS: {
-    urlPath: "/class-hash/:classHash",
+    urlPath: "/class/:classHash",
     component: <ClassHashDetails />,
   },
 };
