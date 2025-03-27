@@ -10,6 +10,7 @@ export const EXECUTION_RESOURCES_KEY_MAP = {
   memory_holes: "memory_holes",
   ec_op_builtin_applications: "ec_op",
 };
+
 export const IS_EMBEDDED =
   window.IS_EMBEDDED ?? import.meta.env.VITE_IS_EMBEDDED;
 

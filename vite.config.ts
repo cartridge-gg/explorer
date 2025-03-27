@@ -15,4 +15,5 @@ export default defineConfig({
       "@constants": path.resolve(__dirname, "./src/constants"),
     },
   },
+  base: process.env.BASE_PATH,
 });
