@@ -6,7 +6,12 @@ import Header from "./shared/components/header";
 function App() {
   return (
     <div className="flex flex-col px-[20px] py-[25px] xl:px-[45px] lg:h-screen">
-      <BrowserRouter>
+      <BrowserRouter
+        basename={
+          // See <vite.config.ts>.
+          import.meta.env.APP_BASE_PATH || "/"
+        }
+      >
         <Header />
         <Routes>
           {/* Loop over all the routes and render them */}

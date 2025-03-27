@@ -15,4 +15,13 @@ export default defineConfig({
       "@constants": path.resolve(__dirname, "./src/constants"),
     },
   },
+  base: process.env.BASE_PATH,
+
+  // This allow us to set a custom base path for the application.
+  // Required when it is exposed in the `katana` under a non-root base path (ie `/explorer`).
+  //
+  // See <src/App.tsx>.
+  define: {
+    "import.meta.env.APP_BASE_PATH": JSON.stringify(process.env.BASE_PATH),
+  },
 });
