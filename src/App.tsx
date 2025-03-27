@@ -8,9 +8,8 @@ function App() {
     <div className="flex flex-col px-[20px] py-[25px] xl:px-[45px] lg:h-screen">
       <BrowserRouter
         basename={
-          // This allow us to set a custom base path for the application. Required when it is exposed in the `katana` under a non-root base path (ie `/explorer`).
-          // Also see <vite.config.ts>.
-          import.meta.env.VITE_BASE_PATH || "/"
+          // See <vite.config.ts>.
+          import.meta.env.APP_BASE_PATH || "/"
         }
       >
         <Header />
