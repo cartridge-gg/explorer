@@ -7,7 +7,7 @@ export interface SectionBoxProps {
 
 export function SectionBox({ title, children }: SectionBoxProps) {
   return (
-    <div className="bg-white flex-grow border border-borderGray">
+    <div className="bg-white border border-borderGray">
       {title ? <SectionBoxHeader title={title} /> : <></>}
       <div className="flex flex-col gap-2 p-[15px]">{children}</div>
     </div>

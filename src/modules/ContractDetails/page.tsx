@@ -23,6 +23,9 @@ import {
 import { Editor } from "@monaco-editor/react";
 
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
+import PageHeader from "@/shared/components/PageHeader";
+import { SectionBox } from "@/shared/components/section/SectionBox";
+import { SectionBoxEntry } from "@/shared/components/section";
 
 const DataTabs = ["Read Contract", "Write Contract", "Contract Code"];
 
@@ -262,61 +265,43 @@ export default function ContractDetails() {
   };
 
   return (
-    <div className="flex flex-col w-full gap-8">
-      <div className="flex flex-col w-full gap-4">
-        <Breadcrumb>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem href="/">Contracts</BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage className=" text-sm">
-              {isMobile && contractAddress
-                ? truncateString(contractAddress)
-                : contractAddress}
-            </BreadcrumbPage>
-          </BreadcrumbItem>
-        </Breadcrumb>
-
-        <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
-          <h1 className="text-white">Contract</h1>
+    <div>
+      <div className="flex flex-col w-full">
+        <div className="mb-2">
+          <Breadcrumb>
+            <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem href="/">Contracts</BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className=" text-sm">
+                {isMobile && contractAddress
+                  ? truncateString(contractAddress)
+                  : contractAddress}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </Breadcrumb>
         </div>
 
-        <div className="flex flex-col w-full lg:flex-row gap-4 pb-4">
+        <PageHeader className="mb-6" title="Contract" />
+
+        <div className="flex flex-col sl:flex-row sl:h-[70vh] gap-4">
           {/* Contract Info Section */}
-          <div className="flex flex-col gap-4">
-            <div
-              style={{
-                borderBottomStyle: "dashed",
-                borderBottomWidth: "2px",
-              }}
-              className="flex flex-col gap-4 p-4 border-[#8E8E8E] border-l-4 border-t border-r"
-            >
-              <div className="flex flex-col text-sm gap-2">
-                <p className="w-fit font-bold px-2 py-1 bg-[#D9D9D9] text-black">
-                  Address
-                </p>
-                <p>
-                  {isMobile && contractAddress
-                    ? truncateString(contractAddress)
-                    : contractAddress}
-                </p>
-              </div>
-              <div className="flex flex-col text-sm gap-2">
-                <p className="w-fit font-bold px-2 py-1 bg-[#D9D9D9] text-black">
-                  Class Hash
-                </p>
-                <p>
-                  {isMobile && classHash
-                    ? truncateString(classHash)
-                    : classHash}
-                </p>
-              </div>
-            </div>
+          <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
+            <SectionBox>
+              <SectionBoxEntry title="Address">
+                {isMobile && contractAddress
+                  ? truncateString(contractAddress)
+                  : contractAddress}
+              </SectionBoxEntry>
+
+              <SectionBoxEntry title="Class Hash">
+                {isMobile && classHash ? truncateString(classHash) : classHash}
+              </SectionBoxEntry>
+            </SectionBox>
           </div>
 
-          <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+          <div className="bg-white h-full flex-grow grid grid-rows-[min-content_1fr]">
             <DetailsPageSelector
               selected={DataTabs[0]}
               onTabSelect={setSelectedDataTab}
