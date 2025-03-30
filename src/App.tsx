@@ -5,7 +5,7 @@ import Header from "./shared/components/header";
 
 function App() {
   return (
-    <div className="flex flex-col px-[20px] py-[25px] xl:px-[45px] lg:h-screen">
+    <div className="flex flex-col gap-[20px] px-[20px] py-[25px] xl:px-[45px] lg:h-screen">
       <BrowserRouter
         basename={
           // See <vite.config.ts>.
