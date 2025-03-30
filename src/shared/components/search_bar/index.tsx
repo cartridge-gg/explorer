@@ -1,15 +1,15 @@
 import { ROUTES } from "@/constants/routes";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { useScreen } from "@/shared/hooks/useScreen";
+import SearchTool from "@/shared/icons/SearchTool";
 import { truncateString } from "@/shared/utils/string";
-import { Input } from "@cartridge/ui-next";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function SearchBar() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
   const { isMobile } = useScreen();
+  const [search, setSearch] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // on clicking outside of dropdown, close it
@@ -147,9 +147,10 @@ export default function SearchBar() {
   };
 
   return (
-    <div className="flex flex-col gap-2 relative">
-      <Input
-        className="search-input relative border-l-4 border-[#8E8E8E] w-full px-[15px] focus:outline-none focus:ring-0"
+    <div className="max-w-[483px] flex gap-2 relative border border-borderGray items-center px-[15px] py-2">
+      <SearchTool />
+      <input
+        className="text-base rounded-none search-input relative w-full h-full focus:outline-none focus:ring-0"
         placeholder="Search"
         value={search}
         onChange={handleSearch}
@@ -157,23 +158,21 @@ export default function SearchBar() {
       {/* dropdown with results */}
       {isDropdownOpen && search.length > 0 ? (
         <div className="search-dropdown absolute bottom-0 left-0 right-0 translate-y-full">
-          <div className="flex flex-col gap-2 bg-white p-2 border border-[#8E8E8E]">
+          <div className="flex flex-col gap-2 bg-white p-2 border border-borderGray">
             {resultType !== "not found" ? (
               <div
                 onClick={handleResultClick}
                 className="flex flex-row hover:bg-gray-100 cursor-pointer px-2 py-2 items-center gap-2 justify-between w-full"
               >
-                <div className="text-sm">
-                  {truncateString(search, isMobile ? 10 : 20)}
-                </div>
+                <div>{truncateString(search, isMobile ? 10 : 20)}</div>
 
-                <div className="text-sm font-medium uppercase px-2 py-1 border border-[#8E8E8E] bg-gray-100">
+                <div className="font-medium uppercase px-2 py-1 border border-borderGray bg-gray-100">
                   {resultType}
                 </div>
               </div>
             ) : (
               <div className="flex flex-row px-2 py-2 items-center gap-2 justify-between w-full">
-                <div className="text-sm">No results found</div>
+                <div>No results found</div>
               </div>
             )}
           </div>
