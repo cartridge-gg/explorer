@@ -10,17 +10,10 @@ import { useAccount, useDisconnect } from "@starknet-react/core";
 import WalletConnectModal from "@/shared/components/wallet_connect";
 import { BreadcrumbPage } from "@cartridge/ui-next";
 import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/shared/components/tab";
-import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumbs";
-import { Editor } from "@monaco-editor/react";
 
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import PageHeader from "@/shared/components/PageHeader";
@@ -28,7 +21,7 @@ import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";
 
-const DataTabs = ["Read Contract", "Write Contract", "Contract Code"];
+const DataTabs = ["Read Contract", "Write Contract"];
 
 interface FunctionInput {
   name: string;
@@ -47,8 +40,6 @@ export default function ContractDetails() {
   }>();
   const { isMobile } = useScreen();
   const [classHash, setClassHash] = useState<string | null>(null);
-  const [contractABI, setContractABI] = useState<string | undefined>();
-  const [sierraProgram, setSierraProgram] = useState<string | undefined>();
   const [contract, setContract] = useState<Contract | null>(null);
   const [readFunctions, setReadFunctions] = useState<
     {
@@ -91,11 +82,6 @@ export default function ContractDetails() {
 
     // process contract functions
     const contractClass = await RPC_PROVIDER.getClassAt(contractAddress);
-
-    setContractABI(JSON.stringify(contractClass.abi, null, 2));
-    if ("sierra_program" in contractClass) {
-      setSierraProgram(JSON.stringify(contractClass.sierra_program, null, 2));
-    }
 
     const readFuncs: typeof readFunctions = [];
     const writeFuncs: typeof writeFunctions = [];
@@ -719,32 +705,6 @@ export default function ContractDetails() {
                       ))}
                     </div>
                   </>
-                ) : selectedDataTab === "Contract Code" ? (
-                  <Tabs
-                    defaultValue="abi"
-                    className="relative flex flex-col gap-2"
-                    variant="secondary"
-                    size="sm"
-                  >
-                    <TabsList className="max-w-md p-0 pb-2">
-                      <TabsTrigger value="abi">Contract ABI</TabsTrigger>
-                      <TabsTrigger value="sierra">Sierra Bytecode</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="abi" className="px-0">
-                      <Editor
-                        className="min-h-[80vh]"
-                        defaultLanguage="json"
-                        defaultValue={contractABI}
-                      />
-                    </TabsContent>
-                    <TabsContent value="sierra" className="px-0">
-                      <Editor
-                        className="min-h-[80vh]"
-                        defaultLanguage="javascript"
-                        defaultValue={sierraProgram}
-                      />
-                    </TabsContent>
-                  </Tabs>
                 ) : (
                   <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
                     <span className="text-[#D0D0D0]">No data found</span>
