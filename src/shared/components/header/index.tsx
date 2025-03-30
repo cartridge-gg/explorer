@@ -1,5 +1,5 @@
 import SearchBar from "../search_bar";
-import ChainId from "../ChainId";
+import ChainDisplay from "../ChainDisplay";
 
 export default function Header() {
   return (
@@ -8,7 +8,7 @@ export default function Header() {
         <SearchBar />
       </div>
 
-      <ChainId />
+      <ChainDisplay />
     </div>
   );
 }
