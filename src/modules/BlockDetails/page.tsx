@@ -343,7 +343,7 @@ export default function BlockDetails() {
             }))}
           />
 
-          <div className="flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray rounded-b-md">
+          <div className="bg-white flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray">
             <div className="w-full h-full">
               {selectedDataTab === "Transactions" ? (
                 <TxList transactions={txsTable} />
