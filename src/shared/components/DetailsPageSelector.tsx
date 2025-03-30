@@ -1,4 +1,3 @@
-import { CSSProperties } from "react";
 import { Selector, SelectorItem, SelectorProps } from "./Selector";
 
 export type DetailsPageSelectorItem = {
@@ -16,11 +15,19 @@ export default function DetailsPageSelector({
   onTabSelect,
   ...props
 }: DetailsPageSelectorProps) {
+  const selectedStyle = {
+    color: "white",
+    border: "none",
+    boxShadow: "none",
+    backgroundColor: "#262626",
+  };
+
   return (
     <div {...props}>
       <Selector
         selected={selected}
         onTabSelect={onTabSelect}
+        selectedStyled={selectedStyle}
         className="text-center gap-[6px] border-none"
       >
         {items.map((item) => (
@@ -28,7 +35,7 @@ export default function DetailsPageSelector({
             key={item.name}
             name={item.name}
             value={item.value}
-            className="text-left font-bold px-2 py-1 border border-borderGray"
+            className="flex justify-start font-bold px-[15px] py-1 border border-borderGray"
           />
         ))}
       </Selector>

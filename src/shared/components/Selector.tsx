@@ -22,6 +22,7 @@ import React, {
 interface SelectorContextType {
   selected?: string;
   setSelected: (tab: string) => void;
+  selectedStyled?: React.CSSProperties;
 }
 
 /**
@@ -35,6 +36,7 @@ const SelectorContext = createContext<SelectorContextType | undefined>(
 export interface SelectorProps extends React.HTMLAttributes<HTMLDivElement> {
   selected?: string; // Initial selected tab
   onTabSelect?: (tab: string) => void; // Callback when selection changes
+  selectedStyled?: React.CSSProperties; // Style to apply to selected tabs
 }
 
 /**
@@ -46,6 +48,7 @@ export interface SelectorProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Selector({
   selected: initialSelectedTab,
   onTabSelect: onSelect,
+  selectedStyled,
   children,
   className,
   ...props
@@ -59,7 +62,7 @@ export function Selector({
     if (initialSelectedTab && onSelect) {
       onSelect(initialSelectedTab);
     }
-  }, [initialSelectedTab]);
+  }, [initialSelectedTab, onSelect]);
 
   // Handle tab selection and propagate changes to parent component
   const handleTabSelect = useCallback(
@@ -74,7 +77,7 @@ export function Selector({
 
   return (
     <SelectorContext.Provider
-      value={{ selected, setSelected: handleTabSelect }}
+      value={{ selected, setSelected: handleTabSelect, selectedStyled }}
     >
       <div
         className={`border border-borderGray flex ${className || ""}`}
@@ -90,6 +93,13 @@ export interface SelectItemProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string; // Display name
   value: string; // The actual value
 }
+
+const defaultSelectedStyle: React.CSSProperties = {
+  color: "#ffff",
+  fontWeight: "bold",
+  backgroundColor: "#B0B0B0",
+  boxShadow: "inset 0px 1px 3px rgba(0, 0, 0, 0.25)",
+};
 
 /**
  * Individual tab component that can be selected
@@ -108,31 +118,26 @@ export function SelectorItem({
     throw new Error("SelectorItem must be used within a Selector");
   }
 
-  const { selected, setSelected } = context;
+  const { selected, setSelected, selectedStyled } = context;
   const isSelected = selected === value;
 
   const onClick = useCallback(() => {
     setSelected(value);
   }, [value, setSelected]);
 
-  const itemStyle = React.useMemo<React.CSSProperties>(
-    () => ({
-      color: isSelected ? "#ffff" : "#000000",
-      backgroundColor: isSelected ? "#B0B0B0" : "#ffff",
-      boxShadow: isSelected ? "inset 0px 1px 3px rgba(0, 0, 0, 0.25)" : "none",
-      fontWeight: isSelected ? "bold" : "normal",
-    }),
-    [isSelected]
+  const computedSelectedStyle = React.useMemo<React.CSSProperties>(
+    () => selectedStyled || defaultSelectedStyle,
+    [selectedStyled]
   );
 
   return (
     <div
       onClick={onClick}
-      style={itemStyle}
+      style={isSelected ? computedSelectedStyle : undefined}
       // `margin-right: -1px;` to simulate `border-collapse`
-      className={` ${
+      className={`bg-white text-center ${
         className || ""
-      } ml-[-1px] border-l border-l-borderGray w-full px-2 uppercase cursor-pointer hover:bg-gray-700 flex text-center justify-center`}
+      } ml-[-1px] border-l border-l-borderGray w-full px-2 uppercase cursor-pointer`}
       {...props}
     >
       {name}
