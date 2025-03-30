@@ -221,7 +221,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
           onTabSelect={(value) =>
             setSelectedTab(value as (typeof TxTypesTabs)[number])
           }
-          className="w-min rounded-sm bg-white z-10"
+          className="w-min bg-white z-10"
         >
           {TxTypesTabs.map((type) => (
             <SelectorItem
@@ -265,7 +265,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                                 value as (typeof TxTypesTabs)[number],
                             }))
                           }
-                          className="w-min rounded-sm"
+                          className="w-min"
                         >
                           {TxTypesTabs.map((type) => (
                             <SelectorItem
@@ -286,7 +286,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                                 value as (typeof FeltDisplayVariants)[number],
                             }))
                           }
-                          className="w-min rounded-sm"
+                          className="w-min"
                         >
                           {FeltDisplayVariants.map((type) => (
                             <SelectorItem

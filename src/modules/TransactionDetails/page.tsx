@@ -752,7 +752,7 @@ export default function TransactionDetails() {
           </SectionBox>
         </div>
 
-        <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+        <div className="bg-white h-full flex-grow grid grid-rows-[min-content_1fr]">
           <DetailsPageSelector
             selected={DataTabs[0]}
             onTabSelect={setSelectedDataTab}
@@ -762,7 +762,7 @@ export default function TransactionDetails() {
             }))}
           />
 
-          <div className="flex-grow flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray rounded-b-md overflow-auto">
+          <div className="flex-grow flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray overflow-auto">
             {selectedDataTab === "Calldata" ? (
               <CalldataDisplay calldata={callData} />
             ) : selectedDataTab === "Events" ? (
