@@ -137,18 +137,29 @@ export default function BlockDetails() {
 
   return (
     <div className="w-full flex-grow gap-8">
-      <Breadcrumb className="mb-3">
-        <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem href="/blocks">Blocks</BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>{blockNumber}</BreadcrumbItem>
-      </Breadcrumb>
+      <div className="flex justify-between mb-2">
+        <Breadcrumb className="flex items-center">
+          <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem href="/blocks">Blocks</BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>{blockNumber}</BreadcrumbItem>
+        </Breadcrumb>
+
+        <BlockNavigation />
+      </div>
 
       <PageHeader
         className="mb-6"
         title={`Block #${blockNumber}`}
         subtext={BlockReceipt?.status}
+        subtextRightComponent={
+          <div className="text-[#5D5D5D]">
+            {BlockReceipt?.timestamp
+              ? dayjs.unix(BlockReceipt?.timestamp).fromNow()
+              : ""}
+          </div>
+        }
       />
 
       <div className="flex flex-col sl:flex-row sl:h-[70vh] gap-4">
