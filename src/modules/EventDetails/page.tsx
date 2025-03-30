@@ -12,11 +12,8 @@ import { convertValue } from "@/shared/utils/rpc_utils";
 import { EventDataItem, DisplayFormatTypes } from "@/types/types";
 import {
   Breadcrumb,
-  BreadcrumbList,
   BreadcrumbItem,
-  BreadcrumbPage,
   BreadcrumbSeparator,
-  BreadcrumbLink,
 } from "@/shared/components/breadcrumbs";
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
@@ -166,31 +163,14 @@ export default function EventDetails() {
   return (
     <div className="w-full flex-grow gap-8">
       <Breadcrumb className="mb-3">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink className="" href="/">
-              .
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink className=" text-sm" href="/">
-              explrr
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink className=" text-sm" href="/events">
-              events
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage className=" text-sm">
-              {isMobile && eventId ? truncateString(eventId) : eventId}
-            </BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem href="/events">Events</BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          {isMobile && eventId ? truncateString(eventId) : eventId}
+        </BreadcrumbItem>
       </Breadcrumb>
 
       <PageHeader

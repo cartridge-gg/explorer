@@ -17,9 +17,7 @@ import {
 } from "@/shared/components/tab";
 import {
   Breadcrumb,
-  BreadcrumbLink,
   BreadcrumbItem,
-  BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumbs";
 import { Editor } from "@monaco-editor/react";
@@ -267,33 +265,18 @@ export default function ContractDetails() {
     <div className="flex flex-col w-full gap-8">
       <div className="flex flex-col w-full gap-4">
         <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink className="" href="/">
-                .
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink className=" text-sm" href="/">
-                explrr
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink className=" text-sm" href="/">
-                contracts
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className=" text-sm">
-                {isMobile && contractAddress
-                  ? truncateString(contractAddress)
-                  : contractAddress}
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem href="/">Contracts</BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className=" text-sm">
+              {isMobile && contractAddress
+                ? truncateString(contractAddress)
+                : contractAddress}
+            </BreadcrumbPage>
+          </BreadcrumbItem>
         </Breadcrumb>
 
         <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">

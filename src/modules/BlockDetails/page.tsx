@@ -18,11 +18,8 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { TransactionTableData, EventTableData } from "@/types/types";
 import {
   Breadcrumb,
-  BreadcrumbList,
   BreadcrumbItem,
-  BreadcrumbPage,
   BreadcrumbSeparator,
-  BreadcrumbLink,
 } from "@/shared/components/breadcrumbs";
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
@@ -141,29 +138,11 @@ export default function BlockDetails() {
   return (
     <div className="w-full flex-grow gap-8">
       <Breadcrumb className="mb-3">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink className="" href="/">
-              .
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink className=" text-sm" href="/">
-              explrr
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink className=" text-sm" href="/blocks">
-              blocks
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage className=" text-sm">{blockNumber}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
+        <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem href="/blocks">Blocks</BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>{blockNumber}</BreadcrumbItem>
       </Breadcrumb>
 
       <PageHeader

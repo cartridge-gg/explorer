@@ -8,10 +8,6 @@ export default function StarknetLogo({
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <script
-        id="argent-x-extension"
-        data-extension-id="{51e0c76c-7dbc-41ba-a45d-c579be84301b}"
-      />
       <path
         d="M2 78.9988C2 121.525 36.4731 155.998 78.9988 155.998C121.525 155.998 156 121.524 156 78.9988C156 36.4732 121.525 2 78.9988 2C36.4731 2 2 36.4731 2 78.9988Z"
         fill="#0C0C4F"

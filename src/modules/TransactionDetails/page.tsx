@@ -24,11 +24,8 @@ import {
 } from "@/constants/rpc";
 import {
   Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
   BreadcrumbItem,
-  BreadcrumbLink,
 } from "@/shared/components/breadcrumbs";
 import { ROUTES } from "@/constants/routes";
 import { DataTable, TableCell, TableHead } from "@/shared/components/dataTable";
@@ -520,31 +517,14 @@ export default function TransactionDetails() {
   return (
     <div className="w-full flex-grow gap-8">
       <Breadcrumb className="mb-3">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink className="" href="/">
-              .
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink className=" text-sm" href="/">
-              explrr
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink className=" text-sm" href="/txns">
-              transactions
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage className=" text-sm">
-              {isMobile && txHash ? truncateString(txHash) : txHash}
-            </BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem href="/txns">Transactions</BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          {isMobile && txHash ? truncateString(txHash) : txHash}
+        </BreadcrumbItem>
       </Breadcrumb>
 
       <PageHeader
