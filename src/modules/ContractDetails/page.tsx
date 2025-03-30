@@ -269,8 +269,8 @@ export default function ContractDetails() {
     useBalances(contractAddress);
 
   return (
-    <div>
-      <div className="flex flex-col w-full">
+    <>
+      <div className="w-full flex-grow gap-8">
         <div className="mb-2">
           <Breadcrumb>
             <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
@@ -335,7 +335,7 @@ export default function ContractDetails() {
             </SectionBox>
           </div>
 
-          <div className="bg-white h-full flex-grow grid grid-rows-[min-content_1fr]">
+          <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
             <DetailsPageSelector
               selected={DataTabs[0]}
               onTabSelect={setSelectedDataTab}
@@ -345,14 +345,14 @@ export default function ContractDetails() {
               }))}
             />
 
-            <div className="flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray rounded-b-md">
-              <div className="w-full h-full">
+            <div className="bg-white flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray overflow-auto">
+              <div className="w-full h-full overflow-auto">
                 {selectedDataTab === "Read Contract" ? (
-                  <div className="flex flex-col gap-4">
+                  <div className="h-full grid grid-flow-row mt-[1px] ">
                     {readFunctions.map((func, index) => (
                       <div
                         key={index}
-                        className="flex flex-col p-4 border border-[#8E8E8E] border-dashed"
+                        className="mt-[-1px] flex flex-col p-4 border border-borderGray"
                       >
                         <div
                           className="flex justify-between items-center cursor-pointer"
@@ -761,6 +761,6 @@ export default function ContractDetails() {
         isOpen={isWalletModalOpen}
         onClose={() => setIsWalletModalOpen(false)}
       />
-    </div>
+    </>
   );
 }
