@@ -517,7 +517,6 @@ export default function TransactionDetails() {
   return (
     <div className="w-full flex-grow gap-8">
       <Breadcrumb className="mb-3">
-        <BreadcrumbSeparator />
         <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem href="/txns">Transactions</BreadcrumbItem>
