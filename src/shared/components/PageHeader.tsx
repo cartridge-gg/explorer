@@ -15,8 +15,8 @@ export default function PageHeader({
   ...props
 }: PageHeaderProps) {
   return (
-    <div className="rounded-md overflow-clip" {...props}>
-      <div className="px-4 w-full justify-between bg-primary h-[50px] flex items-center rounded-t-md">
+    <div className="overflow-clip" {...props}>
+      <div className="px-4 w-full justify-between bg-primary h-[40px] flex items-center">
         <h1 className="page-header-title text-white uppercase text-lg">
           {title}
         </h1>
@@ -24,7 +24,7 @@ export default function PageHeader({
       </div>
 
       {subtext && (
-        <div className="px-4 w-full justify-between bg-[#F1F1F1] border border-[#D0D0D0] border-t-0 h-[30px] flex items-center rounded-b-md capitalize">
+        <div className="px-4 w-full justify-between bg-[#F1F1F1] border border-borderGray border-t-0 h-[25px] flex items-center capitalize">
           <div className="text-sm text-[#4A4A4A]">{subtext}</div>
           {subtextRightComponent ? subtextRightComponent : null}
         </div>
