@@ -62,7 +62,7 @@ export function Selector({
     if (initialSelectedTab && onSelect) {
       onSelect(initialSelectedTab);
     }
-  }, [initialSelectedTab, onSelect]);
+  }, [initialSelectedTab]);
 
   // Handle tab selection and propagate changes to parent component
   const handleTabSelect = useCallback(

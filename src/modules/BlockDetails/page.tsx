@@ -153,7 +153,7 @@ export default function BlockDetails() {
 
       <div className="flex flex-col sl:flex-row sl:h-[70vh] gap-4">
         <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
-          <SectionBox variant="upper-half">
+          <SectionBox>
             <SectionBoxEntry title="Hash">
               {isMobile
                 ? truncateString(BlockReceipt?.block_hash)
@@ -183,7 +183,7 @@ export default function BlockDetails() {
             </SectionBoxEntry>
           </SectionBox>
 
-          <SectionBox title="Gas Prices" variant="upper-half">
+          <SectionBox title="Gas Prices">
             <SectionBoxEntry title="L1 Gas Prices" bold={false}>
               <table className="w-full">
                 <tbody>
@@ -259,7 +259,7 @@ export default function BlockDetails() {
             </SectionBoxEntry>
           </SectionBox>
 
-          <SectionBox title="Execution Resources" variant="full">
+          <SectionBox title="Execution Resources">
             <table className="w-full mb-1">
               <thead>
                 <tr>
