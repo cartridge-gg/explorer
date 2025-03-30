@@ -26,6 +26,7 @@ import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
+import useBalances from "@/shared/hooks/useBalances";
 
 const DataTabs = ["Read Contract", "Write Contract", "Contract Code"];
 
@@ -264,6 +265,9 @@ export default function ContractDetails() {
     }));
   };
 
+  const { balances, isStrkLoading, isEthLoading } =
+    useBalances(contractAddress);
+
   return (
     <div>
       <div className="flex flex-col w-full">
@@ -298,6 +302,36 @@ export default function ContractDetails() {
               <SectionBoxEntry title="Class Hash">
                 {isMobile && classHash ? truncateString(classHash) : classHash}
               </SectionBoxEntry>
+            </SectionBox>
+
+            <SectionBox title="Balances">
+              <table className="w-full">
+                <tbody>
+                  <tr>
+                    <th className="text-left w-[53px] bg-white font-bold">
+                      STRK
+                    </th>
+                    <td className="text-left">
+                      {isStrkLoading
+                        ? "0.00"
+                        : balances.strk !== undefined
+                        ? (Number(balances.strk) / 10 ** 18).toString()
+                        : "N/A"}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <th className="text-left bg-white font-bold">ETH</th>
+                    <td className="text-left">
+                      {isEthLoading
+                        ? "0.00"
+                        : balances.eth !== undefined
+                        ? (Number(balances.eth) / 10 ** 18).toString()
+                        : "N/A"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </SectionBox>
           </div>
 
