@@ -16,29 +16,19 @@ export default function DetailsPageSelector({
   onTabSelect,
   ...props
 }: DetailsPageSelectorProps) {
-  // dashed bottom border
-  const styles: CSSProperties = {
-    borderBottomStyle: "dashed",
-    boxShadow: "0 2px 2px rgba(183, 183, 183, 0.25)",
-  };
-
   return (
-    <div
-      style={styles}
-      className="rounded-t-md overflow-clip px-[15px] pt-6 pb-3 border border-borderGray"
-      {...props}
-    >
+    <div {...props}>
       <Selector
         selected={selected}
         onTabSelect={onTabSelect}
-        className="text-center rounded-sm"
+        className="text-center gap-[6px] border-none"
       >
         {items.map((item) => (
           <SelectorItem
             key={item.name}
             name={item.name}
             value={item.value}
-            className="px-2 py-1"
+            className="text-left font-bold px-2 py-1 border border-borderGray"
           />
         ))}
       </Selector>

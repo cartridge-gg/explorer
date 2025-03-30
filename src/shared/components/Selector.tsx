@@ -77,9 +77,7 @@ export function Selector({
       value={{ selected, setSelected: handleTabSelect }}
     >
       <div
-        className={`border border-borderGray flex overflow-hidden ${
-          className || ""
-        }`}
+        className={`border border-borderGray flex ${className || ""}`}
         {...props}
       >
         {children}
