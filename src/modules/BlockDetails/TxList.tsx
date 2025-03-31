@@ -138,18 +138,19 @@ export default function TxList({ transactions }: TxListProps) {
         <table className="w-full h-min">
           <thead className="uppercase">
             <tr>
-              {table
-                .getHeaderGroups()
-                .map((headerGroup) =>
-                  headerGroup.headers.map((header) => (
-                    <th key={header.id}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </th>
-                  ))
-                )}
+              {table.getHeaderGroups().map((headerGroup) =>
+                headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    style={header.id === "id" ? { width: "38px" } : undefined}
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </th>
+                ))
+              )}
             </tr>
           </thead>
 
@@ -167,7 +168,7 @@ export default function TxList({ transactions }: TxListProps) {
                         key={cell.id}
                         className={`${
                           cell.column.id === "hash"
-                            ? "hover:underline text-left px-[15px] "
+                            ? "hover:underline text-left px-[15px]"
                             : ""
                         } `}
                       >

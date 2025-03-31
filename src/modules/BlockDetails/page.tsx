@@ -76,7 +76,7 @@ export default function BlockDetails() {
                   return [
                     ...prev,
                     {
-                      id: padNumber(prev.length + 1),
+                      id: prev.length + 1,
                       txn_hash: tx.transaction_hash,
                       from: event.from_address,
                     },
@@ -112,11 +112,7 @@ export default function BlockDetails() {
 
             // process info for transactions table
             transactions_table_data.push({
-              id: padNumber(transactions_table_data.length + 1),
-              // hash_display: `${
-              //   tx.transaction_hash
-              // } ( ${formatSnakeCaseToDisplayValue(tx.type)} )`,
-
+              id: transactions_table_data.length + 1,
               type: tx.type,
               status: receipt.statusReceipt,
               hash: tx.transaction_hash,
