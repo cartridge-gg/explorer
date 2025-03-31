@@ -342,6 +342,7 @@ export default function ContractDetails() {
                           key={index}
                           title={
                             <div className="flex flex-row items-center gap-2">
+                              <span className="font-bold">fn</span>
                               <span className="italic">{func.name}</span>
                               <span>
                                 ({func.inputs.map((arg) => arg.name).join(", ")}
