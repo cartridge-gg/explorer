@@ -1,3 +1,4 @@
+import { Dropdown, DropdownItem } from "@/shared/components/Dropdown";
 import { Selector, SelectorItem } from "@/shared/components/Selector";
 
 const TxTypesTabs = ["All", "Invoke", "Deploy Account", "Declare"] as const;
@@ -8,19 +9,19 @@ interface TxTypeToggleProps {
 
 export default function TxTypeToggle({ onFilterChange }: TxTypeToggleProps) {
   return (
-    <Selector
+    <Dropdown
       selected={TxTypesTabs[0]}
-      onTabSelect={onFilterChange}
-      className="w-min"
+      onItemSelect={onFilterChange}
+      className="min-w-[60px] max-w-max"
     >
       {TxTypesTabs.map((type) => (
-        <SelectorItem
+        <DropdownItem
           key={type}
           name={type}
           value={type}
-          className="w-max text-xs py-[2px]"
+          className="text-xs py-[2px]"
         />
       ))}
-    </Selector>
+    </Dropdown>
   );
 }

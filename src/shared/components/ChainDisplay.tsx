@@ -23,7 +23,7 @@ function StarknetChainIdComponent({ id }: { id: StarknetChainId }) {
 
 function OtherChainIdComponent({ id }: { id: ChainId }) {
   return (
-    <div className="w-[105px] border border-borderGray w-[136px] uppercase text-right overflow-clip font-bold flex px-3 py-1 items-center justify-end">
+    <div className="w-[105px] border border-borderGray uppercase text-right overflow-clip font-bold flex px-3 py-1 items-center justify-end">
       <div>{id}</div>
       <div className="w-[9px] h-[9px] bg-primary"></div>
     </div>
