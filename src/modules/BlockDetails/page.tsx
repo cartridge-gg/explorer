@@ -151,9 +151,7 @@ export default function BlockDetails() {
         subtext={BlockReceipt?.status}
         subtextRightComponent={
           <div className="text-[#5D5D5D]">
-            {BlockReceipt?.timestamp
-              ? dayjs.unix(BlockReceipt?.timestamp).fromNow()
-              : ""}
+            {dayjs.unix(BlockReceipt?.timestamp).format("MMM D YYYY HH:mm:ss")}
           </div>
         }
       />
@@ -169,12 +167,6 @@ export default function BlockDetails() {
 
             <SectionBoxEntry title="Number">
               {BlockReceipt?.block_number}
-            </SectionBoxEntry>
-
-            <SectionBoxEntry title="Timestamp">
-              {`${BlockReceipt?.timestamp} (${dayjs
-                .unix(BlockReceipt?.timestamp)
-                .format("MMM D YYYY HH:mm:ss")})`}
             </SectionBoxEntry>
 
             <SectionBoxEntry title="State root">
