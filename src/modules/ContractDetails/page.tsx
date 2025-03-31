@@ -20,6 +20,7 @@ import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";
+import { Accordion, AccordionItem } from "@/shared/components/accordion";
 
 const DataTabs = ["Read Contract", "Write Contract"];
 
@@ -334,80 +335,24 @@ export default function ContractDetails() {
             <div className="bg-white flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray overflow-auto">
               <div className="w-full h-full overflow-auto">
                 {selectedDataTab === "Read Contract" ? (
-                  <div className="h-full grid grid-flow-row mt-[1px] ">
-                    {readFunctions.map((func, index) => (
-                      <div
-                        key={index}
-                        className="mt-[-1px] flex flex-col p-4 border border-borderGray"
-                      >
-                        <div
-                          className="flex justify-between items-center cursor-pointer"
-                          onClick={() => {
-                            if (!expandedFunctions[func.name]) {
-                              setExpandedFunctions((prev) => ({
-                                ...prev,
-                                [func.name]: func.inputs.map((input) => ({
-                                  name: input.name,
-                                  type: input.type,
-                                  value: "",
-                                })),
-                              }));
-                            } else {
-                              setExpandedFunctions((prev) => {
-                                const newState = { ...prev };
-                                delete newState[func.name];
-                                return newState;
-                              });
-                            }
-                          }}
-                        >
-                          <div className="flex flex-row gap-2 w-full flex-wrap">
-                            <p className=" font-bold">{func.name}</p>
-                            <div className="flex flex-row gap-2 flex-wrap text-gray-500">
-                              (
-                              {func.inputs.map((input, idx) => (
-                                <p key={idx} className="text-sm">
-                                  {idx === 0 ? "" : ","}
-                                  {input.name}
-                                </p>
-                              ))}
-                              )
+                  <Accordion
+                    items={() =>
+                      readFunctions.map((func, index) => (
+                        <AccordionItem
+                          key={index}
+                          title={
+                            <div className="flex flex-row items-center gap-2">
+                              <span className="italic">{func.name}</span>
+                              <span>
+                                ({func.inputs.map((arg) => arg.name).join(", ")}
+                                )
+                              </span>
                             </div>
-                          </div>
-                          <span>
-                            {expandedFunctions[func.name] ? "−" : "+"}
-                          </span>
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                          {expandedFunctions[func.name] && (
-                            <div className="flex flex-col gap-4 pt-2">
-                              {func.inputs.map((input, idx) => (
-                                <div key={idx} className="flex flex-col gap-2">
-                                  <label className="text-sm font-medium w-full">
-                                    {input.name} ({input.type})
-                                  </label>
-                                  <input
-                                    type="text"
-                                    className="border border-[#8E8E8E] p-2"
-                                    placeholder={`Enter ${input.type}`}
-                                    value={
-                                      expandedFunctions[func.name][idx]
-                                        ?.value || ""
-                                    }
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        func.name,
-                                        idx,
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </div>
-                              ))}
-
+                          }
+                          content={
+                            <div className="flex flex-col gap-[10px] items-end">
                               <button
-                                className={`px-4 py-2 mt-2 w-fit ${
+                                className={`px-3 py-[2px] text-sm uppercase font-bold w-fit  ${
                                   functionResults[func.name]?.loading
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
@@ -416,107 +361,151 @@ export default function ContractDetails() {
                                 disabled={functionResults[func.name]?.loading}
                               >
                                 {functionResults[func.name]?.loading
-                                  ? "Querying..."
-                                  : "Query"}
+                                  ? "Calling..."
+                                  : "Call"}
                               </button>
 
-                              {functionResults[func.name] && (
-                                <div className="mt-4">
-                                  {functionResults[func.name].loading ? (
-                                    <div className="text-gray-600">
-                                      Loading...
-                                    </div>
-                                  ) : functionResults[func.name].error ? (
-                                    <div className="text-red-500 p-3 bg-red-50 border border-red-200">
-                                      <p className="font-medium">Error:</p>
-                                      <p className="text-sm">
-                                        {functionResults[func.name].error}
-                                      </p>
-                                    </div>
-                                  ) : functionResults[func.name].data !==
-                                    null ? (
-                                    <div className="bg-gray-50 p-3 border border-gray-200">
-                                      <div className="flex flex-row items-center justify-between mb-4">
-                                        <p className="font-medium text-sm">
-                                          Result:
-                                        </p>
-                                        <div className="flex gap-2">
-                                          {DisplayFormat.map((format) => (
-                                            <button
-                                              className={`px-2 py-1 text-xs ${
-                                                (displayFormats[func.name] ??
-                                                  "decimal") === format
-                                                  ? "bg-[#4A4A4A] text-white"
-                                                  : "bg-gray-200"
-                                              }`}
-                                              onClick={() =>
-                                                handleFormatChange(
-                                                  func.name,
-                                                  format as DisplayFormatTypes
-                                                )
-                                              }
-                                            >
-                                              {format}
-                                            </button>
-                                          ))}
-                                        </div>
-                                      </div>
-                                      <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words">
-                                        {(() => {
-                                          const data =
-                                            functionResults[func.name]?.data;
-                                          const format =
-                                            displayFormats[func.name] ||
-                                            "decimal";
+                              {func.inputs.length !== 0 ? (
+                                <table className="bg-white overflow-x w-full">
+                                  <tbody>
+                                    {func.inputs.map((input, idx) => (
+                                      <tr
+                                        key={idx}
+                                        className={`${
+                                          idx !== func.inputs.length - 1
+                                            ? "border-b"
+                                            : ""
+                                        }`}
+                                      >
+                                        <td className="px-2 py-1 text-left align-top w-[90px] italic">
+                                          <span>{input.name}</span>
+                                        </td>
 
-                                          const safeStringify = (value: any) =>
-                                            JSON.stringify(
-                                              value,
-                                              (_, v) =>
-                                                typeof v === "bigint"
-                                                  ? v.toString()
-                                                  : v,
-                                              2
-                                            );
-
-                                          if (Array.isArray(data)) {
-                                            return data.map(
-                                              (item: any, index: number) => (
-                                                <div
-                                                  key={index}
-                                                  className="mb-1"
-                                                >
-                                                  {format === "decimal"
-                                                    ? safeStringify(item)
-                                                    : convertValue(item)?.[
-                                                        format
-                                                      ] || safeStringify(item)}
-                                                </div>
+                                        <td className="text-left align-top p-0">
+                                          <input
+                                            type="text"
+                                            className="px-2 py-1 text-left w-full"
+                                            placeholder={`${input.type}`}
+                                            onChange={(e) =>
+                                              handleInputChange(
+                                                func.name,
+                                                idx,
+                                                e.target.value
                                               )
-                                            );
-                                          }
+                                            }
+                                          />
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              ) : (
+                                <></>
+                              )}
 
-                                          return (
-                                            <div className="mb-1">
-                                              {format === "decimal"
-                                                ? safeStringify(data)
-                                                : convertValue(data)?.[
-                                                    format
-                                                  ] || safeStringify(data)}
-                                            </div>
-                                          );
-                                        })()}
-                                      </pre>
-                                    </div>
-                                  ) : null}
+                              {functionResults[func.name] && (
+                                <div className="w-full flex flex-col gap-1">
+                                  <p className="font-bold text-sm uppercase">
+                                    Result
+                                  </p>
+
+                                  <div className="bg-white">
+                                    {functionResults[func.name].loading ? (
+                                      <div className="text-gray-600">
+                                        Loading...
+                                      </div>
+                                    ) : functionResults[func.name].error ? (
+                                      <div className="text-red-500 p-3 bg-red-50 border border-red-200">
+                                        <p className="font-medium">Error:</p>
+                                        <p className="text-sm">
+                                          {functionResults[func.name].error}
+                                        </p>
+                                      </div>
+                                    ) : functionResults[func.name].data !==
+                                      null ? (
+                                      <div className="p-3 border border-borderGray">
+                                        <div className="flex flex-row items-center justify-between mb-4">
+                                          <div className="flex gap-2">
+                                            {DisplayFormat.map((format) => (
+                                              <button
+                                                className={`px-2 py-1 text-xs ${
+                                                  (displayFormats[func.name] ??
+                                                    "decimal") === format
+                                                    ? "bg-[#4A4A4A] text-white"
+                                                    : "bg-gray-200"
+                                                }`}
+                                                onClick={() =>
+                                                  handleFormatChange(
+                                                    func.name,
+                                                    format as DisplayFormatTypes
+                                                  )
+                                                }
+                                              >
+                                                {format}
+                                              </button>
+                                            ))}
+                                          </div>
+                                        </div>
+                                        <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words">
+                                          {(() => {
+                                            const data =
+                                              functionResults[func.name]?.data;
+                                            const format =
+                                              displayFormats[func.name] ||
+                                              "decimal";
+
+                                            const safeStringify = (
+                                              value: any
+                                            ) =>
+                                              JSON.stringify(
+                                                value,
+                                                (_, v) =>
+                                                  typeof v === "bigint"
+                                                    ? v.toString()
+                                                    : v,
+                                                2
+                                              );
+
+                                            if (Array.isArray(data)) {
+                                              return data.map(
+                                                (item: any, index: number) => (
+                                                  <div
+                                                    key={index}
+                                                    className="mb-1"
+                                                  >
+                                                    {format === "decimal"
+                                                      ? safeStringify(item)
+                                                      : convertValue(item)?.[
+                                                          format
+                                                        ] ||
+                                                        safeStringify(item)}
+                                                  </div>
+                                                )
+                                              );
+                                            }
+
+                                            return (
+                                              <div className="mb-1">
+                                                {format === "decimal"
+                                                  ? safeStringify(data)
+                                                  : convertValue(data)?.[
+                                                      format
+                                                    ] || safeStringify(data)}
+                                              </div>
+                                            );
+                                          })()}
+                                        </pre>
+                                      </div>
+                                    ) : null}
+                                  </div>
                                 </div>
                               )}
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                          }
+                        />
+                      ))
+                    }
+                  />
                 ) : selectedDataTab === "Write Contract" ? (
                   <>
                     <div className="flex justify-between items-center p-4 bg-gray-50 border border-[#8E8E8E] mb-4">
