@@ -11,7 +11,7 @@ export default function TxTypeToggle({ onFilterChange }: TxTypeToggleProps) {
     <Selector
       selected={TxTypesTabs[0]}
       onTabSelect={onFilterChange}
-      className="w-min rounded-sm"
+      className="w-min"
     >
       {TxTypesTabs.map((type) => (
         <SelectorItem

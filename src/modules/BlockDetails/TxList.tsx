@@ -38,11 +38,11 @@ export default function TxList({ transactions }: TxListProps) {
 
   const transaction_columns: ColumnDef<TransactionTableData, any>[] = [
     columnHelper.accessor("id", {
-      header: "No",
+      header: () => <th className="w-[52px]">No</th>,
       cell: (info) => info.renderValue(),
     }),
     columnHelper.accessor("hash", {
-      header: "Hash",
+      header: () => <th className="px-[15px] text-left">Hash</th>,
       cell: (info) => (
         <>
           {isMobile
@@ -57,7 +57,7 @@ export default function TxList({ transactions }: TxListProps) {
       },
     }),
     columnHelper.accessor("type", {
-      header: "Type",
+      header: () => <th className="w-[122px] px-[15px] text-left">Type</th>,
       cell: (info) => <span>{info.renderValue()}</span>,
       filterFn: (row, columnId, filterValue) => {
         const rowValue: string = row.getValue(columnId);
@@ -66,8 +66,24 @@ export default function TxList({ transactions }: TxListProps) {
       },
     }),
     columnHelper.accessor("status", {
-      header: "Status",
-      cell: (info) => <span>{info.renderValue()}</span>,
+      header: (ctx) => (
+        <th key={ctx.header.id} className="px-[15px] text-left w-[103px]">
+          Status
+        </th>
+      ),
+      cell: (info) => (
+        <div
+          className={`flex items-center justify-center border border-primary uppercase font-bold text-white px-2 py-0 h-[15px] text-sm w-[67px] ${
+            info.renderValue() === "success"
+              ? "bg-[#7BA797]"
+              : info.renderValue() === "reverted"
+              ? "bg-[#C4806D]"
+              : ""
+          }`}
+        >
+          {info.renderValue()}
+        </div>
+      ),
     }),
   ];
 
@@ -138,19 +154,16 @@ export default function TxList({ transactions }: TxListProps) {
         <table className="w-full h-min">
           <thead className="uppercase">
             <tr>
-              {table.getHeaderGroups().map((headerGroup) =>
-                headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    style={header.id === "id" ? { width: "38px" } : undefined}
-                  >
-                    {flexRender(
+              {table
+                .getHeaderGroups()
+                .map((headerGroup) =>
+                  headerGroup.headers.map((header) =>
+                    flexRender(
                       header.column.columnDef.header,
                       header.getContext()
-                    )}
-                  </th>
-                ))
-              )}
+                    )
+                  )
+                )}
             </tr>
           </thead>
 
@@ -166,9 +179,11 @@ export default function TxList({ transactions }: TxListProps) {
                     return (
                       <td
                         key={cell.id}
-                        className={`${
+                        className={`text-left px-[15px] ${
                           cell.column.id === "hash"
-                            ? "hover:underline text-left px-[15px]"
+                            ? "hover:underline "
+                            : cell.column.id === "id"
+                            ? "text-center"
                             : ""
                         } `}
                       >
