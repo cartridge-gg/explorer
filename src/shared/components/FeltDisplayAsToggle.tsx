@@ -1,11 +1,12 @@
 import { useMemo } from "react";
 import ToggleButton from "./ToggleButton";
 
-export const FeltDisplayVariants = ["hex", "dec", "string"] as const;
+const FeltDisplayVariantsSet = ["hex", "dec", "string"] as const;
+export type FeltDisplayVariants = (typeof FeltDisplayVariantsSet)[number];
 
 type FeltDisplayToggleProps = {
-  displayAs?: (typeof FeltDisplayVariants)[number];
-  onChange?: (value: (typeof FeltDisplayVariants)[number]) => void;
+  displayAs?: FeltDisplayVariants;
+  onChange?: (value: FeltDisplayVariants) => void;
   asString?: boolean;
   className?: string;
 };
@@ -17,7 +18,8 @@ export default function FeltDisplayAsToggle({
   className,
 }: FeltDisplayToggleProps) {
   const filteredVariants = useMemo(
-    () => FeltDisplayVariants.filter((type) => type !== "string" || asString),
+    () =>
+      FeltDisplayVariantsSet.filter((type) => type !== "string" || asString),
     [asString]
   );
 

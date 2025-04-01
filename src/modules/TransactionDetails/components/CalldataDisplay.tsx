@@ -59,7 +59,7 @@ const ValueRenderer = ({
   type,
 }: {
   value: string;
-  type: Exclude<(typeof FeltDisplayVariants)[number], "string">;
+  type: Exclude<FeltDisplayVariants, "string">;
 }) => {
   const displayValue = useMemo(
     () =>
@@ -85,7 +85,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
   >({});
 
   const [convertValueTabMap, setConvertValueTabMap] = useState<
-    Record<string, (typeof FeltDisplayVariants)[number]>
+    Record<string, Exclude<FeltDisplayVariants, "string">>
   >({});
 
   const fetchAndDecodeCalldata = useCallback(async () => {
@@ -267,8 +267,10 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                             onChange={(format) => {
                               setConvertValueTabMap((prev) => ({
                                 ...prev,
-                                [item.selector]:
-                                  format as (typeof FeltDisplayVariants)[number],
+                                [item.selector]: format as Exclude<
+                                  FeltDisplayVariants,
+                                  "string"
+                                >,
                               }));
                             }}
                           />

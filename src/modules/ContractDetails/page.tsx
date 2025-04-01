@@ -4,8 +4,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useCallback, useEffect, useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Contract } from "starknet";
-import { convertValue } from "@/shared/utils/rpc_utils";
-import { FunctionResult, DisplayFormatTypes } from "@/types/types";
+import { FunctionResult } from "@/types/types";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import WalletConnectModal from "@/shared/components/wallet_connect";
 import { BreadcrumbPage } from "@cartridge/ui-next";
@@ -20,11 +19,7 @@ import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";
-import { Accordion, AccordionItem } from "@/shared/components/accordion";
-import FeltDisplayAsToggle, {
-  FeltDisplayVariants,
-} from "@/shared/components/FeltDisplayAsToggle";
-import FeltDisplay from "@/shared/components/FeltDisplay";
+import ContractReadInterface from "./ContractInterface";
 
 const DataTabs = ["Read Contract", "Write Contract"];
 
@@ -33,8 +28,6 @@ interface FunctionInput {
   type: string;
   value: string;
 }
-
-const DisplayFormat = ["decimal", "hex", "string"];
 
 export default function ContractDetails() {
   const { disconnect } = useDisconnect();
@@ -70,10 +63,6 @@ export default function ContractDetails() {
 
   const [functionResults, setFunctionResults] = useState<
     Record<string, FunctionResult<any>>
-  >({});
-
-  const [displayFormats, setDisplayFormats] = useState<
-    Record<string, (typeof FeltDisplayVariants)[number]>
   >({});
 
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
@@ -151,46 +140,6 @@ export default function ContractDetails() {
     });
   };
 
-  const handleFunctionCall = async (functionName: string) => {
-    if (!contract) return;
-
-    // Set loading state
-    setFunctionResults((prev) => ({
-      ...prev,
-      [functionName]: {
-        loading: true,
-        error: null,
-        data: null,
-      },
-    }));
-
-    try {
-      const inputs =
-        expandedFunctions[functionName]?.map((input) => input.value) || [];
-      const result = await contract.call(functionName, inputs);
-
-      // Update with success result
-      setFunctionResults((prev) => ({
-        ...prev,
-        [functionName]: {
-          loading: false,
-          error: null,
-          data: result,
-        },
-      }));
-    } catch (error) {
-      // Update with error
-      setFunctionResults((prev) => ({
-        ...prev,
-        [functionName]: {
-          loading: false,
-          error: error instanceof Error ? error.message : "An error occurred",
-          data: null,
-        },
-      }));
-    }
-  };
-
   const handleWriteFunctionCall = async (functionName: string) => {
     if (!contract || !account) {
       setFunctionResults((prev) => ({
@@ -244,16 +193,6 @@ export default function ContractDetails() {
         },
       }));
     }
-  };
-
-  const handleFormatChange = (
-    functionName: string,
-    format: (typeof FeltDisplayVariants)[number]
-  ) => {
-    setDisplayFormats((prev) => ({
-      ...prev,
-      [functionName]: format,
-    }));
   };
 
   const { balances, isStrkLoading, isEthLoading } =
@@ -339,170 +278,9 @@ export default function ContractDetails() {
             <div className="bg-white flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray overflow-auto">
               <div className="w-full h-full overflow-auto">
                 {selectedDataTab === "Read Contract" ? (
-                  <Accordion
-                    items={() =>
-                      readFunctions.map((func, index) => (
-                        <AccordionItem
-                          key={index}
-                          title={
-                            <div className="flex flex-row items-center gap-2">
-                              <span className="font-bold">fn</span>
-                              <span className="italic">{func.name}</span>
-                              <span>
-                                ({func.inputs.map((arg) => arg.name).join(", ")}
-                                )
-                              </span>
-                            </div>
-                          }
-                          content={
-                            <div className="flex flex-col gap-[10px] items-end">
-                              <button
-                                className={`px-3 py-[2px] text-sm uppercase font-bold w-fit  ${
-                                  functionResults[func.name]?.loading
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
-                                } text-white`}
-                                onClick={() => handleFunctionCall(func.name)}
-                                disabled={functionResults[func.name]?.loading}
-                              >
-                                {functionResults[func.name]?.loading
-                                  ? "Calling..."
-                                  : "Call"}
-                              </button>
-
-                              {func.inputs.length !== 0 ? (
-                                <table className="bg-white overflow-x w-full">
-                                  <tbody>
-                                    {func.inputs.map((input, idx) => (
-                                      <tr
-                                        key={idx}
-                                        className={`${
-                                          idx !== func.inputs.length - 1
-                                            ? "border-b"
-                                            : ""
-                                        }`}
-                                      >
-                                        <td className="px-2 py-1 text-left align-top w-[90px] italic">
-                                          <span>{input.name}</span>
-                                        </td>
-
-                                        <td className="text-left align-top p-0">
-                                          <input
-                                            type="text"
-                                            className="px-2 py-1 text-left w-full"
-                                            placeholder={`${input.type}`}
-                                            onChange={(e) =>
-                                              handleInputChange(
-                                                func.name,
-                                                idx,
-                                                e.target.value
-                                              )
-                                            }
-                                          />
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              ) : (
-                                <></>
-                              )}
-
-                              {functionResults[func.name] && (
-                                <div className="w-full flex flex-col gap-1">
-                                  <p className="font-bold text-sm uppercase">
-                                    Result
-                                  </p>
-
-                                  <div className="bg-white">
-                                    {functionResults[func.name].loading ? (
-                                      <div className="text-gray-600">
-                                        Loading...
-                                      </div>
-                                    ) : functionResults[func.name].error ? (
-                                      <div className="text-red-500 p-3 bg-red-50 border border-red-200">
-                                        <p className="font-medium">Error:</p>
-                                        <p className="text-sm">
-                                          {functionResults[func.name].error}
-                                        </p>
-                                      </div>
-                                    ) : functionResults[func.name].data !==
-                                      null ? (
-                                      <div className="p-3 border border-borderGray flex flex-col gap-3">
-                                        <FeltDisplayAsToggle
-                                          onChange={(format) =>
-                                            handleFormatChange(
-                                              func.name,
-                                              format as (typeof FeltDisplayVariants)[number]
-                                            )
-                                          }
-                                          asString={true}
-                                        />
-                                        {/* <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words">
-                                          {(() => {
-                                            const data =
-                                              functionResults[func.name]?.data;
-                                            const format =
-                                              displayFormats[func.name] ||
-                                              "decimal";
-
-                                            const safeStringify = (
-                                              value: any
-                                            ) =>
-                                              JSON.stringify(
-                                                value,
-                                                (_, v) =>
-                                                  typeof v === "bigint"
-                                                    ? v.toString()
-                                                    : v,
-                                                2
-                                              );
-
-                                            if (Array.isArray(data)) {
-                                              return data.map(
-                                                (item: any, index: number) => (
-                                                  <div
-                                                    key={index}
-                                                    className="mb-1"
-                                                  >
-                                                    {format === "decimal"
-                                                      ? safeStringify(item)
-                                                      : convertValue(item)?.[
-                                                          format
-                                                        ] ||
-                                                        safeStringify(item)}
-                                                  </div>
-                                                )
-                                              );
-                                            }
-
-                                            return (
-                                              <div className="mb-1">
-                                                {format === "decimal"
-                                                  ? safeStringify(data)
-                                                  : convertValue(data)?.[
-                                                      format
-                                                    ] || safeStringify(data)}
-                                              </div>
-                                            );
-                                          })()}
-                                        </pre> */}
-                                        <FeltDisplay
-                                          value={
-                                            functionResults[func.name]?.data
-                                          }
-                                          displayAs={displayFormats[func.name]}
-                                        />
-                                      </div>
-                                    ) : null}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          }
-                        />
-                      ))
-                    }
+                  <ContractReadInterface
+                    contract={contract}
+                    functions={readFunctions}
                   />
                 ) : selectedDataTab === "Write Contract" ? (
                   <>

@@ -3,7 +3,7 @@ import { FeltDisplayVariants } from "./FeltDisplayAsToggle";
 
 type FeltDisplayProps = {
   value: bigint | number;
-  displayAs?: (typeof FeltDisplayVariants)[number];
+  displayAs?: FeltDisplayVariants;
 };
 
 export default function FeltDisplay({
