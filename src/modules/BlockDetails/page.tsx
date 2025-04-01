@@ -1,5 +1,5 @@
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
-import { formatNumber, padNumber } from "@/shared/utils/number";
+import { formatNumber } from "@/shared/utils/number";
 import {
   formatSnakeCaseToDisplayValue,
   truncateString,
@@ -33,7 +33,7 @@ const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
 
 export default function BlockDetails() {
   const { isMobile } = useScreen();
-  const { blockNumber } = useParams<{ blockNumber: string }>();
+  const { blockId } = useParams<{ blockId: string }>();
   const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
   const [txsTable, setTxsTable] = useState<TransactionTableData[]>([]);
   const [eventsTable, setEventsTable] = useState<EventTableData[]>([]);
@@ -54,9 +54,9 @@ export default function BlockDetails() {
   });
 
   const { data: BlockReceipt } = useQuery({
-    queryKey: [QUERY_KEYS.getBlockWithTxs, blockNumber],
-    queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockNumber ?? 0),
-    enabled: !!blockNumber,
+    queryKey: [QUERY_KEYS.getBlockWithTxs, blockId],
+    queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockId ?? 0),
+    enabled: !!blockId,
     staleTime: STALE_TIME,
     gcTime: CACHE_TIME,
   });
@@ -139,15 +139,15 @@ export default function BlockDetails() {
           <BreadcrumbSeparator />
           <BreadcrumbItem href="/blocks">Blocks</BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>{blockNumber}</BreadcrumbItem>
+          <BreadcrumbItem>{blockId}</BreadcrumbItem>
         </Breadcrumb>
 
-        <BlockNavigation />
+        {/* <BlockNavigation /> */}
       </div>
 
       <PageHeader
         className="mb-6"
-        title={`Block #${blockNumber}`}
+        title={`Block #${BlockReceipt?.block_number}`}
         subtext={BlockReceipt?.status}
         subtextRightComponent={
           <div className="text-[#5D5D5D]">

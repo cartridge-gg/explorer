@@ -17,7 +17,7 @@ export const ROUTES = {
     component: <TransactionDetails />,
   },
   BLOCK_DETAILS: {
-    urlPath: "/block/:blockNumber",
+    urlPath: "/block/:blockId",
     component: <BlockDetails />,
   },
   TRANSACTION_LIST: {
