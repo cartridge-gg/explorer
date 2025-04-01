@@ -204,41 +204,50 @@ export default function TxList({ transactions }: TxListProps) {
           </tbody>
         </table>
 
-        <div className="mt-2 h-min flex flex-row gap-4 justify-between items-center">
+        <div className="mt-2 h-min grid grid-cols-[max-content_max-content] items-center justify-between">
           <div>
             Showing <strong>{pagination.pageIndex + 1}</strong> of{" "}
             <strong>{table.getPageCount()}</strong> pages
           </div>
 
-          <div className="flex flex-row gap-2">
-            <button
-              disabled={pagination.pageIndex === 0}
-              onClick={() =>
-                setPagination((prev) => ({
-                  ...prev,
-                  pageIndex: Math.max(0, prev.pageIndex - 1),
-                }))
-              }
-              className="bg-[#4A4A4A] text-white px-2 disabled:opacity-50 uppercase"
-            >
-              Previous
-            </button>
-            <button
-              disabled={pagination.pageIndex === table.getPageCount() - 1}
-              onClick={() =>
-                setPagination((prev) => ({
-                  ...prev,
-                  pageIndex: Math.min(
-                    table.getPageCount() - 1,
-                    prev.pageIndex + 1
-                  ),
-                }))
-              }
-              className="bg-[#4A4A4A] text-white px-4 py-[3px] disabled:opacity-50 uppercase"
-            >
-              Next
-            </button>
-          </div>
+          {table.getPageCount() > 1 ? (
+            <div className="gap-2 h-[20px] font-bold grid grid-cols-2 w-[145px] select-none">
+              {pagination.pageIndex !== 0 ? (
+                <button
+                  onClick={() =>
+                    setPagination((prev) => ({
+                      ...prev,
+                      pageIndex: Math.max(0, prev.pageIndex - 1),
+                    }))
+                  }
+                  className="bg-white px-4 disabled:opacity-50 uppercase border border-borderGray disabled:hover:bg-white disabled:hover:border disabled:hover:text-inherit hover:bg-primary hover:border-0 hover:text-white"
+                >
+                  Prev
+                </button>
+              ) : (
+                <></>
+              )}
+
+              <button
+                // disable the next button when it's on the last page
+                disabled={pagination.pageIndex === table.getPageCount() - 1}
+                onClick={() =>
+                  setPagination((prev) => ({
+                    ...prev,
+                    pageIndex: Math.min(
+                      table.getPageCount() - 1,
+                      prev.pageIndex + 1
+                    ),
+                  }))
+                }
+                className="bg-white px-4 disabled:opacity-50 uppercase border border-borderGray col-start-2 disabled:hover:bg-white disabled:hover:border disabled:hover:text-inherit hover:bg-primary hover:border-0 hover:text-white"
+              >
+                Next
+              </button>
+            </div>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
     </div>
