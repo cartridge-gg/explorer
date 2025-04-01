@@ -17,6 +17,7 @@ export const QUERY_KEYS = {
   getBlockNumber: ["getBlockNumber"],
   getBlockWithTxs: ["getBlockWithTxs"],
   getClassAt: ["getClassAt"],
+  getClassHashAt: ["getClassHashAt"],
   getTransactionReceipt: ["getTransactionReceipt"],
   getTransactionTrace: ["getTransactionTrace"],
   getTransaction: ["getTransaction"],

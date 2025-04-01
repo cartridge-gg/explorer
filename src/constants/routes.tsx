@@ -3,7 +3,7 @@ import BlocksList from "@/modules/BlocksList/page";
 import ClassHashDetails from "@/modules/ClassHash/page";
 import ContractDetails from "@/modules/ContractDetails/page";
 import EventDetails from "@/modules/EventDetails/page";
-import Home from "@/modules/Home/page";
+import Home from "@/modules/HomeNew/page";
 import TransactionDetails from "@/modules/TransactionDetails/page";
 import TransactionsList from "@/modules/TransactionsList/page";
 
