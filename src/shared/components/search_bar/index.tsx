@@ -134,7 +134,7 @@ export default function SearchBar() {
     if (resultType === "transaction") {
       navigate(ROUTES.TRANSACTION_DETAILS.urlPath.replace(":txHash", search));
     } else if (resultType === "block") {
-      navigate(ROUTES.BLOCK_DETAILS.urlPath.replace(":blockNumber", search));
+      navigate(ROUTES.BLOCK_DETAILS.urlPath.replace(":blockId", search));
     } else if (resultType === "contract") {
       navigate(
         ROUTES.CONTRACT_DETAILS.urlPath.replace(":contractAddress", search)
