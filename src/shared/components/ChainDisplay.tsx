@@ -1,31 +1,55 @@
-import { ChainId, StarknetChainId } from "@/types/types";
 import useChain from "../hooks/useChain";
+import { useState, useRef, useEffect, useMemo } from "react";
 
-export default function ChainDisplay() {
-  const { chainId } = useChain();
+export default function ChainDisplay(
+  props: React.HTMLAttributes<HTMLDivElement>
+) {
+  const { id: chainId, isLoading, error } = useChain();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [indicatorSize, setIndicatorSize] = useState<number>(0);
 
-  if (chainId === "SN_MAIN" || chainId === "SN_SEPOLIA") {
-    return <StarknetChainIdComponent id={chainId} />;
-  } else {
-    return <OtherChainIdComponent id={chainId || ""} />;
-  }
-}
+  useEffect(() => {
+    if (containerRef.current) {
+      const containerHeight = containerRef.current.clientHeight;
+      const indicatorHeight = Math.min(containerHeight * 0.4, 9);
+      const roundedHeight = Math.round(indicatorHeight);
+      setIndicatorSize(roundedHeight);
+    }
+  }, [containerRef]);
 
-function StarknetChainIdComponent({ id }: { id: StarknetChainId }) {
-  const displayName = id === "SN_MAIN" ? "Mainnet" : "Sepolia";
+  const truncatedName = useMemo(() => {
+    if (!chainId) {
+      return;
+    }
+
+    return chainId.asDisplay.length > 7
+      ? `${chainId.asDisplay.substring(0, 6)}..`
+      : chainId.asDisplay;
+  }, [chainId]);
+
   return (
-    <div className="w-[105px] border border-borderGray uppercase text-right flex-row-reverse font-bold overflow-clip flex bg-white px-3 py-1 gap-6 items-center justify-between">
-      <div>{displayName}</div>
-      <div className="w-[9px] h-[9px] bg-starknet-primary"></div>
-    </div>
-  );
-}
-
-function OtherChainIdComponent({ id }: { id: ChainId }) {
-  return (
-    <div className="w-[105px] border border-borderGray uppercase text-right overflow-clip font-bold flex px-3 py-1 items-center justify-end">
-      <div>{id}</div>
-      <div className="w-[9px] h-[9px] bg-primary"></div>
+    <div
+      ref={containerRef}
+      className="bg-white w-[105px] border border-borderGray uppercase font-bold flex px-3 py-1 gap-3 items-center justify-between"
+      {...props}
+    >
+      <div
+        className={`${chainId?.color}`}
+        style={{
+          width: `${indicatorSize}px`,
+          height: `${indicatorSize}px`,
+        }}
+      ></div>
+      {isLoading ? (
+        <div
+          style={{
+            height: `${indicatorSize}px`,
+          }}
+          className="w-5/12 bg-borderGray"
+        ></div>
+      ) : (
+        <span>{error || !truncatedName ? "Unknown" : truncatedName}</span>
+      )}
     </div>
   );
 }
