@@ -69,7 +69,7 @@ const FinalityStatus = ({ status }: { status: string }) => {
   };
   return (
     <div
-      className={`text-white px-2 py-1 rounded-sm ${
+      className={`text-white px-2 h-5 w-[84px] flex items-center justify-center font-bold ${
         status_color_map[status?.toLowerCase() as keyof typeof status_color_map]
       }`}
     >
