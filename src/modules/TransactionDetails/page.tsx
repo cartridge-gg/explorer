@@ -516,15 +516,17 @@ export default function TransactionDetails() {
 
   return (
     <div className="w-full flex-grow gap-8">
-      <Breadcrumb className="mb-3">
-        <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem href="/txns">Transactions</BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          {isMobile && txHash ? truncateString(txHash) : txHash}
-        </BreadcrumbItem>
-      </Breadcrumb>
+      <div className="mb-2">
+        <Breadcrumb>
+          <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem href="/txns">Transactions</BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            {isMobile && txHash ? truncateString(txHash) : txHash}
+          </BreadcrumbItem>
+        </Breadcrumb>
+      </div>
 
       <PageHeader
         className="mb-6"
