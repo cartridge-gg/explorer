@@ -2,6 +2,7 @@ import "./App.css";
 import { ROUTES } from "./constants/routes";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Header from "./shared/components/header";
+import { CallCartProvider } from "./store/ShoppingCartProvider";
 
 function MainContent() {
   const location = useLocation();
@@ -30,9 +31,11 @@ function App() {
         import.meta.env.APP_BASE_PATH || "/"
       }
     >
-      <div className="flex flex-col gap-[20px] px-[20px] py-[25px] xl:px-[45px] lg:h-screen">
-        <MainContent />
-      </div>
+      <CallCartProvider>
+        <div className="flex flex-col gap-[20px] px-[20px] py-[25px] xl:px-[45px] lg:h-screen">
+          <MainContent />
+        </div>
+      </CallCartProvider>
     </BrowserRouter>
   );
 }
