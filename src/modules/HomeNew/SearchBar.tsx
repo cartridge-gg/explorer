@@ -4,13 +4,14 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import SearchTool from "@/shared/icons/SearchTool";
 import { truncateString } from "@/shared/utils/string";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function HomeSearchBar() {
   const navigate = useNavigate();
   const { isMobile } = useScreen();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const queryClient = useQueryClient();
 
@@ -104,8 +105,7 @@ export default function HomeSearchBar() {
     [queryClient]
   );
 
-  const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const handleSearch = (value: string) => {
     if (!value || value.length === 0) return;
     // assuming that there will be no hash collision (very unlikely to collide)
     performSearch(value).then(([isBlock, isTx, isContract, isClass]) => {
@@ -146,19 +146,29 @@ export default function HomeSearchBar() {
     setIsDropdownOpen(false);
   }, [navigate, result]);
 
+  const handleSearchIconClick = () => {
+    if (inputRef.current?.value) {
+      handleSearch(inputRef.current.value);
+    }
+  };
+
   return (
     <div
-      className={`bg-white w-[520px] h-[42px] flex gap-2 relative border ${
+      className={`bg-white w-[520px] h-[42px] flex relative border border-borderGray items-center ${
         isDropdownOpen ? "border-b-0" : ""
-      } border-borderGray items-center px-[15px] py-2`}
+      }`}
     >
       <input
-        className="text-base search-input relative w-full h-full focus:outline-none focus:ring-0"
+        ref={inputRef}
+        className="text-base search-input relative w-full h-full focus:outline-none focus:ring-0 py-2 pl-[15px]"
         placeholder="Search"
-        onChange={handleSearch}
+        onChange={(e) => handleSearch(e.target.value)}
       />
 
-      <div className="cursor-pointer h-full p-1 flex items-center">
+      <div
+        className="cursor-pointer flex items-center px-[15px] h-full"
+        onClick={handleSearchIconClick}
+      >
         <SearchTool />
       </div>
 
