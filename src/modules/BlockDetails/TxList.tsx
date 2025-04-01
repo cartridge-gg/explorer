@@ -90,7 +90,7 @@ export default function TxList({ transactions }: TxListProps) {
   // Calculate pageSize based on window height
   const calculatePageSize = useCallback(() => {
     // Fixed component height and row height
-    const componentHeight = height * 0.5; // 50% of the screen height (computed by hand)
+    const componentHeight = height * 0.55; // 55% of the screen height (computed by hand)
     const rowHeight = 20;
 
     // Calculate how many rows can fit in the available height

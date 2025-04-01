@@ -276,7 +276,7 @@ export default function ContractDetails() {
 
         <PageHeader className="mb-6" title="Contract" />
 
-        <div className="flex flex-col sl:flex-row sl:h-[70vh] gap-4">
+        <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-4">
           {/* Contract Info Section */}
           <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
             <SectionBox>
