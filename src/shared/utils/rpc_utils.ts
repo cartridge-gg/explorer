@@ -1,5 +1,6 @@
 import { cairo, shortString } from "starknet";
 import BN from "bn.js";
+import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
@@ -58,7 +59,7 @@ export const convertValue = (value: string | number) => {
     }
 
     return {
-      decimal: bnValue.toString(10),
+      dec: bnValue.toString(10),
       hex: "0x" + bnValue.toString(16),
       string: shortString.decodeShortString(bnValue.toString()),
     };
@@ -70,7 +71,7 @@ export const convertValue = (value: string | number) => {
 // recurse throught an object and covert all values to hex
 export const convertObjectValuesToDisplayValues = (
   obj: any,
-  type: "decimal" | "hex"
+  type: Exclude<(typeof FeltDisplayVariants)[number], "string">
 ) => {
   for (const key in obj) {
     if (typeof obj[key] === "object") {

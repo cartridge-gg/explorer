@@ -21,6 +21,10 @@ import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
+import FeltDisplayAsToggle, {
+  FeltDisplayVariants,
+} from "@/shared/components/FeltDisplayAsToggle";
+import FeltDisplay from "@/shared/components/FeltDisplay";
 
 const DataTabs = ["Read Contract", "Write Contract"];
 
@@ -69,7 +73,7 @@ export default function ContractDetails() {
   >({});
 
   const [displayFormats, setDisplayFormats] = useState<
-    Record<string, DisplayFormatTypes>
+    Record<string, (typeof FeltDisplayVariants)[number]>
   >({});
 
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
@@ -244,7 +248,7 @@ export default function ContractDetails() {
 
   const handleFormatChange = (
     functionName: string,
-    format: DisplayFormatTypes
+    format: (typeof FeltDisplayVariants)[number]
   ) => {
     setDisplayFormats((prev) => ({
       ...prev,
@@ -424,30 +428,17 @@ export default function ContractDetails() {
                                       </div>
                                     ) : functionResults[func.name].data !==
                                       null ? (
-                                      <div className="p-3 border border-borderGray">
-                                        <div className="flex flex-row items-center justify-between mb-4">
-                                          <div className="flex gap-2">
-                                            {DisplayFormat.map((format) => (
-                                              <button
-                                                className={`px-2 py-1 text-xs ${
-                                                  (displayFormats[func.name] ??
-                                                    "decimal") === format
-                                                    ? "bg-[#4A4A4A] text-white"
-                                                    : "bg-gray-200"
-                                                }`}
-                                                onClick={() =>
-                                                  handleFormatChange(
-                                                    func.name,
-                                                    format as DisplayFormatTypes
-                                                  )
-                                                }
-                                              >
-                                                {format}
-                                              </button>
-                                            ))}
-                                          </div>
-                                        </div>
-                                        <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words">
+                                      <div className="p-3 border border-borderGray flex flex-col gap-3">
+                                        <FeltDisplayAsToggle
+                                          onChange={(format) =>
+                                            handleFormatChange(
+                                              func.name,
+                                              format as (typeof FeltDisplayVariants)[number]
+                                            )
+                                          }
+                                          asString={true}
+                                        />
+                                        {/* <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words">
                                           {(() => {
                                             const data =
                                               functionResults[func.name]?.data;
@@ -495,7 +486,13 @@ export default function ContractDetails() {
                                               </div>
                                             );
                                           })()}
-                                        </pre>
+                                        </pre> */}
+                                        <FeltDisplay
+                                          value={
+                                            functionResults[func.name]?.data
+                                          }
+                                          displayAs={displayFormats[func.name]}
+                                        />
                                       </div>
                                     ) : null}
                                   </div>

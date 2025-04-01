@@ -1,11 +1,12 @@
 import FeltDisplay from "./FeltDisplay";
+import { FeltDisplayVariants } from "./FeltDisplayAsToggle";
 
 type FeltListProps = {
   /**
    * Array of felts to be displayed in the list
    */
   list: bigint[];
-  displayAs?: "hex" | "decimal";
+  displayAs?: Exclude<(typeof FeltDisplayVariants)[number], "string">;
   /**
    * Whether to display the index column
    */
@@ -14,7 +15,7 @@ type FeltListProps = {
 
 export default function FeltList({
   list,
-  displayAs = "decimal",
+  displayAs = "hex",
   showIndex = true,
 }: FeltListProps) {
   return (

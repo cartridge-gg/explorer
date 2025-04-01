@@ -96,7 +96,6 @@ export interface SelectItemProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const defaultSelectedStyle: React.CSSProperties = {
   color: "#ffff",
-  fontWeight: "bold",
   backgroundColor: "#B0B0B0",
   boxShadow: "inset 0px 1px 3px rgba(0, 0, 0, 0.25)",
 };

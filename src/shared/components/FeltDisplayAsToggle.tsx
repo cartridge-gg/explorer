@@ -1,38 +1,32 @@
-import { useCallback } from "react";
-import { Selector, SelectorItem } from "./Selector";
+import { useMemo } from "react";
+import ToggleButton from "./ToggleButton";
 
-export const FeltDisplayVariants = ["decimal", "hex"] as const;
+export const FeltDisplayVariants = ["hex", "dec", "string"] as const;
 
 type FeltDisplayToggleProps = {
   displayAs?: (typeof FeltDisplayVariants)[number];
   onChange?: (value: (typeof FeltDisplayVariants)[number]) => void;
+  asString?: boolean;
+  className?: string;
 };
 
 export default function FeltDisplayAsToggle({
   onChange,
   displayAs = "hex",
+  asString = false,
+  className,
 }: FeltDisplayToggleProps) {
-  const handleTabSelect = useCallback(
-    (value: string) => {
-      if (onChange) onChange(value as (typeof FeltDisplayVariants)[number]);
-    },
-    [onChange]
+  const filteredVariants = useMemo(
+    () => FeltDisplayVariants.filter((type) => type !== "string" || asString),
+    [asString]
   );
 
   return (
-    <Selector
+    <ToggleButton
+      variants={filteredVariants}
       selected={displayAs}
-      onTabSelect={handleTabSelect}
-      className="w-min rounded-sm bg-white z-10"
-    >
-      {FeltDisplayVariants.map((type) => (
-        <SelectorItem
-          key={type}
-          name={type}
-          value={type}
-          className="w-max text-xs py-[2px]"
-        />
-      ))}
-    </Selector>
+      onChange={onChange}
+      className={className}
+    />
   );
 }

@@ -1,7 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from "react";
 import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { AbiEntry, CallData, FunctionAbi, hash } from "starknet";
-import { Selector, SelectorItem } from "@/shared/components/Selector";
 import { truncateString } from "@/shared/utils/string";
 import {
   convertObjectValuesToDisplayValues,
@@ -13,9 +12,14 @@ import { STALE_TIME } from "@/constants/rpc";
 import { CACHE_TIME } from "@/constants/rpc";
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
 import FeltList from "@/shared/components/FeltList";
-import { FeltDisplayVariants } from "@/shared/components/FeltDisplayAsToggle";
+import FeltDisplayAsToggle, {
+  FeltDisplayVariants,
+} from "@/shared/components/FeltDisplayAsToggle";
+import CalldataEncodingToggle, {
+  CalldataEncodingVariants,
+} from "@/shared/components/DecodeRawToggle";
 
-const TxTypesTabs = ["Decoded", "Raw"] as const;
+// const TxTypesTabs = ["Decoded", "Raw"] as const;
 
 interface CalldataDisplayProps {
   calldata: {
@@ -55,7 +59,7 @@ const ValueRenderer = ({
   type,
 }: {
   value: string;
-  type: "decimal" | "hex";
+  type: Exclude<(typeof FeltDisplayVariants)[number], "string">;
 }) => {
   const displayValue = useMemo(
     () =>
@@ -72,11 +76,12 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
   const queryClient = useQueryClient();
   const [decodedCalldata, setDecodedCalldata] = useState<DecodedCalldata[]>([]);
 
-  const [selectedTab, setSelectedTab] = useState<(typeof TxTypesTabs)[number]>(
-    TxTypesTabs[0]
-  );
+  const [selectedTab, setSelectedTab] = useState<
+    (typeof CalldataEncodingVariants)[number]
+  >(CalldataEncodingVariants[0]);
+
   const [decodedRawMap, setDecodedRawMap] = useState<
-    Record<string, (typeof TxTypesTabs)[number]>
+    Record<string, (typeof CalldataEncodingVariants)[number]>
   >({});
 
   const [convertValueTabMap, setConvertValueTabMap] = useState<
@@ -165,12 +170,12 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
 
         setDecodedRawMap((prev) => ({
           ...prev,
-          [data.selector]: "Decoded",
+          [data.selector]: "decoded",
         }));
 
         setConvertValueTabMap((prev) => ({
           ...prev,
-          [data.selector]: "decimal",
+          [data.selector]: "hex",
         }));
 
         return {
@@ -216,26 +221,16 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
   return (
     <div className="h-full space-y-3 grid grid-rows-[min-content_1fr]">
       <div>
-        <Selector
-          selected={selectedTab}
-          onTabSelect={(value) =>
-            setSelectedTab(value as (typeof TxTypesTabs)[number])
+        <CalldataEncodingToggle
+          displayAs={selectedTab}
+          onChange={(value) =>
+            setSelectedTab(value as (typeof CalldataEncodingVariants)[number])
           }
-          className="w-min bg-white z-10"
-        >
-          {TxTypesTabs.map((type) => (
-            <SelectorItem
-              key={type}
-              name={type}
-              value={type}
-              className="w-max text-xs py-[2px]"
-            />
-          ))}
-        </Selector>
+        />
       </div>
 
       <div className="overflow-auto">
-        {selectedTab === "Decoded" ? (
+        {selectedTab === "decoded" ? (
           <Accordion
             items={() =>
               decodedCalldata.map((item) => (
@@ -256,51 +251,34 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                   content={
                     <>
                       <div className="flex gap-3 justify-between mb-3">
-                        <Selector
-                          selected={decodedRawMap[item.selector]}
-                          onTabSelect={(value) =>
+                        <CalldataEncodingToggle
+                          displayAs={decodedRawMap[item.selector]}
+                          onChange={(value) =>
                             setDecodedRawMap((prev) => ({
                               ...prev,
-                              [item.selector]:
-                                value as (typeof TxTypesTabs)[number],
+                              [item.selector]: value,
                             }))
                           }
-                          className="w-min"
-                        >
-                          {TxTypesTabs.map((type) => (
-                            <SelectorItem
-                              key={type}
-                              name={type}
-                              value={type}
-                              className="w-max text-xs py-[2px]"
-                            />
-                          ))}
-                        </Selector>
+                        />
 
-                        <Selector
-                          selected={convertValueTabMap[item.selector]}
-                          onTabSelect={(value) =>
-                            setConvertValueTabMap((prev) => ({
-                              ...prev,
-                              [item.selector]:
-                                value as (typeof FeltDisplayVariants)[number],
-                            }))
-                          }
-                          className="w-min"
-                        >
-                          {FeltDisplayVariants.map((type) => (
-                            <SelectorItem
-                              key={type}
-                              name={type}
-                              value={type}
-                              className="w-max text-xs py-[2px]"
-                            />
-                          ))}
-                        </Selector>
+                        {decodedRawMap[item.selector] === "decoded" ? (
+                          <FeltDisplayAsToggle
+                            displayAs={convertValueTabMap[item.selector]}
+                            onChange={(format) => {
+                              setConvertValueTabMap((prev) => ({
+                                ...prev,
+                                [item.selector]:
+                                  format as (typeof FeltDisplayVariants)[number],
+                              }));
+                            }}
+                          />
+                        ) : (
+                          <></>
+                        )}
                       </div>
 
                       <div className="bg-white border overflow-auto">
-                        {decodedRawMap[item.selector] === "Decoded" ? (
+                        {decodedRawMap[item.selector] === "decoded" ? (
                           <table className="overflow-x w-full">
                             <tbody>
                               {item.data.map((arg, rowIndex, array) => (
@@ -335,10 +313,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                             </tbody>
                           </table>
                         ) : (
-                          <FeltList
-                            list={item.raw_args}
-                            displayAs={convertValueTabMap[item.selector]}
-                          />
+                          <FeltList list={item.raw_args} displayAs="hex" />
                         )}
                       </div>
                     </>

@@ -7,7 +7,7 @@ type SignaureDisplayProps = {
 };
 
 export default function SignatureDisplay({ signature }: SignaureDisplayProps) {
-  const [displayAs, setDisplayAs] = useState<"decimal" | "hex">("hex");
+  const [displayAs, setDisplayAs] = useState<"dec" | "hex">("hex");
 
   return (
     <>
