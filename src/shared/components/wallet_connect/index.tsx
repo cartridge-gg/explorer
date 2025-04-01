@@ -4,6 +4,7 @@ import {
   availableConnectors,
   cartridge_controller,
 } from "@/store/starknetProvider";
+import CrossIcon from "@/shared/icons/ Cross";
 
 interface WalletConnectModalProps {
   isOpen: boolean;
@@ -41,18 +42,18 @@ export default function WalletConnectModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">Connect Wallet</h2>
+      <div className="bg-white p-[15px] pb-5 w-[350px] border border-borderGray shadow-md">
+        <div className="flex flex-col gap-5 mb-6">
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl"
+            className="flex items-center justify-center border border-borderGray w-[25px] h-[25px] hover:bg-primary hover:border-0 hover:text-white"
           >
-            ✕
+            <CrossIcon />
           </button>
+          <h2 className="text-lg font-bold uppercase">Connect A Wallet</h2>
         </div>
 
-        <div className="space-y-4">
+        <div className="">
           {availableConnectors.map((connector) => {
             const name = connector.id || connector.name || "Unknown";
             const displayName =
@@ -71,13 +72,13 @@ export default function WalletConnectModal({
                 key={name}
                 onClick={() => handleConnect(connector)}
                 disabled={!!connecting}
-                className={`flex items-center justify-between w-full p-4 border ${
+                className={`mt-[-1px] flex items-center justify-between w-full p-3 border hover:bg-[#EEEEEE] ${
                   connecting === name
                     ? "border-blue-500 bg-blue-50"
                     : "border-gray-200 hover:border-gray-300"
-                } rounded-lg transition-colors`}
+                } transition-colors`}
               >
-                <div className="flex items-center">
+                <div className="w-full flex items-center justify-between">
                   {walletLogos[displayName] && (
                     <img
                       src={walletLogos[displayName]}
@@ -87,24 +88,13 @@ export default function WalletConnectModal({
                   )}
                   <span className="font-medium">{displayName}</span>
                 </div>
+
                 {connecting === name && (
                   <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
                 )}
               </button>
             );
           })}
-        </div>
-
-        <div className="mt-6 text-center text-sm text-gray-500">
-          <p>
-            New to Starknet?{" "}
-            <span
-              onClick={() => handleConnect(cartridge_controller)}
-              className="text-blue-500 hover:underline cursor-pointer"
-            >
-              Create a Cartridge Controller
-            </span>
-          </p>
         </div>
       </div>
     </div>

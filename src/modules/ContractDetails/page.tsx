@@ -283,193 +283,158 @@ export default function ContractDetails() {
                     functions={readFunctions}
                   />
                 ) : selectedDataTab === "Write Contract" ? (
-                  <>
-                    <div className="flex justify-between items-center p-4 bg-gray-50 border border-[#8E8E8E] mb-4">
-                      <div className="flex flex-col">
-                        <p className="text-sm font-medium">Wallet Status</p>
-                        <p className="text-sm">
-                          {status === "connected" && address
-                            ? `Connected: ${truncateString(address)}`
-                            : status === "connecting"
-                            ? "Connecting..."
-                            : "Not Connected"}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        {status !== "connected" ? (
-                          <button
-                            onClick={() => setIsWalletModalOpen(true)}
-                            className="px-4 py-2 bg-[#4A4A4A] hover:bg-[#6E6E6E] text-white"
-                          >
-                            Connect Wallet
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => disconnect()}
-                            className="px-4 py-2 bg-[#4A4A4A] hover:bg-[#6E6E6E] text-white"
-                          >
-                            Disconnect
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-4">
-                      {writeFunctions.map((func, index) => (
+                  <div className="flex flex-col gap-4">
+                    {writeFunctions.map((func, index) => (
+                      <div
+                        key={index}
+                        className="flex flex-col p-4 border border-[#8E8E8E] border-dashed"
+                      >
                         <div
-                          key={index}
-                          className="flex flex-col p-4 border border-[#8E8E8E] border-dashed"
+                          className="flex justify-between items-center cursor-pointer"
+                          onClick={() => {
+                            if (!expandedFunctions[func.name]) {
+                              setExpandedFunctions((prev) => ({
+                                ...prev,
+                                [func.name]: func.inputs.map((input) => ({
+                                  name: input.name,
+                                  type: input.type,
+                                  value: "",
+                                })),
+                              }));
+                            } else {
+                              setExpandedFunctions((prev) => {
+                                const newState = { ...prev };
+                                delete newState[func.name];
+                                return newState;
+                              });
+                            }
+                          }}
                         >
-                          <div
-                            className="flex justify-between items-center cursor-pointer"
-                            onClick={() => {
-                              if (!expandedFunctions[func.name]) {
-                                setExpandedFunctions((prev) => ({
-                                  ...prev,
-                                  [func.name]: func.inputs.map((input) => ({
-                                    name: input.name,
-                                    type: input.type,
-                                    value: "",
-                                  })),
-                                }));
-                              } else {
-                                setExpandedFunctions((prev) => {
-                                  const newState = { ...prev };
-                                  delete newState[func.name];
-                                  return newState;
-                                });
-                              }
-                            }}
-                          >
-                            <div className="flex flex-row gap-2 w-full flex-wrap">
-                              <p className="font-bold">{func.name}</p>
-                              <div className="flex flex-row gap-2 flex-wrap text-gray-500">
-                                (
-                                {func.inputs.map((input, idx) => (
-                                  <p key={idx} className="text-sm">
-                                    {idx === 0 ? "" : ","}
-                                    {input.name}
-                                  </p>
-                                ))}
-                                )
-                              </div>
+                          <div className="flex flex-row gap-2 w-full flex-wrap">
+                            <p className="font-bold">{func.name}</p>
+                            <div className="flex flex-row gap-2 flex-wrap text-gray-500">
+                              (
+                              {func.inputs.map((input, idx) => (
+                                <p key={idx} className="text-sm">
+                                  {idx === 0 ? "" : ","}
+                                  {input.name}
+                                </p>
+                              ))}
+                              )
                             </div>
-                            <span>
-                              {expandedFunctions[func.name] ? "−" : "+"}
-                            </span>
                           </div>
-
-                          <div className="flex flex-col gap-2">
-                            {expandedFunctions[func.name] && (
-                              <div className="flex flex-col gap-4 pt-4">
-                                {func.inputs.map((input, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="flex flex-col gap-2"
-                                  >
-                                    <label className="text-sm font-medium w-full">
-                                      {input.name} ({input.type})
-                                    </label>
-                                    <input
-                                      type="text"
-                                      className="border border-[#8E8E8E] p-2 "
-                                      placeholder={`Enter ${input.type}`}
-                                      value={
-                                        expandedFunctions[func.name][idx]
-                                          ?.value || ""
-                                      }
-                                      onChange={(e) =>
-                                        handleInputChange(
-                                          func.name,
-                                          idx,
-                                          e.target.value
-                                        )
-                                      }
-                                    />
-                                  </div>
-                                ))}
-
-                                <button
-                                  className={`px-4 py-2 mt-2 w-fit ${
-                                    !address
-                                      ? "bg-gray-400 cursor-not-allowed"
-                                      : functionResults[func.name]?.loading
-                                      ? "bg-gray-400 cursor-not-allowed"
-                                      : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
-                                  } text-white`}
-                                  onClick={() =>
-                                    handleWriteFunctionCall(func.name)
-                                  }
-                                  disabled={
-                                    !address ||
-                                    functionResults[func.name]?.loading
-                                  }
-                                >
-                                  {!address
-                                    ? "Connect Wallet to Execute"
-                                    : functionResults[func.name]?.loading
-                                    ? "Executing..."
-                                    : "Execute"}
-                                </button>
-
-                                {functionResults[func.name]?.data
-                                  ?.transaction_hash && (
-                                  <div className="mt-2 text-sm">
-                                    <p className="font-medium">
-                                      Transaction Hash:
-                                    </p>
-                                    <a
-                                      href={`/transactions/${
-                                        functionResults[func.name].data
-                                          .transaction_hash
-                                      }`}
-                                      className="text-blue-600 hover:text-blue-800 break-all"
-                                    >
-                                      {
-                                        functionResults[func.name].data
-                                          .transaction_hash
-                                      }
-                                    </a>
-                                  </div>
-                                )}
-
-                                {functionResults[func.name] && (
-                                  <div className="mt-4">
-                                    {functionResults[func.name].loading ? (
-                                      <div className="text-gray-600">
-                                        Loading...
-                                      </div>
-                                    ) : functionResults[func.name].error ? (
-                                      <div className="text-red-500 p-3 bg-red-50 border border-red-200">
-                                        <p className="font-medium">Error:</p>
-                                        <p className="text-sm">
-                                          {functionResults[func.name].error}
-                                        </p>
-                                      </div>
-                                    ) : functionResults[func.name].data !==
-                                      null ? (
-                                      <div className="bg-gray-50 p-3 border border-gray-200">
-                                        <p className="font-medium text-sm">
-                                          Result:
-                                        </p>
-                                        <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words">
-                                          {JSON.stringify(
-                                            functionResults[func.name].data,
-                                            null,
-                                            2
-                                          )}
-                                        </pre>
-                                      </div>
-                                    ) : null}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
+                          <span>
+                            {expandedFunctions[func.name] ? "−" : "+"}
+                          </span>
                         </div>
-                      ))}
-                    </div>
-                  </>
+
+                        <div className="flex flex-col gap-2">
+                          {expandedFunctions[func.name] && (
+                            <div className="flex flex-col gap-4 pt-4">
+                              {func.inputs.map((input, idx) => (
+                                <div key={idx} className="flex flex-col gap-2">
+                                  <label className="text-sm font-medium w-full">
+                                    {input.name} ({input.type})
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="border border-[#8E8E8E] p-2 "
+                                    placeholder={`Enter ${input.type}`}
+                                    value={
+                                      expandedFunctions[func.name][idx]
+                                        ?.value || ""
+                                    }
+                                    onChange={(e) =>
+                                      handleInputChange(
+                                        func.name,
+                                        idx,
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </div>
+                              ))}
+
+                              <button
+                                className={`px-4 py-2 mt-2 w-fit ${
+                                  !address
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : functionResults[func.name]?.loading
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
+                                } text-white`}
+                                onClick={() =>
+                                  handleWriteFunctionCall(func.name)
+                                }
+                                disabled={
+                                  !address ||
+                                  functionResults[func.name]?.loading
+                                }
+                              >
+                                {!address
+                                  ? "Connect Wallet to Execute"
+                                  : functionResults[func.name]?.loading
+                                  ? "Executing..."
+                                  : "Execute"}
+                              </button>
+
+                              {functionResults[func.name]?.data
+                                ?.transaction_hash && (
+                                <div className="mt-2 text-sm">
+                                  <p className="font-medium">
+                                    Transaction Hash:
+                                  </p>
+                                  <a
+                                    href={`/transactions/${
+                                      functionResults[func.name].data
+                                        .transaction_hash
+                                    }`}
+                                    className="text-blue-600 hover:text-blue-800 break-all"
+                                  >
+                                    {
+                                      functionResults[func.name].data
+                                        .transaction_hash
+                                    }
+                                  </a>
+                                </div>
+                              )}
+
+                              {functionResults[func.name] && (
+                                <div className="mt-4">
+                                  {functionResults[func.name].loading ? (
+                                    <div className="text-gray-600">
+                                      Loading...
+                                    </div>
+                                  ) : functionResults[func.name].error ? (
+                                    <div className="text-red-500 p-3 bg-red-50 border border-red-200">
+                                      <p className="font-medium">Error:</p>
+                                      <p className="text-sm">
+                                        {functionResults[func.name].error}
+                                      </p>
+                                    </div>
+                                  ) : functionResults[func.name].data !==
+                                    null ? (
+                                    <div className="bg-gray-50 p-3 border border-gray-200">
+                                      <p className="font-medium text-sm">
+                                        Result:
+                                      </p>
+                                      <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words">
+                                        {JSON.stringify(
+                                          functionResults[func.name].data,
+                                          null,
+                                          2
+                                        )}
+                                      </pre>
+                                    </div>
+                                  ) : null}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 ) : (
                   <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
                     <span className="text-[#D0D0D0]">No data found</span>
