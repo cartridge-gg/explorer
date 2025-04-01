@@ -1,5 +1,5 @@
 import useChain from "../hooks/useChain";
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 
 export default function ChainDisplay(
   props: React.HTMLAttributes<HTMLDivElement>
@@ -7,6 +7,7 @@ export default function ChainDisplay(
   const { id: chainId, isLoading, error } = useChain();
   const containerRef = useRef<HTMLDivElement>(null);
   const [indicatorSize, setIndicatorSize] = useState<number>(0);
+  const [showCopiedOverlay, setShowCopiedOverlay] = useState<boolean>(false);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -27,10 +28,22 @@ export default function ChainDisplay(
       : chainId.asDisplay;
   }, [chainId]);
 
+  const handleClick = useCallback(() => {
+    if (chainId && chainId.id) {
+      navigator.clipboard.writeText(chainId.id);
+      setShowCopiedOverlay(true);
+      setTimeout(() => {
+        setShowCopiedOverlay(false);
+      }, 2000);
+    }
+  }, [chainId]);
+
   return (
     <div
       ref={containerRef}
-      className="bg-white w-[105px] border border-borderGray uppercase font-bold flex px-3 py-1 gap-3 items-center justify-between"
+      onClick={handleClick}
+      title={chainId?.id ? `Copy chain id` : ""}
+      className="bg-white w-[105px] border border-borderGray uppercase font-bold flex px-3 py-1 gap-3 items-center justify-between cursor-pointer relative"
       {...props}
     >
       <div
@@ -50,6 +63,14 @@ export default function ChainDisplay(
       ) : (
         <span>{error || !truncatedName ? "Unknown" : truncatedName}</span>
       )}
+
+      <div
+        className={`absolute inset-0 bg-primary bg-opacity-70 flex items-center justify-center text-white text-xs transition-opacity duration-100 ease-in-out ${
+          showCopiedOverlay ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        Copied!
+      </div>
     </div>
   );
 }
