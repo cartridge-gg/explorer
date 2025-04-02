@@ -1,36 +1,31 @@
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
-import FeltDisplay from "@/shared/components/FeltDisplay";
-import FeltDisplayAsToggle, {
-  FeltDisplayVariants,
-} from "@/shared/components/FeltDisplayAsToggle";
-import FeltList from "@/shared/components/FeltList";
-import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState, useMemo } from "react";
-import { Contract, Result } from "starknet";
-
-type FunctionInput = { name: string; type: string };
+import { useAccount } from "@starknet-react/core";
+import { useCallback, useMemo, useState } from "react";
+import { AccountInterface, Contract, InvokeFunctionResponse } from "starknet";
+import * as types from "./types";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/constants/routes";
 
 // The state of the <FunctionCallAccordionContent/> component
 type FunctionCallAccordionContentState = {
-  inputs: FunctionInputWithValue[];
-  result: Result | null;
+  inputs: types.FunctionInputWithValue[];
+  result: InvokeFunctionResponse | null;
   hasCalled: boolean;
+  loading: boolean;
   error: any;
 };
 
-export interface ContractReadInterfaceProps {
+export interface ContractWriteInterfaceProps {
   contract: Contract;
-  functions?: {
-    name: string;
-    selector: string;
-    inputs: FunctionInput[];
-  }[];
+  functions?: types.Function[];
 }
 
-export default function ContractReadInterface({
+export default function ContractWriteInterface({
   contract,
   functions = [],
-}: ContractReadInterfaceProps) {
+}: ContractWriteInterfaceProps) {
+  const { address, account } = useAccount();
+
   // Create a state object to persist input values across accordion openings/closings
   const [functionItemStates, setFunctionEntryStates] = useState<{
     // a map from the function name to its state (ie AccordionItem content states)
@@ -40,7 +35,7 @@ export default function ContractReadInterface({
   const updateFunctionItemState = useCallback(
     (
       functionName: string,
-      update: Partial<(typeof functionItemStates)[string]>
+      update: Partial<FunctionCallAccordionContentState>
     ) => {
       setFunctionEntryStates((prev) => ({
         ...prev,
@@ -50,6 +45,7 @@ export default function ContractReadInterface({
             error: null,
             result: null,
             hasCalled: false,
+            loading: false,
           }),
           ...update,
         },
@@ -81,6 +77,8 @@ export default function ContractReadInterface({
                 onUpdateState={(update) =>
                   updateFunctionItemState(func.name, update)
                 }
+                account={account}
+                address={address}
               />
             }
           />
@@ -90,21 +88,21 @@ export default function ContractReadInterface({
   );
 }
 
-type FunctionInputWithValue = FunctionInput & {
-  value: string;
-};
-
 interface FunctionCallAccordionContentProps {
   /** The contract instance to interact with */
   contract: Contract;
   /** The name of the function to call on the contract */
   functionName: string;
   /** The function's input arguments definition */
-  args: FunctionInput[];
+  args: { name: string; type: string }[];
   /** Current state of the accordion content, including inputs, results and errors */
   state?: FunctionCallAccordionContentState;
   /** Callback to update the state of this accordion item in order to preserve the state */
   onUpdateState: (update: Partial<FunctionCallAccordionContentState>) => void;
+  /** Connected account */
+  account?: AccountInterface;
+  /** Connected address */
+  address: string | undefined;
 }
 
 function FunctionCallAccordionContent({
@@ -112,11 +110,16 @@ function FunctionCallAccordionContent({
   contract,
   functionName,
   onUpdateState,
-  state = { inputs: [], hasCalled: false, error: null, result: null },
+  account,
+  address,
+  state = {
+    inputs: [],
+    hasCalled: false,
+    error: null,
+    result: null,
+    loading: false,
+  },
 }: FunctionCallAccordionContentProps) {
-  const queryClient = useQueryClient();
-  const [loading, setLoading] = useState(false);
-
   // Initialize input values or return existing ones
   // If there are no inputs yet and args are provided, create initial input state with empty values
   const inputs = useMemo(() => {
@@ -134,37 +137,6 @@ function FunctionCallAccordionContent({
     }
   }, [args, state.inputs, onUpdateState]);
 
-  const handleFunctionCall = useCallback(() => {
-    setLoading(true);
-
-    const calldata = inputs.map((i) => i.value);
-
-    if (!state.hasCalled) {
-      onUpdateState({ hasCalled: true });
-    }
-
-    queryClient
-      .fetchQuery({
-        queryKey: [functionName, ...calldata],
-        queryFn: () => contract.call(functionName, calldata),
-      })
-      .then((result) => {
-        onUpdateState({ result, error: null });
-      })
-      .catch((error) => {
-        console.error("failed to call contract", error);
-        onUpdateState({ error, result: null });
-      })
-      .finally(() => setLoading(false));
-  }, [
-    inputs,
-    contract,
-    queryClient,
-    functionName,
-    onUpdateState,
-    state.hasCalled,
-  ]);
-
   const handleInputChange = useCallback(
     (inputIndex: number, value: string) => {
       const newInputs = [...inputs];
@@ -177,18 +149,53 @@ function FunctionCallAccordionContent({
     [inputs, onUpdateState]
   );
 
+  const handleFunctionCall = useCallback(async () => {
+    if (!contract || !account) {
+      onUpdateState({
+        error: "Please connect your wallet first",
+        result: null,
+        loading: false,
+        hasCalled: true,
+      });
+      return;
+    }
+
+    onUpdateState({ loading: true, hasCalled: true });
+
+    const calldata = inputs.map((i) => i.value);
+
+    try {
+      const result = await account.execute([
+        {
+          contractAddress: contract.address,
+          entrypoint: functionName,
+          calldata: calldata,
+        },
+      ]);
+
+      onUpdateState({ result, error: null, loading: false });
+    } catch (error) {
+      console.error("failed to execute contract", error);
+      onUpdateState({ error, result: null, loading: false });
+    }
+  }, [inputs, contract, account, functionName, onUpdateState]);
+
   return (
     <div className="flex flex-col gap-[10px] items-end">
       <button
-        disabled={loading}
+        disabled={!address || state.loading}
         onClick={handleFunctionCall}
         className={`px-3 py-[2px] text-sm uppercase font-bold w-fit  ${
-          loading
+          !address || state.loading
             ? "bg-gray-400 cursor-not-allowed"
             : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
         } text-white`}
       >
-        {loading ? "Calling..." : "Call"}
+        {!address
+          ? "Connect Wallet to Execute"
+          : state.loading
+          ? "Executing..."
+          : "Execute"}
       </button>
 
       {args.length !== 0 ? (
@@ -223,9 +230,8 @@ function FunctionCallAccordionContent({
       {state.hasCalled ? (
         <div className="w-full flex flex-col gap-1">
           <p className="font-bold text-sm uppercase">Result</p>
-
           <div className="bg-white">
-            {loading ? (
+            {state.loading ? (
               <div className="text-gray-600">Loading...</div>
             ) : state.error ? (
               <div className="text-red-500 p-3 bg-red-50 border border-red-200">
@@ -245,25 +251,28 @@ function FunctionCallAccordionContent({
 }
 
 interface FunctionCallResultProps {
-  data: Result;
+  data: InvokeFunctionResponse;
 }
 
 function FunctionCallResult({ data }: FunctionCallResultProps) {
-  const [display, setDisplay] = useState<FeltDisplayVariants>("hex");
+  const navigate = useNavigate();
+
+  const handleTxClick = useCallback(
+    (txHash: string) => {
+      navigate(ROUTES.TRANSACTION_DETAILS.urlPath.replace(":txHash", txHash));
+    },
+    [navigate]
+  );
 
   return (
-    <div className="p-3 border border-borderGray flex flex-col gap-3">
-      {Array.isArray(data) ? (
-        <FeltList list={data as bigint[]} displayAs="hex" />
-      ) : (
-        <>
-          <FeltDisplayAsToggle
-            onChange={(value) => setDisplay(value as FeltDisplayVariants)}
-            asString={true}
-          />
-          <FeltDisplay value={data} displayAs={display} />
-        </>
-      )}
+    <div className="px-3 py-2 border border-borderGray">
+      <p className="">Transaction Hash</p>
+      <a
+        onClick={() => handleTxClick(data.transaction_hash)}
+        className="underline hover:text-borderGray break-all cursor-pointer"
+      >
+        {data.transaction_hash}
+      </a>
     </div>
   );
 }

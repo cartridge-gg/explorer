@@ -5,22 +5,54 @@ import FeltDisplayAsToggle, {
 } from "@/shared/components/FeltDisplayAsToggle";
 import FeltList from "@/shared/components/FeltList";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { Contract, Result } from "starknet";
+import * as types from "./types";
+
+// The state of the <FunctionCallAccordionContent/> component
+type FunctionCallAccordionContentState = {
+  inputs: types.FunctionInputWithValue[];
+  hasCalled: boolean;
+  result: Result | null;
+  error: any;
+};
 
 export interface ContractReadInterfaceProps {
   contract: Contract;
-  functions?: {
-    name: string;
-    inputs: { name: string; type: string }[];
-    selector: string;
-  }[];
+  functions?: types.Function[];
 }
 
 export default function ContractReadInterface({
   contract,
   functions = [],
 }: ContractReadInterfaceProps) {
+  // Create a state object to persist input values across accordion openings/closings
+  const [functionItemStates, setFunctionEntryStates] = useState<{
+    // a map from the function name to its state (ie AccordionItem content states)
+    [key: string]: FunctionCallAccordionContentState;
+  }>({});
+
+  const updateFunctionItemState = useCallback(
+    (
+      functionName: string,
+      update: Partial<(typeof functionItemStates)[string]>
+    ) => {
+      setFunctionEntryStates((prev) => ({
+        ...prev,
+        [functionName]: {
+          ...(prev[functionName] || {
+            inputs: [],
+            error: null,
+            result: null,
+            hasCalled: false,
+          }),
+          ...update,
+        },
+      }));
+    },
+    []
+  );
+
   return (
     <Accordion
       items={() =>
@@ -40,6 +72,10 @@ export default function ContractReadInterface({
                 contract={contract}
                 functionName={func.name}
                 args={func.inputs}
+                state={functionItemStates[func.name]}
+                onUpdateState={(update) =>
+                  updateFunctionItemState(func.name, update)
+                }
               />
             }
           />
@@ -49,39 +85,53 @@ export default function ContractReadInterface({
   );
 }
 
-type FunctionInput = {
-  name: string;
-  type: string;
-  value: string;
-};
-
 interface FunctionCallAccordionContentProps {
+  /** The contract instance to interact with */
   contract: Contract;
+  /** The name of the function to call on the contract */
   functionName: string;
-  args: { name: string; type: string }[];
+  /** The function's input arguments definition */
+  args: types.FunctionInput[];
+  /** Current state of the accordion content, including inputs, results and errors */
+  state?: FunctionCallAccordionContentState;
+  /** Callback to update the state of this accordion item in order to preserve the state */
+  onUpdateState: (update: Partial<FunctionCallAccordionContentState>) => void;
 }
 
 function FunctionCallAccordionContent({
+  args,
   contract,
   functionName,
-  args,
+  onUpdateState,
+  state = { inputs: [], hasCalled: false, error: null, result: null },
 }: FunctionCallAccordionContentProps) {
   const queryClient = useQueryClient();
-
-  const [hasCalled, setHasCalled] = useState(false);
-  const [error, setError] = useState<any>();
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<Result | null>(null);
 
-  const [inputs, setInputs] = useState<FunctionInput[]>([]);
+  // Initialize input values or return existing ones
+  // If there are no inputs yet and args are provided, create initial input state with empty values
+  const inputs = useMemo(() => {
+    if (state.inputs.length === 0 && args.length > 0) {
+      const initialInputs = args.map((arg) => ({
+        name: arg.name,
+        type: arg.type,
+        value: "",
+      }));
+
+      onUpdateState({ inputs: initialInputs });
+      return initialInputs;
+    } else {
+      return state.inputs;
+    }
+  }, [args, state.inputs, onUpdateState]);
 
   const handleFunctionCall = useCallback(() => {
-    const calldata = inputs.map((i) => i.value);
-
     setLoading(true);
 
-    if (!hasCalled) {
-      setHasCalled(true);
+    const calldata = inputs.map((i) => i.value);
+
+    if (!state.hasCalled) {
+      onUpdateState({ hasCalled: true });
     }
 
     queryClient
@@ -89,25 +139,34 @@ function FunctionCallAccordionContent({
         queryKey: [functionName, ...calldata],
         queryFn: () => contract.call(functionName, calldata),
       })
-      .then(setResult)
+      .then((result) => {
+        onUpdateState({ result, error: null });
+      })
       .catch((error) => {
         console.error("failed to call contract", error);
-        setError(error);
+        onUpdateState({ error, result: null });
       })
       .finally(() => setLoading(false));
-  }, [queryClient, contract, functionName, inputs]);
+  }, [
+    inputs,
+    contract,
+    queryClient,
+    functionName,
+    onUpdateState,
+    state.hasCalled,
+  ]);
 
-  const handleInputChange = useCallback((inputIndex: number, value: string) => {
-    setInputs((prev) => {
-      const newInputs = [...(prev || [])];
+  const handleInputChange = useCallback(
+    (inputIndex: number, value: string) => {
+      const newInputs = [...inputs];
       newInputs[inputIndex] = {
         ...newInputs[inputIndex],
         value: value,
       };
-
-      return newInputs;
-    });
-  }, []);
+      onUpdateState({ inputs: newInputs });
+    },
+    [inputs, onUpdateState]
+  );
 
   return (
     <div className="flex flex-col gap-[10px] items-end">
@@ -140,6 +199,7 @@ function FunctionCallAccordionContent({
                     type="text"
                     className="px-2 py-1 text-left w-full"
                     placeholder={`${input.type}`}
+                    value={inputs[idx]?.value || ""}
                     onChange={(e) => handleInputChange(idx, e.target.value)}
                   />
                 </td>
@@ -151,20 +211,20 @@ function FunctionCallAccordionContent({
         <></>
       )}
 
-      {hasCalled ? (
+      {state.hasCalled ? (
         <div className="w-full flex flex-col gap-1">
           <p className="font-bold text-sm uppercase">Result</p>
 
           <div className="bg-white">
             {loading ? (
               <div className="text-gray-600">Loading...</div>
-            ) : error ? (
+            ) : state.error ? (
               <div className="text-red-500 p-3 bg-red-50 border border-red-200">
                 <p className="font-medium">Error:</p>
-                <p className="text-sm">{error}</p>
+                <p className="text-sm">{state.error.toString()}</p>
               </div>
-            ) : result !== null ? (
-              <FunctionCallResult data={result} />
+            ) : state.result !== null ? (
+              <FunctionCallResult data={state.result} />
             ) : null}
           </div>
         </div>
@@ -183,7 +243,7 @@ function FunctionCallResult({ data }: FunctionCallResultProps) {
   const [display, setDisplay] = useState<FeltDisplayVariants>("hex");
 
   return (
-    <div className="p-3 border border-borderGray flex flex-col gap-3">
+    <div className="px-3 py-2  border border-borderGray flex flex-col gap-3">
       {Array.isArray(data) ? (
         <FeltList list={data as bigint[]} displayAs="hex" />
       ) : (

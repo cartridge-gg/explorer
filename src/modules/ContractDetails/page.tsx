@@ -4,8 +4,6 @@ import { truncateString } from "@/shared/utils/string";
 import { useCallback, useEffect, useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Contract } from "starknet";
-import { FunctionResult } from "@/types/types";
-import { useAccount, useDisconnect } from "@starknet-react/core";
 import WalletConnectModal from "@/shared/components/wallet_connect";
 import { BreadcrumbPage } from "@cartridge/ui-next";
 import {
@@ -19,20 +17,12 @@ import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";
-import ContractReadInterface from "./ContractInterface";
+import ContractReadInterface from "./components/ReadContractInterface";
+import ContractWriteInterface from "./components/WriteContractInterface";
 
 const DataTabs = ["Read Contract", "Write Contract"];
 
-interface FunctionInput {
-  name: string;
-  type: string;
-  value: string;
-}
-
 export default function ContractDetails() {
-  const { disconnect } = useDisconnect();
-  const { address, account, status } = useAccount();
-
   const { contractAddress } = useParams<{
     contractAddress: string;
   }>();
@@ -56,14 +46,6 @@ export default function ContractDetails() {
       selector: string;
     }[]
   >([]);
-
-  const [expandedFunctions, setExpandedFunctions] = useState<
-    Record<string, FunctionInput[]>
-  >({});
-
-  const [functionResults, setFunctionResults] = useState<
-    Record<string, FunctionResult<any>>
-  >({});
 
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
 
@@ -121,79 +103,6 @@ export default function ContractDetails() {
     if (!contractAddress) return;
     fetchContractDetails();
   }, [contractAddress, fetchContractDetails]);
-
-  const handleInputChange = (
-    functionName: string,
-    inputIndex: number,
-    value: string
-  ) => {
-    setExpandedFunctions((prev) => {
-      const functionInputs = [...(prev[functionName] || [])];
-      functionInputs[inputIndex] = {
-        ...functionInputs[inputIndex],
-        value: value,
-      };
-      return {
-        ...prev,
-        [functionName]: functionInputs,
-      };
-    });
-  };
-
-  const handleWriteFunctionCall = async (functionName: string) => {
-    if (!contract || !account) {
-      setFunctionResults((prev) => ({
-        ...prev,
-        [functionName]: {
-          loading: false,
-          error: "Please connect your wallet first",
-          data: null,
-        },
-      }));
-      return;
-    }
-
-    setFunctionResults((prev) => ({
-      ...prev,
-      [functionName]: {
-        loading: true,
-        error: null,
-        data: null,
-      },
-    }));
-
-    try {
-      const inputs =
-        expandedFunctions[functionName]?.map((input) => input.value) || [];
-
-      // Execute the transaction using account
-      const result = await account.execute([
-        {
-          contractAddress: contract.address,
-          entrypoint: functionName,
-          calldata: inputs,
-        },
-      ]);
-
-      setFunctionResults((prev) => ({
-        ...prev,
-        [functionName]: {
-          loading: false,
-          error: null,
-          data: result,
-        },
-      }));
-    } catch (error) {
-      setFunctionResults((prev) => ({
-        ...prev,
-        [functionName]: {
-          loading: false,
-          error: error instanceof Error ? error.message : "An error occurred",
-          data: null,
-        },
-      }));
-    }
-  };
 
   const { balances, isStrkLoading, isEthLoading } =
     useBalances(contractAddress);
@@ -283,158 +192,10 @@ export default function ContractDetails() {
                     functions={readFunctions}
                   />
                 ) : selectedDataTab === "Write Contract" ? (
-                  <div className="flex flex-col gap-4">
-                    {writeFunctions.map((func, index) => (
-                      <div
-                        key={index}
-                        className="flex flex-col p-4 border border-[#8E8E8E] border-dashed"
-                      >
-                        <div
-                          className="flex justify-between items-center cursor-pointer"
-                          onClick={() => {
-                            if (!expandedFunctions[func.name]) {
-                              setExpandedFunctions((prev) => ({
-                                ...prev,
-                                [func.name]: func.inputs.map((input) => ({
-                                  name: input.name,
-                                  type: input.type,
-                                  value: "",
-                                })),
-                              }));
-                            } else {
-                              setExpandedFunctions((prev) => {
-                                const newState = { ...prev };
-                                delete newState[func.name];
-                                return newState;
-                              });
-                            }
-                          }}
-                        >
-                          <div className="flex flex-row gap-2 w-full flex-wrap">
-                            <p className="font-bold">{func.name}</p>
-                            <div className="flex flex-row gap-2 flex-wrap text-gray-500">
-                              (
-                              {func.inputs.map((input, idx) => (
-                                <p key={idx} className="text-sm">
-                                  {idx === 0 ? "" : ","}
-                                  {input.name}
-                                </p>
-                              ))}
-                              )
-                            </div>
-                          </div>
-                          <span>
-                            {expandedFunctions[func.name] ? "−" : "+"}
-                          </span>
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                          {expandedFunctions[func.name] && (
-                            <div className="flex flex-col gap-4 pt-4">
-                              {func.inputs.map((input, idx) => (
-                                <div key={idx} className="flex flex-col gap-2">
-                                  <label className="text-sm font-medium w-full">
-                                    {input.name} ({input.type})
-                                  </label>
-                                  <input
-                                    type="text"
-                                    className="border border-[#8E8E8E] p-2 "
-                                    placeholder={`Enter ${input.type}`}
-                                    value={
-                                      expandedFunctions[func.name][idx]
-                                        ?.value || ""
-                                    }
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        func.name,
-                                        idx,
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </div>
-                              ))}
-
-                              <button
-                                className={`px-4 py-2 mt-2 w-fit ${
-                                  !address
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : functionResults[func.name]?.loading
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
-                                } text-white`}
-                                onClick={() =>
-                                  handleWriteFunctionCall(func.name)
-                                }
-                                disabled={
-                                  !address ||
-                                  functionResults[func.name]?.loading
-                                }
-                              >
-                                {!address
-                                  ? "Connect Wallet to Execute"
-                                  : functionResults[func.name]?.loading
-                                  ? "Executing..."
-                                  : "Execute"}
-                              </button>
-
-                              {functionResults[func.name]?.data
-                                ?.transaction_hash && (
-                                <div className="mt-2 text-sm">
-                                  <p className="font-medium">
-                                    Transaction Hash:
-                                  </p>
-                                  <a
-                                    href={`/transactions/${
-                                      functionResults[func.name].data
-                                        .transaction_hash
-                                    }`}
-                                    className="text-blue-600 hover:text-blue-800 break-all"
-                                  >
-                                    {
-                                      functionResults[func.name].data
-                                        .transaction_hash
-                                    }
-                                  </a>
-                                </div>
-                              )}
-
-                              {functionResults[func.name] && (
-                                <div className="mt-4">
-                                  {functionResults[func.name].loading ? (
-                                    <div className="text-gray-600">
-                                      Loading...
-                                    </div>
-                                  ) : functionResults[func.name].error ? (
-                                    <div className="text-red-500 p-3 bg-red-50 border border-red-200">
-                                      <p className="font-medium">Error:</p>
-                                      <p className="text-sm">
-                                        {functionResults[func.name].error}
-                                      </p>
-                                    </div>
-                                  ) : functionResults[func.name].data !==
-                                    null ? (
-                                    <div className="bg-gray-50 p-3 border border-gray-200">
-                                      <p className="font-medium text-sm">
-                                        Result:
-                                      </p>
-                                      <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-words">
-                                        {JSON.stringify(
-                                          functionResults[func.name].data,
-                                          null,
-                                          2
-                                        )}
-                                      </pre>
-                                    </div>
-                                  ) : null}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <ContractWriteInterface
+                    contract={contract}
+                    functions={writeFunctions}
+                  />
                 ) : (
                   <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
                     <span className="text-[#D0D0D0]">No data found</span>

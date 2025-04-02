@@ -58,7 +58,6 @@ export function CallCartProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Custom hook for using the context
 export function useCallCart() {
   const context = useContext(CallCartContext);
   if (context === undefined) {
@@ -67,8 +66,7 @@ export function useCallCart() {
   return context;
 }
 
-// Utility functions for common operations with wallet connection check
-export function useCallCartActions() {
+export function useCallCartDispatch() {
   const { status } = useAccount();
   const { dispatch } = useCallCart();
 
