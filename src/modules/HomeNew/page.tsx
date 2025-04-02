@@ -16,13 +16,16 @@ export default function Home() {
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">
-      <AccountDisplay className="absolute top-0 right-0 h-[34px]" />
+      <div className="absolute top-0 right-0 h-[34px]">
+        <AccountDisplay className="h-full" />
+      </div>
 
       <div className="flex flex-col gap-2 p-1 bg-white w-[520px]">
         <div className="flex gap-2 w-full uppercase text-sm font-bold">
           <div className="h-[25px] px-3 py-1 bg-primary flex-1 text-white flex items-center">
             Explorer
           </div>
+
           <ChainDisplay />
         </div>
 

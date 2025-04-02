@@ -2,8 +2,6 @@ import "./App.css";
 import { ROUTES } from "./constants/routes";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Header from "./shared/components/header";
-import { CallCartProvider } from "./store/ShoppingCartProvider";
-import { ToastProvider } from "./shared/components/toast";
 
 function MainContent() {
   const location = useLocation();
@@ -37,11 +35,7 @@ function App() {
         import.meta.env.APP_BASE_PATH || "/"
       }
     >
-      <ToastProvider>
-        <CallCartProvider>
-          <MainContent />
-        </CallCartProvider>
-      </ToastProvider>
+      <MainContent />
     </BrowserRouter>
   );
 }
