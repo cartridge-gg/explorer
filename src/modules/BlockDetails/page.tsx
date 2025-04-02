@@ -28,6 +28,7 @@ import TxList from "./TxList";
 import EventList from "./EventList";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { QUERY_KEYS } from "@/services/starknet_provider_config";
+import BlockNavigation from "./BlockNavigation";
 
 const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
 
@@ -142,7 +143,7 @@ export default function BlockDetails() {
           <BreadcrumbItem>{blockId}</BreadcrumbItem>
         </Breadcrumb>
 
-        {/* <BlockNavigation /> */}
+        <BlockNavigation currentBlockNumber={BlockReceipt?.block_number} />
       </div>
 
       <PageHeader
