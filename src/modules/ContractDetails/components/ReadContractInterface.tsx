@@ -176,7 +176,7 @@ function FunctionCallAccordionContent({
         className={`px-3 py-[2px] text-sm uppercase font-bold w-fit  ${
           loading
             ? "bg-gray-400 cursor-not-allowed"
-            : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
+            : "bg-primary hover:bg-[#6E6E6E]"
         } text-white`}
       >
         {loading ? "Calling..." : "Call"}

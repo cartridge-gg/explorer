@@ -5,6 +5,8 @@ import { AccountInterface, Contract, InvokeFunctionResponse } from "starknet";
 import * as types from "./types";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
+import AddIcon from "@/shared/icons/ Add";
+import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
 
 // The state of the <FunctionCallAccordionContent/> component
 type FunctionCallAccordionContentState = {
@@ -149,6 +151,22 @@ function FunctionCallAccordionContent({
     [inputs, onUpdateState]
   );
 
+  const { addCall, isWalletConnected } = useCallCartDispatch();
+
+  const handleAddToCart = useCallback(() => {
+    if (!contract || !isWalletConnected) {
+      return;
+    }
+
+    const calldata = inputs.map((i) => i.value);
+
+    addCall({
+      contractAddress: contract.address,
+      entrypoint: functionName,
+      calldata: calldata,
+    });
+  }, [inputs, contract, functionName, addCall, isWalletConnected]);
+
   const handleFunctionCall = useCallback(async () => {
     if (!contract || !account) {
       onUpdateState({
@@ -182,21 +200,43 @@ function FunctionCallAccordionContent({
 
   return (
     <div className="flex flex-col gap-[10px] items-end">
-      <button
-        disabled={!address || state.loading}
-        onClick={handleFunctionCall}
-        className={`px-3 py-[2px] text-sm uppercase font-bold w-fit  ${
-          !address || state.loading
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-[#4A4A4A] hover:bg-[#6E6E6E]"
-        } text-white`}
-      >
-        {!address
-          ? "Connect Wallet to Execute"
-          : state.loading
-          ? "Executing..."
-          : "Execute"}
-      </button>
+      <div className="flex gap-2">
+        <button
+          onClick={handleAddToCart}
+          disabled={!isWalletConnected}
+          className={`bg-white w-[19px] h-[19px] flex items-center justify-center border ${
+            !isWalletConnected
+              ? "border-gray-300 text-gray-300 cursor-not-allowed"
+              : "border-borderGray hover:border-0 hover:bg-primary hover:text-white cursor-pointer"
+          }`}
+          title={
+            !isWalletConnected || !address
+              ? "Please connect your wallet first"
+              : "Add to cart"
+          }
+        >
+          <AddIcon />
+        </button>
+
+        <button
+          disabled={!address || state.loading}
+          onClick={handleFunctionCall}
+          className={`px-3 py-[2px] text-sm uppercase font-bold w-fit text-white ${
+            !address || state.loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-primary hover:bg-[#6E6E6E]"
+          }`}
+          title={
+            !address
+              ? "Please connect your wallet first"
+              : state.loading
+              ? "Transaction in progress"
+              : ""
+          }
+        >
+          {state.loading ? "Executing..." : "Execute"}
+        </button>
+      </div>
 
       {args.length !== 0 ? (
         <table className="bg-white overflow-x w-full">
