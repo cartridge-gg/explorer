@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, ReactNode } from "react";
 import type { Call } from "starknet";
 import { useAccount } from "@starknet-react/core";
+import { useToast } from "../shared/components/toast";
 
 // Define the state structure
 interface CallCartState {
@@ -11,6 +12,7 @@ interface CallCartState {
 type CallCartAction =
   | { type: "ADD_CALL"; call: Call }
   | { type: "REMOVE_CALL"; index: number }
+  | { type: "REORDER_CALLS"; sourceIndex: number; destinationIndex: number }
   | { type: "CLEAR_CALLS" };
 
 // Initial state
@@ -40,6 +42,13 @@ function callCartReducer(
         ...state,
         calls: state.calls.filter((_, index) => index !== action.index),
       };
+    case "REORDER_CALLS": {
+      const { sourceIndex, destinationIndex } = action;
+      const newCalls = Array.from(state.calls);
+      const [removed] = newCalls.splice(sourceIndex, 1);
+      newCalls.splice(destinationIndex, 0, removed);
+      return { ...state, calls: newCalls };
+    }
     case "CLEAR_CALLS":
       return { ...state, calls: [] };
     default:
@@ -78,7 +87,6 @@ export function useCallCartDispatch() {
         console.warn("cannot add call: wallet not connected");
         return;
       }
-
       dispatch({ type: "ADD_CALL", call });
     },
     removeCall: (index: number) => {
@@ -86,15 +94,20 @@ export function useCallCartDispatch() {
         console.warn("cannot remove call: wallet not connected");
         return;
       }
-
       dispatch({ type: "REMOVE_CALL", index });
+    },
+    reorderCalls: (sourceIndex: number, destinationIndex: number) => {
+      if (!isWalletConnected) {
+        console.warn("cannot reorder calls: wallet not connected");
+        return;
+      }
+      dispatch({ type: "REORDER_CALLS", sourceIndex, destinationIndex });
     },
     clearCalls: () => {
       if (!isWalletConnected) {
         console.warn("cannot clear calls: wallet not connected");
         return;
       }
-
       dispatch({ type: "CLEAR_CALLS" });
     },
     isWalletConnected,

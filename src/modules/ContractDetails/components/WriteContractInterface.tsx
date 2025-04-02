@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import AddIcon from "@/shared/icons/ Add";
 import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
+import { useToast } from "@/shared/components/toast";
 
 // The state of the <FunctionCallAccordionContent/> component
 type FunctionCallAccordionContentState = {
@@ -122,6 +123,8 @@ function FunctionCallAccordionContent({
     loading: false,
   },
 }: FunctionCallAccordionContentProps) {
+  const { toast } = useToast();
+
   // Initialize input values or return existing ones
   // If there are no inputs yet and args are provided, create initial input state with empty values
   const inputs = useMemo(() => {
@@ -161,11 +164,12 @@ function FunctionCallAccordionContent({
     const calldata = inputs.map((i) => i.value);
 
     addCall({
-      contractAddress: contract.address,
-      entrypoint: functionName,
       calldata: calldata,
+      entrypoint: functionName,
+      contractAddress: contract.address,
     });
-  }, [inputs, contract, functionName, addCall, isWalletConnected]);
+    toast(`Function call added: ${functionName}`, "success");
+  }, [toast, inputs, contract, functionName, addCall, isWalletConnected]);
 
   const handleFunctionCall = useCallback(async () => {
     if (!contract || !account) {

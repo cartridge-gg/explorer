@@ -8,7 +8,7 @@ type FeltDisplayProps = {
 
 export default function FeltDisplay({
   value,
-  displayAs = "dec",
+  displayAs = "hex",
 }: FeltDisplayProps) {
   // Parse the value as bigint first
   const felt = BigInt(value);
