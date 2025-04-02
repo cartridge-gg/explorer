@@ -1,1 +1,1 @@
-Dojo Explorer
+![Explorer](.github/banner.png)
