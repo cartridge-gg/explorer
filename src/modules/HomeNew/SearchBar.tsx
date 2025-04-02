@@ -154,7 +154,7 @@ export default function HomeSearchBar() {
 
   return (
     <div
-      className={`bg-white w-[520px] h-[42px] flex relative border border-borderGray items-center ${
+      className={`bg-white min-w-[200px] w-full h-[42px] flex relative border border-borderGray items-center ${
         isDropdownOpen ? "border-b-0" : ""
       }`}
     >

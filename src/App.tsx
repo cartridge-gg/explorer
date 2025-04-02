@@ -9,8 +9,13 @@ function MainContent() {
   const isHomePage = location.pathname === "/";
 
   return (
-    <>
+    <div
+      className={`flex flex-col gap-[20px] px-[20px] py-[25px] xl:px-[45px] ${
+        isHomePage ? "h-screen" : "lg:h-screen"
+      }`}
+    >
       {!isHomePage && <Header />}
+
       <Routes>
         {Object.keys(ROUTES).map((routeKey, index) => {
           const route = ROUTES[routeKey as keyof typeof ROUTES];
@@ -19,7 +24,7 @@ function MainContent() {
           );
         })}
       </Routes>
-    </>
+    </div>
   );
 }
 
@@ -32,9 +37,7 @@ function App() {
       }
     >
       <CallCartProvider>
-        <div className="flex flex-col gap-[20px] px-[20px] py-[25px] xl:px-[45px] lg:h-screen">
-          <MainContent />
-        </div>
+        <MainContent />
       </CallCartProvider>
     </BrowserRouter>
   );

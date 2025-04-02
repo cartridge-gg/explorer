@@ -23,4 +23,5 @@ export const QUERY_KEYS = {
   getTransaction: ["getTransaction"],
   getBlockWithTxHashes: ["getBlockWithTxHashes"],
   getBlock: ["getBlock"],
+  specVersion: ["specVersion"],
 };
