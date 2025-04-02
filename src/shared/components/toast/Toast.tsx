@@ -65,7 +65,7 @@ export const Toast = ({
   return (
     <div
       className={cn(
-        "text-sm flex items-center gap-2 p-2 mb-1 max-w-xs shadow-sm transition-all duration-300 ease-in-out border",
+        "text-sm flex items-center gap-2 px-2 py-1 mb-1 max-w-xs shadow-sm transition-all duration-300 ease-in-out border",
         bgColor,
         textColor,
         borderColor,
