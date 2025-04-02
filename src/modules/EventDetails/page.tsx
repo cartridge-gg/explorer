@@ -19,7 +19,7 @@ import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 
-const DisplayFormat = ["decimal", "hex", "string"] as const;
+const DisplayFormat = ["dec", "hex", "string"] as const;
 
 export default function EventDetails() {
   const { eventId } = useParams<{
