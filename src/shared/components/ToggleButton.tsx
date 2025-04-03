@@ -27,7 +27,7 @@ export default function ToggleButton<T extends ToggleVariants>({
     <Selector
       selected={selected}
       onTabSelect={handleTabSelect}
-      className={`w-min bg-white z-10 h-[15px] ${className || ""}`}
+      className={`w-min bg-white h-[15px] ${className || ""}`}
     >
       {(variants as readonly string[]).map((type) => (
         <SelectorItem
