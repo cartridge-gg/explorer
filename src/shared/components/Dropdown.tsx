@@ -11,6 +11,7 @@
  * a cohesive dropdown selection interface without prop drilling.
  */
 
+import * as icons from "lucide-react";
 import React, {
   createContext,
   useCallback,
@@ -137,7 +138,13 @@ export function Dropdown({
           onClick={() => setIsOpen(!isOpen)}
         >
           <span>{selected || placeholder}</span>
-          <span>{isOpen ? "▲" : "▼"}</span>
+          <span>
+            {isOpen ? (
+              <icons.ChevronUp strokeWidth={2.3} width={12} />
+            ) : (
+              <icons.ChevronDown strokeWidth={2.3} width={12} />
+            )}
+          </span>
         </div>
 
         {isOpen && (
