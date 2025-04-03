@@ -180,7 +180,7 @@ export default function HomeSearchBar() {
         <SearchTool />
       </div>
 
-      {result && isDropdownOpen ? (
+      {isDropdownOpen ? (
         <div className="search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full">
           <div
             // hack for doing custom spacing for the dashed line
@@ -203,7 +203,7 @@ export default function HomeSearchBar() {
                 <span>{truncateString(result.value, isMobile ? 10 : 25)}</span>
               </div>
             ) : (
-              <div className="flex px-2 py-2 items-center justify-center text-sm lowercase">
+              <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-borderGray">
                 <div>No results found</div>
               </div>
             )}
