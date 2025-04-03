@@ -4,7 +4,9 @@ import { useAccount, useDisconnect } from "@starknet-react/core";
 import FeltDisplay from "./FeltDisplay";
 import * as icons from "lucide-react";
 import { truncateString } from "../utils/string";
-import { Call, InvokeFunctionResponse } from "starknet";
+import { Call } from "starknet";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/constants/routes";
 
 interface AccountModalProps {
   isOpen: boolean;
@@ -116,6 +118,115 @@ const CallDetailModal: React.FC<CallDetailModalProps> = ({
   );
 };
 
+// Execution result view component
+interface ExecutionResultViewProps {
+  txHash: string;
+  onBack: () => void;
+  onModalClose: () => void;
+}
+
+function ExecutionResultView({
+  txHash,
+  onBack,
+  onModalClose,
+}: ExecutionResultViewProps) {
+  const navigate = useNavigate();
+
+  const handleTxHashClick = useCallback(() => {
+    onModalClose();
+    navigate(ROUTES.TRANSACTION_DETAILS.urlPath.replace(":txHash", txHash));
+  }, [onModalClose, navigate, txHash]);
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex justify-between items-center mb-6">
+        <button
+          onClick={onBack}
+          className="flex items-center justify-center border border-borderGray w-[25px] h-[25px] hover:bg-primary hover:border-0 hover:text-white"
+        >
+          <icons.ChevronLeft strokeWidth={1.5} width={15} height={15} />
+        </button>
+      </div>
+
+      <div className="flex flex-col flex-1 overflow-y-auto">
+        <h3 className="font-bold uppercase text-lg mb-3">Submitted</h3>
+
+        <div className="flex flex-col justify-between flex-1">
+          <div className="border border-borderGray p-[10px]">
+            <div className="font-bold uppercase mb-1">Tx Hash</div>
+            <a
+              onClick={handleTxHashClick}
+              className="break-all cursor-pointer hover:underline"
+            >
+              {txHash}
+            </a>
+          </div>
+
+          <div className="flex items-center gap-5 p-[10px] text-xs bg-borderGray">
+            <div className="font-bold uppercase">Note</div>
+            <div>
+              Transaction has been submitted to the network. It may take a few
+              minutes to be processed.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Error result component
+interface ErrorResultViewProps {
+  error: any;
+  onBack: () => void;
+}
+
+const ErrorResultView: React.FC<ErrorResultViewProps> = ({ error, onBack }) => {
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex justify-between items-center mb-6">
+        <button
+          onClick={onBack}
+          className="flex items-center justify-center border border-borderGray w-[25px] h-[25px] hover:bg-primary hover:border-0 hover:text-white"
+        >
+          <icons.ChevronLeft strokeWidth={1.5} width={15} height={15} />
+        </button>
+        {/* <h2 className="text-md font-bold uppercase">Transaction Failed</h2> */}
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        <div className="flex items-center gap-2 mb-4">
+          {/* <div className="w-6 h-6 bg-red-100 flex items-center justify-center">
+            <icons.X
+              className="text-red-600"
+              strokeWidth={2}
+              width={14}
+              height={14}
+            />
+          </div> */}
+          <h3 className="font-bold uppercase">Error During Execution</h3>
+        </div>
+
+        <div className="space-y-4">
+          <div className="border border-borderGray p-[10px]">
+            <div className="font-bold uppercase mb-1">Message</div>
+            <div className="text-red-600">
+              {error?.message || "Unknown error occurred"}
+            </div>
+          </div>
+
+          <div className="border border-borderGray p-[10px]">
+            <div className="font-bold uppercase mb-1">Details</div>
+            <pre className="text-sm font-mono whitespace-pre-wrap break-all py-2">
+              {JSON.stringify(error, null, 2)}
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 type ExecuteResult = {
   txHash: string | null;
   error: any;
@@ -130,6 +241,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   const { account } = useAccount();
   const { disconnect } = useDisconnect();
   const modalRef = useRef<HTMLDivElement>(null);
+  const { clearCalls } = useCallCartDispatch();
 
   // --------------- COMPONENT LOCAL STATE ----------------
 
@@ -161,6 +273,8 @@ export const AccountModal: React.FC<AccountModalProps> = ({
           loading: false,
           txHash: result.transaction_hash,
         });
+        // Clear calls from the cart after successful execution
+        clearCalls();
       })
       .catch((error) => {
         console.error("failed to execute function calls", error);
@@ -170,7 +284,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
           loading: false,
         });
       });
-  }, [account, state.calls]);
+  }, [account, state.calls, clearCalls]);
 
   // Handle clicking on a call
   const handleCallClick = (index: number, call: Call) => {
@@ -189,6 +303,15 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   // Close expanded call view
   const closeExpandedCall = () => {
     setExpandedCall(null);
+  };
+
+  // Reset execution result state
+  const resetExecutionResult = () => {
+    setExecuteResult({
+      txHash: null,
+      error: null,
+      loading: false,
+    });
   };
 
   // Click outside handler for the entire modal system
@@ -224,6 +347,8 @@ export const AccountModal: React.FC<AccountModalProps> = ({
       if (event.key === "Escape") {
         if (expandedCall) {
           closeExpandedCall(); // Close expanded call first if it's open
+        } else if (executeResult.txHash || executeResult.error) {
+          resetExecutionResult(); // Reset execution result if active
         } else {
           onClose(); // Otherwise close the main modal
         }
@@ -236,7 +361,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     return () => {
       document.removeEventListener("keydown", handleEscKey);
     };
-  }, [isOpen, onClose, expandedCall]);
+  }, [isOpen, onClose, expandedCall, executeResult]);
 
   // Stop scrolling when modal is open
   useEffect(() => {
@@ -250,14 +375,132 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     };
   }, [isOpen]);
 
-  // Close expanded call when main modal is closed
+  // Reset all states when main modal is closed
   useEffect(() => {
     if (!isOpen) {
       setExpandedCall(null);
+      resetExecutionResult();
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const renderMainContent = () => {
+    // If transaction execution has completed (success or error)
+    if (executeResult.txHash) {
+      return (
+        <ExecutionResultView
+          onModalClose={onClose}
+          txHash={executeResult.txHash}
+          onBack={resetExecutionResult}
+        />
+      );
+    }
+
+    // If transaction execution has failed
+    if (executeResult.error) {
+      return (
+        <ErrorResultView
+          error={executeResult.error}
+          onBack={resetExecutionResult}
+        />
+      );
+    }
+
+    // Default view - calls list
+    return (
+      <>
+        <div className="flex flex-row justify-between gap-5 mb-6">
+          <button
+            onClick={onClose}
+            className="flex items-center justify-center border border-borderGray w-[25px] h-[25px] hover:bg-primary hover:border-0 hover:text-white"
+          >
+            <icons.X strokeWidth={1.5} width={15} height={15} />
+          </button>
+
+          <button
+            onClick={() => {
+              disconnect();
+              onClose();
+            }}
+            className="px-2 py-1 w-[73px] text-xs text-[#D25D73]/50 uppercase font-bold border border-[#D25D73] hover:bg-[#D25D73] hover:text-white"
+          >
+            Disconnect
+          </button>
+        </div>
+
+        <div className="overflow-y-auto flex-grow">
+          {/* Function Calls Cart Section */}
+          <div className="h-full grid grid-rows-[min-content_1fr]">
+            <div className="flex justify-between items-end mb-3">
+              <h2 className="w-full flex justify-between gap-3 text-md font-bold uppercase">
+                Calls ({state.calls.length})
+              </h2>
+            </div>
+
+            {state.calls.length === 0 ? (
+              <div className="flex items-center justify-center pt-4 text-xs text-gray-500 lowercase">
+                Empty :(
+              </div>
+            ) : (
+              <div className="flex flex-col justify-between gap-3">
+                <table className="w-full h-min">
+                  <tbody>
+                    {state.calls.map((call, index) => (
+                      <tr
+                        key={index}
+                        onClick={() => handleCallClick(index, call)}
+                        className={`account-call-entry hover:bg-gray-100 cursor-pointer ${
+                          expandedCall && expandedCall.index === index
+                            ? "bg-gray-100"
+                            : ""
+                        }`}
+                      >
+                        <td className="w-[40px]">{index + 1}</td>
+                        <td className="w-[92px] px-[10px]">
+                          {truncateString(call.contractAddress, 3)}
+                        </td>
+                        <td className="italic px-[10px] text-left">
+                          {call.entrypoint}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <button
+                  onClick={handleExecute}
+                  disabled={executeResult.loading}
+                  className={`
+                    bg-primary uppercase font-bold text-white p-2
+                    ${
+                      executeResult.loading
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:bg-opacity-80"
+                    }
+                  `}
+                >
+                  {executeResult.loading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <icons.Loader
+                        className="animate-spin"
+                        strokeWidth={1.5}
+                        width={16}
+                        height={16}
+                      />
+                      <span>Executing...</span>
+                    </div>
+                  ) : (
+                    "Execute"
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
@@ -265,92 +508,13 @@ export const AccountModal: React.FC<AccountModalProps> = ({
         {/* Main Account Modal */}
         <div
           ref={modalRef}
-          className="relative bg-white p-[15px] w-max min-w-[380px] shadow-lg max-w-2xl max-h-[50vh] min-h-[464px] overflow-hidden flex flex-col border border-borderGray"
+          className="relative bg-white p-[15px] w-[380px] shadow-lg max-w-2xl max-h-[50vh] min-h-[464px] overflow-hidden flex flex-col border border-borderGray"
         >
-          <div className="flex flex-row justify-between gap-5 mb-6">
-            <button
-              onClick={onClose}
-              className="flex items-center justify-center border border-borderGray w-[25px] h-[25px] hover:bg-primary hover:border-0 hover:text-white"
-            >
-              <icons.X strokeWidth={1.5} width={15} height={15} />
-            </button>
-
-            <button
-              onClick={() => {
-                disconnect();
-                onClose();
-              }}
-              className="px-2 py-1 w-[73px] text-xs text-[#D25D73]/50 uppercase font-bold border border-[#D25D73] hover:bg-[#D25D73] hover:text-white"
-            >
-              Disconnect
-            </button>
-          </div>
-
-          <div className="overflow-y-auto flex-grow">
-            {/* Function Calls Cart Section */}
-            <div className="h-full grid grid-rows-[min-content_1fr]">
-              <div className="flex justify-between items-end mb-3">
-                <h2 className="w-full flex justify-between gap-3 text-md font-bold uppercase">
-                  Calls ({state.calls.length})
-                </h2>
-
-                {/* {state.calls.length > 0 && (
-                  <button
-                    onClick={() => {
-                      clearCalls();
-                      setExpandedCall(null);
-                    }}
-                    className="px-2 w-[73px] h-full text-xs text-[#D25D73]/50 uppercase font-bold border border-[#D25D73] hover:bg-[#D25D73] hover:text-white"
-                  >
-                    Clear
-                  </button>
-                )} */}
-              </div>
-
-              {state.calls.length === 0 ? (
-                <div className="flex items-center justify-center pt-4 text-xs text-gray-500 lowercase">
-                  Empty :(
-                </div>
-              ) : (
-                <div className="flex flex-col justify-between gap-3">
-                  <table className="w-full h-min">
-                    <tbody>
-                      {state.calls.map((call, index) => (
-                        <tr
-                          key={index}
-                          onClick={() => handleCallClick(index, call)}
-                          className={`account-call-entry hover:bg-gray-100 cursor-pointer ${
-                            expandedCall && expandedCall.index === index
-                              ? "bg-gray-100"
-                              : ""
-                          }`}
-                        >
-                          <td className="w-[40px]">{index + 1}</td>
-                          <td className="w-[92px] px-[10px]">
-                            {truncateString(call.contractAddress, 3)}
-                          </td>
-                          <td className="italic px-[10px] text-left">
-                            {call.entrypoint}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  <button
-                    onClick={handleExecute}
-                    className="bg-primary uppercase font-bold text-white p-2 hover:bg-opacity-80"
-                  >
-                    Execute
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+          {renderMainContent()}
         </div>
 
-        {/* Call Detail Modal */}
-        {expandedCall && (
+        {/* Call Detail Modal - only show when in normal view (not execution result view) */}
+        {expandedCall && !executeResult.txHash && !executeResult.error && (
           <div onClick={(e) => e.stopPropagation()}>
             <CallDetailModal
               call={expandedCall.call}
