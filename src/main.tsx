@@ -7,6 +7,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { StarknetProvider } from "./store/starknetProvider";
 import { ToastProvider } from "./shared/components/toast";
 import { CallCartProvider } from "./store/ShoppingCartProvider";
+import { BlockNumberProvider } from "./store/BlockNumberProvider";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -14,7 +15,9 @@ createRoot(document.getElementById("root")!).render(
       <StarknetProvider>
         <ToastProvider>
           <CallCartProvider>
-            <App />
+            <BlockNumberProvider>
+              <App />
+            </BlockNumberProvider>
           </CallCartProvider>
         </ToastProvider>
       </StarknetProvider>
