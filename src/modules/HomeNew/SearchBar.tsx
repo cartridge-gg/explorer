@@ -163,7 +163,7 @@ export default function HomeSearchBar() {
       <input
         ref={inputRef}
         className="text-base search-input relative w-full h-full focus:outline-none focus:ring-0 py-2 pl-[15px]"
-        placeholder="Search"
+        placeholder="Search blocks, transactions, contracts"
         onChange={(e) => {
           handleSearch(e.target.value);
           setIsDropdownOpen(!!e.target.value);
