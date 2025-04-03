@@ -44,21 +44,15 @@ export default function EventList({ events }: EventListProps) {
   const columnHelper = createColumnHelper<EventTableData>();
   const columns: ColumnDef<EventTableData, any>[] = [
     columnHelper.accessor("id", {
-      header: "No",
+      header: () => <th className="w-[52px]">No</th>,
       cell: (info) => info.renderValue(),
     }),
     columnHelper.accessor("txn_hash", {
-      header: "Transaction",
-      cell: (info) => (
-        <>
-          {isMobile
-            ? truncateString(info.renderValue(), 10)
-            : info.renderValue()}
-        </>
-      ),
+      header: () => <th className="px-[15px] text-left">Transaction</th>,
+      cell: (info) => truncateString(info.renderValue()),
     }),
     columnHelper.accessor("from", {
-      header: "From Address",
+      header: () => <th className="px-[15px] text-left">From Address</th>,
       cell: (info) => truncateString(info.renderValue()),
     }),
   ];
@@ -82,22 +76,20 @@ export default function EventList({ events }: EventListProps) {
   });
 
   return (
-    <div className="flex flex-col gap-2 h-full">
-      <div className="h-full flex flex-col gap-2">
-        <table className="overflow-x-auto p-0 h-full">
+    <div className="h-full space-y-3 grid grid-rows-[1fr]">
+      <div className="grid grid-rows-[1fr_min-content] gap-3">
+        <table className="w-full h-min">
           <thead className="uppercase">
             <tr>
               {table
                 .getHeaderGroups()
                 .map((headerGroup) =>
-                  headerGroup.headers.map((header) => (
-                    <th key={header.id}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </th>
-                  ))
+                  headerGroup.headers.map((header) =>
+                    flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )
+                  )
                 )}
             </tr>
           </thead>
@@ -105,7 +97,10 @@ export default function EventList({ events }: EventListProps) {
           <tbody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row, id) => (
-                <tr key={id} className="hover:bg-gray-100 h-5 ">
+                <tr
+                  key={id}
+                  className="hover:bg-button-whiteInitialHover cursor-pointer"
+                >
                   {row.getVisibleCells().map((cell) => {
                     if (cell.column.id === "txn_hash") {
                       return (
@@ -127,7 +122,9 @@ export default function EventList({ events }: EventListProps) {
                         <td
                           key={cell.id}
                           onClick={() => navigateToContract(row.original.from)}
-                          className={"hover:underline cursor-pointer"}
+                          className={
+                            "hover:underline cursor-pointer text-left px-[15px]"
+                          }
                         >
                           {flexRender(
                             cell.column.columnDef.cell,
