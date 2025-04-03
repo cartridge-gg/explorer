@@ -1,5 +1,4 @@
 import { Dropdown, DropdownItem } from "@/shared/components/Dropdown";
-import { Selector, SelectorItem } from "@/shared/components/Selector";
 
 const TxTypesTabs = ["All", "Invoke", "Deploy Account", "Declare"] as const;
 
