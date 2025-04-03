@@ -173,7 +173,7 @@ export default function TxList({ transactions }: TxListProps) {
                 <tr
                   key={id}
                   onClick={() => navigateToTxn(row.original.hash)}
-                  className="hover:bg-gray-100 cursor-pointer"
+                  className="hover:bg-button-whiteInitialHover cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => {
                     return (

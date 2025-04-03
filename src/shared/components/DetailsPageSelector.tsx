@@ -35,7 +35,7 @@ export default function DetailsPageSelector({
             key={item.name}
             name={item.name}
             value={item.value}
-            className="flex justify-start font-bold px-[15px] py-1 border border-borderGray"
+            className="flex justify-start font-bold px-[15px] py-1 border border-borderGray hover:bg-button-whiteInitialHover"
           />
         ))}
       </Selector>

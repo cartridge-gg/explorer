@@ -22,7 +22,6 @@ export default function HomeSearchBar() {
       const searchInput = document.querySelector(".search-input");
 
       if (
-        isDropdownOpen &&
         dropdown &&
         !dropdown.contains(event.target as Node) &&
         !searchInput?.contains(event.target as Node)
@@ -36,7 +35,7 @@ export default function HomeSearchBar() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isDropdownOpen]);
+  }, []);
 
   const [result, setResult] = useState<
     { type: "tx" | "block" | "contract" | "class"; value: string } | undefined
@@ -105,23 +104,26 @@ export default function HomeSearchBar() {
     [queryClient]
   );
 
-  const handleSearch = (value: string) => {
-    if (!value || value.length === 0) return;
-    // assuming that there will be no hash collision (very unlikely to collide)
-    performSearch(value).then(([isBlock, isTx, isContract, isClass]) => {
-      if (isBlock) {
-        setResult({ type: "block", value });
-      } else if (isTx) {
-        setResult({ type: "tx", value });
-      } else if (isContract) {
-        setResult({ type: "contract", value });
-      } else if (isClass) {
-        setResult({ type: "class", value });
-      } else {
-        setResult(undefined);
-      }
-    });
-  };
+  const handleSearch = useCallback(
+    (value: string) => {
+      if (!value || value.length === 0) return;
+      // assuming that there will be no hash collision (very unlikely to collide)
+      performSearch(value).then(([isBlock, isTx, isContract, isClass]) => {
+        if (isBlock) {
+          setResult({ type: "block", value });
+        } else if (isTx) {
+          setResult({ type: "tx", value });
+        } else if (isContract) {
+          setResult({ type: "contract", value });
+        } else if (isClass) {
+          setResult({ type: "class", value });
+        } else {
+          setResult(undefined);
+        }
+      });
+    },
+    [performSearch]
+  );
 
   const handleResultClick = useCallback(() => {
     if (result?.type === "tx") {
@@ -154,15 +156,21 @@ export default function HomeSearchBar() {
 
   return (
     <div
-      className={`bg-white min-w-[200px] w-full h-[42px] flex relative border border-borderGray items-center ${
-        isDropdownOpen ? "border-b-0" : ""
+      className={`bg-white min-w-[200px] w-full h-[42px] flex relative border border-borderGray items-center shadow ${
+        isDropdownOpen && result ? "border-b-0" : ""
       }`}
     >
       <input
         ref={inputRef}
         className="text-base search-input relative w-full h-full focus:outline-none focus:ring-0 py-2 pl-[15px]"
         placeholder="Search"
-        onChange={(e) => handleSearch(e.target.value)}
+        onChange={(e) => {
+          handleSearch(e.target.value);
+          setIsDropdownOpen(!!e.target.value);
+        }}
+        onFocus={() => {
+          if (result) setIsDropdownOpen(true);
+        }}
       />
 
       <div
@@ -172,7 +180,7 @@ export default function HomeSearchBar() {
         <SearchTool />
       </div>
 
-      {result ? (
+      {result && isDropdownOpen ? (
         <div className="search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full">
           <div
             // hack for doing custom spacing for the dashed line

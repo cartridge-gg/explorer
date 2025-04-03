@@ -14,6 +14,9 @@ export default {
           primary: "#262626",
           secondary: "white",
         },
+        button: {
+          whiteInitialHover: "#f3f4f6",
+        },
       },
       screens: {
         // `slightly large` as it sits between lg and xl
