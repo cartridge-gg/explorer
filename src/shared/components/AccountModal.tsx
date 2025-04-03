@@ -4,7 +4,7 @@ import { useAccount, useDisconnect } from "@starknet-react/core";
 import FeltDisplay from "./FeltDisplay";
 import * as icons from "lucide-react";
 import { truncateString } from "../utils/string";
-import { Call } from "starknet";
+import { Call, InvokeFunctionResponse } from "starknet";
 
 interface AccountModalProps {
   isOpen: boolean;
@@ -45,12 +45,23 @@ const CallDetailModal: React.FC<CallDetailModalProps> = ({
       style={{ maxHeight: "calc(50vh)" }}
     >
       <div className="w-full flex mb-4">
-        <div className="flex gap-2">
+        <div className="w-full grid grid-cols-[25px_25px] justify-between">
           <button
             onClick={onClose}
             className="flex items-center justify-center border border-borderGray w-[25px] h-[25px] hover:bg-primary hover:border-0 hover:text-white"
           >
-            <icons.X strokeWidth={1.5} width={15} height={15} />
+            <icons.ChevronLeft strokeWidth={1.5} width={15} height={15} />
+          </button>
+
+          <button
+            onClick={() => {
+              removeCall(index);
+              onClose(); // Close the detail modal after deleting
+            }}
+            className="flex items-center justify-center border border-[#D25D73] w-full h-[25px] hover:bg-[#D25D73] hover:text-white text-[#D25D73] uppercase font-bold"
+            title="Delete call"
+          >
+            <icons.Trash strokeWidth={1.5} width={12} height={12} />
           </button>
         </div>
       </div>
@@ -58,8 +69,8 @@ const CallDetailModal: React.FC<CallDetailModalProps> = ({
       <div className="space-y-4">
         {/* Contract Address */}
         <div className="">
-          <div className="font-bold uppercase text-sm mb-1">Contract</div>
-          <div className="break-all text-sm">
+          <div className="font-bold uppercase mb-1">Contract</div>
+          <div className="break-all">
             <FeltDisplay
               value={formattedCall.contractAddress}
               displayAs="hex"
@@ -69,20 +80,18 @@ const CallDetailModal: React.FC<CallDetailModalProps> = ({
 
         {/* Function Name */}
         <div className="">
-          <div className="font-bold uppercase text-sm mb-1">Function</div>
-          <div className="text-sm text-primary italic">
-            {formattedCall.entrypoint}
-          </div>
+          <div className="font-bold uppercase mb-1">Function</div>
+          <div className="text-primary italic">{formattedCall.entrypoint}</div>
         </div>
 
         {/* Calldata */}
         <div className="">
-          <div className="font-bold uppercase text-sm mb-1">Arguments</div>
+          <div className="font-bold uppercase mb-1">Arguments</div>
           {formattedCall.calldata.length === 0 ? (
-            <div className="text-sm text-gray-500 italic">No arguments</div>
+            <div className="text-gray-500 italic">No arguments</div>
           ) : (
             <div>
-              <table className="w-full text-sm">
+              <table className="w-full">
                 <thead className="border-b">
                   <tr>
                     <th className="text-gray-600 w-[40px]">#</th>
@@ -103,19 +112,14 @@ const CallDetailModal: React.FC<CallDetailModalProps> = ({
           )}
         </div>
       </div>
-
-      <button
-        onClick={() => {
-          removeCall(index);
-          onClose(); // Close the detail modal after deleting
-        }}
-        className="mt-8 flex items-center justify-center border border-[#D25D73] w-full h-[25px] hover:bg-[#D25D73] hover:text-white text-[#D25D73] uppercase font-bold"
-        title="Delete call"
-      >
-        Delete
-      </button>
     </div>
   );
+};
+
+type ExecuteResult = {
+  txHash: string | null;
+  error: any;
+  loading: boolean;
 };
 
 export const AccountModal: React.FC<AccountModalProps> = ({
@@ -123,28 +127,48 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   onClose,
 }) => {
   const { state } = useCallCart();
-  const { address, account } = useAccount();
+  const { account } = useAccount();
   const { disconnect } = useDisconnect();
   const modalRef = useRef<HTMLDivElement>(null);
-  const { clearCalls } = useCallCartDispatch();
+
+  // --------------- COMPONENT LOCAL STATE ----------------
+
+  const [executeResult, setExecuteResult] = useState<ExecuteResult>({
+    error: null,
+    txHash: null,
+    loading: false,
+  });
 
   const [expandedCall, setExpandedCall] = useState<{
     index: number;
     call: Call;
   } | null>(null);
 
+  // ------------------------------------------------------
+
   const handleExecute = useCallback(() => {
     if (!account) {
       return;
     }
 
+    setExecuteResult({ loading: true, error: null, txHash: null });
+
     account
       .execute(state.calls)
       .then((result) => {
-        console.log(result);
+        setExecuteResult({
+          error: null,
+          loading: false,
+          txHash: result.transaction_hash,
+        });
       })
       .catch((error) => {
         console.error("failed to execute function calls", error);
+        setExecuteResult({
+          error,
+          txHash: null,
+          loading: false,
+        });
       });
   }, [account, state.calls]);
 
@@ -241,71 +265,51 @@ export const AccountModal: React.FC<AccountModalProps> = ({
         {/* Main Account Modal */}
         <div
           ref={modalRef}
-          className="relative bg-white p-[15px] w-max shadow-lg max-w-2xl max-h-[50vh] min-h-[464px] overflow-hidden flex flex-col border border-borderGray"
+          className="relative bg-white p-[15px] w-max min-w-[380px] shadow-lg max-w-2xl max-h-[50vh] min-h-[464px] overflow-hidden flex flex-col border border-borderGray"
         >
-          <div className="flex flex-col gap-5 mb-6">
+          <div className="flex flex-row justify-between gap-5 mb-6">
             <button
               onClick={onClose}
               className="flex items-center justify-center border border-borderGray w-[25px] h-[25px] hover:bg-primary hover:border-0 hover:text-white"
             >
               <icons.X strokeWidth={1.5} width={15} height={15} />
             </button>
+
+            <button
+              onClick={() => {
+                disconnect();
+                onClose();
+              }}
+              className="px-2 py-1 w-[73px] text-xs text-[#D25D73]/50 uppercase font-bold border border-[#D25D73] hover:bg-[#D25D73] hover:text-white"
+            >
+              Disconnect
+            </button>
           </div>
 
-          <div className="overflow-y-auto flex-grow grid grid-rows-[min-content_1fr]">
-            {/* Account Information Section */}
-            <div className="mb-3 pb-4">
-              <div className="flex justify-between items-end mb-3">
-                <h2 className="text-md font-bold uppercase">
-                  Account Information
-                </h2>
-
-                <button
-                  onClick={() => {
-                    disconnect();
-                    onClose();
-                  }}
-                  className="px-2 w-[73px] text-xs text-[#D25D73]/50 uppercase font-bold border border-[#D25D73] hover:bg-[#D25D73] hover:text-white"
-                >
-                  Disconnect
-                </button>
-              </div>
-
-              <div className="border border-borderGray p-[10px]">
-                <div className="font-bold uppercase text-sm mb-1">Address</div>
-                <div className="break-all text-sm">
-                  {address ? (
-                    <FeltDisplay value={address} displayAs="hex" />
-                  ) : (
-                    "Not available"
-                  )}
-                </div>
-              </div>
-            </div>
-
+          <div className="overflow-y-auto flex-grow">
             {/* Function Calls Cart Section */}
             <div className="h-full grid grid-rows-[min-content_1fr]">
               <div className="flex justify-between items-end mb-3">
-                <h2 className="text-md font-bold uppercase">
-                  Calls [{state.calls.length}]
+                <h2 className="w-full flex justify-between gap-3 text-md font-bold uppercase">
+                  Calls ({state.calls.length})
                 </h2>
 
-                {state.calls.length > 0 && (
+                {/* {state.calls.length > 0 && (
                   <button
                     onClick={() => {
                       clearCalls();
                       setExpandedCall(null);
                     }}
-                    className="px-2 w-[73px] text-xs text-[#D25D73]/50 uppercase font-bold border border-[#D25D73] hover:bg-[#D25D73] hover:text-white"
+                    className="px-2 w-[73px] h-full text-xs text-[#D25D73]/50 uppercase font-bold border border-[#D25D73] hover:bg-[#D25D73] hover:text-white"
                   >
-                    Clear All
+                    Clear
                   </button>
-                )}
+                )} */}
               </div>
 
               {state.calls.length === 0 ? (
                 <div className="flex items-center justify-center pt-4 text-xs text-gray-500 lowercase">
-                  Cart is empty
+                  Empty :(
                 </div>
               ) : (
                 <div className="flex flex-col justify-between gap-3">
