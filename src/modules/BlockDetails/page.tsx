@@ -5,7 +5,7 @@ import {
   truncateString,
 } from "@/shared/utils/string";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   CACHE_TIME,
@@ -39,98 +39,106 @@ export default function BlockDetails() {
   const [txsTable, setTxsTable] = useState<TransactionTableData[]>([]);
   const [eventsTable, setEventsTable] = useState<EventTableData[]>([]);
   const [executionTable, setExecutionTable] = useState({
+    ecdsa: 0,
+    keccak: 0,
     bitwise: 0,
     pedersen: 0,
-    range_check: 0,
     poseidon: 0,
-    ecdsa: 0,
+    range_check: 0,
     segment_arena: 0,
-    keccak: 0,
   });
 
   const [blockComputeData, setBlockComputeData] = useState({
     gas: 0,
-    data_gas: 0,
     steps: 0,
+    data_gas: 0,
   });
 
-  const { data: BlockReceipt } = useQuery({
-    queryKey: [QUERY_KEYS.getBlockWithTxs, blockId],
-    queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockId ?? 0),
+  const { data: BlockWithReceipts } = useQuery({
+    queryKey: [QUERY_KEYS.getBlockWithReceipts, blockId],
+    queryFn: () => RPC_PROVIDER.getBlockWithReceipts(blockId ?? 0),
     enabled: !!blockId,
     staleTime: STALE_TIME,
     gcTime: CACHE_TIME,
   });
 
-  const processBlockInformation = useCallback(async (transactions) => {
-    if (!transactions) return;
+  useEffect(() => {
+    if (!BlockWithReceipts) return;
 
+    // Reset state before processing
+    setTxsTable([]);
+    setEventsTable([]);
+    setExecutionTable({
+      ecdsa: 0,
+      keccak: 0,
+      bitwise: 0,
+      pedersen: 0,
+      poseidon: 0,
+      range_check: 0,
+      segment_arena: 0,
+    });
+    setBlockComputeData({
+      gas: 0,
+      steps: 0,
+      data_gas: 0,
+    });
+
+    // Process transactions and receipts
     const transactions_table_data: TransactionTableData[] = [];
-    await Promise.all(
-      transactions.map((tx) => {
-        return RPC_PROVIDER.getTransactionReceipt(tx.transaction_hash).then(
-          (receipt) => {
-            // process block events
-            if (receipt?.events) {
-              receipt.events.forEach((event) => {
-                setEventsTable((prev) => {
-                  return [
-                    ...prev,
-                    {
-                      id: prev.length + 1,
-                      txn_hash: tx.transaction_hash,
-                      from: event.from_address,
-                    },
-                  ];
-                });
-              });
+
+    BlockWithReceipts.transactions.forEach(({ transaction, receipt }) => {
+      // Process block events
+      if (receipt.events) {
+        receipt.events.forEach((event) => {
+          setEventsTable((prev) => [
+            ...prev,
+            {
+              id: prev.length + 1,
+              txn_hash: receipt.transaction_hash,
+              from: event.from_address,
+              age: "", // Add required field based on EventTableData interface
+            },
+          ]);
+        });
+      }
+
+      // Process execution resources
+      if (receipt.execution_resources) {
+        Object.keys(receipt.execution_resources).forEach((key) => {
+          if (key === "steps") {
+            setBlockComputeData((prev) => ({
+              ...prev,
+              steps: prev.steps + receipt.execution_resources[key],
+            }));
+          } else if (key === "data_availability") {
+            setBlockComputeData((prev) => ({
+              ...prev,
+              gas: prev.gas + receipt.execution_resources[key].l1_data_gas,
+              data_gas: prev.data_gas + receipt.execution_resources[key].l1_gas,
+            }));
+          } else {
+            const key_map = EXECUTION_RESOURCES_KEY_MAP[key];
+            if (key_map) {
+              setExecutionTable((prev) => ({
+                ...prev,
+                [key_map]: prev[key_map] + receipt.execution_resources[key],
+              }));
             }
-
-            // process execution resources
-            Object.keys(receipt?.execution_resources).forEach((key) => {
-              if (key === "steps") {
-                setBlockComputeData((prev) => ({
-                  ...prev,
-                  steps: prev.steps + receipt.execution_resources[key],
-                }));
-              } else if (key === "data_availability") {
-                setBlockComputeData((prev) => ({
-                  ...prev,
-                  gas: prev.gas + receipt.execution_resources[key].l1_data_gas,
-                  data_gas:
-                    prev.data_gas + receipt.execution_resources[key].l1_gas,
-                }));
-              } else {
-                const key_map = EXECUTION_RESOURCES_KEY_MAP[key];
-                if (key_map) {
-                  setExecutionTable((prev) => ({
-                    ...prev,
-                    [key_map]: prev[key_map] + receipt.execution_resources[key],
-                  }));
-                }
-              }
-            });
-
-            // process info for transactions table
-            transactions_table_data.push({
-              id: transactions_table_data.length + 1,
-              type: tx.type,
-              status: receipt.statusReceipt,
-              hash: tx.transaction_hash,
-            });
           }
-        );
-      })
-    );
+        });
+      }
+
+      // Process info for transactions table
+      transactions_table_data.push({
+        id: transactions_table_data.length + 1,
+        type: transaction.type,
+        hash: receipt.transaction_hash,
+        status: receipt.execution_status,
+      });
+    });
 
     setTxsTable(transactions_table_data);
-  }, []);
-
-  useEffect(() => {
-    if (!BlockReceipt) return;
-
-    processBlockInformation(BlockReceipt?.transactions);
-  }, [BlockReceipt, processBlockInformation]);
+  }, [BlockWithReceipts]);
 
   return (
     <div className="w-full flex-grow gap-8">
@@ -143,16 +151,20 @@ export default function BlockDetails() {
           <BreadcrumbItem>{blockId}</BreadcrumbItem>
         </Breadcrumb>
 
-        <BlockNavigation currentBlockNumber={BlockReceipt?.block_number} />
+        <BlockNavigation currentBlockNumber={BlockWithReceipts?.block_number} />
       </div>
 
       <PageHeader
         className="mb-6"
-        title={`Block #${BlockReceipt?.block_number}`}
-        subtext={BlockReceipt?.status}
+        title={`Block #${BlockWithReceipts?.block_number}`}
+        subtext={BlockWithReceipts?.status}
         subtextRightComponent={
           <div className="text-[#5D5D5D]">
-            {dayjs.unix(BlockReceipt?.timestamp).format("MMM D YYYY HH:mm:ss")}
+            {BlockWithReceipts?.timestamp
+              ? dayjs
+                  .unix(BlockWithReceipts.timestamp)
+                  .format("MMM D YYYY HH:mm:ss")
+              : ""}
           </div>
         }
       />
@@ -162,24 +174,24 @@ export default function BlockDetails() {
           <SectionBox>
             <SectionBoxEntry title="Hash">
               {isMobile
-                ? truncateString(BlockReceipt?.block_hash)
-                : BlockReceipt?.block_hash}
+                ? truncateString(BlockWithReceipts?.block_hash)
+                : BlockWithReceipts?.block_hash}
             </SectionBoxEntry>
 
             <SectionBoxEntry title="Number">
-              {BlockReceipt?.block_number}
+              {BlockWithReceipts?.block_number}
             </SectionBoxEntry>
 
             <SectionBoxEntry title="State root">
               {isMobile
-                ? truncateString(BlockReceipt?.new_root)
-                : BlockReceipt?.new_root}
+                ? truncateString(BlockWithReceipts?.new_root)
+                : BlockWithReceipts?.new_root}
             </SectionBoxEntry>
 
             <SectionBoxEntry title="Sequencer address">
               {isMobile
-                ? truncateString(BlockReceipt?.sequencer_address)
-                : BlockReceipt?.sequencer_address}
+                ? truncateString(BlockWithReceipts?.sequencer_address)
+                : BlockWithReceipts?.sequencer_address}
             </SectionBoxEntry>
           </SectionBox>
 
@@ -190,11 +202,11 @@ export default function BlockDetails() {
                   <tr>
                     <th className="w-[67px]">ETH</th>
                     <td>
-                      {BlockReceipt?.l1_gas_price
+                      {BlockWithReceipts?.l1_gas_price
                         ? formatNumber(
                             Number(
                               cairo.felt(
-                                BlockReceipt?.l1_gas_price?.price_in_wei
+                                BlockWithReceipts?.l1_gas_price?.price_in_wei
                               )
                             )
                           )
@@ -205,11 +217,11 @@ export default function BlockDetails() {
                   <tr>
                     <th className="w-min">STRK</th>
                     <td>
-                      {BlockReceipt?.l1_gas_price
+                      {BlockWithReceipts?.l1_gas_price
                         ? formatNumber(
                             Number(
                               cairo.felt(
-                                BlockReceipt?.l1_gas_price?.price_in_fri
+                                BlockWithReceipts?.l1_gas_price?.price_in_fri
                               )
                             )
                           )
@@ -227,11 +239,12 @@ export default function BlockDetails() {
                   <tr>
                     <th className="w-[67px]">ETH</th>
                     <td>
-                      {BlockReceipt?.l1_data_gas_price
+                      {BlockWithReceipts?.l1_data_gas_price
                         ? formatNumber(
                             Number(
                               cairo.felt(
-                                BlockReceipt?.l1_data_gas_price?.price_in_wei
+                                BlockWithReceipts?.l1_data_gas_price
+                                  ?.price_in_wei
                               )
                             )
                           )
@@ -242,11 +255,12 @@ export default function BlockDetails() {
                   <tr>
                     <th className="w-min">STRK</th>
                     <td>
-                      {BlockReceipt?.l1_data_gas_price
+                      {BlockWithReceipts?.l1_data_gas_price
                         ? formatNumber(
                             Number(
                               cairo.felt(
-                                BlockReceipt?.l1_data_gas_price?.price_in_fri
+                                BlockWithReceipts?.l1_data_gas_price
+                                  ?.price_in_fri
                               )
                             )
                           )

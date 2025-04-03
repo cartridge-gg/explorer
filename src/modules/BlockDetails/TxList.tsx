@@ -58,7 +58,11 @@ export default function TxList({ transactions }: TxListProps) {
     }),
     columnHelper.accessor("type", {
       header: () => <th className="w-[122px] px-[15px] text-left">Type</th>,
-      cell: (info) => <span>{info.renderValue()}</span>,
+      cell: (info) => (
+        <span className="text-nowrap">
+          {info.renderValue().replace(/_/g, " ")}
+        </span>
+      ),
       filterFn: (row, columnId, filterValue) => {
         const rowValue: string = row.getValue(columnId);
         if (filterValue === undefined || filterValue === "All") return true;
@@ -74,9 +78,9 @@ export default function TxList({ transactions }: TxListProps) {
       cell: (info) => (
         <div
           className={`flex items-center justify-center border border-primary uppercase font-bold text-white px-2 py-0 h-[15px] text-sm w-[67px] ${
-            info.renderValue() === "success"
+            info.renderValue() === "SUCCEEDED"
               ? "bg-[#7BA797]"
-              : info.renderValue() === "reverted"
+              : info.renderValue() === "REVERTED"
               ? "bg-[#C4806D]"
               : ""
           }`}

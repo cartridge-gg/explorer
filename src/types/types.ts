@@ -54,7 +54,7 @@ export type TransactionType =
   | "DEPLOY_ACCOUNT";
 
 export type TransactionTableData = {
-  id: string;
+  id: number;
   hash: string;
   type: TransactionType;
   status: string;
@@ -62,7 +62,7 @@ export type TransactionTableData = {
 
 // Event Table Types
 export type EventTableData = {
-  id: string;
+  id: number;
   txn_hash: string;
   from: string;
   age: string;
