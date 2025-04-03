@@ -46,7 +46,7 @@ export default function TxList({ transactions }: TxListProps) {
       cell: (info) => (
         <>
           {isMobile
-            ? truncateString(info.renderValue(), 10)
+            ? truncateString(info.renderValue(), 4)
             : info.renderValue()}
         </>
       ),
