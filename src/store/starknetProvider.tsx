@@ -1,11 +1,7 @@
 "use client";
 import React from "react";
 import { sepolia, mainnet, Chain } from "@starknet-react/chains";
-import {
-  StarknetConfig,
-  jsonRpcProvider,
-  useInjectedConnectors,
-} from "@starknet-react/core";
+import { StarknetConfig, jsonRpcProvider } from "@starknet-react/core";
 import { Connector, InjectedConnector } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import { WebWalletConnector } from "starknetkit/webwallet";
@@ -69,11 +65,9 @@ export const katanaLocalChain = {
 export function StarknetProvider({ children }: { children: React.ReactNode }) {
   const providers = jsonRpcProvider({
     rpc: () => ({
-      nodeUrl: import.meta.env.VITERPC_URL as string,
+      nodeUrl: RPC_URL,
     }),
   });
-
-  const { connectors } = useInjectedConnectors({});
 
   return (
     <StarknetConfig
@@ -85,7 +79,7 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
           : katanaLocalChain,
       ]}
       provider={providers}
-      connectors={connectors}
+      connectors={availableConnectors}
     >
       {children}
     </StarknetConfig>
