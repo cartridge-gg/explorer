@@ -18,6 +18,7 @@ import FeltDisplayAsToggle, {
 import CalldataEncodingToggle, {
   CalldataEncodingVariants,
 } from "@/shared/components/DecodeRawToggle";
+import AddressDisplay from "@/shared/components/AddressDisplay";
 
 // const TxTypesTabs = ["Decoded", "Raw"] as const;
 
@@ -233,12 +234,18 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
         {selectedTab === "decoded" ? (
           <Accordion
             items={() =>
-              decodedCalldata.map((item) => (
+              decodedCalldata.map((item, idx) => (
                 <AccordionItem
+                  key={idx}
+                  titleClassName="h-[45px]"
                   title={
                     <div className="flex flex-row items-center gap-2">
-                      <span className="underline">
-                        {truncateString(item.contract)}
+                      <span className="">
+                        <AddressDisplay
+                          alwaysTruncate={true}
+                          truncateLength={3}
+                          value={item.contract}
+                        />
                       </span>
                       <span>
                         <ArrowRightIcon className="w-3 h-3" />

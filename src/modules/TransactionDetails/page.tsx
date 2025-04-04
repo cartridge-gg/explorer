@@ -35,6 +35,7 @@ import { SectionBoxEntry } from "@/shared/components/section";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import dayjs from "dayjs";
 import SignatureDisplay from "./components/SignatureDisplay";
+import AddressDisplay from "@/shared/components/AddressDisplay";
 
 const DataTabs = ["Calldata", "Events", "Signature", "Storage Diffs"];
 
@@ -373,7 +374,7 @@ export default function TransactionDetails() {
       cell: (info) => (
         <TableCell
           onClick={() => navigateToContract(info.getValue())}
-          className="w-1 pr-4 border-0 text-left hover:text-blue-400 transition-all cursor-pointer"
+          className="w-1 pr-4 border-0 text-left hover:underline cursor-pointer"
         >
           <span>{truncateString(info.getValue())}</span>
         </TableCell>
@@ -556,17 +557,27 @@ export default function TransactionDetails() {
             </SectionBoxEntry>
           </SectionBox>
 
-          <SectionBox title="Sender" variant="upper-half">
-            <SectionBoxEntry title="Address">
-              {isMobile
-                ? truncateString(TransactionDetails?.sender_address)
-                : TransactionDetails?.sender_address}
-            </SectionBoxEntry>
+          {TransactionDetails?.sender_address || TransactionDetails?.nonce ? (
+            <SectionBox title="Sender" variant="upper-half">
+              {TransactionDetails?.sender_address ? (
+                <SectionBoxEntry title="Address">
+                  <AddressDisplay value={TransactionDetails?.sender_address} />
+                </SectionBoxEntry>
+              ) : (
+                <></>
+              )}
 
-            <SectionBoxEntry title="Nonce">
-              {Number(TransactionDetails?.nonce)}
-            </SectionBoxEntry>
-          </SectionBox>
+              {TransactionDetails?.nonce ? (
+                <SectionBoxEntry title="Nonce">
+                  {Number(TransactionDetails?.nonce)}
+                </SectionBoxEntry>
+              ) : (
+                <></>
+              )}
+            </SectionBox>
+          ) : (
+            <></>
+          )}
 
           <SectionBox title="Resource Bounds" variant="upper-half">
             <SectionBoxEntry title="L1 Gas Prices" bold={false}>
