@@ -4,7 +4,7 @@ import { truncateString } from "../utils/string";
 import { useScreen } from "../hooks/useScreen";
 
 type FeltDisplayProps = {
-  value: bigint | number;
+  value?: bigint | number;
   alwaysTruncate?: boolean;
   truncateLength?: number;
   displayAs?: FeltDisplayVariants;
@@ -17,6 +17,17 @@ export default function FeltDisplay({
   truncateLength = 6,
 }: FeltDisplayProps) {
   const { isMobile } = useScreen();
+
+  // If value is undefined, display N/A
+  if (value === undefined) {
+    return (
+      <>
+        <div className="felt">
+          <div className="felt-value">N/A</div>
+        </div>
+      </>
+    );
+  }
 
   // Parse the value as bigint first
   const felt = BigInt(value);

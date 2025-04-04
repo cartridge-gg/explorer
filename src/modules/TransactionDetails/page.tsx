@@ -36,6 +36,7 @@ import { SectionBox } from "@/shared/components/section/SectionBox";
 import dayjs from "dayjs";
 import SignatureDisplay from "./components/SignatureDisplay";
 import AddressDisplay from "@/shared/components/AddressDisplay";
+import BlockIdDisplay from "@/shared/components/BlockIdDisplay";
 
 const DataTabs = ["Calldata", "Events", "Signature", "Storage Diffs"];
 
@@ -553,7 +554,7 @@ export default function TransactionDetails() {
             </SectionBoxEntry>
 
             <SectionBoxEntry title="Block">
-              {TransactionReceipt?.block_number}
+              <BlockIdDisplay value={TransactionReceipt?.block_number} />
             </SectionBoxEntry>
           </SectionBox>
 

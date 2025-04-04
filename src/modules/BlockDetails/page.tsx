@@ -29,6 +29,7 @@ import EventList from "./EventList";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { QUERY_KEYS } from "@/services/starknet_provider_config";
 import BlockNavigation from "./BlockNavigation";
+import AddressDisplay from "@/shared/components/AddressDisplay";
 
 const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
 
@@ -189,9 +190,7 @@ export default function BlockDetails() {
             </SectionBoxEntry>
 
             <SectionBoxEntry title="Sequencer address">
-              {isMobile
-                ? truncateString(BlockWithReceipts?.sequencer_address)
-                : BlockWithReceipts?.sequencer_address}
+              <AddressDisplay value={BlockWithReceipts?.sequencer_address} />
             </SectionBoxEntry>
           </SectionBox>
 
