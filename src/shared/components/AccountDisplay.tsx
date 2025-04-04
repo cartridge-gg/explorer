@@ -45,7 +45,7 @@ export default function AccountDisplay(props: HTMLAttributes<HTMLDivElement>) {
     }
   };
 
-  const classes = `relative bg-white hover:bg-primary hover:text-white hover:border-primary w-[122px] border border-borderGray font-bold flex px-3 py-1 gap-3 items-center justify-between cursor-pointer ${
+  const classes = `relative bg-white hover:bg-primary hover:text-white hover:border-primary sm:w-[122px] border border-borderGray font-bold flex px-3 py-1 gap-3 items-center justify-between cursor-pointer ${
     props.className || ""
   } ${status === "connected" ? "" : "uppercase"} `;
 
@@ -59,12 +59,14 @@ export default function AccountDisplay(props: HTMLAttributes<HTMLDivElement>) {
         className={classes}
       >
         <WalletIcon />
-        <span ref={textRef}>{statusText}</span>
-        {status === "connected" && state.calls.length > 0 && (
-          <span className="absolute -top-2 -left-2 bg-primary text-white text-xs w-4 h-4 flex items-center justify-center">
-            {state.calls.length}
-          </span>
-        )}
+        <div className="max-sm:hidden">
+          <span ref={textRef}>{statusText}</span>
+          {status === "connected" && state.calls.length > 0 && (
+            <span className="absolute -top-2 -left-2 bg-primary text-white text-xs w-4 h-4 flex items-center justify-center">
+              {state.calls.length}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Wallet Connection Modal */}

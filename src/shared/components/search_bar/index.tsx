@@ -147,7 +147,7 @@ export default function SearchBar() {
   };
 
   return (
-    <div className="bg-white max-w-[483px] flex gap-2 relative border border-borderGray items-center px-[15px] py-2">
+    <div className="bg-white max-w-[483px] min-w-[100px] flex gap-2 relative border border-borderGray items-center px-[15px] py-2">
       <SearchTool />
       <input
         className="text-base rounded-none search-input relative w-full h-full focus:outline-none focus:ring-0"
