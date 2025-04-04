@@ -9,7 +9,7 @@ A local explorer for your Katana instance.
 1. Clone the repository
 
 ```bash
-git clone https://github.com/cartridge-gg/starknet-explorer.git
+git clone https://github.com/cartridge-gg/explorer.git
 ```
 
 2. Install dependencies
@@ -32,10 +32,4 @@ VITE_IS_EMBEDDED=true
 
 ```bash
 bun run dev
-```
-
-5. Open the app in your browser
-
-```bash
-http://localhost:5173
 ```
