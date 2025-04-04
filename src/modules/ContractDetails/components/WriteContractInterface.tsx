@@ -63,6 +63,7 @@ export default function ContractWriteInterface({
         functions.map((func, index) => (
           <AccordionItem
             key={index}
+            titleClassName="h-[45px]"
             title={
               <div className="flex flex-row items-center gap-2">
                 <span className="font-bold">fn</span>
