@@ -14,9 +14,10 @@ export const EXECUTION_RESOURCES_KEY_MAP = {
 export const IS_EMBEDDED =
   window.IS_EMBEDDED ?? import.meta.env.VITE_IS_EMBEDDED;
 
-export const RPC_URL = IS_EMBEDDED
-  ? window.location.origin
-  : window.RPC_URL ?? import.meta.env.VITE_RPC_URL;
+export const RPC_URL =
+  IS_EMBEDDED === "true"
+    ? window.location.origin
+    : window.RPC_URL ?? import.meta.env.VITE_RPC_URL;
 
 export const CHAIN_ID = window.CHAIN_ID ?? import.meta.env.VITE_CHAIN_ID;
 
