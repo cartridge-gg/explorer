@@ -1,10 +1,10 @@
 ![Explorer](.github/banner.png)
 
-# Katana Explorer
+# Explorer
 
-A local explorer for your Katana instance.
+A developer oriented and stateless explorer for Starknet.
 
-## Using for your Katana instance
+## Using for your Starknet network
 
 1. Clone the repository
 
