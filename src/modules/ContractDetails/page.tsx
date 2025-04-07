@@ -20,9 +20,9 @@ import useBalances from "@/shared/hooks/useBalances";
 import ContractReadInterface from "./components/ReadContractInterface";
 import ContractWriteInterface from "./components/WriteContractInterface";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { useReactTable, getCoreRowModel, flexRender, getPaginationRowModel, ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { useReactTable, getCoreRowModel, flexRender, getPaginationRowModel, ColumnDef, createColumnHelper, getSortedRowModel } from "@tanstack/react-table";
 
-const DataTabs = ["Read Contract", "Write Contract", "Contract Code"];
+const DataTabs = ["Read Contract", "Write Contract"];
 if (isLocalNode) {
   DataTabs.unshift("Events");
 }
@@ -180,6 +180,13 @@ export default function ContractDetails() {
     columns: eventsColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    initialState: {
+      sorting: [{
+        id: 'block_number',
+        desc: true
+      }]
+    },
     state: {
       pagination: eventPagination,
     }
