@@ -3,7 +3,7 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { useCallback, useEffect, useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
-import { Contract } from "starknet";
+import { Abi, Contract } from "starknet";
 import WalletConnectModal from "@/shared/components/wallet_connect";
 import { BreadcrumbPage } from "@cartridge/ui-next";
 import {
@@ -19,6 +19,12 @@ import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";
 import ContractReadInterface from "./components/ReadContractInterface";
 import ContractWriteInterface from "./components/WriteContractInterface";
+import { createFunctionInputTypeAST } from "@/shared/utils/abi";
+import {
+  buildAstForFunction,
+  buildFunctionParametersAST,
+} from "@/shared/utils/abi2";
+import { getFunctionAst } from "@/shared/utils/abi3";
 
 const DataTabs = ["Read Contract", "Write Contract"];
 
@@ -29,6 +35,7 @@ export default function ContractDetails() {
   const { isMobile } = useScreen();
   const [classHash, setClassHash] = useState<string | null>(null);
   const [contract, setContract] = useState<Contract | null>(null);
+  const [abi, setAbi] = useState<Abi | null>(null);
   const [readFunctions, setReadFunctions] = useState<
     {
       name: string;
@@ -61,6 +68,9 @@ export default function ContractDetails() {
 
     const readFuncs: typeof readFunctions = [];
     const writeFuncs: typeof writeFunctions = [];
+
+    // console.log(getFunctionAst(contractClass.abi, "is_valid_signature"));
+    setAbi(contractClass.abi);
 
     contractClass.abi.forEach((item) => {
       if (item.type === "interface") {
@@ -189,7 +199,8 @@ export default function ContractDetails() {
                 {selectedDataTab === "Read Contract" ? (
                   <ContractReadInterface
                     contract={contract}
-                    functions={readFunctions}
+                    abi={abi}
+                    // functions={readFunctions}
                   />
                 ) : selectedDataTab === "Write Contract" ? (
                   <ContractWriteInterface
