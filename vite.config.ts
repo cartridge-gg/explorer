@@ -9,6 +9,24 @@ export default defineConfig({
   server: {
     port: process.env.NODE_ENV === "development" ? 3004 : undefined,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split Monaco Editor into a separate chunk
+          "monaco-editor": [
+            "monaco-editor",
+            "@monaco-editor/react",
+            "@monaco-editor/loader",
+          ],
+          // Group vendor libraries
+          vendor: ["react", "react-dom"],
+        },
+      },
+    },
+    // This ensures chunks are loaded only when needed
+    chunkSizeWarningLimit: 1000,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

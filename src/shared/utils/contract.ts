@@ -57,5 +57,10 @@ export function parseClassFunctions(contractClass: ContractClassResponse) {
 }
 
 function isReadFunction(func: FunctionAbi) {
-  return func.state_mutability === "view" || func.state_mutability === "pure";
+  return (
+    func.state_mutability === "view" ||
+    func.state_mutability === "pure" ||
+    func.stateMutability === "view" ||
+    func.stateMutability === "pure"
+  );
 }

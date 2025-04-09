@@ -155,6 +155,7 @@ export default function ContractDetails() {
                 switch (selectedDataTab) {
                   case "Read Contract":
                     return <ContractReadInterface
+                      abi={contract.abi}
                       contract={contract}
                       functions={readFunctions}
                     />
