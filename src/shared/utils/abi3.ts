@@ -79,8 +79,7 @@ function createPrimitiveSchema(primitive: PrimitiveType): any {
     case "core::integer::u128":
     case "core::integer::u256":
       return { type: "integer" };
-    case "core::bool":
-      return { type: "boolean" };
+    // In Cairo, core::bool is considered as an enum, not a primitive boolean
     default:
       return { type: "string" }; // Default to string for unknown primitives
   }
@@ -105,6 +104,11 @@ function createStructSchema(struct: StructType): any {
 }
 
 function createEnumSchema(enumType: EnumType): any {
+  // Special case for core::bool which is an enum in Cairo
+  if (enumType.name === "core::bool") {
+    return { type: "boolean" };
+  }
+
   // For enums, we'll represent them as a string with allowed values
   const enumValues = enumType.variants.map((variant) => variant.name);
 
