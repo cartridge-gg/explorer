@@ -49,6 +49,108 @@ export interface FunctionAst {
   inputs: Array<InputNode>;
 }
 
+export function createJsonSchemaFromTypeNode(type: TypeNode): any {
+  switch (type.type) {
+    case "primitive":
+      return createPrimitiveSchema(type.value);
+    case "struct":
+      return createStructSchema(type.value);
+    case "enum":
+      return createEnumSchema(type.value);
+    case "array":
+      return createArraySchema(type.value);
+    case "generic":
+      return createGenericSchema(type.value);
+    case "unknown":
+      return { type: "object" }; // Default to object for unknown types
+    default:
+      return { type: "object" };
+  }
+}
+
+function createPrimitiveSchema(primitive: PrimitiveType): any {
+  // Map Starknet/Cairo primitive types to JSON schema types
+  switch (primitive.name) {
+    case "core::felt252":
+    case "core::integer::u8":
+    case "core::integer::u16":
+    case "core::integer::u32":
+    case "core::integer::u64":
+    case "core::integer::u128":
+    case "core::integer::u256":
+      return { type: "integer" };
+    case "core::bool":
+      return { type: "boolean" };
+    default:
+      return { type: "string" }; // Default to string for unknown primitives
+  }
+}
+
+function createStructSchema(struct: StructType): any {
+  const properties: Record<string, any> = {};
+  const required: string[] = [];
+
+  struct.members.forEach(([name, typeNode]) => {
+    properties[name] = createJsonSchemaFromTypeNode(typeNode);
+    required.push(name);
+  });
+
+  return {
+    type: "object",
+    title: struct.name,
+    properties,
+    required,
+    additionalProperties: false,
+  };
+}
+
+function createEnumSchema(enumType: EnumType): any {
+  // For enums, we'll represent them as a string with allowed values
+  const enumValues = enumType.variants.map((variant) => variant.name);
+
+  return {
+    type: "string",
+    enum: enumValues,
+    title: enumType.name,
+  };
+}
+
+function createArraySchema(array: ArrayType): any {
+  return {
+    type: "array",
+    items: createJsonSchemaFromTypeNode(array.element_type),
+  };
+}
+
+function createGenericSchema(generic: GenericType): any {
+  // For generics, we'll try to construct a sensible schema based on the type arguments
+  if (generic.name.includes("Option")) {
+    // Handle Option<T> as nullable T
+    const innerSchema = createJsonSchemaFromTypeNode(generic.type_arguments[0]);
+    return {
+      ...innerSchema,
+      nullable: true,
+    };
+  }
+
+  if (generic.name.includes("Map") || generic.name.includes("Dict")) {
+    // Handle Map/Dict as an object with additional properties
+    return {
+      type: "object",
+      additionalProperties:
+        generic.type_arguments.length > 1
+          ? createJsonSchemaFromTypeNode(generic.type_arguments[1])
+          : true,
+    };
+  }
+
+  // Default handling for other generic types
+  return {
+    type: "object",
+    title: generic.name,
+  };
+}
+
 /**
  * Builds type registries for structs and enums from the ABI
  */

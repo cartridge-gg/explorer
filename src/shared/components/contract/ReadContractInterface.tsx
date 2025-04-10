@@ -16,11 +16,11 @@ import {
 } from "starknet";
 import * as types from "./types";
 import { Editor, Monaco, loader } from "@monaco-editor/react";
-import { editor, Position } from "monaco-editor";
+import { editor } from "monaco-editor";
 import {
+  createJsonSchemaFromTypeNode,
   FunctionAst,
   getFunctionAst,
-  getMonacoCompletionItems,
   InputNode,
 } from "@/shared/utils/abi3";
 
@@ -149,19 +149,71 @@ function FunctionCallAccordionContent({
 }: FunctionCallAccordionContentProps) {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
-  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const editorsRef = useRef<Record<string, editor.IStandaloneCodeEditor>>({});
+  const [editorModels, setEditorModels] = useState<Record<string, string>>({});
 
   function handleEditorDidMount(
+    inputName: string,
     input: InputNode,
     editor: editor.IStandaloneCodeEditor,
     monaco: Monaco
   ) {
-    editorRef.current = editor;
+    // Store the editor reference for this input
+    editorsRef.current[inputName] = editor;
     editor.focus();
 
-    monaco.languages.registerCompletionItemProvider("json", {
-      provideCompletionItems: (model: editor.ITextModel, position: Position) =>
-        getMonacoCompletionItems(input, model, position),
+    // Create a unique model ID for this input
+    const modelId = `${functionName}_${inputName}`;
+
+    // Create a unique URI for this model
+    const uri = monaco.Uri.parse(`file:///${modelId}.json`);
+
+    // Get or create the model for this input
+    let model = monaco.editor.getModel(uri);
+    if (!model) {
+      // Create default content based on input type
+      const defaultContent =
+        input.type.type === "struct"
+          ? "{\n\t\n}"
+          : input.type.type === "array"
+            ? "[\n\t\n]"
+            : "";
+
+      // Create a new model with the uri
+      model = monaco.editor.createModel(
+        editorModels[inputName] || defaultContent,
+        "json",
+        uri
+      );
+
+      // Set this model for the editor
+      editor.setModel(model);
+
+      // Create JSON schema for this input
+      const schema = createJsonSchemaFromTypeNode(input.type);
+      console.log("fucking schema", modelId, schema);
+
+      // Configure JSON validation just for this model's URI
+      monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+        validate: true,
+        schemas: [
+          ...(monaco.languages.json.jsonDefaults.diagnosticsOptions?.schemas ||
+            []),
+          {
+            uri: `schema://${modelId}.json`,
+            fileMatch: [uri.toString()],
+            schema,
+          },
+        ],
+      });
+    }
+
+    // Listen for model content changes
+    model.onDidChangeContent(() => {
+      setEditorModels((prev) => ({
+        ...prev,
+        [inputName]: model?.getValue() || "",
+      }));
     });
   }
 
@@ -191,18 +243,33 @@ function FunctionCallAccordionContent({
 
     let calldata;
 
-    if (!editorRef.current) {
+    if (Object.keys(editorsRef.current).length === 0) {
       console.error("no editor found");
       calldata = inputs.map((i) => i.value);
       console.log("caldata", calldata);
     } else {
-      const argsString = editorRef.current.getValue();
-      console.log("editor args", argsString);
+      // Collect all editor values from complex inputs
+      const complexArgs: Record<string, any> = {};
 
-      // Parse the string to JSON object
-      const args = JSON.parse(argsString);
+      for (const [inputName, editor] of Object.entries(editorsRef.current)) {
+        try {
+          const argsString = editor.getValue();
+          const args = JSON.parse(argsString);
+          complexArgs[inputName] = args;
+        } catch (e) {
+          console.error(`Failed to parse input ${inputName}:`, e);
+        }
+      }
 
-      calldata = CallData.toCalldata(args);
+      // For primitive inputs, use the stored values
+      const allArgs = inputs.map((input) => {
+        if (input.name in complexArgs) {
+          return complexArgs[input.name];
+        }
+        return input.value;
+      });
+
+      calldata = CallData.toCalldata(allArgs);
     }
 
     if (!state.hasCalled) {
@@ -222,7 +289,14 @@ function FunctionCallAccordionContent({
         onUpdateState({ error, result: null });
       })
       .finally(() => setLoading(false));
-  }, [contract, queryClient, functionName, onUpdateState, state.hasCalled]);
+  }, [
+    contract,
+    queryClient,
+    functionName,
+    onUpdateState,
+    state.hasCalled,
+    inputs,
+  ]);
 
   const handleInputChange = useCallback(
     (inputIndex: number, value: string) => {
@@ -277,7 +351,7 @@ function FunctionCallAccordionContent({
                       height={200}
                       language="json"
                       onMount={(editor, monaco: Monaco) =>
-                        handleEditorDidMount(input, editor, monaco)
+                        handleEditorDidMount(input.name, input, editor, monaco)
                       }
                       options={{
                         selectOnLineNumbers: true,
@@ -288,59 +362,29 @@ function FunctionCallAccordionContent({
                         suggestOnTriggerCharacters: true,
                         snippetSuggestions: "inline",
                         scrollbar: {
-                          // Subtle shadows to the left & top. Defaults to true.
                           useShadows: false,
-                          // Render vertical arrows. Defaults to false.
                           verticalHasArrows: true,
-                          // Render horizontal arrows. Defaults to false.
                           horizontalHasArrows: true,
-                          // Render vertical scrollbar.
-                          // Accepted values: 'auto', 'visible', 'hidden'.
-                          // Defaults to 'auto'
                           vertical: "visible",
-                          // Render horizontal scrollbar.
-                          // Accepted values: 'auto', 'visible', 'hidden'.
-                          // Defaults to 'auto'
                           horizontal: "visible",
                           verticalScrollbarSize: 17,
                           horizontalScrollbarSize: 17,
                           arrowSize: 30,
                         },
                       }}
-                      defaultValue={
-                        input.type.type === "struct"
+                      value={
+                        editorModels[input.name] ||
+                        (input.type.type === "struct"
                           ? "{\n\t\n}"
                           : input.type.type === "array"
                             ? "[\n\t\n]"
-                            : ""
+                            : "")
                       }
                     />
                   )}
                 </td>
               </tr>
             ))}
-
-            {/* {args.map((input, idx) => (
-              <tr
-                key={idx}
-                className={`${idx !== args.length - 1 ? "border-b" : ""}`}
-              >
-                <td className="px-2 py-1 text-left align-top w-[90px] italic">
-                  <span>{input.name}</span>
-                </td>
-
-                <td className="text-left align-top p-0">
-                  <input
-                    type="text"
-                    className="px-2 py-1 text-left w-full"
-                    placeholder={`${input.type}`}
-                    value={inputs[idx]?.value || ""}
-                    onChange={(e) => handleInputChange(idx, e.target.value)}
-                    disabled={!contract}
-                  />
-                </td>
-              </tr>
-            ))} */}
           </tbody>
         </table>
       ) : (
