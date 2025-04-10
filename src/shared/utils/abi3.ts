@@ -353,6 +353,38 @@ function resolveType(
   // Check if it's a struct
   if (structRegistry.has(typeStr)) {
     const structDef = structRegistry.get(typeStr)!;
+
+    // Check if the struct name starts with core::array::Span, if so, treat it like an array
+    if (structDef.name.startsWith("core::array::Span")) {
+      // Try to extract the element type from the struct's members
+      // Typically, spans have an "element" field or similar
+      for (const member of structDef.members) {
+        if (member.name === "element" || member.name === "elements") {
+          return {
+            type: "array",
+            value: {
+              element_type: resolveType(
+                member.type,
+                structRegistry,
+                enumRegistry
+              ),
+            },
+          };
+        }
+      }
+
+      // If we couldn't determine the element type, create a generic array type
+      return {
+        type: "array",
+        value: {
+          element_type: {
+            type: "primitive",
+            value: { name: "felt252" }, // Default element type
+          },
+        },
+      };
+    }
+
     const members: Array<[string, TypeNode]> = [];
 
     for (const member of structDef.members) {
@@ -386,6 +418,25 @@ function resolveType(
   // Special case for arrays like core::array::Array::<core::felt252>
   if (
     typeStr.includes("core::array::Array") &&
+    typeStr.includes("<") &&
+    typeStr.endsWith(">")
+  ) {
+    // Extract the element type from the generic parameter
+    const startIdx = typeStr.indexOf("<") + 1;
+    const endIdx = typeStr.lastIndexOf(">");
+    const elementType = typeStr.substring(startIdx, endIdx);
+
+    return {
+      type: "array",
+      value: {
+        element_type: resolveType(elementType, structRegistry, enumRegistry),
+      },
+    };
+  }
+
+  // Special case for spans like core::array::Span::<core::felt252>
+  if (
+    typeStr.includes("core::array::Span") &&
     typeStr.includes("<") &&
     typeStr.endsWith(">")
   ) {
