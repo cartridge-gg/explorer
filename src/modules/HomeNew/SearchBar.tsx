@@ -171,6 +171,11 @@ export default function HomeSearchBar() {
         onFocus={() => {
           if (result) setIsDropdownOpen(true);
         }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && result) {
+            handleResultClick();
+          }
+        }}
       />
 
       <div
