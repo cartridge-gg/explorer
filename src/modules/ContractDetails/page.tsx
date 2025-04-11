@@ -1,9 +1,9 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
-import { Block, Contract } from "starknet";
+import { Block, Contract, getChecksumAddress } from "starknet";
 import { isLocalNode } from "@/shared/utils/rpc_utils";
 import WalletConnectModal from "@/shared/components/wallet_connect";
 import { BreadcrumbPage } from "@cartridge/ui-next";
@@ -31,6 +31,7 @@ export default function ContractDetails() {
   const { contractAddress } = useParams<{
     contractAddress: string;
   }>();
+  const navigate = useNavigate();
   const { isMobile } = useScreen();
   const [classHash, setClassHash] = useState<string | null>(null);
   const [contract, setContract] = useState<Contract | null>(null);
@@ -119,10 +120,14 @@ export default function ContractDetails() {
 
   const blockOffset = 10;
   const fetchOffset = 5;
+
+  type EventDataRaw = { block_number: number, transaction_hash: string };
+  type EventData = EventDataRaw & { id: string };
+
   const eventsQuery = useInfiniteQuery({
     queryKey: ["contract", contractAddress, "events"],
     queryFn: async ({ pageParam }) => {
-      const events = [];
+      const eventsByTX = new Map<string, EventData[]>();
       let continuationToken = null;
       while (continuationToken === null || !!continuationToken) {
         const res = await RPC_PROVIDER.getEvents({
@@ -133,17 +138,24 @@ export default function ContractDetails() {
           continuation_token: continuationToken ?? undefined
         });
         continuationToken = res.continuation_token;
-        events.push(...res.events);
+
+        res.events.forEach(e => {
+          if (eventsByTX.has(e.transaction_hash)) {
+            eventsByTX.get(e.transaction_hash)?.push(e);
+          } else {
+            eventsByTX.set(e.transaction_hash, [e]);
+          }
+        })
       }
 
-      return events
+      return Array.from(eventsByTX.entries())
+        .map(([txHash, events]) => events.map((e, i) => ({ ...e, id: `${getChecksumAddress(txHash).toLowerCase()}-${i}` })))
+        .flat();
     },
-    getNextPageParam: (_lastPage, _allPages, lastPageParam) => {
-      return {
-        fromBlock: { block_number: lastPageParam.fromBlock.block_number - blockOffset },
-        toBlock: { block_number: lastPageParam.toBlock.block_number - blockOffset }
-      };
-    },
+    getNextPageParam: (_lastPage, _allPages, lastPageParam) => ({
+      fromBlock: { block_number: lastPageParam.fromBlock.block_number - blockOffset },
+      toBlock: { block_number: lastPageParam.toBlock.block_number - blockOffset }
+    }),
     initialPageParam: {
       fromBlock: { block_number: latestBlockQuery.data ? latestBlockQuery.data.block_number - blockOffset : undefined } as Block,
       toBlock: { block_number: latestBlockQuery.data ? latestBlockQuery.data.block_number : undefined } as Block,
@@ -154,11 +166,13 @@ export default function ContractDetails() {
     enabled: contractAddress && !latestBlockQuery.isLoading && isLocalNode
   });
 
-  type EventData = { block_number: number, transaction_hash: string };
-
   const eventsColumns: ColumnDef<EventData, any>[] = useMemo(() => {
     const columnHelper = createColumnHelper<EventData>();
     return [
+      columnHelper.accessor("id", {
+        header: "ID",
+        cell: (info) => info.renderValue(),
+      }),
       columnHelper.accessor("block_number", {
         header: "Block Number",
         cell: (info) => info.renderValue(),
@@ -306,10 +320,10 @@ export default function ContractDetails() {
 
                         <tbody>
                           {eventTable.getRowModel().rows.length ? (
-                            eventTable.getRowModel().rows.map((row, id) => (
+                            eventTable.getRowModel().rows.map((row) => (
                               <tr
-                                key={id}
-                                // onClick={() => navigateTo(row.original.transaction_hash)}
+                                key={row.original.id}
+                                onClick={() => navigate(`/events/${row.original.id}`)}
                                 className="hover:bg-gray-100 cursor-pointer min-h-5"
                               >
                                 {row.getVisibleCells().map((cell) => {
