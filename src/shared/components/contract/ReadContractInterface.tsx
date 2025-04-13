@@ -8,7 +8,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState, useMemo, useRef } from "react";
 import {
   Abi,
-  AbiEntry,
   CallData,
   Contract,
   FunctionAbi,
@@ -22,7 +21,7 @@ import {
   FunctionAst,
   getFunctionAst,
   InputNode,
-} from "@/shared/utils/abi3";
+} from "@/shared/utils/abi";
 
 // Optional: Configure loader to use CDN
 loader.config({
@@ -150,9 +149,9 @@ function FunctionCallAccordionContent({
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const editorsRef = useRef<Record<string, editor.IStandaloneCodeEditor>>({});
-  const [editorModels, setEditorModels] = useState<Record<string, string>>({});
 
   function handleEditorDidMount(
+    inputIndex: number,
     inputName: string,
     input: InputNode,
     editor: editor.IStandaloneCodeEditor,
@@ -171,27 +170,22 @@ function FunctionCallAccordionContent({
     // Get or create the model for this input
     let model = monaco.editor.getModel(uri);
     if (!model) {
-      // Create default content based on input type
       const defaultContent =
-        input.type.type === "struct"
-          ? "{\n\t\n}"
-          : input.type.type === "array"
-            ? "[\n\t\n]"
-            : "";
+        inputIndex < state.inputs.length
+          ? state.inputs[inputIndex].value
+          : input.type.type === "struct"
+            ? "{\n\t\n}"
+            : input.type.type === "array"
+              ? "[\n\t\n]"
+              : "";
 
       // Create a new model with the uri
-      model = monaco.editor.createModel(
-        editorModels[inputName] || defaultContent,
-        "json",
-        uri
-      );
-
+      model = monaco.editor.createModel(defaultContent, "json", uri);
       // Set this model for the editor
       editor.setModel(model);
 
       // Create JSON schema for this input
       const schema = createJsonSchemaFromTypeNode(input.type);
-      console.log("fucking schema", modelId, schema);
 
       // Configure JSON validation just for this model's URI
       monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
@@ -200,7 +194,7 @@ function FunctionCallAccordionContent({
           ...(monaco.languages.json.jsonDefaults.diagnosticsOptions?.schemas ||
             []),
           {
-            uri: `schema://${modelId}.json`,
+            uri: `schema://${input.type.value.name}.json`,
             fileMatch: [uri.toString()],
             schema,
           },
@@ -210,31 +204,9 @@ function FunctionCallAccordionContent({
 
     // Listen for model content changes
     model.onDidChangeContent(() => {
-      setEditorModels((prev) => ({
-        ...prev,
-        [inputName]: model?.getValue() || "",
-      }));
+      handleInputChange(inputIndex, model?.getValue() || null);
     });
   }
-
-  // Initialize input values or return existing ones
-  // If there are no inputs yet and args are provided, create initial input state with empty values
-  const inputs = useMemo(() => {
-    if (state.inputs.length === 0 && args.length > 0) {
-      const initialInputs = args.map((arg) => ({
-        name: arg.name,
-        type: arg.type,
-        value: "",
-      }));
-
-      if (contract) {
-        onUpdateState({ inputs: initialInputs });
-      }
-      return initialInputs;
-    } else {
-      return state.inputs;
-    }
-  }, [args, state.inputs, onUpdateState, contract]);
 
   const handleFunctionCall = useCallback(() => {
     if (!contract) return;
@@ -245,7 +217,7 @@ function FunctionCallAccordionContent({
 
     if (Object.keys(editorsRef.current).length === 0) {
       console.error("no editor found");
-      calldata = inputs.map((i) => i.value);
+      calldata = state.inputs.map((i) => i.value);
       console.log("caldata", calldata);
     } else {
       // Collect all editor values from complex inputs
@@ -262,7 +234,7 @@ function FunctionCallAccordionContent({
       }
 
       // For primitive inputs, use the stored values
-      const allArgs = inputs.map((input) => {
+      const allArgs = state.inputs.map((input) => {
         if (input.name in complexArgs) {
           return complexArgs[input.name];
         }
@@ -293,21 +265,21 @@ function FunctionCallAccordionContent({
     contract,
     queryClient,
     functionName,
+    state.inputs,
     onUpdateState,
     state.hasCalled,
-    inputs,
   ]);
 
   const handleInputChange = useCallback(
-    (inputIndex: number, value: string) => {
-      const newInputs = [...inputs];
+    (inputIndex: number, value: any) => {
+      const newInputs = [...state.inputs];
       newInputs[inputIndex] = {
         ...newInputs[inputIndex],
         value: value,
       };
       onUpdateState({ inputs: newInputs });
     },
-    [inputs, onUpdateState]
+    [state, onUpdateState]
   );
 
   return (
@@ -343,43 +315,46 @@ function FunctionCallAccordionContent({
                       type="text"
                       className="px-2 py-1 text-left w-full"
                       placeholder={`${input.type.value.name}`}
-                      value={inputs[idx]?.value || ""}
                       onChange={(e) => handleInputChange(idx, e.target.value)}
+                      value={
+                        idx < state.inputs.length
+                          ? state.inputs[idx]?.value
+                          : undefined
+                      }
                     />
                   ) : (
                     <Editor
                       height={200}
                       language="json"
                       onMount={(editor, monaco: Monaco) =>
-                        handleEditorDidMount(input.name, input, editor, monaco)
+                        handleEditorDidMount(
+                          idx,
+                          input.name,
+                          input,
+                          editor,
+                          monaco
+                        )
                       }
                       options={{
-                        selectOnLineNumbers: true,
-                        roundedSelection: false,
                         readOnly: false,
+                        lineNumbers: "off",
                         cursorStyle: "line",
                         automaticLayout: true,
-                        suggestOnTriggerCharacters: true,
+                        roundedSelection: false,
+                        selectOnLineNumbers: true,
                         snippetSuggestions: "inline",
+                        suggestOnTriggerCharacters: true,
                         scrollbar: {
+                          arrowSize: 10,
                           useShadows: false,
-                          verticalHasArrows: true,
-                          horizontalHasArrows: true,
                           vertical: "visible",
                           horizontal: "visible",
+                          verticalHasArrows: true,
+                          horizontalHasArrows: true,
                           verticalScrollbarSize: 17,
                           horizontalScrollbarSize: 17,
-                          arrowSize: 30,
                         },
                       }}
-                      value={
-                        editorModels[input.name] ||
-                        (input.type.type === "struct"
-                          ? "{\n\t\n}"
-                          : input.type.type === "array"
-                            ? "[\n\t\n]"
-                            : "")
-                      }
                     />
                   )}
                 </td>
