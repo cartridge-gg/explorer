@@ -1,7 +1,7 @@
 export type FunctionInput = { name: string; type: string };
 
 export type FunctionInputWithValue = FunctionInput & {
-  value: string;
+  value: any;
 };
 
 export type Function = {
