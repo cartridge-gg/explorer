@@ -10,8 +10,17 @@ import { useNavigate } from "react-router-dom";
 export default function HomeSearchBar() {
   const navigate = useNavigate();
   const { isMobile } = useScreen();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownResultRef = useRef<HTMLDivElement>(null);
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  // State to track visual focus on the result
+  const [isResultFocused, setIsResultFocused] = useState(false);
+
+  const [result, setResult] = useState<
+    { type: "tx" | "block" | "contract" | "class"; value: string } | undefined
+  >();
 
   const queryClient = useQueryClient();
 
@@ -36,10 +45,6 @@ export default function HomeSearchBar() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  const [result, setResult] = useState<
-    { type: "tx" | "block" | "contract" | "class"; value: string } | undefined
-  >();
 
   const performSearch = useCallback(
     (input: string) => {
@@ -120,6 +125,10 @@ export default function HomeSearchBar() {
         } else {
           setResult(undefined);
         }
+
+        if (isBlock || isTx || isContract || isClass) {
+          setIsResultFocused(true);
+        }
       });
     },
     [performSearch]
@@ -154,6 +163,29 @@ export default function HomeSearchBar() {
     }
   };
 
+  // Handle keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && result) {
+      if (isResultFocused || e.currentTarget === dropdownResultRef.current) {
+        handleResultClick();
+      }
+    } else if (e.key === "Escape") {
+      setIsDropdownOpen(false);
+      setIsResultFocused(false);
+    } else if (e.key === "ArrowDown" && result && isDropdownOpen) {
+      setIsResultFocused(true);
+      e.preventDefault(); // Prevent scrolling
+    } else if (
+      e.key === "ArrowUp" &&
+      result &&
+      isDropdownOpen &&
+      isResultFocused
+    ) {
+      setIsResultFocused(false);
+      e.preventDefault(); // Prevent scrolling
+    }
+  };
+
   return (
     <div
       className={`bg-white min-w-[200px] w-full h-[42px] flex relative border border-borderGray items-center shadow ${
@@ -171,11 +203,7 @@ export default function HomeSearchBar() {
         onFocus={() => {
           if (result) setIsDropdownOpen(true);
         }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && result) {
-            handleResultClick();
-          }
-        }}
+        onKeyDown={handleKeyDown}
       />
 
       <div
@@ -200,8 +228,13 @@ export default function HomeSearchBar() {
           >
             {result ? (
               <div
+                ref={dropdownResultRef}
+                tabIndex={0}
+                onKeyDown={handleKeyDown}
                 onClick={handleResultClick}
-                className="flex flex-row hover:bg-gray-100 cursor-pointer items-center gap-2 justify-between w-full px-2 py-1"
+                className={`flex flex-row hover:bg-gray-100 cursor-pointer items-center gap-2 justify-between w-full px-2 py-1 outline-none ${
+                  isResultFocused ? "bg-gray-100" : ""
+                }`}
               >
                 <span className="font-bold uppercase">{result.type}</span>
 
