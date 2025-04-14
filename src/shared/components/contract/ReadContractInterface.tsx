@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState, useMemo, useRef } from "react";
 import {
   Abi,
+  Calldata,
   CallData,
   Contract,
   FunctionAbi,
@@ -17,6 +18,7 @@ import * as types from "./types";
 import { Editor, Monaco, loader } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import {
+  convertToCalldata,
   createJsonSchemaFromTypeNode,
   FunctionAst,
   getFunctionAst,
@@ -150,6 +152,8 @@ function FunctionCallAccordionContent({
   const [loading, setLoading] = useState(false);
   const editorsRef = useRef<Record<string, editor.IStandaloneCodeEditor>>({});
 
+  console.log("abi", abi);
+
   function handleEditorDidMount(
     inputIndex: number,
     inputName: string,
@@ -213,36 +217,15 @@ function FunctionCallAccordionContent({
 
     setLoading(true);
 
-    let calldata;
+    let calldata: Calldata = [];
 
-    if (Object.keys(editorsRef.current).length === 0) {
-      console.error("no editor found");
-      calldata = state.inputs.map((i) => i.value);
-      console.log("caldata", calldata);
-    } else {
-      // Collect all editor values from complex inputs
-      const complexArgs: Record<string, any> = {};
+    state.inputs.forEach((input, idx) => {
+      calldata = calldata.concat(
+        convertToCalldata(ast.inputs[idx].type, input.value)
+      );
+    });
 
-      for (const [inputName, editor] of Object.entries(editorsRef.current)) {
-        try {
-          const argsString = editor.getValue();
-          const args = JSON.parse(argsString);
-          complexArgs[inputName] = args;
-        } catch (e) {
-          console.error(`Failed to parse input ${inputName}:`, e);
-        }
-      }
-
-      // For primitive inputs, use the stored values
-      const allArgs = state.inputs.map((input) => {
-        if (input.name in complexArgs) {
-          return complexArgs[input.name];
-        }
-        return input.value;
-      });
-
-      calldata = CallData.toCalldata(allArgs);
-    }
+    console.log("calldata", calldata);
 
     if (!state.hasCalled) {
       onUpdateState({ hasCalled: true });
@@ -251,7 +234,8 @@ function FunctionCallAccordionContent({
     queryClient
       .fetchQuery({
         queryKey: [functionName, ...calldata],
-        queryFn: () => contract.call(functionName, calldata),
+        queryFn: () =>
+          contract.call(functionName, calldata, { parseRequest: false }),
       })
       .then((result) => {
         onUpdateState({ result, error: null });
@@ -263,6 +247,7 @@ function FunctionCallAccordionContent({
       .finally(() => setLoading(false));
   }, [
     contract,
+    ast.inputs,
     queryClient,
     functionName,
     state.inputs,
