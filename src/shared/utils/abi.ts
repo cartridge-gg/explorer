@@ -1,4 +1,11 @@
-import { Abi, AbiEnum, AbiStruct, FunctionAbi, InterfaceAbi } from "starknet";
+import {
+  Abi,
+  AbiEnum,
+  AbiStruct,
+  Calldata,
+  FunctionAbi,
+  InterfaceAbi,
+} from "starknet";
 
 export type AbiEnumVariant = {
   name: string;
@@ -82,18 +89,7 @@ export function createJsonSchemaFromTypeNode(type: TypeNode): any {
 }
 
 function createPrimitiveSchema(primitive: PrimitiveType): any {
-  // Map Starknet/Cairo primitive types to JSON schema types
-  switch (primitive.name) {
-    case "core::felt252":
-    case "core::integer::u8":
-    case "core::integer::u16":
-    case "core::integer::u32":
-    case "core::integer::u64":
-    case "core::integer::u128":
-    case "core::integer::u256":
-    default:
-      return { type: "string", title: primitive.name };
-  }
+  return { type: "string", title: primitive.name };
 }
 
 function createStructSchema(struct: StructType): any {
@@ -295,26 +291,40 @@ function resolveType(
     const structDef = structRegistry.get(typeStr)!;
 
     // Check if the struct name starts with core::array::Span, if so, treat it like an array
+    //
+    // Example:
+    // {
+    //     "type": "struct",
+    //     "name": "core::array::Span::<core::felt252>",
+    //     "members": [
+    //         {
+    //             "name": "snapshot",
+    //             "type": "@core::array::Array::<core::felt252>"
+    //         }
+    //     ]
+    // }
     if (structDef.name.startsWith("core::array::Span")) {
       // Try to extract the element type from the struct's members
       // Typically, spans have an "element" field or similar
       for (const member of structDef.members) {
-        if (
-          member.name === "element" ||
-          member.name === "elements" ||
-          member.name === "snapshot"
-        ) {
-          return {
-            type: "array",
-            value: {
-              name: structDef.name,
-              element_type: resolveType(
-                member.type,
-                structRegistry,
-                enumRegistry
-              ),
-            },
-          };
+        if (member.name === "snapshot") {
+          if (member.type.includes("@core::array::Array")) {
+            const startIdx = member.type.indexOf("<") + 1;
+            const endIdx = member.type.lastIndexOf(">");
+            const elementType = member.type.substring(startIdx, endIdx);
+
+            return {
+              type: "array",
+              value: {
+                name: structDef.name,
+                element_type: resolveType(
+                  elementType,
+                  structRegistry,
+                  enumRegistry
+                ),
+              },
+            };
+          }
         }
       }
 
@@ -322,6 +332,7 @@ function resolveType(
       return {
         type: "array",
         value: {
+          name: structDef.name,
           element_type: {
             type: "primitive",
             value: { name: "felt252" }, // Default element type
@@ -399,6 +410,7 @@ function resolveType(
     return {
       type: "array",
       value: {
+        name: elementType,
         element_type: resolveType(elementType, structRegistry, enumRegistry),
       },
     };
@@ -411,4 +423,100 @@ function resolveType(
       name: typeStr,
     },
   };
+}
+
+export function convertToCalldata(type: TypeNode, value: any): Calldata {
+  switch (type.type) {
+    case "primitive":
+      return convertPrimitiveToCalldata(type.value, value as string);
+    case "struct":
+      return convertStructToCalldata(
+        type.value,
+        typeof value === "string" ? JSON.parse(value) : value
+      );
+    case "enum":
+      return convertEnumToCalldata(type.value, value);
+    case "option":
+      return convertOptionToCalldata(type.value, value);
+    case "array":
+      return convertArrayToCalldata(type.value, value as any[]);
+    case "generic":
+    case "unknown":
+    default:
+      return [];
+  }
+}
+
+function convertStructToCalldata(type: StructType, value: any): Calldata {
+  let calldata: Calldata = [];
+  console.log("struct value", value);
+
+  type.members.forEach(([memberName, memberType]) => {
+    const memberValue = value[memberName];
+    const memberCalldata = convertToCalldata(memberType, memberValue);
+    calldata = calldata.concat(memberCalldata);
+  });
+
+  console.log("type", type, calldata);
+
+  return calldata;
+}
+
+function convertArrayToCalldata(type: ArrayType, value: any[]): Calldata {
+  let calldata: Calldata = [];
+  const arrayLength = BigInt(value.length);
+  calldata.push(arrayLength.toString());
+
+  value.forEach((elem) => {
+    console.log("element_type", type.element_type, "elem", elem);
+    const elemCalldata = convertToCalldata(type.element_type, elem);
+    console.log("elemcalldata", elemCalldata);
+    calldata = calldata.concat(elemCalldata);
+  });
+
+  return calldata;
+}
+
+function convertEnumToCalldata(type: EnumType, value: any): Calldata {
+  if (type.name === "core::bool") {
+    return convertBooleanToCalldata(value as boolean);
+  } else {
+    return [];
+  }
+}
+
+function convertOptionToCalldata(type: OptionType, value: any): Calldata {
+  if (value) {
+    return ["0", ...convertToCalldata(type.element_type, value)];
+  } else {
+    return ["1"];
+  }
+}
+
+function convertBooleanToCalldata(value: boolean): Calldata {
+  return value ? ["1"] : ["0"];
+}
+
+function convertPrimitiveToCalldata(
+  type: PrimitiveType,
+  value: string
+): Calldata {
+  switch (type.name) {
+    case "core::integer::u256": {
+      const num = BigInt(value);
+      const mask = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"); // 2^128
+      const low = (num & mask).toString();
+      const high = (num >> BigInt(128)).toString();
+      return [low, high];
+    }
+    // case "core::felt252":
+    // case "core::integer::u8":
+    // case "core::integer::u16":
+    // case "core::integer::u32":
+    // case "core::integer::u64":
+    // case "core::integer::u128":
+    // case "core::starknet::class_hash::ClassHash":
+    default:
+      return [value];
+  }
 }
