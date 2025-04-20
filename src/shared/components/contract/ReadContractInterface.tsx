@@ -21,12 +21,12 @@ import {
 } from "@/shared/utils/abi";
 import FunctionArgEditor from "@/shared/components/FunctionInputEditor";
 
-// Optional: Configure loader to use CDN
-loader.config({
-  paths: {
-    vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs",
-  },
-});
+// // Optional: Configure loader to use CDN
+// loader.config({
+//   paths: {
+//     vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs",
+//   },
+// });
 
 // The state of the <FunctionCallAccordionContent/> component
 type FunctionCallAccordionContentState = {
@@ -106,7 +106,6 @@ export function ContractReadInterface({
                 ast={functionsAst[func.name]}
                 key={index}
                 contract={contract}
-                functionName={func.name}
                 state={functionItemStates[func.name]}
                 onUpdateState={(update) => {
                   updateFunctionItemState(func.name, update);
@@ -125,8 +124,6 @@ interface FunctionCallAccordionContentProps {
   /** The contract instance to interact with */
   contract?: Contract;
   ast: FunctionAst;
-  /** The name of the function to call on the contract */
-  functionName: string;
   /** Current state of the accordion content, including inputs, results and errors */
   state?: FunctionCallAccordionContentState;
   /** Callback to update the state of this accordion item in order to preserve the state */
@@ -136,7 +133,6 @@ interface FunctionCallAccordionContentProps {
 function FunctionCallAccordionContent({
   ast,
   contract,
-  functionName,
   onUpdateState,
   state = { inputs: [], hasCalled: false, error: null, result: null },
 }: FunctionCallAccordionContentProps) {
@@ -156,17 +152,15 @@ function FunctionCallAccordionContent({
       );
     });
 
-    console.log("calldata", calldata);
-
     if (!state.hasCalled) {
       onUpdateState({ hasCalled: true });
     }
 
     queryClient
       .fetchQuery({
-        queryKey: [functionName, ...calldata],
+        queryKey: [ast.name, ...calldata],
         queryFn: () =>
-          contract.call(functionName, calldata, { parseRequest: false }),
+          contract.call(ast.name, calldata, { parseRequest: false }),
       })
       .then((result) => {
         onUpdateState({ result, error: null });
@@ -177,10 +171,9 @@ function FunctionCallAccordionContent({
       })
       .finally(() => setLoading(false));
   }, [
+    ast,
     contract,
-    ast.inputs,
     queryClient,
-    functionName,
     state.inputs,
     onUpdateState,
     state.hasCalled,

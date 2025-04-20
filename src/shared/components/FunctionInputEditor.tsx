@@ -1,6 +1,6 @@
 import { createJsonSchemaFromTypeNode, ArgumentNode } from "../utils/abi";
 import { editor } from "monaco-editor";
-import { Editor, Monaco, loader } from "@monaco-editor/react";
+import { Editor, Monaco } from "@monaco-editor/react";
 import { useCallback } from "react";
 
 interface FunctionInputEditorProps {
