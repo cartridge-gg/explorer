@@ -5,25 +5,21 @@ import FeltDisplayAsToggle, {
 } from "@/shared/components/FeltDisplayAsToggle";
 import FeltList from "@/shared/components/FeltList";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState, useMemo, useRef } from "react";
+import { useCallback, useState, useMemo } from "react";
 import {
   Abi,
   Calldata,
-  CallData,
   Contract,
   FunctionAbi,
   Result,
 } from "starknet";
 import * as types from "./types";
-import { Editor, Monaco, loader } from "@monaco-editor/react";
-import { editor } from "monaco-editor";
 import {
   convertToCalldata,
-  createJsonSchemaFromTypeNode,
   FunctionAst,
   getFunctionAst,
-  InputNode,
 } from "@/shared/utils/abi";
+import FunctionArgEditor from "@/shared/components/FunctionInputEditor";
 
 // Optional: Configure loader to use CDN
 loader.config({
@@ -111,7 +107,6 @@ export function ContractReadInterface({
                 key={index}
                 contract={contract}
                 functionName={func.name}
-                args={func.inputs}
                 state={functionItemStates[func.name]}
                 onUpdateState={(update) => {
                   updateFunctionItemState(func.name, update);
@@ -132,8 +127,6 @@ interface FunctionCallAccordionContentProps {
   ast: FunctionAst;
   /** The name of the function to call on the contract */
   functionName: string;
-  /** The function's input arguments definition */
-  args: AbiEntry[];
   /** Current state of the accordion content, including inputs, results and errors */
   state?: FunctionCallAccordionContentState;
   /** Callback to update the state of this accordion item in order to preserve the state */
@@ -142,7 +135,6 @@ interface FunctionCallAccordionContentProps {
 
 function FunctionCallAccordionContent({
   ast,
-  args,
   contract,
   functionName,
   onUpdateState,
@@ -150,67 +142,6 @@ function FunctionCallAccordionContent({
 }: FunctionCallAccordionContentProps) {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
-  const editorsRef = useRef<Record<string, editor.IStandaloneCodeEditor>>({});
-
-  console.log("abi", abi);
-
-  function handleEditorDidMount(
-    inputIndex: number,
-    inputName: string,
-    input: InputNode,
-    editor: editor.IStandaloneCodeEditor,
-    monaco: Monaco
-  ) {
-    // Store the editor reference for this input
-    editorsRef.current[inputName] = editor;
-    editor.focus();
-
-    // Create a unique model ID for this input
-    const modelId = `${functionName}_${inputName}`;
-
-    // Create a unique URI for this model
-    const uri = monaco.Uri.parse(`file:///${modelId}.json`);
-
-    // Get or create the model for this input
-    let model = monaco.editor.getModel(uri);
-    if (!model) {
-      const defaultContent =
-        inputIndex < state.inputs.length
-          ? state.inputs[inputIndex].value
-          : input.type.type === "struct"
-            ? "{\n\t\n}"
-            : input.type.type === "array"
-              ? "[\n\t\n]"
-              : "";
-
-      // Create a new model with the uri
-      model = monaco.editor.createModel(defaultContent, "json", uri);
-      // Set this model for the editor
-      editor.setModel(model);
-
-      // Create JSON schema for this input
-      const schema = createJsonSchemaFromTypeNode(input.type);
-
-      // Configure JSON validation just for this model's URI
-      monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-        validate: true,
-        schemas: [
-          ...(monaco.languages.json.jsonDefaults.diagnosticsOptions?.schemas ||
-            []),
-          {
-            uri: `schema://${input.type.value.name}.json`,
-            fileMatch: [uri.toString()],
-            schema,
-          },
-        ],
-      });
-    }
-
-    // Listen for model content changes
-    model.onDidChangeContent(() => {
-      handleInputChange(inputIndex, model?.getValue() || null);
-    });
-  }
 
   const handleFunctionCall = useCallback(() => {
     if (!contract) return;
@@ -282,13 +213,13 @@ function FunctionCallAccordionContent({
         </button>
       )}
 
-      {args.length !== 0 ? (
+      {ast.inputs.length !== 0 ? (
         <table className="bg-white overflow-x w-full">
           <tbody>
             {ast.inputs.map((input, idx) => (
               <tr
                 key={idx}
-                className={`${idx !== args.length - 1 ? "border-b" : ""}`}
+                className={`${idx !== ast.inputs.length - 1 ? "border-b" : ""}`}
               >
                 <td className="px-2 py-1 text-left align-top w-[90px] italic">
                   <span>{input.name}</span>
@@ -308,38 +239,20 @@ function FunctionCallAccordionContent({
                       }
                     />
                   ) : (
-                    <Editor
-                      height={200}
-                      language="json"
-                      onMount={(editor, monaco: Monaco) =>
-                        handleEditorDidMount(
-                          idx,
-                          input.name,
-                          input,
-                          editor,
-                          monaco
-                        )
+                    <FunctionArgEditor
+                      key={idx}
+                      functionName={ast.name}
+                      argInfo={input}
+                      onChange={(value) => handleInputChange(idx, value)}
+                      value={
+                        idx < state.inputs.length
+                          ? state.inputs[idx].value
+                          : input.type.type === "struct"
+                            ? "{\n\t\n}"
+                            : input.type.type === "array"
+                              ? "[\n\t\n]"
+                              : ""
                       }
-                      options={{
-                        readOnly: false,
-                        lineNumbers: "off",
-                        cursorStyle: "line",
-                        automaticLayout: true,
-                        roundedSelection: false,
-                        selectOnLineNumbers: true,
-                        snippetSuggestions: "inline",
-                        suggestOnTriggerCharacters: true,
-                        scrollbar: {
-                          arrowSize: 10,
-                          useShadows: false,
-                          vertical: "visible",
-                          horizontal: "visible",
-                          verticalHasArrows: true,
-                          horizontalHasArrows: true,
-                          verticalScrollbarSize: 17,
-                          horizontalScrollbarSize: 17,
-                        },
-                      }}
                     />
                   )}
                 </td>

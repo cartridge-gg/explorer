@@ -56,7 +56,7 @@ export type TypeNode =
   | { type: "unknown"; value: UnknownType };
 
 // Input node for function parameters
-export interface InputNode {
+export interface ArgumentNode {
   name: string;
   type: TypeNode;
 }
@@ -64,7 +64,7 @@ export interface InputNode {
 // Function AST representation
 export interface FunctionAst {
   name: string;
-  inputs: Array<InputNode>;
+  inputs: Array<ArgumentNode>;
 }
 
 export function createJsonSchemaFromTypeNode(type: TypeNode): any {
