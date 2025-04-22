@@ -19,8 +19,9 @@ import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";
 import ContractReadInterface from "./components/ReadContractInterface";
 import ContractWriteInterface from "./components/WriteContractInterface";
+import { Code, CodeProps } from "./components/Code";
 
-const DataTabs = ["Read Contract", "Write Contract"];
+const DataTabs = ["Read Contract", "Write Contract", "Code"];
 
 export default function ContractDetails() {
   const { contractAddress } = useParams<{
@@ -29,6 +30,7 @@ export default function ContractDetails() {
   const { isMobile } = useScreen();
   const [classHash, setClassHash] = useState<string | null>(null);
   const [contract, setContract] = useState<Contract | null>(null);
+  const [codeProps, setCodeProps] = useState<CodeProps>();
   const [readFunctions, setReadFunctions] = useState<
     {
       name: string;
@@ -58,6 +60,10 @@ export default function ContractDetails() {
 
     // process contract functions
     const contractClass = await RPC_PROVIDER.getClassAt(contractAddress);
+    setCodeProps({
+      abi: JSON.stringify(contractClass.abi, null, 2),
+      sierra: "sierra_program" in contractClass ? JSON.stringify(contractClass.sierra_program, null, 2) : undefined,
+    });
 
     const readFuncs: typeof readFunctions = [];
     const writeFuncs: typeof writeFunctions = [];
@@ -154,8 +160,8 @@ export default function ContractDetails() {
                       {isStrkLoading
                         ? "0.00"
                         : balances.strk !== undefined
-                        ? (Number(balances.strk) / 10 ** 18).toString()
-                        : "N/A"}
+                          ? (Number(balances.strk) / 10 ** 18).toString()
+                          : "N/A"}
                     </td>
                   </tr>
 
@@ -165,8 +171,8 @@ export default function ContractDetails() {
                       {isEthLoading
                         ? "0.00"
                         : balances.eth !== undefined
-                        ? (Number(balances.eth) / 10 ** 18).toString()
-                        : "N/A"}
+                          ? (Number(balances.eth) / 10 ** 18).toString()
+                          : "N/A"}
                     </td>
                   </tr>
                 </tbody>
@@ -186,21 +192,32 @@ export default function ContractDetails() {
 
             <div className="bg-white flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray overflow-auto">
               <div className="w-full h-full overflow-auto">
-                {selectedDataTab === "Read Contract" ? (
-                  <ContractReadInterface
-                    contract={contract}
-                    functions={readFunctions}
-                  />
-                ) : selectedDataTab === "Write Contract" ? (
-                  <ContractWriteInterface
-                    contract={contract}
-                    functions={writeFunctions}
-                  />
-                ) : (
-                  <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
-                    <span className="text-[#D0D0D0]">No data found</span>
-                  </div>
-                )}
+                {(() => {
+                  if (!contract) {
+                    return null
+                  }
+
+                  switch (selectedDataTab) {
+                    case "Read Contract":
+                      return <ContractReadInterface
+                        contract={contract}
+                        functions={readFunctions}
+                      />
+                    case "Write Contract":
+                      return <ContractWriteInterface
+                        contract={contract}
+                        functions={writeFunctions}
+                      />
+                    case "Code":
+                      return <Code {...codeProps} />
+                    default:
+                      return (
+                        <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
+                          <span className="text-[#D0D0D0]">No data found</span>
+                        </div>
+                      )
+                  }
+                })()}
               </div>
             </div>
           </div>
