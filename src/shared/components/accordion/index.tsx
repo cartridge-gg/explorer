@@ -46,6 +46,10 @@ interface AccordionItemProps {
    * Optional custom styling for the content section
    */
   contentClassName?: string;
+  /**
+   * Whether the accordion is disabled
+   */
+  disabled?: boolean;
 }
 
 export function AccordionItem({
@@ -54,6 +58,7 @@ export function AccordionItem({
   titleClassName,
   contentClassName,
   containerClassName,
+  disabled = false,
 }: AccordionItemProps) {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
 
@@ -65,12 +70,12 @@ export function AccordionItem({
   return (
     <div className={`accordion w-full ${containerClassName || ""}`}>
       <div
-        onClick={toggleAccordion}
-        className={`accordion-header sticky top-0 bg-white cursor-pointer border border-borderGray px-4 gap-3 py-2 grid grid-cols-[1fr_min-content] items-center ${titleClassName || ""
-          }`}
+        onClick={disabled ? undefined : toggleAccordion}
+        className={`accordion-header sticky top-0 bg-white border border-borderGray px-4 gap-3 py-2 grid grid-cols-[1fr_min-content] items-center ${titleClassName || ""
+          } ${disabled ? "cursor-default" : "cursor-pointer"}`}
       >
         <div className="accordion-title overflow-x-auto">{title}</div>
-        {isOpen ? <AccordionCollapseIcon /> : <AccordionExpandIcon />}
+        {!disabled && (isOpen ? <AccordionCollapseIcon /> : <AccordionExpandIcon />)}
       </div>
 
       {isOpen && (
