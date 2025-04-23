@@ -18,11 +18,11 @@ type FunctionCallAccordionContentState = {
 };
 
 export interface ContractReadInterfaceProps {
-  contract: Contract;
+  contract?: Contract;
   functions?: types.Function[];
 }
 
-export default function ContractReadInterface({
+export function ContractReadInterface({
   contract,
   functions = [],
 }: ContractReadInterfaceProps) {
@@ -79,6 +79,7 @@ export default function ContractReadInterface({
                 }
               />
             }
+            disabled={!contract && !func.inputs.length}
           />
         ))
       }
@@ -88,7 +89,7 @@ export default function ContractReadInterface({
 
 interface FunctionCallAccordionContentProps {
   /** The contract instance to interact with */
-  contract: Contract;
+  contract?: Contract;
   /** The name of the function to call on the contract */
   functionName: string;
   /** The function's input arguments definition */
@@ -119,14 +120,18 @@ function FunctionCallAccordionContent({
         value: "",
       }));
 
-      onUpdateState({ inputs: initialInputs });
+      if (contract) {
+        onUpdateState({ inputs: initialInputs });
+      }
       return initialInputs;
     } else {
       return state.inputs;
     }
-  }, [args, state.inputs, onUpdateState]);
+  }, [args, state.inputs, onUpdateState, contract]);
 
   const handleFunctionCall = useCallback(() => {
+    if (!contract) return;
+
     setLoading(true);
 
     const calldata = inputs.map((i) => i.value);
@@ -171,17 +176,18 @@ function FunctionCallAccordionContent({
 
   return (
     <div className="flex flex-col gap-[10px] items-end">
-      <button
-        disabled={loading}
-        onClick={handleFunctionCall}
-        className={`px-3 py-[2px] text-sm uppercase font-bold w-fit  ${
-          loading
+      {contract && (
+        <button
+          disabled={loading}
+          onClick={handleFunctionCall}
+          className={`px-3 py-[2px] text-sm uppercase font-bold w-fit  ${loading
             ? "bg-gray-400 cursor-not-allowed"
             : "bg-primary hover:bg-[#6E6E6E]"
-        } text-white`}
-      >
-        {loading ? "Calling..." : "Call"}
-      </button>
+            } text-white`}
+        >
+          {loading ? "Calling..." : "Call"}
+        </button>
+      )}
 
       {args.length !== 0 ? (
         <table className="bg-white overflow-x w-full">
@@ -202,6 +208,7 @@ function FunctionCallAccordionContent({
                     placeholder={`${input.type}`}
                     value={inputs[idx]?.value || ""}
                     onChange={(e) => handleInputChange(idx, e.target.value)}
+                    disabled={!contract}
                   />
                 </td>
               </tr>

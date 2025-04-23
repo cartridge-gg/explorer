@@ -4,7 +4,6 @@ import { truncateString } from "@/shared/utils/string";
 import { useCallback, useEffect, useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Contract } from "starknet";
-import WalletConnectModal from "@/shared/components/wallet_connect";
 import { BreadcrumbPage } from "@cartridge/ui-next";
 import {
   Breadcrumb,
@@ -17,9 +16,11 @@ import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";
-import ContractReadInterface from "./components/ReadContractInterface";
-import ContractWriteInterface from "./components/WriteContractInterface";
-import { Code, CodeProps } from "./components/Code";
+import { ContractReadInterface } from "@/shared/components/contract/ReadContractInterface";
+import { ContractWriteInterface } from "@/shared/components/contract/WriteContractInterface";
+import { parseClassFunctions } from "@/shared/utils/contract";
+import { Function } from "@/shared/components/contract/types";
+import { Code, CodeProps } from "@/shared/components/contract/Code";
 
 const DataTabs = ["Read Contract", "Write Contract", "Code"];
 
@@ -28,28 +29,12 @@ export default function ContractDetails() {
     contractAddress: string;
   }>();
   const { isMobile } = useScreen();
+  const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
   const [classHash, setClassHash] = useState<string | null>(null);
   const [contract, setContract] = useState<Contract | null>(null);
+  const [readFunctions, setReadFunctions] = useState<Function[]>([]);
+  const [writeFunctions, setWriteFunctions] = useState<Function[]>([]);
   const [codeProps, setCodeProps] = useState<CodeProps>();
-  const [readFunctions, setReadFunctions] = useState<
-    {
-      name: string;
-      inputs: { name: string; type: string }[];
-      selector: string;
-    }[]
-  >([]);
-
-  const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
-
-  const [writeFunctions, setWriteFunctions] = useState<
-    {
-      name: string;
-      inputs: { name: string; type: string }[];
-      selector: string;
-    }[]
-  >([]);
-
-  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
 
   const fetchContractDetails = useCallback(async () => {
     if (!contractAddress) return;
@@ -64,35 +49,7 @@ export default function ContractDetails() {
       abi: JSON.stringify(contractClass.abi, null, 2),
       sierra: "sierra_program" in contractClass ? JSON.stringify(contractClass.sierra_program, null, 2) : undefined,
     });
-
-    const readFuncs: typeof readFunctions = [];
-    const writeFuncs: typeof writeFunctions = [];
-
-    contractClass.abi.forEach((item) => {
-      if (item.type === "interface") {
-        item.items.forEach((func) => {
-          if (func.type === "function") {
-            const funcData = {
-              name: func.name,
-              inputs: func.inputs.map((input) => ({
-                name: input.name,
-                type: input.type,
-              })),
-              selector: func.selector || "",
-            };
-
-            if (
-              func.state_mutability === "view" ||
-              func.state_mutability === "pure"
-            ) {
-              readFuncs.push(funcData);
-            } else {
-              writeFuncs.push(funcData);
-            }
-          }
-        });
-      }
-    });
+    const { readFuncs, writeFuncs } = parseClassFunctions(contractClass);
 
     setReadFunctions(readFuncs);
     setWriteFunctions(writeFuncs);

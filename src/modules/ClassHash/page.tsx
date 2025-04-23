@@ -9,7 +9,10 @@ import { SectionBox } from "@/shared/components/section/SectionBox";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { useQuery } from "@tanstack/react-query";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { Overview } from "./Overview";
+import { Deploy } from "./Deploy";
+import { parseClassFunctions } from "@/shared/utils/contract";
 
 const DataTabs = ["Overview", "Deploy"];
 
@@ -23,6 +26,19 @@ export default function ClassHashDetails() {
     queryFn: () => RPC_PROVIDER.getContractVersion(undefined, classHash!),
     enabled: !!classHash,
   });
+
+  const { data: contractClass } = useQuery({
+    queryKey: ["contractClass", classHash],
+    queryFn: () => RPC_PROVIDER.getClass(classHash!),
+    enabled: !!classHash,
+  });
+
+  const { readFuncs, writeFuncs } = useMemo(() =>
+    contractClass
+      ? parseClassFunctions(contractClass)
+      : { readFuncs: [], writeFuncs: [] },
+    [contractClass]
+  );
 
   return (
     <div className="w-full flex-grow">
@@ -72,24 +88,20 @@ export default function ClassHashDetails() {
             }))}
           />
 
-          <div className="bg-white flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray overflow-auto">
-            <div className="w-full h-full overflow-auto">
-              {(() => {
-                switch (selectedDataTab) {
-                  case "Overview":
-                    return <div>Overview</div>;
-                  case "Deploy":
-                    return <div>Deploy</div>;
-                  default:
-                    return (
-                      <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
-                        <span className="text-[#D0D0D0]">No data found</span>
-                      </div>
-                    )
-                }
-              })()}
-            </div>
-          </div>
+          {(() => {
+            switch (selectedDataTab) {
+              case "Overview":
+                return <Overview readFuncs={readFuncs} writeFuncs={writeFuncs} />;
+              case "Deploy":
+                return <Deploy />;
+              default:
+                return (
+                  <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
+                    <span className="text-[#D0D0D0]">No data found</span>
+                  </div>
+                )
+            }
+          })()}
         </div>
       </div>
     </div>

@@ -19,11 +19,11 @@ type FunctionCallAccordionContentState = {
 };
 
 export interface ContractWriteInterfaceProps {
-  contract: Contract;
+  contract?: Contract;
   functions?: types.Function[];
 }
 
-export default function ContractWriteInterface({
+export function ContractWriteInterface({
   contract,
   functions = [],
 }: ContractWriteInterfaceProps) {
@@ -94,7 +94,7 @@ export default function ContractWriteInterface({
 
 interface FunctionCallAccordionContentProps {
   /** The contract instance to interact with */
-  contract: Contract;
+  contract?: Contract;
   /** The name of the function to call on the contract */
   functionName: string;
   /** The function's input arguments definition */
@@ -136,12 +136,14 @@ function FunctionCallAccordionContent({
         value: "",
       }));
 
-      onUpdateState({ inputs: initialInputs });
+      if (contract) {
+        onUpdateState({ inputs: initialInputs });
+      }
       return initialInputs;
     } else {
       return state.inputs;
     }
-  }, [args, state.inputs, onUpdateState]);
+  }, [args, state.inputs, onUpdateState, contract]);
 
   const handleInputChange = useCallback(
     (inputIndex: number, value: string) => {
@@ -205,41 +207,43 @@ function FunctionCallAccordionContent({
 
   return (
     <div className="flex flex-col gap-[10px] items-end">
-      <div className="flex gap-2">
-        <button
-          onClick={handleAddToCart}
-          disabled={!isWalletConnected}
-          className={`bg-white w-[19px] h-[19px] flex items-center justify-center border ${!isWalletConnected
+      {contract && (
+        <div className="flex gap-2">
+          <button
+            onClick={handleAddToCart}
+            disabled={!isWalletConnected}
+            className={`bg-white w-[19px] h-[19px] flex items-center justify-center border ${!isWalletConnected
               ? "border-gray-300 text-gray-300 cursor-not-allowed"
               : "border-borderGray hover:border-0 hover:bg-primary hover:text-white cursor-pointer"
-            }`}
-          title={
-            !isWalletConnected || !address
-              ? "Please connect your wallet first"
-              : "Add to cart"
-          }
-        >
-          <AddIcon />
-        </button>
+              }`}
+            title={
+              !isWalletConnected || !address
+                ? "Please connect your wallet first"
+                : "Add to cart"
+            }
+          >
+            <AddIcon />
+          </button>
 
-        <button
-          disabled={!address || state.loading}
-          onClick={handleFunctionCall}
-          className={`px-3 py-[2px] text-sm uppercase font-bold w-fit text-white ${!address || state.loading
+          <button
+            disabled={!address || state.loading}
+            onClick={handleFunctionCall}
+            className={`px-3 py-[2px] text-sm uppercase font-bold w-fit text-white ${!address || state.loading
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-primary hover:bg-[#6E6E6E]"
-            }`}
-          title={
-            !address
-              ? "Please connect your wallet first"
-              : state.loading
-                ? "Transaction in progress"
-                : ""
-          }
-        >
-          {state.loading ? "Executing..." : "Execute"}
-        </button>
-      </div>
+              }`}
+            title={
+              !address
+                ? "Please connect your wallet first"
+                : state.loading
+                  ? "Transaction in progress"
+                  : ""
+            }
+          >
+            {state.loading ? "Executing..." : "Execute"}
+          </button>
+        </div>
+      )}
 
       {args.length !== 0 ? (
         <table className="bg-white overflow-x w-full">
@@ -260,6 +264,7 @@ function FunctionCallAccordionContent({
                     placeholder={`${input.type}`}
                     value={inputs[idx]?.value || ""}
                     onChange={(e) => handleInputChange(idx, e.target.value)}
+                    disabled={!contract}
                   />
                 </td>
               </tr>
