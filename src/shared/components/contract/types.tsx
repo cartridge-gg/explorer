@@ -9,3 +9,7 @@ export type Function = {
   selector: string;
   inputs: FunctionInput[];
 };
+
+export type Constructor = {
+  inputs: FunctionInput[];
+};
