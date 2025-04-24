@@ -12,8 +12,8 @@ export function Overview({
 }) {
   return (
     <div className="bg-white flex flex-col gap-1 mt-[6px] overflow-auto">
-      <AccordionItem title="Read Functions" content={<ContractReadInterface functions={readFuncs} />} />
-      <AccordionItem title="Write Functions" content={<ContractWriteInterface functions={writeFuncs} />} />
+      <AccordionItem title="Read Functions" content={<ContractReadInterface functions={readFuncs} />} titleClassName="z-10" />
+      <AccordionItem title="Write Functions" content={<ContractWriteInterface functions={writeFuncs} />} titleClassName="z-10" />
     </div>
   )
 }
