@@ -66,19 +66,17 @@ export function AccordionItem({
     <div className={`accordion w-full ${containerClassName || ""}`}>
       <div
         onClick={toggleAccordion}
-        className={`accordion-header sticky top-0 bg-white cursor-pointer border border-borderGray px-4 gap-3 py-2 grid grid-cols-[1fr_min-content] items-center ${
-          titleClassName || ""
-        }`}
+        className={`accordion-header sticky top-0 bg-white cursor-pointer border border-borderGray px-4 gap-3 py-2 grid grid-cols-[1fr_min-content] items-center ${titleClassName || ""
+          }`}
       >
-        <div className="accordion-title">{title}</div>
+        <div className="accordion-title overflow-x-auto">{title}</div>
         {isOpen ? <AccordionCollapseIcon /> : <AccordionExpandIcon />}
       </div>
 
       {isOpen && (
         <div
-          className={`bg-[#F1F1F1] p-3 border-x border-borderGray shadow-inner ${
-            contentClassName || ""
-          }`}
+          className={`bg-[#F1F1F1] p-3 border-x border-borderGray shadow-inner ${contentClassName || ""
+            }`}
         >
           {content || <EmptyAccordionContent />}
         </div>
