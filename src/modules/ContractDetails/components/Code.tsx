@@ -1,6 +1,7 @@
 import ToggleButton from "@/shared/components/ToggleButton";
+import { CheckIcon, CopyIcon } from "@cartridge/ui-next";
 import { Editor } from "@monaco-editor/react";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export type CodeProps = {
   abi?: string;
@@ -20,13 +21,60 @@ export function Code({ abi, sierra }: CodeProps) {
     (typeof variants)[number]
   >(variants[0]);
 
+  const [copied, setCopied] = useState(false);
+  const onCopy = useCallback(() => {
+    switch (selectedTab) {
+      case "contract abi":
+        if (!abi) {
+          return;
+        }
+        navigator.clipboard.writeText(abi);
+        setCopied(true);
+        break;
+      case "sierra bytecode":
+        if (!sierra) {
+          return;
+        }
+        navigator.clipboard.writeText(sierra);
+        setCopied(true);
+        break;
+    }
+  }, [abi, sierra, selectedTab])
+
+  useEffect(() => {
+    if (copied) {
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    }
+  }, [copied])
+
   return (
     <div className="flex flex-col gap-3">
-      <ToggleButton
-        variants={variants}
-        selected={selectedTab}
-        onChange={setSelectedTab}
-      />
+      <div className="flex justify-between items-center">
+        <ToggleButton
+          variants={variants}
+          selected={selectedTab}
+          onChange={setSelectedTab}
+        />
+        <button
+          className="flex items-center gap-2 uppercase bg-black text-white px-2 py-1 text-sm font-bold"
+          onClick={onCopy}
+          disabled={copied}
+        >
+          {copied ? (
+            <>
+              <CheckIcon size="xs" />
+              <div>Copied</div>
+            </>
+          ) : (
+            <>
+              <CopyIcon size="xs" />
+              <div>Copy</div>
+            </>
+          )}
+        </button>
+      </div>
 
       {(() => {
         switch (selectedTab) {
