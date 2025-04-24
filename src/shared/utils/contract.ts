@@ -1,6 +1,6 @@
 import { CompiledSierra } from "starknet";
 import { LegacyContractClass } from "starknet";
-import { Function } from "@/modules/ContractDetails/components/types";
+import { Function } from "@/shared/components/contract/types";
 
 export function parseClassFunctions(contractClass: LegacyContractClass | Omit<CompiledSierra, "sierra_program_debug_info">) {
   const readFuncs: Function[] = [];
