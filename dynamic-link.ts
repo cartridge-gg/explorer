@@ -52,26 +52,26 @@ export default function dynamicLinksPlugin(): PluginOption[] {
           const jsPath = jsMatch[1].replace(/^\//, "");
 
           // Create the dynamic loading template with actual asset paths
-          let updatedHtml = DYNAMIC_ASSETS_LOADING_TEMPLATE.replace(
+          const scriptTemplate = DYNAMIC_ASSETS_LOADING_TEMPLATE.replace(
             "<PATH_TO_CSS_ASSET>",
             cssPath
           ).replace("<PATH_TO_JS_ASSET>", jsPath);
 
           // Remove the static link and script tags (they're now loaded dynamically)
-          updatedHtml = updatedHtml.replace(/\/cartridge.svg/g, "");
-          updatedHtml = html.replace(
+          html = html.replace(/\/cartridge.svg/g, "");
+          html = html.replace(
             /<script type="module" crossorigin src="[^"]+"><\/script>/g,
             ""
           );
-          updatedHtml = updatedHtml.replace(
+          html = html.replace(
             /<link rel="stylesheet" crossorigin href="[^"]+">/g,
             ""
           );
 
           // Insert the dynamic loading template after the <head> tag
-          updatedHtml = updatedHtml.replace(/<head>/, `<head>${updatedHtml}`);
+          html = html.replace(/<head>/, `<head>${scriptTemplate}`);
 
-          return updatedHtml;
+          return html;
         }
 
         return html;
