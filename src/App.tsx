@@ -9,9 +9,8 @@ function MainContent() {
 
   return (
     <div
-      className={`flex flex-col gap-[20px] px-[20px] py-[25px] xl:px-[45px] min-w-[380px] ${
-        isHomePage ? "h-screen" : "lg:h-screen"
-      }`}
+      className={`flex flex-col gap-[20px] px-[20px] py-[25px] xl:px-[45px] w-full min-w-[320px] ${isHomePage ? "h-screen" : "lg:h-screen"
+        }`}
     >
       {!isHomePage && <Header />}
 

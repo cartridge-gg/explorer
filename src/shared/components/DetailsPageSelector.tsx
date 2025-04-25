@@ -1,3 +1,5 @@
+import { cn } from "@cartridge/ui-next";
+import { useScreen } from "@/shared/hooks/useScreen";
 import { Selector, SelectorItem, SelectorProps } from "./Selector";
 
 export type DetailsPageSelectorItem = {
@@ -15,6 +17,7 @@ export default function DetailsPageSelector({
   onTabSelect,
   ...props
 }: DetailsPageSelectorProps) {
+  const { isMobile } = useScreen();
   const selectedStyle = {
     color: "white",
     border: "none",
@@ -35,7 +38,7 @@ export default function DetailsPageSelector({
             key={item.name}
             name={item.name}
             value={item.value}
-            className="flex justify-start font-bold px-[15px] py-1 border border-borderGray hover:bg-button-whiteInitialHover"
+            className={cn("flex items-center font-bold px-[15px] py-1 border border-borderGray hover:bg-button-whiteInitialHover", isMobile ? "justify-center" : "justify-start")}
           />
         ))}
       </Selector>
