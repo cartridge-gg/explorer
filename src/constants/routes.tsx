@@ -6,6 +6,7 @@ import EventDetails from "@/modules/EventDetails/page";
 import Home from "@/modules/HomeNew/page";
 import TransactionDetails from "@/modules/TransactionDetails/page";
 import TransactionsList from "@/modules/TransactionsList/page";
+import JRPCPlayground from "@/modules/JRPC/page";
 
 export const ROUTES = {
   HOME: {
@@ -39,5 +40,9 @@ export const ROUTES = {
   CLASS_HASH_DETAILS: {
     urlPath: "/class/:classHash",
     component: <ClassHashDetails />,
+  },
+  JRPC: {
+    urlPath: "/jrpc",
+    component: <JRPCPlayground />,
   },
 };

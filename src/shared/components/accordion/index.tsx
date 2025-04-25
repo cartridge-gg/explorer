@@ -1,5 +1,6 @@
 import React from "react";
 import { AccordionCollapseIcon, AccordionExpandIcon } from "./icons";
+import { cn } from "@cartridge/ui-next";
 
 type AccordionProps = {
   /**
@@ -12,15 +13,8 @@ export function Accordion({ items }: AccordionProps) {
   const accordionItems = items();
 
   return (
-    <div className="accordion-container">
-      {accordionItems.map((item, index) => {
-        const isLastItem = index === accordionItems.length - 1;
-        // to avoid border collapsing issue
-        return React.cloneElement(item, {
-          contentClassName: isLastItem ? "border-b" : "",
-          containerClassName: isLastItem ? "" : "mb-[-1px]",
-        });
-      })}
+    <div className="accordion-container [&_div:not(:last-child)_.accordion-header]:mb-[-1px]">
+      {accordionItems}
     </div>
   );
 }
@@ -75,8 +69,7 @@ export function AccordionItem({
 
       {isOpen && (
         <div
-          className={`bg-[#F1F1F1] p-3 border-x border-borderGray shadow-inner ${contentClassName || ""
-            }`}
+          className={cn("bg-[#F1F1F1] p-3 border-x border-borderGray shadow-inner", contentClassName)}
         >
           {content || <EmptyAccordionContent />}
         </div>
