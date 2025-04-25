@@ -27,8 +27,15 @@ function MainContent() {
 }
 
 function App() {
+  // More robust basename determination
+  // Determine if we're at the root or in a subdirectory
+  const pathname = window.location.pathname;
+  const basename = pathname.endsWith("/")
+    ? pathname
+    : pathname.substring(0, pathname.lastIndexOf("/") + 1);
+
   return (
-    <BrowserRouter basename={window.location.pathname}>
+    <BrowserRouter basename={basename}>
       <MainContent />
     </BrowserRouter>
   );
