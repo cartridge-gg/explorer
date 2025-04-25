@@ -1,10 +1,11 @@
 import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import dynamicLinksPlugin from "./dynamic-link";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), dynamicLinksPlugin()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -14,14 +15,5 @@ export default defineConfig({
       "@modules": path.resolve(__dirname, "./src/modules"),
       "@constants": path.resolve(__dirname, "./src/constants"),
     },
-  },
-  base: process.env.BASE_PATH,
-
-  // This allow us to set a custom base path for the application.
-  // Required when it is exposed in the `katana` under a non-root base path (ie `/explorer`).
-  //
-  // See <src/App.tsx>.
-  define: {
-    "import.meta.env.APP_BASE_PATH": JSON.stringify(process.env.BASE_PATH),
   },
 });

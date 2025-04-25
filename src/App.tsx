@@ -28,12 +28,7 @@ function MainContent() {
 
 function App() {
   return (
-    <BrowserRouter
-      basename={
-        // See <vite.config.ts>.
-        import.meta.env.APP_BASE_PATH || "/"
-      }
-    >
+    <BrowserRouter basename={window.location.pathname}>
       <MainContent />
     </BrowserRouter>
   );
