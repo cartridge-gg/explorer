@@ -1,8 +1,7 @@
-import { useState } from "react";
-import { useConnect } from "@starknet-react/core";
+import { useCallback, useEffect, useState } from "react";
+import { Connector, useConnect } from "@starknet-react/core";
 import {
   availableConnectors,
-  cartridge_controller,
 } from "@/store/starknetProvider";
 import CrossIcon from "@/shared/icons/ Cross";
 
@@ -26,19 +25,33 @@ export default function WalletConnectModal({
   const { connect } = useConnect();
   const [connecting, setConnecting] = useState<string | null>(null);
 
-  if (!isOpen) return null;
-
-  const handleConnect = async (connector: any) => {
+  const handleConnect = useCallback((connector: Connector) => {
     try {
       setConnecting(connector.id || connector.name);
-      await connect({ connector });
+      connect({ connector });
+      localStorage.setItem("lastUsedConnector", connector.id);
       onClose();
     } catch (error) {
       console.error("Connection error:", error);
     } finally {
       setConnecting(null);
     }
-  };
+  }, [connect, onClose]);
+
+  useEffect(() => {
+    const lastUsedConnector = localStorage.getItem("lastUsedConnector");
+    if (!lastUsedConnector) {
+      return
+    }
+    const connector = availableConnectors.find(c => c.id === lastUsedConnector)
+    if (!connector) {
+      return
+    }
+    handleConnect(connector);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -60,23 +73,22 @@ export default function WalletConnectModal({
               name === "controller"
                 ? "Controller"
                 : name === "argentX"
-                ? "Argent X"
-                : name === "braavos"
-                ? "Braavos"
-                : name === "argentWebWallet"
-                ? "Argent Web Wallet"
-                : name;
+                  ? "Argent X"
+                  : name === "braavos"
+                    ? "Braavos"
+                    : name === "argentWebWallet"
+                      ? "Argent Web Wallet"
+                      : name;
 
             return (
               <button
                 key={name}
                 onClick={() => handleConnect(connector)}
                 disabled={!!connecting}
-                className={`mt-[-1px] flex items-center justify-between w-full p-3 border hover:bg-[#EEEEEE] ${
-                  connecting === name
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
-                } transition-colors`}
+                className={`mt-[-1px] flex items-center justify-between w-full p-3 border hover:bg-[#EEEEEE] ${connecting === name
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-200 hover:border-gray-300"
+                  } transition-colors`}
               >
                 <div className="w-full flex items-center justify-between">
                   {walletLogos[displayName] && (

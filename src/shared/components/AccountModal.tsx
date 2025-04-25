@@ -421,6 +421,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
           <button
             onClick={() => {
               disconnect();
+              localStorage.removeItem("lastUsedConnector");
               onClose();
             }}
             className="px-2 py-1 w-[73px] text-xs text-[#D25D73]/50 uppercase font-bold border border-[#D25D73] hover:bg-[#D25D73] hover:text-white"
@@ -450,11 +451,10 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                       <tr
                         key={index}
                         onClick={() => handleCallClick(index, call)}
-                        className={`account-call-entry hover:bg-gray-100 cursor-pointer ${
-                          expandedCall && expandedCall.index === index
+                        className={`account-call-entry hover:bg-gray-100 cursor-pointer ${expandedCall && expandedCall.index === index
                             ? "bg-gray-100"
                             : ""
-                        }`}
+                          }`}
                       >
                         <td className="w-[40px]">{index + 1}</td>
                         <td className="w-[92px] px-[10px]">
@@ -473,10 +473,9 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                   disabled={executeResult.loading}
                   className={`
                     bg-primary uppercase font-bold text-white p-2
-                    ${
-                      executeResult.loading
-                        ? "opacity-50 cursor-not-allowed"
-                        : "hover:bg-opacity-80"
+                    ${executeResult.loading
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-opacity-80"
                     }
                   `}
                 >
