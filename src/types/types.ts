@@ -101,6 +101,8 @@ declare global {
     CHAIN_ID?: string;
     IS_EMBEDDED?: boolean;
     ENABLE_CONTROLLER?: boolean;
+    CHAIN_NAME?: string;
+    CHAIN_NETWORK?: string;
   }
 }
 

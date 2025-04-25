@@ -1,3 +1,5 @@
+import { shortString } from "starknet";
+
 export const EXECUTION_RESOURCES_KEY_MAP = {
   bitwise_builtin_applications: "bitwise",
   pedersen_builtin_applications: "pedersen",
@@ -19,7 +21,21 @@ export const RPC_URL =
     ? window.location.origin
     : window.RPC_URL ?? import.meta.env.VITE_RPC_URL;
 
-export const CHAIN_ID = window.CHAIN_ID ?? import.meta.env.VITE_CHAIN_ID;
+export const CHAIN_ID =
+  IS_EMBEDDED === "true"
+    ? window.CHAIN_ID
+    : import.meta.env.VITE_CHAIN_ID ??
+      BigInt(shortString.encodeShortString("KATANA"));
+
+export const CHAIN_NAME =
+  IS_EMBEDDED === "true"
+    ? window.CHAIN_NAME
+    : import.meta.env.VITE_CHAIN_NAME ?? "Katana Local";
+
+export const CHAIN_NETWORK =
+  IS_EMBEDDED === "true"
+    ? window.CHAIN_NETWORK
+    : import.meta.env.VITE_CHAIN_NETWORK ?? "katana";
 
 // Cache constants
 export const CACHE_TIME = 1000 * 60 * 60 * 24; // 24 hours
