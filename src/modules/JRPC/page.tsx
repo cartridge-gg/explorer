@@ -4,12 +4,11 @@ import { BreadcrumbItem, BreadcrumbSeparator } from "@/shared/components/breadcr
 
 import { Breadcrumb } from "@/shared/components/breadcrumbs";
 import PageHeader from "@/shared/components/PageHeader";
+import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { BreadcrumbPage, cn, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@cartridge/ui-next";
 import { useQuery } from "@tanstack/react-query";
 import { InfoIcon, PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
-const SPEC_VERSION = "0.8.1";
 
 interface OpenRPCSchema {
   methods: JRPCMethod[];
@@ -63,10 +62,11 @@ interface JRPCResponse {
 }
 
 export default function JRPCPlayground() {
+  const { data: specVersion } = useSpecVersion();
   const { data: scheme } = useQuery({
     queryKey: ["scheme"],
     queryFn: async () => {
-      const response = await fetch(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${SPEC_VERSION}/api/starknet_api_openrpc.json`);
+      const response = await fetch(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${specVersion}/api/starknet_api_openrpc.json`);
       const data = await response.json() as OpenRPCSchema;
       return data;
     },
@@ -151,7 +151,7 @@ export default function JRPCPlayground() {
         </Breadcrumb>
       </div>
 
-      <PageHeader className="mb-6" title="JSON-RPC Playground" />
+      <PageHeader className="mb-6" title={`JSON-RPC Playground (${specVersion})`} />
 
       <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
         <div className="flex flex-col md:flex-row justify-stretch border border-borderGray rounded-lg overflow-hidden py-5 px-4 gap-4">

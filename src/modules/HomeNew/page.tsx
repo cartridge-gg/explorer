@@ -3,6 +3,8 @@ import HomeSearchBar from "./SearchBar";
 import ChainDisplay from "@/shared/components/ChainDisplay";
 import { useQuery } from "@tanstack/react-query";
 import AccountDisplay from "@/shared/components/AccountDisplay";
+import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
+import { Link } from "react-router-dom";
 
 // const POLLING_INTERVAL = 3000; // 3 seconds
 
@@ -38,21 +40,18 @@ export default function Home() {
 }
 
 function ChainInfoContainer() {
-  const { data: specVersion } = useQuery({
-    queryKey: QUERY_KEYS.specVersion,
-    queryFn: () => RPC_PROVIDER.getSpecVersion(),
-  });
+  const { data: specVersion } = useSpecVersion();
 
   return (
-    <div
-      id="homepage-chain-info-container"
+    <Link
+      to="/jrpc"
       className="absolute bottom-0 left-0 flex flex-col uppercase text-sm items-start gap-1"
     >
       <ChainInfoItem
         label="Starknet JSON-RPC Spec"
         value={specVersion || "N/A"}
       />
-    </div>
+    </Link>
   );
 }
 
