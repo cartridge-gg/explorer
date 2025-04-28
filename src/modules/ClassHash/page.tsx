@@ -33,10 +33,10 @@ export default function ClassHashDetails() {
     enabled: !!classHash,
   });
 
-  const { constructor, readFuncs, writeFuncs } = useMemo(() =>
+  const { constructor, readFuncs, writeFuncs, abi, sierra } = useMemo(() =>
     contractClass
       ? parseClassFunctions(contractClass)
-      : { constructor: { inputs: [] }, readFuncs: [], writeFuncs: [] },
+      : { constructor: { inputs: [] }, readFuncs: [], writeFuncs: [], abi: "", sierra: "" },
     [contractClass]
   );
 
@@ -91,7 +91,7 @@ export default function ClassHashDetails() {
           {(() => {
             switch (selectedDataTab) {
               case "Overview":
-                return <Overview readFuncs={readFuncs} writeFuncs={writeFuncs} />;
+                return <Overview readFuncs={readFuncs} writeFuncs={writeFuncs} abi={abi} sierra={sierra} />;
               case "Deploy":
                 return <Deploy classHash={classHash!} constructor={constructor} />;
               default:

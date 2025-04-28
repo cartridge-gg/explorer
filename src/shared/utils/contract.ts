@@ -47,5 +47,13 @@ export function parseClassFunctions(contractClass: LegacyContractClass | Omit<Co
       }
   });
 
-  return { constructor: constructor!, readFuncs, writeFuncs };
+  return {
+    constructor: constructor!,
+    readFuncs,
+    writeFuncs,
+    abi: JSON.stringify(contractClass.abi, null, 2),
+    sierra: "sierra_program" in contractClass
+      ? JSON.stringify(contractClass.sierra_program, null, 2)
+      : undefined
+  };
 }
