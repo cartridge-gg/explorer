@@ -95,7 +95,7 @@ export default function JRPCPlayground() {
     setRequest(req => ({
       id: req.id === 0 ? 0 : req.id + 1,
       jsonrpc: "2.0",
-      method: scheme?.methods.find(m => m.name === req.method)?.name ?? "",
+      method: scheme?.methods[0].name ?? "",
     }))
   }, [scheme])
 
@@ -126,6 +126,16 @@ export default function JRPCPlayground() {
     const json = await res.json();
     setResponse(json)
   }, [request]);
+
+  const methods = useMemo(() => {
+    if (!scheme?.methods) return [];
+    if (!search) return scheme.methods;
+
+    return scheme.methods.filter(method =>
+      method.name.toLowerCase().includes(search.toLowerCase()) ??
+      method.summary.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [scheme?.methods, search]);
 
   return (
     <div className="w-full flex-grow gap-8">
@@ -164,7 +174,7 @@ export default function JRPCPlayground() {
                       titleClassName="uppercase font-bold"
                       content={(
                         <div>
-                          {scheme?.methods.map((method) => (
+                          {methods.map((method) => (
                             <div
                               className={cn("py-2 px-4", method.name === request.method ? "bg-[#DBDBDB]" : "bg-[#F3F3F3] cursor-pointer")}
                               key={method.name}
@@ -240,6 +250,7 @@ export default function JRPCPlayground() {
                     </code>
                   </div>
                 )}
+                titleClassName="uppercase"
                 open
               />,
               <AccordionItem
@@ -254,6 +265,7 @@ export default function JRPCPlayground() {
                     </code>
                   </div>
                 )}
+                titleClassName="uppercase"
                 open
               />
             ]}

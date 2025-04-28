@@ -62,13 +62,12 @@ export function AccordionItem({
   );
 
   return (
-    <div className={`accordion w-full ${containerClassName || ""}`}>
+    <div className={cn("accordion w-full", containerClassName)}>
       <div
         onClick={toggleAccordion}
-        className={`accordion-header sticky top-0 bg-white cursor-pointer border border-borderGray px-4 gap-3 py-2 grid grid-cols-[1fr_min-content] items-center ${titleClassName || ""
-          }`}
+        className={cn("accordion-header sticky top-0 bg-white cursor-pointer border border-borderGray px-4 gap-3 py-2 grid grid-cols-[1fr_min-content] items-center", titleClassName)}
       >
-        <div className="accordion-title overflow-x-auto">{title}</div>
+        <div className={"accordion-title overflow-x-auto"}>{title}</div>
         {isOpen ? <AccordionCollapseIcon /> : <AccordionExpandIcon />}
       </div>
 
