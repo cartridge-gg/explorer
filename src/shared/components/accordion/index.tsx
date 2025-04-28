@@ -40,6 +40,10 @@ interface AccordionItemProps {
    * Optional custom styling for the content section
    */
   contentClassName?: string;
+  /**
+   * Open accordion item by default
+   */
+  open?: boolean;
 }
 
 export function AccordionItem({
@@ -48,8 +52,9 @@ export function AccordionItem({
   titleClassName,
   contentClassName,
   containerClassName,
+  open = false,
 }: AccordionItemProps) {
-  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+  const [isOpen, setIsOpen] = React.useState<boolean>(open);
 
   const toggleAccordion = React.useCallback(
     () => setIsOpen((prev) => !prev),
