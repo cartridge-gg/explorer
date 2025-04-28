@@ -9,6 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import { InfoIcon, PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+const SPEC_VERSION = "0.8.1";
+
 interface OpenRPCSchema {
   methods: JRPCMethod[];
   components?: {
@@ -30,6 +32,7 @@ interface JRPCParam {
   name: string;
   description?: string;
   schema: JSONSchema;
+  value: string;
 }
 
 interface JSONSchema {
@@ -46,7 +49,7 @@ interface JRPCRequest {
   jsonrpc: "2.0";
   id: number;
   method: string;
-  params?: JRPCParam[];
+  params?: Pick<JRPCParam, "name" | "value">[];
 }
 
 interface JRPCResponse {
@@ -63,40 +66,18 @@ export default function JRPCPlayground() {
   const { data: scheme } = useQuery({
     queryKey: ["scheme"],
     queryFn: async () => {
-      const response = await fetch(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/${SPEC_VERSION}/api/starknet_api_openrpc.json`);
+      const response = await fetch(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${SPEC_VERSION}/api/starknet_api_openrpc.json`);
       const data = await response.json() as OpenRPCSchema;
       return data;
     },
   });
-  const [selected, setSelected] = useState(0);
   const [search, setSearch] = useState("");
   const [request, setRequest] = useState<JRPCRequest>({
     id: 0,
     jsonrpc: "2.0",
-    method: scheme?.methods[selected].name ?? "",
+    method: "starknet_specVersion",
   });
   const [response, setResponse] = useState<JRPCResponse>();
-
-  useEffect(() => {
-    setRequest(req => ({
-      id: req.id === 0 ? 0 : req.id + 1,
-      jsonrpc: "2.0",
-      method: scheme?.methods[selected].name ?? "",
-    }))
-  }, [scheme, selected])
-
-  const onExecute = useCallback(async () => {
-    const res = await fetch(RPC_URL, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: JSON.stringify(request),
-    })
-    const json = await res.json();
-    setResponse(json)
-  }, [request]);
-
   const requestJSON = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, ...json } = request
@@ -109,6 +90,42 @@ export default function JRPCPlayground() {
     const { id, ...json } = response
     return JSON.stringify(json, null, 2)
   }, [response])
+
+  useEffect(() => {
+    setRequest(req => ({
+      id: req.id === 0 ? 0 : req.id + 1,
+      jsonrpc: "2.0",
+      method: scheme?.methods.find(m => m.name === req.method)?.name ?? "",
+    }))
+  }, [scheme])
+
+  const onMethodChange = useCallback((selected: JRPCMethod) => () => {
+    setRequest(req => ({
+      id: req.id === 0 ? 0 : req.id + 1,
+      jsonrpc: "2.0",
+      method: selected.name,
+      params: scheme?.methods.find(m => m.name === selected.name)?.params?.map((p) => ({ name: p.name, value: "" })) ?? []
+    }))
+  }, [scheme])
+
+  const onParamChange = useCallback((name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRequest(req => ({
+      ...req,
+      params: req.params?.map(p => p.name === name ? ({ ...p, value: e.target.value }) : p)
+    }))
+  }, [])
+
+  const onExecute = useCallback(async () => {
+    const res = await fetch(RPC_URL, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(request),
+    })
+    const json = await res.json();
+    setResponse(json)
+  }, [request]);
 
   return (
     <div className="w-full flex-grow gap-8">
@@ -147,11 +164,11 @@ export default function JRPCPlayground() {
                       titleClassName="uppercase font-bold"
                       content={(
                         <div>
-                          {scheme?.methods.map((method, i) => (
+                          {scheme?.methods.map((method) => (
                             <div
-                              className={cn("py-2 px-4", selected === i ? "bg-[#DBDBDB]" : "bg-[#F3F3F3] cursor-pointer")}
+                              className={cn("py-2 px-4", method.name === request.method ? "bg-[#DBDBDB]" : "bg-[#F3F3F3] cursor-pointer")}
                               key={method.name}
-                              onClick={() => setSelected(i)}
+                              onClick={onMethodChange(method)}
                             >
                               {method.name.replace("starknet_", "")}
                             </div>
@@ -169,12 +186,12 @@ export default function JRPCPlayground() {
 
           <div className="h-full flex-grow grid grid-rows-[min-content_1fr] gap-8 w-80">
             <div className="flex flex-col gap-2">
-              <div className="uppercase font-bold text-lg">{scheme?.methods[selected].name.replace("starknet_", "").replace(/([A-Z])/g, ' $1')}</div>
-              <div>{scheme?.methods[selected].summary}</div>
+              <div className="uppercase font-bold text-lg">{request.method.replace("starknet_", "").replace(/([A-Z])/g, ' $1')}</div>
+              <div>{scheme?.methods.find(m => m.name === request.method)?.summary}</div>
             </div>
 
             <div className="flex flex-col gap-2">
-              {scheme?.methods[selected].params?.map((param) => (
+              {scheme?.methods.find(m => m.name === request.method)?.params?.map((param) => (
                 <div key={param.name} className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     <div className="uppercase">{param.name}</div>
@@ -190,7 +207,11 @@ export default function JRPCPlayground() {
                     </TooltipProvider>
                   </div>
 
-                  <input className="bg-white border border-borderGray px-3 py-1 text-base rounded-none search-input relative focus:outline-none focus:ring-0" />
+                  <input
+                    className="bg-white border border-borderGray px-3 py-1 text-base rounded-none search-input relative focus:outline-none focus:ring-0"
+                    value={request.params?.find(p => p.name === param.name)?.value ?? ""}
+                    onChange={onParamChange(param.name)}
+                  />
                 </div>
               ))}
             </div>
@@ -208,6 +229,7 @@ export default function JRPCPlayground() {
           <Accordion
             items={() => [
               <AccordionItem
+                key="request"
                 title="request"
                 content={(
                   <div>
@@ -221,6 +243,7 @@ export default function JRPCPlayground() {
                 open
               />,
               <AccordionItem
+                key="response"
                 title="response"
                 content={(
                   <div className="min-h-80">
