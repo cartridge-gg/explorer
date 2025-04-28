@@ -33,10 +33,10 @@ export default function ClassHashDetails() {
     enabled: !!classHash,
   });
 
-  const { readFuncs, writeFuncs } = useMemo(() =>
+  const { constructor, readFuncs, writeFuncs } = useMemo(() =>
     contractClass
       ? parseClassFunctions(contractClass)
-      : { readFuncs: [], writeFuncs: [] },
+      : { constructor: { inputs: [] }, readFuncs: [], writeFuncs: [] },
     [contractClass]
   );
 
@@ -93,7 +93,7 @@ export default function ClassHashDetails() {
               case "Overview":
                 return <Overview readFuncs={readFuncs} writeFuncs={writeFuncs} />;
               case "Deploy":
-                return <Deploy />;
+                return <Deploy classHash={classHash!} constructor={constructor} />;
               default:
                 return (
                   <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
