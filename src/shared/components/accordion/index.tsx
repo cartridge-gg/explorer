@@ -13,7 +13,7 @@ export function Accordion({ items }: AccordionProps) {
   const accordionItems = items();
 
   return (
-    <div className="accordion-container [&_div:not(:last-child)_.accordion-header]:mb-[-1px]">
+    <div className="accordion-container [&_div:not(:last-child)_.accordion-header]:mb-[-1px] [&_div:last-child_.shadow-inner]:border-b">
       {accordionItems}
     </div>
   );
