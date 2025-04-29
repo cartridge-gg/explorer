@@ -20,11 +20,11 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
     inputs: initialInputs
   });
 
-  const onInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const onInputChange = useCallback((name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(form => ({
       ...form,
       inputs: form.inputs.map(input =>
-        input.name === e.target.name
+        input.name === name
           ? { ...input, value: e.target.value }
           : input
       )
@@ -88,7 +88,8 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
                     className="px-2 py-1 text-left w-full"
                     placeholder={`${input.type}`}
                     value={form.inputs[idx]!.value}
-                    onChange={onInputChange}
+                    onChange={onInputChange(input.name)}
+                    disabled={!account}
                   />
                 </td>
               </tr>
