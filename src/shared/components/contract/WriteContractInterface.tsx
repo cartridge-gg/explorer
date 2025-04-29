@@ -1,7 +1,7 @@
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
-import { AccountInterface, Contract, FunctionAbi, InvokeFunctionResponse } from "starknet";
+import { AbiEntry, AccountInterface, Contract, FunctionAbi, InvokeFunctionResponse } from "starknet";
 import * as types from "./types";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
@@ -85,6 +85,7 @@ export function ContractWriteInterface({
                 address={address}
               />
             }
+            disabled={!contract && !func.inputs.length}
           />
         ))
       }
@@ -98,7 +99,7 @@ interface FunctionCallAccordionContentProps {
   /** The name of the function to call on the contract */
   functionName: string;
   /** The function's input arguments definition */
-  args: { name: string; type: string }[];
+  args: AbiEntry[];
   /** Current state of the accordion content, including inputs, results and errors */
   state?: FunctionCallAccordionContentState;
   /** Callback to update the state of this accordion item in order to preserve the state */

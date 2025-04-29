@@ -6,7 +6,7 @@ import FeltDisplayAsToggle, {
 import FeltList from "@/shared/components/FeltList";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState, useMemo } from "react";
-import { Contract, Result } from "starknet";
+import { AbiEntry, Contract, FunctionAbi, Result } from "starknet";
 import * as types from "./types";
 
 // The state of the <FunctionCallAccordionContent/> component
@@ -14,12 +14,12 @@ type FunctionCallAccordionContentState = {
   inputs: types.FunctionInputWithValue[];
   hasCalled: boolean;
   result: Result | null;
-  error: any;
+  error: Error | string | null;
 };
 
 export interface ContractReadInterfaceProps {
   contract?: Contract;
-  functions?: types.Function[];
+  functions?: FunctionAbi[];
 }
 
 export function ContractReadInterface({
@@ -93,7 +93,7 @@ interface FunctionCallAccordionContentProps {
   /** The name of the function to call on the contract */
   functionName: string;
   /** The function's input arguments definition */
-  args: types.FunctionInput[];
+  args: AbiEntry[];
   /** Current state of the accordion content, including inputs, results and errors */
   state?: FunctionCallAccordionContentState;
   /** Callback to update the state of this accordion item in order to preserve the state */
