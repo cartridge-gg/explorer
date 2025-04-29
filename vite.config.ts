@@ -6,6 +6,9 @@ import dynamicLinksPlugin from "./dynamic-link";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), process.env.IS_EMBEDDED ? dynamicLinksPlugin() : null],
+  server: {
+    port: process.env.NODE_ENV === "development" ? 3004 : undefined,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

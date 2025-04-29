@@ -6,6 +6,8 @@ import { truncateString } from "@/shared/utils/string";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { fetchDataCreator } from "@cartridge/utils";
+import { AddressByUsernameDocument, AddressByUsernameQuery, AddressByUsernameQueryVariables } from "@cartridge/utils/api/cartridge";
 
 export default function HomeSearchBar() {
   const navigate = useNavigate();
@@ -50,61 +52,81 @@ export default function HomeSearchBar() {
     (input: string) => {
       try {
         BigInt(input);
-      } catch (error) {
-        console.error("Invalid input", error);
-        return Promise.resolve([false, false, false, false]);
+        const blockWithTxsPromise = queryClient
+          .fetchQuery({
+            queryKey: [QUERY_KEYS.getBlockWithTxs, input],
+            queryFn: () => RPC_PROVIDER.getBlockWithTxs(input),
+          })
+          .then(() => true)
+          .catch((error) => {
+            console.error("Error fetching block with txs:", error);
+            return false;
+          });
+
+        const transactionPromise = queryClient
+          .fetchQuery({
+            queryKey: [QUERY_KEYS.getTransaction, input],
+            queryFn: () => RPC_PROVIDER.getTransaction(input),
+          })
+          .then(() => true)
+          .catch((error) => {
+            console.error("Error fetching transaction:", error);
+            return false;
+          });
+
+        const classHashPromise = queryClient
+          .fetchQuery({
+            queryKey: [QUERY_KEYS.getClassHashAt, input],
+            queryFn: () => RPC_PROVIDER.getClassHashAt(input),
+          })
+          .then(() => true)
+          .catch((error) => {
+            console.error("Error fetching class hash:", error);
+            return false;
+          });
+
+        const classPromise = queryClient
+          .fetchQuery({
+            queryKey: [QUERY_KEYS.getClassAt, input],
+            queryFn: () => RPC_PROVIDER.getClass(input),
+          })
+          .then(() => true)
+          .catch((error) => {
+            console.error("Error fetching class:", error);
+            return false;
+          });
+
+        return Promise.all([
+          blockWithTxsPromise,
+          transactionPromise,
+          classHashPromise,
+          classPromise,
+        ]);
+      } catch {
+        const controllerPromise = queryClient
+          .fetchQuery({
+            queryKey: [QUERY_KEYS.getController, input],
+            queryFn: async () => {
+              const fetchData = fetchDataCreator("https://api.cartridge.gg/query");
+              try {
+                const res = await fetchData<AddressByUsernameQuery, AddressByUsernameQueryVariables>(AddressByUsernameDocument, {
+                  username: input,
+                });
+                return res.account?.controllers?.edges?.[0]?.node?.address;
+              } catch (error) {
+                console.error("Error fetching account:", error);
+                return;
+              }
+            },
+          })
+          .catch((error) => {
+            console.error("Error fetching account:", error);
+            return false;
+          });
+
+        return Promise.all([controllerPromise])
       }
 
-      const blockWithTxsPromise = queryClient
-        .fetchQuery({
-          queryKey: [QUERY_KEYS.getBlockWithTxs, input],
-          queryFn: () => RPC_PROVIDER.getBlockWithTxs(input),
-        })
-        .then(() => true)
-        .catch((error) => {
-          console.error("Error fetching block with txs:", error);
-          return false;
-        });
-
-      const transactionPromise = queryClient
-        .fetchQuery({
-          queryKey: [QUERY_KEYS.getTransaction, input],
-          queryFn: () => RPC_PROVIDER.getTransaction(input),
-        })
-        .then(() => true)
-        .catch((error) => {
-          console.error("Error fetching transaction:", error);
-          return false;
-        });
-
-      const classHashPromise = queryClient
-        .fetchQuery({
-          queryKey: [QUERY_KEYS.getClassHashAt, input],
-          queryFn: () => RPC_PROVIDER.getClassHashAt(input),
-        })
-        .then(() => true)
-        .catch((error) => {
-          console.error("Error fetching class hash:", error);
-          return false;
-        });
-
-      const classPromise = queryClient
-        .fetchQuery({
-          queryKey: [QUERY_KEYS.getClassAt, input],
-          queryFn: () => RPC_PROVIDER.getClass(input),
-        })
-        .then(() => true)
-        .catch((error) => {
-          console.error("Error fetching class:", error);
-          return false;
-        });
-
-      return Promise.all([
-        blockWithTxsPromise,
-        transactionPromise,
-        classHashPromise,
-        classPromise,
-      ]);
     },
     [queryClient]
   );
@@ -113,21 +135,31 @@ export default function HomeSearchBar() {
     (value: string) => {
       if (!value || value.length === 0) return;
       // assuming that there will be no hash collision (very unlikely to collide)
-      performSearch(value).then(([isBlock, isTx, isContract, isClass]) => {
-        if (isBlock) {
-          setResult({ type: "block", value });
-        } else if (isTx) {
-          setResult({ type: "tx", value });
-        } else if (isContract) {
-          setResult({ type: "contract", value });
-        } else if (isClass) {
-          setResult({ type: "class", value });
-        } else {
-          setResult(undefined);
-        }
+      performSearch(value).then((promises) => {
+        if (promises.length > 1) {
+          const [isBlock, isTx, isContract, isClass] = promises;
+          if (isBlock) {
+            setResult({ type: "block", value });
+          } else if (isTx) {
+            setResult({ type: "tx", value });
+          } else if (isContract) {
+            setResult({ type: "contract", value });
+          } else if (isClass) {
+            setResult({ type: "class", value });
+          } else {
+            setResult(undefined);
+          }
 
-        if (isBlock || isTx || isContract || isClass) {
-          setIsResultFocused(true);
+          if (isBlock || isTx || isContract || isClass) {
+            setIsResultFocused(true);
+          }
+        } else {
+          const [address] = promises;
+          if (address) {
+            setResult({ type: "contract", value: address as string });
+          } else {
+            setResult(undefined);
+          }
         }
       });
     },
@@ -188,9 +220,8 @@ export default function HomeSearchBar() {
 
   return (
     <div
-      className={`bg-white min-w-[200px] w-full h-[42px] flex relative border border-borderGray items-center shadow ${
-        isDropdownOpen && result ? "border-b-0" : ""
-      }`}
+      className={`bg-white min-w-[200px] w-full h-[42px] flex relative border border-borderGray items-center shadow ${isDropdownOpen && result ? "border-b-0" : ""
+        }`}
     >
       <input
         ref={inputRef}
@@ -232,9 +263,8 @@ export default function HomeSearchBar() {
                 tabIndex={0}
                 onKeyDown={handleKeyDown}
                 onClick={handleResultClick}
-                className={`flex flex-row hover:bg-gray-100 cursor-pointer items-center gap-2 justify-between w-full px-2 py-1 outline-none ${
-                  isResultFocused ? "bg-gray-100" : ""
-                }`}
+                className={`flex flex-row hover:bg-gray-100 cursor-pointer items-center gap-2 justify-between w-full px-2 py-1 outline-none ${isResultFocused ? "bg-gray-100" : ""
+                  }`}
               >
                 <span className="font-bold uppercase">{result.type}</span>
 
