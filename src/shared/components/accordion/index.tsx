@@ -1,5 +1,6 @@
 import React from "react";
 import { AccordionCollapseIcon, AccordionExpandIcon } from "./icons";
+import { cn } from "@cartridge/ui-next";
 
 type AccordionProps = {
   /**
@@ -12,15 +13,8 @@ export function Accordion({ items }: AccordionProps) {
   const accordionItems = items();
 
   return (
-    <div className="accordion-container">
-      {accordionItems.map((item, index) => {
-        const isLastItem = index === accordionItems.length - 1;
-        // to avoid border collapsing issue
-        return React.cloneElement(item, {
-          contentClassName: isLastItem ? "border-b" : "",
-          containerClassName: isLastItem ? "" : "mb-[-1px]",
-        });
-      })}
+    <div className="accordion-container [&_div:not(:last-child)_.accordion-header]:mb-[-1px] [&_div:last-child_.shadow-inner]:border-b">
+      {accordionItems}
     </div>
   );
 }
@@ -46,6 +40,10 @@ interface AccordionItemProps {
    * Optional custom styling for the content section
    */
   contentClassName?: string;
+  /**
+   * Open accordion item by default
+   */
+  open?: boolean;
 }
 
 export function AccordionItem({
@@ -54,8 +52,9 @@ export function AccordionItem({
   titleClassName,
   contentClassName,
   containerClassName,
+  open = false,
 }: AccordionItemProps) {
-  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+  const [isOpen, setIsOpen] = React.useState<boolean>(open);
 
   const toggleAccordion = React.useCallback(
     () => setIsOpen((prev) => !prev),
@@ -63,20 +62,18 @@ export function AccordionItem({
   );
 
   return (
-    <div className={`accordion w-full ${containerClassName || ""}`}>
+    <div className={cn("accordion w-full", containerClassName)}>
       <div
         onClick={toggleAccordion}
-        className={`accordion-header sticky top-0 bg-white cursor-pointer border border-borderGray px-4 gap-3 py-2 grid grid-cols-[1fr_min-content] items-center ${titleClassName || ""
-          }`}
+        className={cn("accordion-header sticky top-0 bg-white cursor-pointer border border-borderGray px-4 gap-3 py-2 grid grid-cols-[1fr_min-content] items-center", titleClassName)}
       >
-        <div className="accordion-title overflow-x-auto">{title}</div>
+        <div className={"accordion-title overflow-x-auto"}>{title}</div>
         {isOpen ? <AccordionCollapseIcon /> : <AccordionExpandIcon />}
       </div>
 
       {isOpen && (
         <div
-          className={`bg-[#F1F1F1] p-3 border-x border-borderGray shadow-inner ${contentClassName || ""
-            }`}
+          className={cn("bg-[#F1F1F1] p-3 border-x border-borderGray shadow-inner", contentClassName)}
         >
           {content || <EmptyAccordionContent />}
         </div>
