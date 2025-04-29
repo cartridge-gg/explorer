@@ -26,6 +26,7 @@ bun install
 VITE_RPC_URL=YOUR_RPC_URL
 VITE_CHAIN_ID=YOUR_CHAIN_ID
 VITE_IS_EMBEDDED=true
+VITE_CARTRIDGE_API_URL=http://localhost:8000
 ```
 
 4. Run the app
