@@ -99,7 +99,7 @@ declare global {
   interface Window {
     RPC_URL?: string;
     CHAIN_ID?: string;
-    IS_EMBEDDED?: boolean;
+    BASE_PATH?: string;
     ENABLE_CONTROLLER?: boolean;
   }
 }

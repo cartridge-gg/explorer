@@ -11,6 +11,8 @@ export const EXECUTION_RESOURCES_KEY_MAP = {
   ec_op_builtin_applications: "ec_op",
 };
 
+export const BASE_PATH = window.BASE_PATH ?? import.meta.env.VITE_BASE_PATH;
+
 export const RPC_URL = window.RPC_URL ?? import.meta.env.VITE_RPC_URL;
 
 export const CHAIN_ID = window.CHAIN_ID ?? import.meta.env.VITE_CHAIN_ID;

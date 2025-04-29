@@ -1,12 +1,14 @@
 import { Plugin } from "vite";
 
+const BASE_PATH = "window.BASE_PATH";
+
 function createFaviconAssetTemplate(path: string): string {
   return `
 	// Favicon
 	const iconLink = document.createElement("link");
 	iconLink.rel = "icon";
 	iconLink.type = "image/svg+xml";
-	iconLink.href = basePath + "${path}";
+	iconLink.href = ${BASE_PATH} + "${path}";
 	document.head.appendChild(iconLink);
 `;
 }
@@ -16,7 +18,7 @@ function createCssAssetTemplate(path: string): string {
 	// CSS
 	const cssLink = document.createElement("link");
 	cssLink.rel = "stylesheet";
-	cssLink.href = basePath + "${path}";
+	cssLink.href = ${BASE_PATH} + "${path}";
 	cssLink.setAttribute("crossorigin", "");
 	document.head.appendChild(cssLink);
 `;
@@ -27,7 +29,7 @@ function createJsAssetTemplate(path: string): string {
 	// JS
 	const script = document.createElement("script");
 	script.type = "module";
-	script.src = basePath + "${path}";
+	script.src = ${BASE_PATH} + "${path}";
 	script.setAttribute("crossorigin", "");
 	document.head.appendChild(script);
 `;
@@ -36,7 +38,7 @@ function createJsAssetTemplate(path: string): string {
 function dynamicAssetsLoadingTemplate(
   favicon?: string,
   css?: string,
-  js?: string
+  js?: string,
 ) {
   if (!favicon && !css && !js) {
     return;
@@ -45,11 +47,11 @@ function dynamicAssetsLoadingTemplate(
   return `
 <script>
 	document.addEventListener("DOMContentLoaded", function () {
-		const currentPath = window.location.pathname;
-		const basePath = currentPath.substring(
-			0,
-			currentPath.lastIndexOf("/") + 1
-		);
+	//	const currentPath = window.location.pathname;
+	//	const basePath = currentPath.substring(
+	//		0,
+	//		currentPath.lastIndexOf("/") + 1
+	//	);
 
 		${favicon || ""}
 		${css || ""}
@@ -94,7 +96,7 @@ export default function dynamicLinksPlugin(): Plugin {
       const fullTemplate = dynamicAssetsLoadingTemplate(
         faviconTemplate,
         cssTemplate,
-        jsTemplate
+        jsTemplate,
       );
 
       if (fullTemplate) {
