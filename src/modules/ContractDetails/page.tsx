@@ -3,7 +3,7 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { useCallback, useEffect, useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
-import { Contract } from "starknet";
+import { Contract, FunctionAbi } from "starknet";
 import { BreadcrumbPage } from "@cartridge/ui-next";
 import {
   Breadcrumb,
@@ -19,7 +19,6 @@ import useBalances from "@/shared/hooks/useBalances";
 import { ContractReadInterface } from "@/shared/components/contract/ReadContractInterface";
 import { ContractWriteInterface } from "@/shared/components/contract/WriteContractInterface";
 import { parseClassFunctions } from "@/shared/utils/contract";
-import { Function } from "@/shared/components/contract/types";
 import { Code, CodeProps } from "@/shared/components/contract/Code";
 
 const DataTabs = ["Read Contract", "Write Contract", "Code"];
@@ -32,8 +31,8 @@ export default function ContractDetails() {
   const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
   const [classHash, setClassHash] = useState<string | null>(null);
   const [contract, setContract] = useState<Contract | null>(null);
-  const [readFunctions, setReadFunctions] = useState<Function[]>([]);
-  const [writeFunctions, setWriteFunctions] = useState<Function[]>([]);
+  const [readFunctions, setReadFunctions] = useState<FunctionAbi[]>([]);
+  const [writeFunctions, setWriteFunctions] = useState<FunctionAbi[]>([]);
   const [codeProps, setCodeProps] = useState<CodeProps>();
 
   const fetchContractDetails = useCallback(async () => {
@@ -68,7 +67,7 @@ export default function ContractDetails() {
   }, [contractAddress, fetchContractDetails]);
 
   const { balances, isStrkLoading, isEthLoading } =
-    useBalances(contractAddress);
+    useBalances(contractAddress ?? "");
 
   return (
     <div className="w-full flex-grow gap-8">

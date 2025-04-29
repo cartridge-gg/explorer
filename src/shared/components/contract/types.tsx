@@ -1,15 +1,7 @@
-export type FunctionInput = { name: string; type: string };
+import { AbiEntry } from "starknet";
 
-export type FunctionInputWithValue = FunctionInput & {
+export type FunctionInputWithValue = AbiEntry & {
   value: string;
 };
 
-export type Function = {
-  name: string;
-  selector: string;
-  inputs: FunctionInput[];
-};
-
-export type Constructor = {
-  inputs: FunctionInput[];
-};
+export type ConstructorAbi = { inputs: AbiEntry[] };

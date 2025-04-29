@@ -1,17 +1,17 @@
-import { CompiledSierra } from "starknet";
-import { LegacyContractClass } from "starknet";
-import { Constructor, Function } from "@/shared/components/contract/types";
+import { ContractClassResponse, FunctionAbi, InterfaceAbi } from "starknet";
+import { ConstructorAbi } from "../components/contract/types";
 
-export function parseClassFunctions(contractClass: LegacyContractClass | Omit<CompiledSierra, "sierra_program_debug_info">) {
-  let constructor: Constructor;
-  const readFuncs: Function[] = [];
-  const writeFuncs: Function[] = [];
+export function parseClassFunctions(contractClass: ContractClassResponse) {
+  let constructor: ConstructorAbi;
+  const readFuncs: FunctionAbi[] = [];
+  const writeFuncs: FunctionAbi[] = [];
 
   contractClass.abi.forEach((item) => {
     switch (item.type) {
       case "constructor": {
+        const _item = item as Omit<FunctionAbi, "outputs">;
         constructor = {
-          inputs: item.inputs.map((input) => ({
+          inputs: _item.inputs.map((input) => ({
             name: input.name,
             type: input.type,
           })),
@@ -19,27 +19,28 @@ export function parseClassFunctions(contractClass: LegacyContractClass | Omit<Co
         break;
       }
       case "interface": {
-        item.items.forEach((func) => {
+        const _item = item as InterfaceAbi;
+        _item.items.forEach((func) => {
           if (func.type === "function") {
-            const funcData = {
-            name: func.name,
-            inputs: func.inputs.map((input) => ({
-              name: input.name,
-              type: input.type,
-            })),
-            selector: func.selector || "",
-          };
-
-          if (
-            func.state_mutability === "view" ||
-            func.state_mutability === "pure"
-          ) {
-            readFuncs.push(funcData);
-          } else {
-            writeFuncs.push(funcData);
+            if (
+              func.state_mutability === "view" ||
+              func.state_mutability === "pure"
+            ) {
+              readFuncs.push(func);
+            } else {
+              writeFuncs.push(func);
+            }
           }
-        }
         });
+        break;
+      }
+      case "function": {
+        const _item = item as FunctionAbi;
+        if (_item.state_mutability === "view" || _item.state_mutability === "pure") {
+          readFuncs.push(_item);
+        } else {
+          writeFuncs.push(_item);
+        }
         break;
       }
       default:

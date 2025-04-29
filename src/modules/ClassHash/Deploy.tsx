@@ -1,10 +1,10 @@
-import { Constructor, FunctionInputWithValue } from "@/shared/components/contract/types";
+import { ConstructorAbi, FunctionInputWithValue } from "@/shared/components/contract/types";
 import { useToast } from "@/shared/components/toast";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
 import { DeployContractResponse, RawArgsObject } from "starknet";
 
-export function Deploy({ classHash, constructor }: { classHash: string, constructor: Constructor }) {
+export function Deploy({ classHash, constructor }: { classHash: string, constructor: ConstructorAbi }) {
   const { toast } = useToast();
   const { account } = useAccount();
   const initialInputs = useMemo(() => constructor.inputs.map(input => ({

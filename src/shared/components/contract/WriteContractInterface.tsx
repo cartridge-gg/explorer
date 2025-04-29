@@ -1,7 +1,7 @@
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
-import { AccountInterface, Contract, InvokeFunctionResponse } from "starknet";
+import { AccountInterface, Contract, FunctionAbi, InvokeFunctionResponse } from "starknet";
 import * as types from "./types";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
@@ -15,12 +15,12 @@ type FunctionCallAccordionContentState = {
   result: InvokeFunctionResponse | null;
   hasCalled: boolean;
   loading: boolean;
-  error: any;
+  error: Error | string | null;
 };
 
 export interface ContractWriteInterfaceProps {
   contract?: Contract;
-  functions?: types.Function[];
+  functions?: FunctionAbi[];
 }
 
 export function ContractWriteInterface({
@@ -201,7 +201,7 @@ function FunctionCallAccordionContent({
       onUpdateState({ result, error: null, loading: false });
     } catch (error) {
       console.error("failed to execute contract", error);
-      onUpdateState({ error, result: null, loading: false });
+      onUpdateState({ error: error as Error, result: null, loading: false });
     }
   }, [inputs, contract, account, functionName, onUpdateState]);
 

@@ -29,7 +29,7 @@ export default function ClassHashDetails() {
 
   const { data: contractClass } = useQuery({
     queryKey: ["contractClass", classHash],
-    queryFn: () => RPC_PROVIDER.getClass(classHash!),
+    queryFn: () => RPC_PROVIDER.getClassByHash(classHash!),
     enabled: !!classHash,
   });
 

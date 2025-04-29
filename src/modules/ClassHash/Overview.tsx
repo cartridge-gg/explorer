@@ -2,7 +2,7 @@ import { AccordionItem } from "@/shared/components/accordion";
 import { Code } from "@/shared/components/contract/Code";
 import { ContractReadInterface } from "@/shared/components/contract/ReadContractInterface";
 import { ContractWriteInterface } from "@/shared/components/contract/WriteContractInterface";
-import { Function } from "@/shared/components/contract/types";
+import { FunctionAbi } from "starknet";
 
 export function Overview({
   readFuncs,
@@ -10,15 +10,15 @@ export function Overview({
   abi,
   sierra
 }: {
-  readFuncs: Function[],
-  writeFuncs: Function[],
+  readFuncs: FunctionAbi[],
+  writeFuncs: FunctionAbi[],
   abi: string,
   sierra?: string
 }) {
   return (
     <div className="bg-white flex flex-col gap-1 mt-[6px] overflow-auto">
-      <AccordionItem title="Read Functions" content={<ContractReadInterface functions={readFuncs} />} titleClassName="z-10" />
-      <AccordionItem title="Write Functions" content={<ContractWriteInterface functions={writeFuncs} />} titleClassName="z-10" />
+      <AccordionItem title={`Read Functions (${readFuncs.length})`} content={<ContractReadInterface functions={readFuncs} />} titleClassName="z-10" disabled={readFuncs.length === 0} />
+      <AccordionItem title={`Write Functions (${writeFuncs.length})`} content={<ContractWriteInterface functions={writeFuncs} />} titleClassName="z-10" disabled={writeFuncs.length === 0} />
       <div className="border border-borderGray p-4">
         <Code abi={abi} sierra={sierra} />
       </div>
