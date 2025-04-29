@@ -25,4 +25,5 @@ export const QUERY_KEYS = {
   getBlockWithTxHashes: ["getBlockWithTxHashes"],
   getBlock: ["getBlock"],
   specVersion: ["specVersion"],
+  getController: ["getController"],
 };
