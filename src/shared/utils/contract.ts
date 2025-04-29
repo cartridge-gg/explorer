@@ -22,10 +22,7 @@ export function parseClassFunctions(contractClass: ContractClassResponse) {
         const _item = item as InterfaceAbi;
         _item.items.forEach((func) => {
           if (func.type === "function") {
-            if (
-              func.state_mutability === "view" ||
-              func.state_mutability === "pure"
-            ) {
+            if (isReadFunction(func)) {
               readFuncs.push(func);
             } else {
               writeFuncs.push(func);
@@ -36,7 +33,7 @@ export function parseClassFunctions(contractClass: ContractClassResponse) {
       }
       case "function": {
         const _item = item as FunctionAbi;
-        if (_item.state_mutability === "view" || _item.state_mutability === "pure") {
+        if (isReadFunction(_item)) {
           readFuncs.push(_item);
         } else {
           writeFuncs.push(_item);
@@ -57,4 +54,8 @@ export function parseClassFunctions(contractClass: ContractClassResponse) {
       ? JSON.stringify(contractClass.sierra_program, null, 2)
       : undefined
   };
+}
+
+function isReadFunction(func: FunctionAbi) {
+  return func.state_mutability === "view" || func.state_mutability === "pure";
 }

@@ -27,7 +27,7 @@ export default function ClassHashDetails() {
     enabled: !!classHash,
   });
 
-  const { data: contractClass } = useQuery({
+  const { data: contractClass, isLoading } = useQuery({
     queryKey: ["contractClass", classHash],
     queryFn: () => RPC_PROVIDER.getClassByHash(classHash!),
     enabled: !!classHash,
@@ -58,52 +58,62 @@ export default function ClassHashDetails() {
 
       <PageHeader className="mb-6" title="Class" />
 
-      <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
-        {/* Contract Info Section */}
-        <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
-          <SectionBox>
-            <SectionBoxEntry title="Class Hash">
-              {isMobile && classHash
-                ? truncateString(classHash)
-                : classHash}
-            </SectionBoxEntry>
-
-            <SectionBoxEntry title="Compiler Version">
-              v{contractVersion?.compiler}
-            </SectionBoxEntry>
-
-            <SectionBoxEntry title="Cairo Version">
-              v{contractVersion?.cairo}
-            </SectionBoxEntry>
-          </SectionBox>
+      {isLoading ? (
+        <div className="h-40 flex items-center justify-center text-xs border border-borderGray">
+          <span className="text-[#D0D0D0]">Loading...</span>
         </div>
+      ) : contractClass ? (
+        <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
+          {/* Contract Info Section */}
+          <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
+            <SectionBox>
+              <SectionBoxEntry title="Class Hash">
+                {isMobile && classHash
+                  ? truncateString(classHash)
+                  : classHash}
+              </SectionBoxEntry>
 
-        <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-          <DetailsPageSelector
-            selected={selectedDataTab}
-            onTabSelect={setSelectedDataTab}
-            items={DataTabs.map((tab) => ({
-              name: tab,
-              value: tab,
-            }))}
-          />
+              <SectionBoxEntry title="Compiler Version">
+                v{contractVersion?.compiler}
+              </SectionBoxEntry>
 
-          {(() => {
-            switch (selectedDataTab) {
-              case "Overview":
-                return <Overview readFuncs={readFuncs} writeFuncs={writeFuncs} abi={abi} sierra={sierra} />;
-              case "Deploy":
-                return <Deploy classHash={classHash!} constructor={constructor} />;
-              default:
-                return (
-                  <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
-                    <span className="text-[#D0D0D0]">No data found</span>
-                  </div>
-                )
-            }
-          })()}
+              <SectionBoxEntry title="Cairo Version">
+                v{contractVersion?.cairo}
+              </SectionBoxEntry>
+            </SectionBox>
+          </div>
+
+          <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+            <DetailsPageSelector
+              selected={selectedDataTab}
+              onTabSelect={setSelectedDataTab}
+              items={DataTabs.map((tab) => ({
+                name: tab,
+                value: tab,
+              }))}
+            />
+
+            {(() => {
+              switch (selectedDataTab) {
+                case "Overview":
+                  return <Overview readFuncs={readFuncs} writeFuncs={writeFuncs} abi={abi} sierra={sierra} />;
+                case "Deploy":
+                  return <Deploy classHash={classHash!} constructor={constructor} />;
+                default:
+                  return (
+                    <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
+                      <span className="text-[#D0D0D0]">No data found</span>
+                    </div>
+                  )
+              }
+            })()}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="h-40 flex items-center justify-center text-xs border border-borderGray">
+          <span className="text-[#D0D0D0]">Contract class not found</span>
+        </div>
+      )}
     </div>
   );
 }
