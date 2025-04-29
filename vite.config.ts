@@ -5,7 +5,7 @@ import dynamicLinksPlugin from "./dynamic-link";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), dynamicLinksPlugin()],
+  plugins: [react(), process.env.IS_EMBEDDED ? dynamicLinksPlugin() : null],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -15,5 +15,8 @@ export default defineConfig({
       "@modules": path.resolve(__dirname, "./src/modules"),
       "@constants": path.resolve(__dirname, "./src/constants"),
     },
+  },
+  define: {
+    "import.meta.env.APP_IS_EMBEDDED": JSON.stringify(process.env.IS_EMBEDDED),
   },
 });
