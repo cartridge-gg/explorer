@@ -107,7 +107,7 @@ export default function HomeSearchBar() {
           .fetchQuery({
             queryKey: [QUERY_KEYS.getController, input],
             queryFn: async () => {
-              const fetchData = fetchDataCreator("https://api.cartridge.gg/query");
+              const fetchData = fetchDataCreator(`${import.meta.env.VITE_CARTRIDGE_API_URL ?? "https://api.cartridge.gg"}/query`);
               try {
                 const res = await fetchData<AddressByUsernameQuery, AddressByUsernameQueryVariables>(AddressByUsernameDocument, {
                   username: input,
