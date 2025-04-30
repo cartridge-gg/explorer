@@ -9,11 +9,13 @@ import { SectionBox } from "@/shared/components/section/SectionBox";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { useQuery } from "@tanstack/react-query";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Overview } from "./Overview";
 import { Deploy } from "./Deploy";
 import { parseClassFunctions } from "@/shared/utils/contract";
-
+import { validateAndParseAddress } from "starknet";
+import { useToast } from "@/shared/components/toast";
+import NotFound from "../NotFound/page";
 const DataTabs = ["Overview", "Deploy"];
 
 export default function ClassHashDetails() {
@@ -27,7 +29,7 @@ export default function ClassHashDetails() {
     enabled: !!classHash,
   });
 
-  const { data: contractClass, isLoading } = useQuery({
+  const { data: contractClass, isLoading, error } = useQuery({
     queryKey: ["contractClass", classHash],
     queryFn: () => RPC_PROVIDER.getClassByHash(classHash!),
     enabled: !!classHash,
@@ -39,6 +41,39 @@ export default function ClassHashDetails() {
       : { constructor: { inputs: [] }, readFuncs: [], writeFuncs: [], abi: "", sierra: "" },
     [contractClass]
   );
+
+  const { toast } = useToast()
+
+  const [classHashError, setClassHashError] = useState<Error>();
+  const isFirstRender = useRef(true)
+
+  useEffect(() => {
+    if (!isFirstRender.current) return
+    isFirstRender.current = false
+    try {
+      if (!classHash) {
+        throw new Error("Class hash is empty")
+      }
+
+      validateAndParseAddress(classHash)
+    } catch (error) {
+      setClassHashError(error as Error)
+      toast(`Invalid class hash: ${classHash}`, "error")
+    }
+  }, [classHash, toast])
+
+  useEffect(() => {
+    if (!error) return
+
+    toast(`Class hash not found: ${classHash}`, "error")
+    setClassHashError(error as Error)
+    // workaround for getting toast multiple times
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [classHash, error])
+
+  if (classHashError) {
+    return <NotFound />
+  }
 
   return (
     <div className="w-full flex-grow">
@@ -59,10 +94,10 @@ export default function ClassHashDetails() {
       <PageHeader className="mb-6" title="Class" />
 
       {isLoading ? (
-        <div className="h-40 flex items-center justify-center text-xs border border-borderGray">
+        <div className="h-40 flex items-center justify-center text-xs border border-borderGray animate-pulse">
           <span className="text-[#D0D0D0]">Loading...</span>
         </div>
-      ) : contractClass ? (
+      ) : (
         <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
           {/* Contract Info Section */}
           <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
@@ -108,10 +143,6 @@ export default function ClassHashDetails() {
               }
             })()}
           </div>
-        </div>
-      ) : (
-        <div className="h-40 flex items-center justify-center text-xs border border-borderGray">
-          <span className="text-[#D0D0D0]">Contract class not found</span>
         </div>
       )}
     </div>

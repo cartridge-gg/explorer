@@ -65,7 +65,7 @@ export const Toast = ({
   return (
     <div
       className={cn(
-        "text-sm flex items-center gap-2 px-2 py-1 mb-1 max-w-xs shadow-sm transition-all duration-300 ease-in-out border",
+        "w-full text-sm flex items-center gap-2 px-2 py-1 mb-1 shadow-sm transition-all duration-300 ease-in-out border",
         bgColor,
         textColor,
         borderColor,
@@ -86,7 +86,7 @@ export const Toast = ({
         <icons.X strokeWidth={1.5} width={10} height={10} />
       </button>
 
-      <div className="text-sm font-medium">{message}</div>
+      <div className="w-full max-w-xs text-sm font-medium break-words">{message}</div>
     </div>
   );
 };
