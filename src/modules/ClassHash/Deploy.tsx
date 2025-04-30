@@ -2,7 +2,7 @@ import { ConstructorAbi, FunctionInputWithValue } from "@/shared/components/cont
 import { useToast } from "@/shared/components/toast";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
-import { DeployContractResponse, RawArgsObject } from "starknet";
+import { DeployContractResponse, RawArgsObject, uint256 } from "starknet";
 
 export function Deploy({ classHash, constructor }: { classHash: string, constructor: ConstructorAbi }) {
   const { toast } = useToast();
@@ -39,10 +39,7 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
     try {
       const result = await account.deployContract({
         classHash: classHash,
-        constructorCalldata: form.inputs.reduce((acc, input) => {
-          acc[input.name] = input.value;
-          return acc;
-        }, {} as RawArgsObject)
+        constructorCalldata: toRawArgs(form.inputs)
       });
       setForm(form => ({
         ...form,
@@ -107,4 +104,17 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
       </button>
     </div>
   )
+}
+
+function toRawArgs(inputs: FunctionInputWithValue[]) {
+  return inputs.reduce((acc, input) => ({ ...acc, [input.name]: toMultiType(input) }), {} as RawArgsObject);
+}
+
+function toMultiType(input: FunctionInputWithValue) {
+  switch (input.type) {
+    case "Uint256":
+      return uint256.bnToUint256(input.value);
+    default:
+      return BigInt(input.value);
+  }
 }
