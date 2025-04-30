@@ -4,7 +4,7 @@
 
 body {
   background-color: #fff;
-  background-image: url("assets/dotgrid.svg");
+  background-image: url("/dotgrid.svg");
   font-family: "Space Mono", monospace;
   font-size: 11px;
   color: theme("colors.primary");

@@ -1,6 +1,6 @@
 import { Plugin } from "vite";
 
-const BASE_PATH = "window.BASE_PATH";
+const BASE_PATH = '(window.BASE_PATH || "")';
 
 function createFaviconAssetTemplate(path: string): string {
   return `
@@ -39,20 +39,15 @@ function dynamicAssetsLoadingTemplate(
   favicon?: string,
   css?: string,
   js?: string,
+  background?: string,
 ) {
-  if (!favicon && !css && !js) {
+  if (!favicon && !css && !js && !background) {
     return;
   }
 
   return `
 <script>
 	document.addEventListener("DOMContentLoaded", function () {
-	//	const currentPath = window.location.pathname;
-	//	const basePath = currentPath.substring(
-	//		0,
-	//		currentPath.lastIndexOf("/") + 1
-	//	);
-
 		${favicon || ""}
 		${css || ""}
 		${js || ""}
@@ -66,7 +61,7 @@ export default function dynamicLinksPlugin(): Plugin {
     name: "vite-plugin-dynamic-links",
     transformIndexHtml(html: string): string {
       const faviconRegex =
-        /<link rel="icon" type="image\/svg+xml" href="([^"]+)" \/>/;
+        /<link rel="icon" (?:type="[^"]+")? href="([^"]+)" \/>/;
       const cssRegex = /<link rel="stylesheet" crossorigin href="([^"]+)">/;
       const jsRegex =
         /<script type="module" crossorigin src="([^"]+)"><\/script>/;
@@ -79,18 +74,21 @@ export default function dynamicLinksPlugin(): Plugin {
       if (faviconMatch) {
         const faviconPath = faviconMatch[1].replace(/^\//, "");
         faviconTemplate = createFaviconAssetTemplate(faviconPath);
+        html = html.replace(faviconRegex, "");
       }
 
       let cssTemplate;
       if (cssMatch) {
         const cssPath = cssMatch[1].replace(/^\//, "");
         cssTemplate = createCssAssetTemplate(cssPath);
+        html = html.replace(cssRegex, "");
       }
 
       let jsTemplate;
       if (jsMatch) {
         const jsPath = jsMatch[1].replace(/^\//, "");
         jsTemplate = createJsAssetTemplate(jsPath);
+        html = html.replace(jsRegex, "");
       }
 
       const fullTemplate = dynamicAssetsLoadingTemplate(
