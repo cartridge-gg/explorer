@@ -9,7 +9,7 @@ import {
 import { Connector, InjectedConnector } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import { WebWalletConnector } from "starknetkit/webwallet";
-import { CHAIN_ID, RPC_URL } from "@/constants/rpc";
+import { CHAIN_ID, rpcUrl } from "@/constants/rpc";
 
 const ENABLE_CONTROLLER =
   window.ENABLE_CONTROLLER ?? import.meta.env.VITE_ENABLE_CONTROLLER === "true";
@@ -18,7 +18,7 @@ export const cartridge_controller = ENABLE_CONTROLLER
   ? new ControllerConnector({
       chains: [
         {
-          rpcUrl: RPC_URL,
+          rpcUrl: rpcUrl(),
         },
       ],
       defaultChainId: CHAIN_ID,

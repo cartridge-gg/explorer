@@ -1,4 +1,4 @@
-import { RPC_URL } from "@/constants/rpc";
+import { rpcUrl } from "@/constants/rpc";
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
 import { BreadcrumbItem, BreadcrumbSeparator } from "@/shared/components/breadcrumbs";
 
@@ -116,7 +116,7 @@ export default function JRPCPlayground() {
   }, [])
 
   const onExecute = useCallback(async () => {
-    const res = await fetch(RPC_URL, {
+    const res = await fetch(rpcUrl(), {
       headers: {
         "Content-Type": "application/json",
       },

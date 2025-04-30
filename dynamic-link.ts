@@ -1,6 +1,16 @@
 import { Plugin } from "vite";
 
-const BASE_PATH = '(window.BASE_PATH || "")';
+const BASE_PATH = `function basePath() {
+	const pathname = window.location.pathname;
+	const explorerIndex = pathname.lastIndexOf("/explorer");
+
+	if (explorerIndex !== -1) {
+		return pathname.substring(0, explorerIndex) + "/explorer";
+	} else {
+		console.error("Couldn't determine the base path. App is in embedded mode but '/explorer' was not found in the pathname");
+		return "";
+	}
+}`;
 
 function createFaviconAssetTemplate(path: string): string {
   return `
@@ -8,7 +18,7 @@ function createFaviconAssetTemplate(path: string): string {
 	const iconLink = document.createElement("link");
 	iconLink.rel = "icon";
 	iconLink.type = "image/svg+xml";
-	iconLink.href = ${BASE_PATH} + "/${path}";
+	iconLink.href = basePath() + "/${path}";
 	document.head.appendChild(iconLink);
 `;
 }
@@ -18,7 +28,7 @@ function createCssAssetTemplate(path: string): string {
 	// CSS
 	const cssLink = document.createElement("link");
 	cssLink.rel = "stylesheet";
-	cssLink.href = ${BASE_PATH} + "/${path}";
+	cssLink.href = basePath() + "/${path}";
 	cssLink.setAttribute("crossorigin", "");
 	document.head.appendChild(cssLink);
 `;
@@ -29,7 +39,7 @@ function createJsAssetTemplate(path: string): string {
 	// JS
 	const script = document.createElement("script");
 	script.type = "module";
-	script.src = ${BASE_PATH} + "/${path}";
+	script.src = basePath() + "/${path}";
 	script.setAttribute("crossorigin", "");
 	document.head.appendChild(script);
 `;
@@ -39,7 +49,7 @@ function createBackgroundAssetTemplate(path: string): string {
   return `
 	// Background
 	const style = document.createElement("style");
-	style.textContent = "body { background-image: url('" + ${BASE_PATH} + "/${path}'); }";
+	style.textContent = "body { background-image: url('" + basePath() + "/${path}'); }";
 	document.head.appendChild(style);
 `;
 }
@@ -56,6 +66,7 @@ function dynamicAssetsLoadingTemplate(
 
   return `
 <script>
+	${BASE_PATH}
 	document.addEventListener("DOMContentLoaded", function () {
 		${favicon || ""}
 		${css || ""}

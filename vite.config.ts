@@ -22,4 +22,7 @@ export default defineConfig({
   define: {
     "import.meta.env.APP_IS_EMBEDDED": JSON.stringify(process.env.IS_EMBEDDED),
   },
+  preview: {
+    allowedHosts: ["x.cartridge.gg"],
+  },
 });
