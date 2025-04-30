@@ -2,7 +2,7 @@ import "./App.css";
 import { ROUTES } from "./constants/routes";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Header from "./shared/components/header";
-import { basePath, rpcUrl } from "./constants/rpc";
+import { basePath } from "./constants/rpc";
 
 function MainContent() {
   const location = useLocation();
