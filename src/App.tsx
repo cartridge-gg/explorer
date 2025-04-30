@@ -2,7 +2,7 @@ import "./App.css";
 import { ROUTES } from "./constants/routes";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Header from "./shared/components/header";
-import { BASE_PATH } from "./constants/rpc";
+import { basePath, rpcUrl } from "./constants/rpc";
 
 function MainContent() {
   const location = useLocation();
@@ -28,12 +28,8 @@ function MainContent() {
 }
 
 function App() {
-  const basename =
-    // See <vite.config.ts>.
-    import.meta.env.APP_IS_EMBEDDED ? BASE_PATH : undefined;
-
   return (
-    <BrowserRouter basename={basename}>
+    <BrowserRouter basename={basePath()}>
       <MainContent />
     </BrowserRouter>
   );

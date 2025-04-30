@@ -1,5 +1,5 @@
 "use client";
-import { RPC_URL } from "@/constants/rpc";
+import { rpcUrl } from "@/constants/rpc";
 import { RpcProvider } from "starknet";
 
 declare global {
@@ -9,7 +9,7 @@ declare global {
 }
 
 export const RPC_PROVIDER = new RpcProvider({
-  nodeUrl: RPC_URL,
+  nodeUrl: rpcUrl(),
 });
 
 // useful for caching

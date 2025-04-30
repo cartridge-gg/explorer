@@ -11,9 +11,40 @@ export const EXECUTION_RESOURCES_KEY_MAP = {
   ec_op_builtin_applications: "ec_op",
 };
 
-export const BASE_PATH = window.BASE_PATH ?? import.meta.env.VITE_BASE_PATH;
+export function basePath(): string | undefined {
+  console.log("ohayo");
+  if (import.meta.env.APP_IS_EMBEDDED) {
+    const pathname = window.location.pathname;
+    const explorerIndex = pathname.lastIndexOf("/explorer");
 
-export const RPC_URL = window.RPC_URL ?? import.meta.env.VITE_RPC_URL;
+    if (explorerIndex !== -1) {
+      return window.location.pathname;
+    } else {
+      throw new Error(
+        "Couldn't determine the base path. App is in embedded mode but `/explorer` was not found in the pathname",
+      );
+    }
+  }
+}
+
+// In embedded mode, it is assumed that the explorer is served at the relative path `/explorer` of the JSON-RPC server.
+export function rpcUrl(): string {
+  if (import.meta.env.APP_IS_EMBEDDED) {
+    const pathname = window.location.pathname;
+    const explorerIndex = pathname.lastIndexOf("/explorer");
+
+    if (explorerIndex !== -1) {
+      const basePath = pathname.substring(0, explorerIndex);
+      return `${window.location.protocol}//${window.location.host}${basePath}`;
+    } else {
+      throw new Error(
+        "Couldn't determine the RPC URL. App is in embedded mode but `/explorer` was not found in the pathname",
+      );
+    }
+  }
+
+  return import.meta.env.VITE_RPC_URL;
+}
 
 export const CHAIN_ID = window.CHAIN_ID ?? import.meta.env.VITE_CHAIN_ID;
 
