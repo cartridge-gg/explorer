@@ -30,7 +30,7 @@ function MainContent() {
 function App() {
   const basename =
     // See <vite.config.ts>.
-    import.meta.env.APP_IS_EMBEDDED ? BASE_PATH || "/" : "/";
+    import.meta.env.APP_IS_EMBEDDED ? BASE_PATH : undefined;
 
   return (
     <BrowserRouter basename={basename}>
