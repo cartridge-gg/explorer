@@ -3,20 +3,13 @@ import { Connector, useConnect } from "@starknet-react/core";
 import {
   availableConnectors,
 } from "@/store/starknetProvider";
-import CrossIcon from "@/shared/icons/ Cross";
+import CrossIcon from "@/shared/icons/Cross";
+import { connectorIconToSrc } from "@/shared/utils/image";
 
 interface WalletConnectModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-// Map wallet names to their SVG logo paths
-const walletLogos: Record<string, string> = {
-  Controller: "/controller.svg",
-  "Argent X": "/argent.svg",
-  Braavos: "/braavos.svg",
-  "Argent Web Wallet": "/argent.svg",
-};
 
 export default function WalletConnectModal({
   isOpen,
@@ -27,7 +20,7 @@ export default function WalletConnectModal({
 
   const handleConnect = useCallback((connector: Connector) => {
     try {
-      setConnecting(connector.id || connector.name);
+      setConnecting(connector.id);
       connect({ connector });
       localStorage.setItem("lastUsedConnector", connector.id);
       onClose();
@@ -68,40 +61,26 @@ export default function WalletConnectModal({
 
         <div className="">
           {availableConnectors.map((connector) => {
-            const name = connector.id || connector.name || "Unknown";
-            const displayName =
-              name === "controller"
-                ? "Controller"
-                : name === "argentX"
-                  ? "Argent X"
-                  : name === "braavos"
-                    ? "Braavos"
-                    : name === "argentWebWallet"
-                      ? "Argent Web Wallet"
-                      : name;
-
             return (
               <button
-                key={name}
+                key={connector.id}
                 onClick={() => handleConnect(connector)}
                 disabled={!!connecting}
-                className={`mt-[-1px] flex items-center justify-between w-full p-3 border hover:bg-[#EEEEEE] ${connecting === name
+                className={`mt-[-1px] flex items-center justify-between w-full p-3 border hover:bg-[#EEEEEE] ${connecting === connector.id
                   ? "border-blue-500 bg-blue-50"
                   : "border-gray-200 hover:border-gray-300"
                   } transition-colors`}
               >
                 <div className="w-full flex items-center justify-between">
-                  {walletLogos[displayName] && (
-                    <img
-                      src={walletLogos[displayName]}
-                      alt={`${displayName} logo`}
-                      className="w-6 h-6 mr-3"
-                    />
-                  )}
-                  <span className="font-medium">{displayName}</span>
+                  <img
+                    src={connectorIconToSrc(connector.icon)}
+                    alt={`${connector.name} logo`}
+                    className="w-6 h-6 mr-3"
+                  />
+                  <span className="font-medium">{connector.name}</span>
                 </div>
 
-                {connecting === name && (
+                {connecting === connector.id && (
                   <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
                 )}
               </button>

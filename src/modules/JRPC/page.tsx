@@ -9,7 +9,7 @@ import { BreadcrumbPage, cn, Tooltip, TooltipContent, TooltipProvider, TooltipTr
 import { useQuery } from "@tanstack/react-query";
 import { InfoIcon, PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
+import { fromCamelCase } from "@/shared/utils/string";
 interface OpenRPCSchema {
   methods: JRPCMethod[];
   components?: {
@@ -196,7 +196,7 @@ export default function JRPCPlayground() {
 
           <div className="h-full flex-grow grid grid-rows-[min-content_1fr] gap-8 w-80">
             <div className="flex flex-col gap-2">
-              <div className="uppercase font-bold text-lg">{request.method.replace("starknet_", "").replace(/([A-Z])/g, ' $1')}</div>
+              <div className="uppercase font-bold text-lg">{fromCamelCase(request.method.replace("starknet_", ""))}</div>
               <div>{scheme?.methods.find(m => m.name === request.method)?.summary}</div>
             </div>
 
