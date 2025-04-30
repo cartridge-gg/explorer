@@ -5,7 +5,7 @@ const BASE_PATH = `function basePath() {
 	const explorerIndex = pathname.lastIndexOf("/explorer");
 
 	if (explorerIndex !== -1) {
-		return window.location.pathname;
+		return pathname.substring(0, explorerIndex);
 	} else {
 		console.error("Couldn't determine the base path. App is in embedded mode but '/explorer' was not found in the pathname");
 		return "";
