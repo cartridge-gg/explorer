@@ -1,6 +1,6 @@
 import { Plugin } from "vite";
 
-const BASE_PATH = '(window.BASE_PATH || "")';
+const BASE_PATH = '(window.BASE_PATH || "/")';
 
 function createFaviconAssetTemplate(path: string): string {
   return `
@@ -35,6 +35,15 @@ function createJsAssetTemplate(path: string): string {
 `;
 }
 
+function createBackgroundAssetTemplate(path: string): string {
+  return `
+	// Background
+	const style = document.createElement("style");
+	style.textContent = "body { background-image: url(" + ${BASE_PATH}) + "'${path}'); }";
+	document.head.appendChild(style);
+`;
+}
+
 function dynamicAssetsLoadingTemplate(
   favicon?: string,
   css?: string,
@@ -51,6 +60,7 @@ function dynamicAssetsLoadingTemplate(
 		${favicon || ""}
 		${css || ""}
 		${js || ""}
+		${background || ""}
 	});
 </script>
 `;
@@ -91,10 +101,13 @@ export default function dynamicLinksPlugin(): Plugin {
         html = html.replace(jsRegex, "");
       }
 
+      const backgroundTemplate = createBackgroundAssetTemplate("dotgrid.svg");
+
       const fullTemplate = dynamicAssetsLoadingTemplate(
         faviconTemplate,
         cssTemplate,
         jsTemplate,
+        backgroundTemplate,
       );
 
       if (fullTemplate) {
