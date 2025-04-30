@@ -7,10 +7,14 @@ import { BASE_PATH } from "./constants/rpc";
 function MainContent() {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+  const fullScreen = isHomePage || !Object
+    .values(ROUTES)
+    .map(r => r.urlPath)
+    .includes(location.pathname)
 
   return (
     <div
-      className={`flex flex-col gap-[20px] px-[20px] py-[25px] xl:px-[45px] w-full min-w-[320px] ${isHomePage ? "h-screen" : "lg:h-screen"
+      className={`flex flex-col gap-[20px] px-[20px] py-[25px] xl:px-[45px] w-full min-w-[320px] ${fullScreen ? "h-screen" : "lg:h-screen"
         }`}
     >
       {!isHomePage && <Header />}

@@ -7,6 +7,7 @@ import Home from "@/modules/HomeNew/page";
 import TransactionDetails from "@/modules/TransactionDetails/page";
 import TransactionsList from "@/modules/TransactionsList/page";
 import JRPCPlayground from "@/modules/JRPC/page";
+import NotFound from "@/modules/NotFound/page";
 
 export const ROUTES = {
   HOME: {
@@ -45,4 +46,8 @@ export const ROUTES = {
     urlPath: "/jrpc",
     component: <JRPCPlayground />,
   },
+  NOT_FOUND: {
+    urlPath: "*",
+    component: <NotFound />,
+  }
 };
