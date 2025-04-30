@@ -13,8 +13,8 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@cartridge/connector": "^0.6.0",
-    "@cartridge/controller": "^0.6.0",
+    "@cartridge/connector": "^0.7.13-alpha.1",
+    "@cartridge/controller": "^0.7.13-alpha.1",
     "@cartridge/presets": "github:cartridge-gg/presets#2373780",
     "@cartridge/ui-next": "0.5.0-alpha.1",
     "@cartridge/utils": "^0.7.12",

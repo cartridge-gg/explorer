@@ -16,19 +16,20 @@ const ENABLE_CONTROLLER =
 
 export const cartridge_controller = ENABLE_CONTROLLER
   ? new ControllerConnector({
-      chains: [
-        {
-          rpcUrl: rpcUrl(),
-        },
-      ],
-      defaultChainId: CHAIN_ID,
-    })
+    chains: [
+      {
+        rpcUrl: rpcUrl(),
+      },
+    ],
+    defaultChainId: CHAIN_ID,
+    url: import.meta.env.VITE_KEYCHAIN_URL,
+  })
   : null;
 
 const connectors = ENABLE_CONTROLLER
   ? [cartridge_controller].filter(
-      (connector): connector is ControllerConnector => connector !== null
-    )
+    (connector): connector is ControllerConnector => connector !== null
+  )
   : [];
 
 export const availableConnectors: Connector[] = [
