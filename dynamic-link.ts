@@ -1,6 +1,5 @@
+import { basePath } from "@/constants/rpc";
 import { Plugin } from "vite";
-
-const BASE_PATH = '(window.BASE_PATH || "")';
 
 function createFaviconAssetTemplate(path: string): string {
   return `
@@ -8,7 +7,7 @@ function createFaviconAssetTemplate(path: string): string {
 	const iconLink = document.createElement("link");
 	iconLink.rel = "icon";
 	iconLink.type = "image/svg+xml";
-	iconLink.href = ${BASE_PATH} + "/${path}";
+	iconLink.href = ${basePath()} + "/${path}";
 	document.head.appendChild(iconLink);
 `;
 }
@@ -18,7 +17,7 @@ function createCssAssetTemplate(path: string): string {
 	// CSS
 	const cssLink = document.createElement("link");
 	cssLink.rel = "stylesheet";
-	cssLink.href = ${BASE_PATH} + "/${path}";
+	cssLink.href = ${basePath()} + "/${path}";
 	cssLink.setAttribute("crossorigin", "");
 	document.head.appendChild(cssLink);
 `;
@@ -29,7 +28,7 @@ function createJsAssetTemplate(path: string): string {
 	// JS
 	const script = document.createElement("script");
 	script.type = "module";
-	script.src = ${BASE_PATH} + "/${path}";
+	script.src = ${basePath()} + "/${path}";
 	script.setAttribute("crossorigin", "");
 	document.head.appendChild(script);
 `;
@@ -39,7 +38,7 @@ function createBackgroundAssetTemplate(path: string): string {
   return `
 	// Background
 	const style = document.createElement("style");
-	style.textContent = "body { background-image: url('" + ${BASE_PATH} + "/${path}'); }";
+	style.textContent = "body { background-image: url('" + ${basePath()} + "/${path}'); }";
 	document.head.appendChild(style);
 `;
 }

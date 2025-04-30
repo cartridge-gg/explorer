@@ -12,8 +12,7 @@ export const EXECUTION_RESOURCES_KEY_MAP = {
 };
 
 export function basePath(): string | undefined {
-  console.log("ohayo");
-  if (import.meta.env.APP_IS_EMBEDDED) {
+  if (process.env.IS_EMBEDDED || import.meta.env.APP_IS_EMBEDDED) {
     const pathname = window.location.pathname;
     const explorerIndex = pathname.lastIndexOf("/explorer");
 
