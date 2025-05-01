@@ -42,7 +42,7 @@ export const availableConnectors: Connector[] = [
 export function StarknetProvider({ children }: { children: React.ReactNode }) {
   const providers = jsonRpcProvider({
     rpc: () => ({
-      nodeUrl: import.meta.env.VITERPC_URL as string,
+      nodeUrl: import.meta.env.VITE_RPC_URL as string,
     }),
   });
 
