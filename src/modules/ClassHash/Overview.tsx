@@ -24,13 +24,11 @@ export function Overview({
       <AccordionItem
         title={`Read Functions (${readFuncs.length})`}
         content={<ContractReadInterface functions={readFuncs} />}
-        titleClassName="z-10"
         disabled={!readFuncs.length}
       />
       <AccordionItem
         title={`Write Functions (${writeFuncs.length})`}
         content={<ContractWriteInterface functions={writeFuncs} />}
-        titleClassName="z-10"
         disabled={!writeFuncs.length}
       />
       <div className="border border-borderGray p-4">

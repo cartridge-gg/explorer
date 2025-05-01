@@ -62,6 +62,7 @@ export default function FunctionArgEditor({
 
   return (
     <Editor
+      className="z-0"
       height={200}
       language="json"
       onMount={(editor, monaco: Monaco) => handleEditorDidMount(editor, monaco)}

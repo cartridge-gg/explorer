@@ -76,7 +76,7 @@ export function ContractReadInterface({
         functions.map(({ ast, ...func }, index) => (
           <AccordionItem
             key={index}
-            titleClassName="h-[45px] z-50"
+            titleClassName="h-[45px] z-10"
             title={
               <div className="flex flex-row items-center gap-2">
                 <span className="font-bold">fn</span>
