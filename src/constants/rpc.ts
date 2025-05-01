@@ -12,7 +12,8 @@ export const EXECUTION_RESOURCES_KEY_MAP = {
 };
 
 export function basePath(): string | undefined {
-  if (import.meta.env.VITE_IS_EMBEDDED || import.meta.env.VITE_APP_IS_EMBEDDED) {
+  // See <vite.config.ts>
+  if (import.meta.env.VITE_APP_IS_EMBEDDED) {
     const pathname = window.location.pathname;
     const explorerIndex = pathname.lastIndexOf("/explorer");
 
@@ -28,7 +29,8 @@ export function basePath(): string | undefined {
 
 // In embedded mode, it is assumed that the explorer is served at the relative path `/explorer` of the JSON-RPC server.
 export function rpcUrl(): string {
-  if (import.meta.env.APP_IS_EMBEDDED) {
+  // See <vite.config.ts>
+  if (import.meta.env.VITE_APP_IS_EMBEDDED) {
     const pathname = window.location.pathname;
     const explorerIndex = pathname.lastIndexOf("/explorer");
 
