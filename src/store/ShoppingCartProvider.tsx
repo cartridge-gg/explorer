@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useReducer, ReactNode } from "react";
 import type { Call } from "starknet";
 import { useAccount } from "@starknet-react/core";
-import { useToast } from "../shared/components/toast";
 
 // Define the state structure
 interface CallCartState {
@@ -23,9 +22,9 @@ const initialState: CallCartState = {
 // Create the context
 const CallCartContext = createContext<
   | {
-      state: CallCartState;
-      dispatch: React.Dispatch<CallCartAction>;
-    }
+    state: CallCartState;
+    dispatch: React.Dispatch<CallCartAction>;
+  }
   | undefined
 >(undefined);
 

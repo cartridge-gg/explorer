@@ -1,10 +1,9 @@
 import "./App.css";
 import { ROUTES } from "./constants/routes";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Header from "./shared/components/header";
-import { basePath } from "./constants/rpc";
 
-function MainContent() {
+export function App() {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
   const fullScreen = isHomePage || !Object
@@ -30,13 +29,3 @@ function MainContent() {
     </div>
   );
 }
-
-function App() {
-  return (
-    <BrowserRouter basename={basePath()}>
-      <MainContent />
-    </BrowserRouter>
-  );
-}
-
-export default App;
