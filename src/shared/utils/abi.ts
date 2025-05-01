@@ -1,16 +1,13 @@
 import {
   Abi,
+  AbiEntry,
   AbiEnum,
   AbiStruct,
   Calldata,
   FunctionAbi,
   InterfaceAbi,
+  uint256,
 } from "starknet";
-
-export type AbiEnumVariant = {
-  name: string;
-  type: string;
-};
 
 // TypeNode and related types
 export interface PrimitiveType {
@@ -67,7 +64,20 @@ export interface FunctionAst {
   inputs: Array<ArgumentNode>;
 }
 
-export function createJsonSchemaFromTypeNode(type: TypeNode): any {
+export type FunctionInputWithValue = AbiEntry & {
+  value: string;
+};
+
+export interface ConstructorAbi {
+  inputs: AbiEntry[]
+};
+
+export interface FunctionAbiWithAst extends FunctionAbi {
+  ast: FunctionAst;
+};
+
+
+export function createJsonSchemaFromTypeNode(type: TypeNode): unknown {
   switch (type.type) {
     case "primitive":
       return createPrimitiveSchema(type.value);
@@ -192,12 +202,12 @@ function buildTypeRegistries(
 export function getFunctionAst(
   abi: Abi,
   functionName: string
-): FunctionAst | null {
+): FunctionAst | undefined {
   const [structRegistry, enumRegistry] = buildTypeRegistries(abi);
   const targetFunction = findFunctionInAbi(abi, functionName);
 
   if (!targetFunction) {
-    return null;
+    return;
   }
 
   // Parse the inputs
@@ -503,20 +513,76 @@ function convertPrimitiveToCalldata(
 ): Calldata {
   switch (type.name) {
     case "core::integer::u256": {
-      const num = BigInt(value);
-      const mask = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"); // 2^128
-      const low = (num & mask).toString();
-      const high = (num >> BigInt(128)).toString();
-      return [low, high];
+      const {low, high} = uint256.bnToUint256(value);
+      return [low.toString(), high.toString()];
     }
-    // case "core::felt252":
-    // case "core::integer::u8":
-    // case "core::integer::u16":
-    // case "core::integer::u32":
-    // case "core::integer::u64":
-    // case "core::integer::u128":
-    // case "core::starknet::class_hash::ClassHash":
+    // case "core::integer::u512":
+    case "core::felt252":
+    case "core::integer::u8":
+    case "core::integer::u16":
+    case "core::integer::u32":
+    case "core::integer::u64":
+    case "core::integer::u128":
+    case "core::starknet::class_hash::ClassHash":
     default:
       return [value];
   }
+}
+
+export function parseAbi(abi: Abi) {
+  let constructor: ConstructorAbi;
+  const functions: FunctionAbiWithAst[] = [];
+
+  abi.forEach((item) => {
+    switch (item.type) {
+      case "constructor": {
+        const _item = item as Omit<FunctionAbi, "outputs">;
+        constructor = {
+          inputs: _item.inputs.map((input) => ({
+            name: input.name,
+            type: input.type,
+          })),
+        };
+        break;
+      }
+      case "interface": {
+        const _item = item as InterfaceAbi;
+        _item.items.forEach((item) => {
+          if (item.type === "function") {
+            functions.push(getFunctionAbiWithAst(abi, item));
+          }
+        });
+        break;
+      }
+      case "function": {
+            functions.push(getFunctionAbiWithAst(abi, item));
+        break;
+      }
+      default:
+        break;
+      }
+  });
+
+  return {
+    constructor: constructor!,
+    readFuncs: functions.filter(isReadFunction),
+    writeFuncs: functions.filter((f) => !isReadFunction(f)),
+  };
+}
+
+function getFunctionAbiWithAst(abi: Abi, item: FunctionAbi) {
+  const ast = getFunctionAst(abi, item.name)!;
+  return {
+    ...item,
+    ast,
+  };
+}
+
+function isReadFunction(func: FunctionAbi) {
+  return (
+    func.state_mutability === "view" ||
+    func.state_mutability === "pure" ||
+    func.stateMutability === "view" ||
+    func.stateMutability === "pure"
+  );
 }

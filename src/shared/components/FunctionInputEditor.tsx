@@ -83,6 +83,7 @@ export default function FunctionArgEditor({
           horizontalHasArrows: true,
           verticalScrollbarSize: 17,
           horizontalScrollbarSize: 17,
+          alwaysConsumeMouseWheel: false
         },
       }}
     />

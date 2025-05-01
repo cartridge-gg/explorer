@@ -1,31 +1,23 @@
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
 import { useAccount } from "@starknet-react/core";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   AccountInterface,
   Contract,
   InvokeFunctionResponse,
   Calldata,
-  Abi,
-  FunctionAbi,
-  InterfaceAbi,
 } from "starknet";
-import * as types from "./types";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import AddIcon from "@/shared/icons/Add";
 import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
 import { useToast } from "@/shared/components/toast";
-import {
-  convertToCalldata,
-  FunctionAst,
-  getFunctionAst,
-} from "@/shared/utils/abi";
+import { convertToCalldata, FunctionAbiWithAst, FunctionAst, FunctionInputWithValue } from "@/shared/utils/abi";
 import FunctionArgEditor from "@/shared/components/FunctionInputEditor";
 
 // The state of the <FunctionCallAccordionContent/> component
 type FunctionCallAccordionContentState = {
-  inputs: types.FunctionInputWithValue[];
+  inputs: FunctionInputWithValue[];
   result: InvokeFunctionResponse | null;
   hasCalled: boolean;
   loading: boolean;
@@ -34,61 +26,15 @@ type FunctionCallAccordionContentState = {
 
 export interface ContractWriteInterfaceProps {
   contract?: Contract;
-  functions?: FunctionAbi[];
-  abi: Abi;
+  functions: FunctionAbiWithAst[];
 }
 
 export function ContractWriteInterface({
   contract,
-  abi,
+  functions,
 }: ContractWriteInterfaceProps) {
   const { address, account } = useAccount();
 
-  const functions = useMemo<FunctionAbi[]>(() => {
-    if (!abi) {
-      return [];
-    }
-
-    const functions: FunctionAbi[] = [];
-
-    for (const item of abi) {
-      // Handle direct function definitions
-      if (item.type === "function") {
-        const func = item as FunctionAbi;
-        if (func.state_mutability === "external") {
-          functions.push(func);
-        }
-      }
-
-      // Handle interface items
-      if (item.type === "interface" && "items" in item) {
-        const interfaceAbi = item as InterfaceAbi;
-        for (const func of interfaceAbi.items) {
-          if (
-            func.type === "function" &&
-            func.state_mutability === "external"
-          ) {
-            functions.push(func);
-          }
-        }
-      }
-    }
-
-    return functions;
-  }, [abi]);
-
-  const functionsAst = useMemo<Record<string, FunctionAst>>(() => {
-    const map: Record<string, FunctionAst> = {};
-
-    functions.forEach((fnAbi) => {
-      const ast = getFunctionAst(abi, fnAbi.name);
-      if (ast !== null) {
-        map[fnAbi.name] = ast;
-      }
-    });
-
-    return map;
-  }, [abi, functions]);
 
   // Create a state object to persist input values across accordion openings/closings
   const [functionItemStates, setFunctionEntryStates] = useState<{
@@ -121,7 +67,7 @@ export function ContractWriteInterface({
   return (
     <Accordion
       items={() =>
-        functions.map((func, index) => (
+        functions.map(({ ast, ...func }, index) => (
           <AccordionItem
             key={index}
             titleClassName="h-[45px]"
@@ -135,7 +81,7 @@ export function ContractWriteInterface({
             content={
               <FunctionCallAccordionContent
                 key={index}
-                ast={functionsAst[func.name]}
+                ast={ast}
                 contract={contract}
                 state={functionItemStates[func.name]}
                 onUpdateState={(update) =>
@@ -202,11 +148,11 @@ function FunctionCallAccordionContent({
   // }, [args, state.inputs, onUpdateState]);
 
   const handleInputChange = useCallback(
-    (inputIndex: number, value: any) => {
+    (inputIndex: number, value: string) => {
       const newInputs = [...state.inputs];
       newInputs[inputIndex] = {
         ...newInputs[inputIndex],
-        value: value,
+        value,
       };
       onUpdateState({ inputs: newInputs });
     },

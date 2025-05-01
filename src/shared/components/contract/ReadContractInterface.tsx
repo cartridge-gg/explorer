@@ -5,19 +5,17 @@ import FeltDisplayAsToggle, {
 } from "@/shared/components/FeltDisplayAsToggle";
 import FeltList from "@/shared/components/FeltList";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState } from "react";
 import {
-  Abi,
   Calldata,
   Contract,
-  FunctionAbi,
   Result,
 } from "starknet";
-import * as types from "./types";
 import {
   convertToCalldata,
+  FunctionAbiWithAst,
   FunctionAst,
-  getFunctionAst,
+  FunctionInputWithValue,
 } from "@/shared/utils/abi";
 import FunctionArgEditor from "@/shared/components/FunctionInputEditor";
 
@@ -30,7 +28,7 @@ import FunctionArgEditor from "@/shared/components/FunctionInputEditor";
 
 // The state of the <FunctionCallAccordionContent/> component
 type FunctionCallAccordionContentState = {
-  inputs: types.FunctionInputWithValue[];
+  inputs: FunctionInputWithValue[];
   hasCalled: boolean;
   result: Result | null;
   error: Error | string | null;
@@ -38,28 +36,13 @@ type FunctionCallAccordionContentState = {
 
 export interface ContractReadInterfaceProps {
   contract?: Contract;
-  functions: FunctionAbi[];
-  abi: Abi;
+  functions: FunctionAbiWithAst[];
 }
 
 export function ContractReadInterface({
   contract,
   functions,
-  abi,
 }: ContractReadInterfaceProps) {
-  const functionsAst = useMemo<Record<string, FunctionAst>>(() => {
-    const map: Record<string, FunctionAst> = {};
-
-    functions.forEach((fnAbi) => {
-      const ast = getFunctionAst(abi, fnAbi.name);
-      if (ast !== null) {
-        map[fnAbi.name] = ast;
-      }
-    });
-
-    return map;
-  }, [abi, functions]);
-
   // Create a state object to persist input values across accordion openings/closings
   const [functionItemStates, setFunctionEntryStates] = useState<{
     // a map from the function name to its state (ie AccordionItem content states)
@@ -90,7 +73,7 @@ export function ContractReadInterface({
   return (
     <Accordion
       items={() =>
-        functions.map((func, index) => (
+        functions.map(({ ast, ...func }, index) => (
           <AccordionItem
             key={index}
             titleClassName="h-[45px] z-50"
@@ -103,7 +86,7 @@ export function ContractReadInterface({
             }
             content={
               <FunctionCallAccordionContent
-                ast={functionsAst[func.name]}
+                ast={ast}
                 key={index}
                 contract={contract}
                 state={functionItemStates[func.name]}
@@ -180,11 +163,11 @@ function FunctionCallAccordionContent({
   ]);
 
   const handleInputChange = useCallback(
-    (inputIndex: number, value: any) => {
+    (inputIndex: number, value: string) => {
       const newInputs = [...state.inputs];
       newInputs[inputIndex] = {
         ...newInputs[inputIndex],
-        value: value,
+        value,
       };
       onUpdateState({ inputs: newInputs });
     },

@@ -1,9 +1,9 @@
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
-import { Contract, FunctionAbi } from "starknet";
+import { Contract } from "starknet";
 import { BreadcrumbPage } from "@cartridge/ui-next";
 import {
   Breadcrumb,
@@ -18,10 +18,21 @@ import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";
 import { ContractReadInterface } from "@/shared/components/contract/ReadContractInterface";
 import { ContractWriteInterface } from "@/shared/components/contract/WriteContractInterface";
-import { parseClassFunctions } from "@/shared/utils/contract";
-import { Code, CodeProps } from "@/shared/components/contract/Code";
+import { getContractClassInfo, ContractClassInfo } from "@/shared/utils/contract";
+import { Code } from "@/shared/components/contract/Code";
+import { useQuery } from "@tanstack/react-query";
 
 const DataTabs = ["Read Contract", "Write Contract", "Code"];
+
+const initialData: Omit<ContractClassInfo, "constructor"> & { contract?: Contract } = {
+  contract: undefined,
+  readFuncs: [],
+  writeFuncs: [],
+  code: {
+    abi: "",
+    sierra: undefined,
+  },
+};
 
 export default function ContractDetails() {
   const { contractAddress } = useParams<{
@@ -30,41 +41,36 @@ export default function ContractDetails() {
   const { isMobile } = useScreen();
   const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
   const [classHash, setClassHash] = useState<string | null>(null);
-  const [contract, setContract] = useState<Contract | null>(null);
-  const [readFunctions, setReadFunctions] = useState<FunctionAbi[]>([]);
-  const [writeFunctions, setWriteFunctions] = useState<FunctionAbi[]>([]);
-  const [codeProps, setCodeProps] = useState<CodeProps>();
 
-  const fetchContractDetails = useCallback(async () => {
-    if (!contractAddress) return;
+  const { data: { contract, readFuncs, writeFuncs, code } } = useQuery({
+    queryKey: ["contractClass", contractAddress],
+    queryFn: async () => {
+      if (!contractAddress) return initialData;
 
-    // get class hash
-    const classHash = await RPC_PROVIDER.getClassHashAt(contractAddress);
-    setClassHash(classHash);
+      // get class hash
+      const classHash = await RPC_PROVIDER.getClassHashAt(contractAddress);
+      setClassHash(classHash);
 
-    // process contract functions
-    const contractClass = await RPC_PROVIDER.getClassAt(contractAddress);
-    setCodeProps({
-      abi: JSON.stringify(contractClass.abi, null, 2),
-      sierra: "sierra_program" in contractClass ? JSON.stringify(contractClass.sierra_program, null, 2) : undefined,
-    });
-    const { readFuncs, writeFuncs } = parseClassFunctions(contractClass);
+      // process contract functions
+      const contractClass = await RPC_PROVIDER.getClassAt(contractAddress);
+      const { readFuncs, writeFuncs, code } = getContractClassInfo(contractClass);
 
-    setReadFunctions(readFuncs);
-    setWriteFunctions(writeFuncs);
+      const contract = new Contract(
+        contractClass.abi,
+        contractAddress!,
+        RPC_PROVIDER
+      );
 
-    const contract = new Contract(
-      contractClass.abi,
-      contractAddress,
-      RPC_PROVIDER
-    );
-    setContract(contract);
-  }, [contractAddress]);
-
-  useEffect(() => {
-    if (!contractAddress) return;
-    fetchContractDetails();
-  }, [contractAddress, fetchContractDetails]);
+      return {
+        contract,
+        readFuncs,
+        writeFuncs,
+        code
+      };
+    },
+    enabled: !!contractAddress,
+    initialData,
+  });
 
   const { balances, isStrkLoading, isEthLoading } =
     useBalances(contractAddress ?? "");
@@ -154,18 +160,11 @@ export default function ContractDetails() {
 
                 switch (selectedDataTab) {
                   case "Read Contract":
-                    return <ContractReadInterface
-                      abi={contract.abi}
-                      contract={contract}
-                      functions={readFunctions}
-                    />
+                    return <ContractReadInterface functions={readFuncs} contract={contract} />
                   case "Write Contract":
-                    return <ContractWriteInterface
-                      contract={contract}
-                      functions={writeFunctions}
-                    />
+                    return <ContractWriteInterface functions={writeFuncs} contract={contract} />
                   case "Code":
-                    return <Code {...codeProps} />
+                    return <Code abi={code.abi} sierra={code.sierra} />
                   default:
                     return (
                       <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
