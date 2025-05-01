@@ -1,21 +1,23 @@
-import { useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { cn } from "@cartridge/ui-next";
 import * as icons from "lucide-react";
 
-export type ToastType = "success" | "error" | "info" | "warning";
+export type ToastVariant = "success" | "error" | "info" | "warning";
 
-export interface ToastProps {
+export interface ToastType {
   id: string;
-  message: string;
-  type: ToastType;
+  message: string | ReactNode;
+  variant: ToastVariant;
   duration?: number;
+};
+
+export interface ToastProps extends ToastType {
   onClose: () => void;
 }
 
 export const Toast = ({
-  id,
   message,
-  type,
+  variant,
   duration = 3000,
   onClose,
 }: ToastProps) => {
@@ -31,7 +33,7 @@ export const Toast = ({
   }, [duration, onClose]);
 
   const getColors = useCallback(() => {
-    switch (type) {
+    switch (variant) {
       case "success":
         return {
           bgColor: "bg-white",
@@ -58,7 +60,7 @@ export const Toast = ({
           textColor: "text-primary",
         };
     }
-  }, [type]);
+  }, [variant]);
 
   const { bgColor, borderColor, textColor } = getColors();
 

@@ -2,6 +2,7 @@ import { ConstructorAbi, FunctionInputWithValue } from "@/shared/components/cont
 import { useToast } from "@/shared/components/toast";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { DeployContractResponse, RawArgsObject, uint256 } from "starknet";
 
 export function Deploy({ classHash, constructor }: { classHash: string, constructor: ConstructorAbi }) {
@@ -19,6 +20,7 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
   }>({
     inputs: initialInputs
   });
+  const [isDeploying, setIsDeploying] = useState(false);
 
   const onInputChange = useCallback((name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(form => ({
@@ -36,6 +38,7 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
       return;
     }
 
+    setIsDeploying(true);
     try {
       const result = await account.deployContract({
         classHash: classHash,
@@ -47,9 +50,25 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
         result
       }));
 
-      toast(`Contract ${result.contract_address} is deployed successfully at tx: ${result.transaction_hash}`, "success");
+      toast(
+        (
+          <div>
+            Contract {" "}
+            <Link to={`/contract/${result.contract_address}`} className="underline">
+              {result.contract_address}
+            </Link>{" "}
+            is deployed successfully at tx: {" "}
+            <Link to={`/tx/${result.transaction_hash}`} className="underline">
+              {result.transaction_hash}
+            </Link>
+          </div>
+        ),
+        "success"
+      );
     } catch (error) {
       toast(`Failed to deploy contract: ${error}`, "error");
+    } finally {
+      setIsDeploying(false);
     }
   }, [account, classHash, form, toast, initialInputs]);
 
@@ -61,13 +80,7 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
         </div>
       )}
 
-      {form.result && (
-        <div className="text-sm text-green-500">
-          Contract {form.result.contract_address} is deployed successfully at tx: {form.result.transaction_hash}
-        </div>
-      )}
-
-      {constructor.inputs.length !== 0 && (
+      {!!constructor.inputs.length && (
         <table className="bg-white overflow-x w-full">
           <tbody>
             {constructor.inputs.map((input, idx) => (
@@ -86,7 +99,7 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
                     placeholder={`${input.type}`}
                     value={form.inputs[idx]!.value}
                     onChange={onInputChange(input.name)}
-                    disabled={!account}
+                    disabled={!account || isDeploying}
                   />
                 </td>
               </tr>
@@ -98,9 +111,9 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
       <button
         className="bg-primary text-white px-4 py-2 self-start hover:bg-primary/80 disabled:bg-primary/50"
         onClick={onDeploy}
-        disabled={!account}
+        disabled={!account || isDeploying}
       >
-        Deploy
+        {isDeploying ? "Deploying..." : "Deploy"}
       </button>
     </div>
   )

@@ -1,7 +1,7 @@
-import { Toast, ToastProps } from "./Toast";
+import { Toast, ToastType } from "./Toast";
 
 interface ToastContainerProps {
-  toasts: ToastProps[];
+  toasts: ToastType[];
   removeToast: (id: string) => void;
 }
 
@@ -15,7 +15,7 @@ export const ToastContainer = ({
         <Toast
           id={toast.id}
           key={toast.id}
-          type={toast.type}
+          variant={toast.variant}
           message={toast.message}
           duration={toast.duration}
           onClose={() => removeToast(toast.id)}
