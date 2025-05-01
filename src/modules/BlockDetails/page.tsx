@@ -142,7 +142,7 @@ export default function BlockDetails() {
   }, [BlockWithReceipts]);
 
   return (
-    <div className="w-full flex-grow gap-8">
+    <div id="block-details" className="w-full flex-grow gap-8">
       <div className="flex justify-between mb-2">
         <Breadcrumb className="flex items-center">
           <BreadcrumbItem href="/">Explorer</BreadcrumbItem>

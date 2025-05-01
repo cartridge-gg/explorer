@@ -220,8 +220,10 @@ export default function HomeSearchBar() {
 
   return (
     <div
-      className={`bg-white min-w-[200px] w-full h-[42px] flex relative border border-borderGray items-center shadow ${isDropdownOpen && result ? "border-b-0" : ""
-        }`}
+      id="home-search-bar"
+      className={`bg-white min-w-[200px] w-full h-[42px] flex relative border border-borderGray items-center shadow ${
+        isDropdownOpen && result ? "border-b-0" : ""
+      }`}
     >
       <input
         ref={inputRef}
