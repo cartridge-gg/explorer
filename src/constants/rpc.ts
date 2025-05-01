@@ -12,7 +12,7 @@ export const EXECUTION_RESOURCES_KEY_MAP = {
 };
 
 export function basePath(): string | undefined {
-  if (process.env.IS_EMBEDDED || import.meta.env.APP_IS_EMBEDDED) {
+  if (import.meta.env.VITE_IS_EMBEDDED || import.meta.env.VITE_APP_IS_EMBEDDED) {
     const pathname = window.location.pathname;
     const explorerIndex = pathname.lastIndexOf("/explorer");
 
