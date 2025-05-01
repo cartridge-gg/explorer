@@ -66,11 +66,12 @@ export default function ContractDetails() {
     fetchContractDetails();
   }, [contractAddress, fetchContractDetails]);
 
-  const { balances, isStrkLoading, isEthLoading } =
-    useBalances(contractAddress ?? "");
+  const { balances, isStrkLoading, isEthLoading } = useBalances(
+    contractAddress ?? "",
+  );
 
   return (
-    <div className="w-full flex-grow gap-8">
+    <div id="contract-details" className="w-full flex-grow gap-8">
       <div className="mb-2">
         <Breadcrumb>
           <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
