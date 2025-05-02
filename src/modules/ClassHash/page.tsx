@@ -9,14 +9,26 @@ import { SectionBox } from "@/shared/components/section/SectionBox";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { useQuery } from "@tanstack/react-query";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Overview } from "./Overview";
 import { Deploy } from "./Deploy";
-import { parseClassFunctions } from "@/shared/utils/contract";
+import { getContractClassInfo, ContractClassInfo } from "@/shared/utils/contract";
 import { validateAndParseAddress } from "starknet";
 import { useToast } from "@/shared/components/toast";
 import NotFound from "../NotFound/page";
 const DataTabs = ["Overview", "Deploy"];
+
+const initialData: ContractClassInfo = {
+  constructor: {
+    inputs: []
+  },
+  readFuncs: [],
+  writeFuncs: [],
+  code: {
+    abi: "",
+    sierra: undefined
+  }
+};
 
 export default function ClassHashDetails() {
   const { classHash } = useParams();
@@ -29,18 +41,22 @@ export default function ClassHashDetails() {
     enabled: !!classHash,
   });
 
-  const { data: contractClass, isLoading, error } = useQuery({
+  const {
+    data: { constructor, readFuncs, writeFuncs, code },
+    isLoading,
+    error
+  } = useQuery({
     queryKey: ["contractClass", classHash],
-    queryFn: () => RPC_PROVIDER.getClassByHash(classHash!),
+    queryFn: async () => {
+      if (!classHash) return initialData;
+      const contractClass = await RPC_PROVIDER.getClassByHash(classHash!);
+      return contractClass
+        ? getContractClassInfo(contractClass)
+        : initialData;
+    },
     enabled: !!classHash,
+    initialData,
   });
-
-  const { constructor, readFuncs, writeFuncs, abi, sierra } = useMemo(() =>
-    contractClass
-      ? parseClassFunctions(contractClass)
-      : { constructor: { inputs: [] }, readFuncs: [], writeFuncs: [], abi: "", sierra: "" },
-    [contractClass]
-  );
 
   const { toast } = useToast()
 
@@ -131,7 +147,7 @@ export default function ClassHashDetails() {
             {(() => {
               switch (selectedDataTab) {
                 case "Overview":
-                  return <Overview readFuncs={readFuncs} writeFuncs={writeFuncs} abi={abi} sierra={sierra} />;
+                  return <Overview readFuncs={readFuncs} writeFuncs={writeFuncs} code={code} />;
                 case "Deploy":
                   return <Deploy classHash={classHash!} constructor={constructor} />;
                 default:

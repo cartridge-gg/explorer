@@ -1,17 +1,23 @@
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
 import { useAccount } from "@starknet-react/core";
-import { useCallback, useMemo, useState } from "react";
-import { AbiEntry, AccountInterface, Contract, FunctionAbi, InvokeFunctionResponse } from "starknet";
-import * as types from "./types";
+import { useCallback, useState } from "react";
+import {
+  AccountInterface,
+  Contract,
+  InvokeFunctionResponse,
+  Calldata,
+} from "starknet";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import AddIcon from "@/shared/icons/Add";
 import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
 import { useToast } from "@/shared/components/toast";
+import { convertToCalldata, FunctionAbiWithAst, FunctionAst, FunctionInputWithValue } from "@/shared/utils/abi";
+import FunctionArgEditor from "@/shared/components/FunctionInputEditor";
 
 // The state of the <FunctionCallAccordionContent/> component
 type FunctionCallAccordionContentState = {
-  inputs: types.FunctionInputWithValue[];
+  inputs: FunctionInputWithValue[];
   result: InvokeFunctionResponse | null;
   hasCalled: boolean;
   loading: boolean;
@@ -20,14 +26,15 @@ type FunctionCallAccordionContentState = {
 
 export interface ContractWriteInterfaceProps {
   contract?: Contract;
-  functions?: FunctionAbi[];
+  functions: FunctionAbiWithAst[];
 }
 
 export function ContractWriteInterface({
   contract,
-  functions = [],
+  functions,
 }: ContractWriteInterfaceProps) {
   const { address, account } = useAccount();
+
 
   // Create a state object to persist input values across accordion openings/closings
   const [functionItemStates, setFunctionEntryStates] = useState<{
@@ -57,10 +64,18 @@ export function ContractWriteInterface({
     []
   );
 
+  if (!functions.length) {
+    return (
+      <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
+        <span className="text-[#D0D0D0]">No functions found</span>
+      </div>
+    )
+  }
+
   return (
     <Accordion
       items={() =>
-        functions.map((func, index) => (
+        functions.map(({ ast, ...func }, index) => (
           <AccordionItem
             key={index}
             titleClassName="h-[45px]"
@@ -74,9 +89,8 @@ export function ContractWriteInterface({
             content={
               <FunctionCallAccordionContent
                 key={index}
+                ast={ast}
                 contract={contract}
-                functionName={func.name}
-                args={func.inputs}
                 state={functionItemStates[func.name]}
                 onUpdateState={(update) =>
                   updateFunctionItemState(func.name, update)
@@ -94,26 +108,22 @@ export function ContractWriteInterface({
 }
 
 interface FunctionCallAccordionContentProps {
+  ast: FunctionAst;
   /** The contract instance to interact with */
   contract?: Contract;
-  /** The name of the function to call on the contract */
-  functionName: string;
-  /** The function's input arguments definition */
-  args: AbiEntry[];
+  /** Connected account */
+  account?: AccountInterface;
+  /** Connected address */
+  address?: string;
   /** Current state of the accordion content, including inputs, results and errors */
   state?: FunctionCallAccordionContentState;
   /** Callback to update the state of this accordion item in order to preserve the state */
   onUpdateState: (update: Partial<FunctionCallAccordionContentState>) => void;
-  /** Connected account */
-  account?: AccountInterface;
-  /** Connected address */
-  address: string | undefined;
 }
 
 function FunctionCallAccordionContent({
-  args,
+  ast,
   contract,
-  functionName,
   onUpdateState,
   account,
   address,
@@ -126,56 +136,58 @@ function FunctionCallAccordionContent({
   },
 }: FunctionCallAccordionContentProps) {
   const { toast } = useToast();
+  const { addCall, isWalletConnected } = useCallCartDispatch();
 
-  // Initialize input values or return existing ones
-  // If there are no inputs yet and args are provided, create initial input state with empty values
-  const inputs = useMemo(() => {
-    if (state.inputs.length === 0 && args.length > 0) {
-      const initialInputs = args.map((arg) => ({
-        name: arg.name,
-        type: arg.type,
-        value: "",
-      }));
+  // // Initialize input values or return existing ones
+  // // If there are no inputs yet and args are provided, create initial input state with empty values
+  // const inputs = useMemo(() => {
+  //   if (state.inputs.length === 0 && args.length > 0) {
+  //     const initialInputs = args.map((arg) => ({
+  //       name: arg.name,
+  //       type: arg.type,
+  //       value: "",
+  //     }));
 
-      if (contract) {
-        onUpdateState({ inputs: initialInputs });
-      }
-      return initialInputs;
-    } else {
-      return state.inputs;
-    }
-  }, [args, state.inputs, onUpdateState, contract]);
+  //     onUpdateState({ inputs: initialInputs });
+  //     return initialInputs;
+  //   } else {
+  //     return state.inputs;
+  //   }
+  // }, [args, state.inputs, onUpdateState]);
 
   const handleInputChange = useCallback(
     (inputIndex: number, value: string) => {
-      const newInputs = [...inputs];
+      const newInputs = [...state.inputs];
       newInputs[inputIndex] = {
         ...newInputs[inputIndex],
-        value: value,
+        value,
       };
       onUpdateState({ inputs: newInputs });
     },
-    [inputs, onUpdateState]
+    [state, onUpdateState]
   );
-
-  const { addCall, isWalletConnected } = useCallCartDispatch();
 
   const handleAddToCart = useCallback(() => {
     if (!contract || !isWalletConnected) {
       return;
     }
 
-    const calldata = inputs.map((i) => i.value);
+    let calldata: Calldata = [];
+    state.inputs.forEach((input, idx) => {
+      calldata = calldata.concat(
+        convertToCalldata(ast.inputs[idx].type, input.value)
+      );
+    });
 
     addCall({
       calldata: calldata,
-      entrypoint: functionName,
+      entrypoint: ast.name,
       contractAddress: contract.address,
     });
-    toast(`Function call added: ${functionName}`, "success");
-  }, [toast, inputs, contract, functionName, addCall, isWalletConnected]);
+    toast(`Function call added: ${ast.name}`, "success");
+  }, [toast, contract, ast, state.inputs, addCall, isWalletConnected]);
 
-  const handleFunctionCall = useCallback(async () => {
+  const handleFunctionExecute = useCallback(async () => {
     if (!contract || !account) {
       onUpdateState({
         error: "Please connect your wallet first",
@@ -188,14 +200,24 @@ function FunctionCallAccordionContent({
 
     onUpdateState({ loading: true, hasCalled: true });
 
-    const calldata = inputs.map((i) => i.value);
+    let calldata: Calldata = [];
 
     try {
+      state.inputs.forEach((input, idx) => {
+        calldata = calldata.concat(
+          convertToCalldata(ast.inputs[idx].type, input.value)
+        );
+      });
+
+      if (!state.hasCalled) {
+        onUpdateState({ hasCalled: true });
+      }
+
       const result = await account.execute([
         {
-          contractAddress: contract.address,
-          entrypoint: functionName,
           calldata: calldata,
+          entrypoint: ast.name,
+          contractAddress: contract.address,
         },
       ]);
 
@@ -204,7 +226,7 @@ function FunctionCallAccordionContent({
       console.error("failed to execute contract", error);
       onUpdateState({ error: error as Error, result: null, loading: false });
     }
-  }, [inputs, contract, account, functionName, onUpdateState]);
+  }, [contract, account, ast, state.hasCalled, state.inputs, onUpdateState]);
 
   return (
     <div className="flex flex-col gap-[10px] items-end">
@@ -228,7 +250,7 @@ function FunctionCallAccordionContent({
 
           <button
             disabled={!address || state.loading}
-            onClick={handleFunctionCall}
+            onClick={handleFunctionExecute}
             className={`px-3 py-[2px] text-sm uppercase font-bold w-fit text-white ${!address || state.loading
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-primary hover:bg-[#6E6E6E]"
@@ -246,27 +268,50 @@ function FunctionCallAccordionContent({
         </div>
       )}
 
-      {args.length !== 0 ? (
+      {ast.inputs.length ? (
         <table className="bg-white overflow-x w-full">
           <tbody>
-            {args.map((input, idx) => (
+            {ast.inputs.map((input, idx) => (
               <tr
                 key={idx}
-                className={`${idx !== args.length - 1 ? "border-b" : ""}`}
+                className={`${idx !== ast.inputs.length - 1 ? "border-b" : ""}`}
               >
                 <td className="px-2 py-1 text-left align-top w-[90px] italic">
                   <span>{input.name}</span>
                 </td>
 
                 <td className="text-left align-top p-0">
-                  <input
-                    type="text"
-                    className="px-2 py-1 text-left w-full"
-                    placeholder={`${input.type}`}
-                    value={inputs[idx]?.value || ""}
-                    onChange={(e) => handleInputChange(idx, e.target.value)}
-                    disabled={!contract}
-                  />
+                  {input.type.type === "primitive" ? (
+                    <input
+                      type="text"
+                      className="px-2 py-1 text-left w-full"
+                      placeholder={`${input.type.value.name}`}
+                      onChange={(e) => handleInputChange(idx, e.target.value)}
+                      value={
+                        idx < state.inputs.length
+                          ? state.inputs[idx]?.value ?? ""
+                          : ""
+                      }
+                      disabled={!contract}
+                    />
+                  ) : (
+                    <FunctionArgEditor
+                      key={idx}
+                      functionName={ast.name}
+                      argInfo={input}
+                      onChange={(value) => handleInputChange(idx, value)}
+                      value={
+                        idx < state.inputs.length
+                          ? state.inputs[idx].value
+                          : input.type.type === "struct"
+                            ? "{\n\t\n}"
+                            : input.type.type === "array"
+                              ? "[\n\t\n]"
+                              : ""
+                      }
+                      readOnly={!contract}
+                    />
+                  )}
                 </td>
               </tr>
             ))}

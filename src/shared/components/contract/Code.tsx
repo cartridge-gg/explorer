@@ -83,6 +83,12 @@ export function Code({ abi, sierra }: CodeProps) {
               className="min-h-[80vh]"
               defaultLanguage="json"
               value={abi}
+              options={{
+                readOnly: true,
+                scrollbar: {
+                  alwaysConsumeMouseWheel: false
+                }
+              }}
             />
           case "sierra bytecode":
             if (!sierra) {
@@ -93,6 +99,12 @@ export function Code({ abi, sierra }: CodeProps) {
               className="min-h-[80vh]"
               defaultLanguage="json"
               value={sierra}
+              options={{
+                readOnly: true,
+                scrollbar: {
+                  alwaysConsumeMouseWheel: false
+                }
+              }}
             />;
         }
       })()}

@@ -1,4 +1,4 @@
-import { ConstructorAbi, FunctionInputWithValue } from "@/shared/components/contract/types";
+import { ConstructorAbi, FunctionInputWithValue } from "@/shared/utils/abi";
 import { useToast } from "@/shared/components/toast";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
