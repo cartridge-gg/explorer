@@ -143,9 +143,10 @@ function FunctionCallAccordionContent({
       .fetchQuery({
         queryKey: [ast.name, ...calldata],
         queryFn: () =>
-          contract.call(ast.name, calldata, { parseRequest: false }),
+          contract.call(ast.name, calldata, { parseRequest: false, parseResponse: false }),
       })
       .then((result) => {
+        console.log(result)
         onUpdateState({ result, error: null });
       })
       .catch((error) => {
@@ -271,19 +272,17 @@ interface FunctionCallResultProps {
 
 function FunctionCallResult({ data }: FunctionCallResultProps) {
   const [display, setDisplay] = useState<FeltDisplayVariants>("hex");
-
   return (
-    <div className="px-3 py-2  border border-borderGray flex flex-col gap-3">
+    <div className="px-3 py-2 border border-borderGray flex flex-col gap-3">
+      <FeltDisplayAsToggle
+        onChange={(value) => setDisplay(value as FeltDisplayVariants)
+        }
+        asString={true}
+      />
       {Array.isArray(data) ? (
-        <FeltList list={data as bigint[]} displayAs="hex" />
+        <FeltList list={data as bigint[]} displayAs={display} />
       ) : (
-        <>
-          <FeltDisplayAsToggle
-            onChange={(value) => setDisplay(value as FeltDisplayVariants)}
-            asString={true}
-          />
-          <FeltDisplay value={data} displayAs={display} />
-        </>
+        <FeltDisplay value={data} displayAs={display} />
       )}
     </div>
   );
