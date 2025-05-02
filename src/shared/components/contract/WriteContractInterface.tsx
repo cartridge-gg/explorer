@@ -194,17 +194,17 @@ function FunctionCallAccordionContent({
 
     let calldata: Calldata = [];
 
-    state.inputs.forEach((input, idx) => {
-      calldata = calldata.concat(
-        convertToCalldata(ast.inputs[idx].type, input.value)
-      );
-    });
-
-    if (!state.hasCalled) {
-      onUpdateState({ hasCalled: true });
-    }
-
     try {
+      state.inputs.forEach((input, idx) => {
+        calldata = calldata.concat(
+          convertToCalldata(ast.inputs[idx].type, input.value)
+        );
+      });
+
+      if (!state.hasCalled) {
+        onUpdateState({ hasCalled: true });
+      }
+
       const result = await account.execute([
         {
           calldata: calldata,

@@ -122,38 +122,37 @@ function FunctionCallAccordionContent({
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
 
-  const handleFunctionCall = useCallback(() => {
+  const handleFunctionCall = useCallback(async () => {
     if (!contract) return;
 
     setLoading(true);
 
     let calldata: Calldata = [];
 
-    state.inputs.forEach((input, idx) => {
-      calldata = calldata.concat(
-        convertToCalldata(ast.inputs[idx].type, input.value)
-      );
-    });
+    try {
+      state.inputs.forEach((input, idx) => {
+        calldata = calldata.concat(
+          convertToCalldata(ast.inputs[idx].type, input.value)
+        );
+      });
+      const result = await queryClient
+        .fetchQuery({
+          queryKey: [ast.name, ...calldata],
+          queryFn: () =>
+            contract.call(ast.name, calldata, { parseRequest: false, parseResponse: false }),
+        })
 
-    if (!state.hasCalled) {
-      onUpdateState({ hasCalled: true });
-    }
+      onUpdateState({ result, error: null });
 
-    queryClient
-      .fetchQuery({
-        queryKey: [ast.name, ...calldata],
-        queryFn: () =>
-          contract.call(ast.name, calldata, { parseRequest: false, parseResponse: false }),
-      })
-      .then((result) => {
-        console.log(result)
-        onUpdateState({ result, error: null });
-      })
-      .catch((error) => {
-        console.error("failed to call contract", error);
-        onUpdateState({ error, result: null });
-      })
-      .finally(() => setLoading(false));
+      if (!state.hasCalled) {
+        onUpdateState({ hasCalled: true });
+      }
+    } catch (error) {
+      console.error("failed to call contract", error);
+      onUpdateState({ error: error as Error, result: null });
+    } finally {
+      setLoading(false)
+    };
   }, [
     ast,
     contract,
