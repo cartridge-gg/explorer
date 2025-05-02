@@ -8,6 +8,7 @@ interface FunctionInputEditorProps {
   argInfo: ArgumentNode;
   value?: string;
   onChange: (value: string) => void;
+  readOnly?: boolean;
 }
 
 export default function FunctionArgEditor({
@@ -15,6 +16,7 @@ export default function FunctionArgEditor({
   argInfo,
   value,
   onChange,
+  readOnly = false,
 }: FunctionInputEditorProps) {
   const handleEditorDidMount = useCallback(
     (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
@@ -67,7 +69,7 @@ export default function FunctionArgEditor({
       language="json"
       onMount={(editor, monaco: Monaco) => handleEditorDidMount(editor, monaco)}
       options={{
-        readOnly: false,
+        readOnly,
         lineNumbers: "off",
         cursorStyle: "line",
         automaticLayout: true,

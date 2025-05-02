@@ -229,6 +229,7 @@ function FunctionCallAccordionContent({
                               ? "[\n\t\n]"
                               : ""
                       }
+                      readOnly={!contract}
                     />
                   )}
                 </td>
