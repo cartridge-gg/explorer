@@ -70,6 +70,14 @@ export function ContractReadInterface({
     []
   );
 
+  if (!functions.length) {
+    return (
+      <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
+        <span className="text-[#D0D0D0]">No functions found</span>
+      </div>
+    )
+  }
+
   return (
     <Accordion
       items={() =>
@@ -189,7 +197,7 @@ function FunctionCallAccordionContent({
         </button>
       )}
 
-      {ast.inputs.length !== 0 ? (
+      {ast.inputs.length ? (
         <table className="bg-white overflow-x w-full">
           <tbody>
             {ast.inputs.map((input, idx) => (
