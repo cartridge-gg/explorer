@@ -25,11 +25,13 @@ export function Overview({
         title={`Read Functions (${readFuncs.length})`}
         content={<ContractReadInterface functions={readFuncs} />}
         disabled={!readFuncs.length}
+        titleClassName="z-20"
       />
       <AccordionItem
         title={`Write Functions (${writeFuncs.length})`}
         content={<ContractWriteInterface functions={writeFuncs} />}
         disabled={!writeFuncs.length}
+        titleClassName="z-20"
       />
       <div className="border border-borderGray p-4">
         <Code abi={abi} sierra={sierra} />
