@@ -281,8 +281,8 @@ function FunctionCallAccordionContent({
                       onChange={(e) => handleInputChange(idx, e.target.value)}
                       value={
                         idx < state.inputs.length
-                          ? state.inputs[idx]?.value
-                          : undefined
+                          ? state.inputs[idx]?.value ?? ""
+                          : ""
                       }
                       disabled={!contract}
                     />
