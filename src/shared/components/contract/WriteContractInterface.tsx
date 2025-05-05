@@ -228,7 +228,6 @@ function FunctionCallAccordionContent({
     }
   }, [contract, account, ast, state.hasCalled, state.inputs, onUpdateState]);
 
-
   return (
     <div className="flex flex-col gap-[10px] items-end">
       {contract && (
