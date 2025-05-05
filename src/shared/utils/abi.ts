@@ -199,13 +199,12 @@ function buildTypeRegistries(
 /**
  * Builds an abstract syntax tree for a function's inputs
  */
-export function getFunctionAst(
+function getFunctionAst(
   abi: Abi,
   functionName: string
 ): FunctionAst | undefined {
   const [structRegistry, enumRegistry] = buildTypeRegistries(abi);
   const targetFunction = findFunctionInAbi(abi, functionName);
-
   if (!targetFunction) {
     return;
   }
@@ -408,7 +407,8 @@ function resolveType(
 
   // Special case for arrays like core::array::Array::<core::felt252>
   if (
-    typeStr.includes("core::array::Array") &&
+    (typeStr.includes("core::array::Array") ||
+      typeStr.includes("core::array::Span")) &&
     typeStr.includes("<") &&
     typeStr.endsWith(">")
   ) {
