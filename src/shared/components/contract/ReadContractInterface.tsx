@@ -230,7 +230,7 @@ function FunctionCallAccordionContent({
                       onChange={(value) => handleInputChange(idx, value)}
                       value={
                         idx < state.inputs.length
-                          ? state.inputs[idx].value
+                          ? state.inputs[idx]?.value
                           : input.type.type === "struct"
                             ? "{\n\t\n}"
                             : input.type.type === "array"

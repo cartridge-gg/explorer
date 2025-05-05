@@ -228,6 +228,7 @@ function FunctionCallAccordionContent({
     }
   }, [contract, account, ast, state.hasCalled, state.inputs, onUpdateState]);
 
+
   return (
     <div className="flex flex-col gap-[10px] items-end">
       {contract && (
@@ -302,7 +303,7 @@ function FunctionCallAccordionContent({
                       onChange={(value) => handleInputChange(idx, value)}
                       value={
                         idx < state.inputs.length
-                          ? state.inputs[idx].value
+                          ? state.inputs[idx]?.value
                           : input.type.type === "struct"
                             ? "{\n\t\n}"
                             : input.type.type === "array"
