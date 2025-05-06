@@ -1,33 +1,20 @@
-import React from "react";
+import React, { PropsWithChildren } from "react";
 import { AccordionCollapseIcon, AccordionExpandIcon } from "./icons";
 import { cn } from "@cartridge/ui-next";
 
-type AccordionProps = {
-  /**
-   * A function that returns an array of AccordionItem components
-   */
-  items: () => React.ReactElement<AccordionItemProps>[];
-};
-
-export function Accordion({ items }: AccordionProps) {
-  const accordionItems = items();
-
+export function Accordion({ children }: PropsWithChildren) {
   return (
     <div className="accordion-container [&_div:not(:last-child)_.accordion-header]:mb-[-1px] [&_div:last-child_.shadow-inner]:border-b">
-      {accordionItems}
+      {children}
     </div>
   );
 }
 
-interface AccordionItemProps {
+interface AccordionItemProps extends PropsWithChildren {
   /**
    * The content to be displayed in the accordion header
    */
   title: React.ReactNode;
-  /**
-   * The content to be displayed when the accordion is expanded
-   */
-  content?: React.ReactNode;
   /**
    * Optional custom styling for the title section
    */
@@ -52,12 +39,12 @@ interface AccordionItemProps {
 
 export function AccordionItem({
   title,
-  content,
   titleClassName,
   contentClassName,
   containerClassName,
   open = false,
   disabled = false,
+  children,
 }: AccordionItemProps) {
   const [isOpen, setIsOpen] = React.useState<boolean>(open);
 
@@ -80,7 +67,7 @@ export function AccordionItem({
         <div
           className={cn("bg-[#F1F1F1] p-3 border-x border-borderGray shadow-inner", contentClassName)}
         >
-          {content || <EmptyAccordionContent />}
+          {children || <EmptyAccordionContent />}
         </div>
       )}
     </div>

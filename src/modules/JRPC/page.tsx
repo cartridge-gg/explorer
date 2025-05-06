@@ -167,35 +167,32 @@ export default function JRPCPlayground() {
             />
 
             <div className="max-h-[30vh] sl:max-h-none overflow-y-auto">
-              <Accordion
-                items={() => [
-                  <AccordionItem
-                    open
-                    key="starknet"
-                    title="Starknet"
-                    titleClassName="uppercase font-bold"
-                    contentClassName="p-0 overflow-y-scroll"
-                    content={
-                      <div>
-                        {methods.map((method) => (
-                          <div
-                            className={cn(
-                              "py-1 px-3",
-                              method.name === request.method
-                                ? "bg-[#DBDBDB]"
-                                : "bg-[#F3F3F3] cursor-pointer",
-                            )}
-                            key={method.name}
-                            onClick={onMethodChange(method)}
-                          >
-                            {method.name.replace("starknet_", "")}
-                          </div>
-                        ))}
+              <Accordion>
+                <AccordionItem
+                  open
+                  key="starknet"
+                  title="Starknet"
+                  titleClassName="uppercase font-bold"
+                  contentClassName="p-0 overflow-y-scroll"
+                >
+                  <div>
+                    {methods.map((method) => (
+                      <div
+                        className={cn(
+                          "py-1 px-3",
+                          method.name === request.method
+                            ? "bg-[#DBDBDB]"
+                            : "bg-[#F3F3F3] cursor-pointer",
+                        )}
+                        key={method.name}
+                        onClick={onMethodChange(method)}
+                      >
+                        {method.name.replace("starknet_", "")}
                       </div>
-                    }
-                  />,
-                ]}
-              />
+                    ))}
+                  </div>
+                </AccordionItem>
+              </Accordion>
             </div>
           </div>
 
@@ -256,36 +253,32 @@ export default function JRPCPlayground() {
             Execute
             <PlayIcon className="size-2 fill-white" />
           </button>
-          <Accordion
-            items={() => [
-              <AccordionItem
-                key="request"
-                title="request"
-                content={
-                  <div>
-                    <code>
-                      <pre>{requestJSON}</pre>
-                    </code>
-                  </div>
-                }
-                titleClassName="uppercase"
-                open
-              />,
-              <AccordionItem
-                key="response"
-                title="response"
-                content={
-                  <div className="min-h-80">
-                    <code>
-                      <pre>{responseJSON}</pre>
-                    </code>
-                  </div>
-                }
-                titleClassName="uppercase"
-                open
-              />,
-            ]}
-          />
+          <Accordion>
+            <AccordionItem
+              key="request"
+              title="request"
+              titleClassName="uppercase"
+              open
+            >
+              <div>
+                <code>
+                  <pre>{requestJSON}</pre>
+                </code>
+              </div>
+            </AccordionItem>
+            <AccordionItem
+              key="response"
+              title="response"
+              titleClassName="uppercase"
+              open
+            >
+              <div className="min-h-80">
+                <code>
+                  <pre>{responseJSON}</pre>
+                </code>
+              </div>
+            </AccordionItem>
+          </Accordion>
         </div>
       </div>
     </div>
