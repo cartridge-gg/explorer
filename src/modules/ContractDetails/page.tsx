@@ -16,11 +16,10 @@ import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";
-import { ContractReadInterface } from "@/shared/components/contract/ReadContractInterface";
-import { ContractWriteInterface } from "@/shared/components/contract/WriteContractInterface";
 import { getContractClassInfo, ContractClassInfo } from "@/shared/utils/contract";
 import { Code } from "@/shared/components/contract/Code";
 import { useQuery } from "@tanstack/react-query";
+import { ContractForm } from "@/shared/components/contract/Form";
 
 const DataTabs = ["Read Contract", "Write Contract", "Code"];
 
@@ -161,9 +160,9 @@ export default function ContractDetails() {
 
                 switch (selectedDataTab) {
                   case "Read Contract":
-                    return <ContractReadInterface functions={readFuncs} contract={contract} />
+                    return <ContractForm functions={readFuncs} contract={contract} />
                   case "Write Contract":
-                    return <ContractWriteInterface functions={writeFuncs} contract={contract} />
+                    return <ContractForm functions={writeFuncs} contract={contract} />
                   case "Code":
                     return <Code abi={code.abi} sierra={code.sierra} />
                   default:

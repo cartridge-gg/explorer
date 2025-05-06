@@ -6,7 +6,7 @@ type FeltListProps = {
    * Array of felts to be displayed in the list
    */
   list: bigint[];
-  displayAs?: Exclude<FeltDisplayVariants, "string">;
+  displayAs?: FeltDisplayVariants;
   /**
    * Whether to display the index column
    */

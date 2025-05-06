@@ -578,7 +578,7 @@ function getFunctionAbiWithAst(abi: Abi, item: FunctionAbi) {
   };
 }
 
-function isReadFunction(func: FunctionAbi) {
+export function isReadFunction(func: FunctionAbi) {
   return (
     func.state_mutability === "view" ||
     func.state_mutability === "pure" ||
