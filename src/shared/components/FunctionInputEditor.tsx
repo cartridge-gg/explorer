@@ -11,7 +11,7 @@ interface FunctionInputEditorProps {
   readOnly?: boolean;
 }
 
-export default function FunctionArgEditor({
+export default function FunctionInputEditor({
   functionName,
   argInfo,
   value,

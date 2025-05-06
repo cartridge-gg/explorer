@@ -80,7 +80,7 @@ export default function JRPCPlayground() {
   const [response, setResponse] = useState<JRPCResponse>();
   const requestJSON = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, ...json } = request
+    const { id, ...json } = formatRequest(request)
     return JSON.stringify(json, null, 2)
   }, [request])
 
@@ -106,6 +106,7 @@ export default function JRPCPlayground() {
       method: selected.name,
       params: scheme?.methods.find(m => m.name === selected.name)?.params?.map((p) => ({ name: p.name, value: "" })) ?? []
     }))
+    setResponse(undefined)
   }, [scheme])
 
   const onParamChange = useCallback((name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,7 +122,7 @@ export default function JRPCPlayground() {
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify(request),
+      body: JSON.stringify(formatRequest(request)),
     })
     const json = await res.json();
     setResponse(json)
@@ -260,7 +261,7 @@ export default function JRPCPlayground() {
               titleClassName="uppercase"
               open
             >
-              <div>
+              <div className="overflow-x-auto">
                 <code>
                   <pre>{requestJSON}</pre>
                 </code>
@@ -272,7 +273,7 @@ export default function JRPCPlayground() {
               titleClassName="uppercase"
               open
             >
-              <div className="min-h-80">
+              <div className="min-h-80 overflow-x-auto">
                 <code>
                   <pre>{responseJSON}</pre>
                 </code>
@@ -283,4 +284,18 @@ export default function JRPCPlayground() {
       </div>
     </div>
   );
+}
+
+function formatRequest(request: JRPCRequest) {
+  const { params, ...json } = request
+  return {
+    ...json,
+    params: params?.map(p => {
+      try {
+        return JSON.parse(p.value)
+      } catch {
+        return p.value
+      }
+    }),
+  }
 }
