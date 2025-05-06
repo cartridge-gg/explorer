@@ -260,7 +260,7 @@ export default function JRPCPlayground() {
               titleClassName="uppercase"
               open
             >
-              <div>
+              <div className="overflow-x-auto">
                 <code>
                   <pre>{requestJSON}</pre>
                 </code>
@@ -272,7 +272,7 @@ export default function JRPCPlayground() {
               titleClassName="uppercase"
               open
             >
-              <div className="min-h-80">
+              <div className="min-h-80 overflow-x-auto">
                 <code>
                   <pre>{responseJSON}</pre>
                 </code>
