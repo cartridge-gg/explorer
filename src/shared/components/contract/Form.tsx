@@ -4,66 +4,59 @@ import FeltDisplayAsToggle, {
   FeltDisplayVariants,
 } from "@/shared/components/FeltDisplayAsToggle";
 import FeltList from "@/shared/components/FeltList";
-import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import {
-  Calldata,
   Contract,
-  Result,
+  InvokeFunctionResponse,
 } from "starknet";
 import {
   convertToCalldata,
   FunctionAbiWithAst,
   FunctionAst,
   FunctionInputWithValue,
+  isReadFunction,
 } from "@/shared/utils/abi";
 import FunctionArgEditor from "@/shared/components/FunctionInputEditor";
+import { useAccount } from "@starknet-react/core";
+import { Link } from "react-router-dom";
 
-// // Optional: Configure loader to use CDN
-// loader.config({
-//   paths: {
-//     vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs",
-//   },
-// });
-
-// The state of the <FunctionCallAccordionContent/> component
-type FunctionCallAccordionContentState = {
-  inputs: FunctionInputWithValue[];
-  hasCalled: boolean;
-  result: Result | null;
-  error: Error | string | null;
-};
-
-export interface ContractReadInterfaceProps {
+export interface ContractFormProps {
   contract?: Contract;
   functions: FunctionAbiWithAst[];
 }
 
-export function ContractReadInterface({
+type FormState = {
+  inputs: FunctionInputWithValue[];
+  result?: CallResult | InvokeFunctionResponse;
+  error?: Error | string;
+  hasCalled: boolean;
+  loading: boolean;
+};
+
+const initFormState: FormState = {
+  inputs: [],
+  hasCalled: false,
+  loading: false,
+}
+
+export function ContractForm({
   contract,
   functions,
-}: ContractReadInterfaceProps) {
-  // Create a state object to persist input values across accordion openings/closings
-  const [functionItemStates, setFunctionEntryStates] = useState<{
-    // a map from the function name to its state (ie AccordionItem content states)
-    [key: string]: FunctionCallAccordionContentState;
+}: ContractFormProps) {
+  const [form, setForm] = useState<{
+    [key: string]: FormState;
   }>({});
 
-  const updateFunctionItemState = useCallback(
+  const onUpdate = useCallback(
     (
-      functionName: string,
-      update: Partial<(typeof functionItemStates)[string]>
+      name: string,
+      value: Partial<(typeof form)[string]>
     ) => {
-      setFunctionEntryStates((prev) => ({
+      setForm((prev) => ({
         ...prev,
-        [functionName]: {
-          ...(prev[functionName] || {
-            inputs: [],
-            error: null,
-            result: null,
-            hasCalled: false,
-          }),
-          ...update,
+        [name]: {
+          ...(prev[name] || initFormState),
+          ...value,
         },
       }));
     },
@@ -81,9 +74,9 @@ export function ContractReadInterface({
   return (
     <Accordion
       items={() =>
-        functions.map(({ ast, ...func }, index) => (
+        functions.map(({ ast, ...func }, i) => (
           <AccordionItem
-            key={index}
+            key={i}
             titleClassName="h-[45px] z-10"
             title={
               <div className="flex flex-row items-center gap-2">
@@ -93,14 +86,15 @@ export function ContractReadInterface({
               </div>
             }
             content={
-              <FunctionCallAccordionContent
+              <FunctionForm
+                key={i}
                 ast={ast}
-                key={index}
                 contract={contract}
-                state={functionItemStates[func.name]}
-                onUpdateState={(update) => {
-                  updateFunctionItemState(func.name, update);
+                state={form[func.name] || initFormState}
+                onUpdate={(update) => {
+                  onUpdate(func.name, update);
                 }}
+                isRead={isReadFunction(func)}
               />
             }
             disabled={!contract && !func.inputs.length}
@@ -111,99 +105,100 @@ export function ContractReadInterface({
   );
 }
 
-interface FunctionCallAccordionContentProps {
+interface FunctionFormProps {
   /** The contract instance to interact with */
   contract?: Contract;
   ast: FunctionAst;
+  isRead: boolean;
   /** Current state of the accordion content, including inputs, results and errors */
-  state?: FunctionCallAccordionContentState;
+  state: FormState;
   /** Callback to update the state of this accordion item in order to preserve the state */
-  onUpdateState: (update: Partial<FunctionCallAccordionContentState>) => void;
+  onUpdate: (update: Partial<FormState>) => void;
 }
 
-function FunctionCallAccordionContent({
+function FunctionForm({
   ast,
   contract,
-  onUpdateState,
-  state = { inputs: [], hasCalled: false, error: null, result: null },
-}: FunctionCallAccordionContentProps) {
-  const queryClient = useQueryClient();
-  const [loading, setLoading] = useState(false);
+  isRead,
+  onUpdate,
+  state,
+}: FunctionFormProps) {
+  const { account } = useAccount();
 
-  const handleFunctionCall = useCallback(async () => {
-    if (!contract) return;
+  const onCallOrExecute = useCallback(async () => {
+    if (!contract || (!isRead && !account)) {
+      onUpdate({
+        error: "Please connect your wallet first",
+        result: undefined,
+        hasCalled: true,
+      });
+      return;
+    };
 
-    setLoading(true);
-
-    let calldata: Calldata = [];
+    onUpdate({ loading: true });
 
     try {
-      state.inputs.forEach((input, idx) => {
-        calldata = calldata.concat(
-          convertToCalldata(ast.inputs[idx].type, input.value)
-        );
-      });
-      const result = await queryClient
-        .fetchQuery({
-          queryKey: [ast.name, ...calldata],
-          queryFn: () =>
-            contract.call(ast.name, calldata, { parseRequest: false, parseResponse: false }),
-        })
-
-      onUpdateState({ result, error: null });
-
-      if (!state.hasCalled) {
-        onUpdateState({ hasCalled: true });
+      const calldata = state.inputs.map((input, i) => convertToCalldata(ast.inputs[i].type, input.value));
+      if (isRead) {
+        const result = await contract.call(ast.name, calldata, { parseRequest: false, parseResponse: false });
+        onUpdate({ result: result as CallResult, error: undefined });
+      } else {
+        const result = await account!.execute([{
+          calldata: calldata,
+          entrypoint: ast.name,
+          contractAddress: contract.address,
+        }])
+        onUpdate({ result: result, error: undefined });
       }
     } catch (error) {
       console.error("failed to call contract", error);
-      onUpdateState({ error: error as Error, result: null });
+      onUpdate({ error: error as Error, result: undefined });
     } finally {
-      setLoading(false)
+      onUpdate({ hasCalled: true, loading: false });
     };
   }, [
     ast,
     contract,
-    queryClient,
+    account,
     state.inputs,
-    onUpdateState,
-    state.hasCalled,
+    isRead,
+    onUpdate,
   ]);
 
-  const handleInputChange = useCallback(
+  const onChange = useCallback(
     (inputIndex: number, value: string) => {
       const newInputs = [...state.inputs];
       newInputs[inputIndex] = {
         ...newInputs[inputIndex],
         value,
       };
-      onUpdateState({ inputs: newInputs });
+      onUpdate({ inputs: newInputs });
     },
-    [state, onUpdateState]
+    [state, onUpdate]
   );
 
   return (
     <div className="flex flex-col gap-[10px] items-end">
       {contract && (
         <button
-          disabled={loading}
-          onClick={handleFunctionCall}
-          className={`px-3 py-[2px] text-sm uppercase font-bold w-fit  ${loading
+          disabled={state.loading}
+          onClick={onCallOrExecute}
+          className={`px-3 py-[2px] text-sm uppercase font-bold w-fit  ${state.loading
             ? "bg-gray-400 cursor-not-allowed"
             : "bg-primary hover:bg-[#6E6E6E]"
             } text-white`}
         >
-          {loading ? "Calling..." : "Call"}
+          {state.loading ? "Calling..." : "Call"}
         </button>
       )}
 
-      {ast.inputs.length ? (
+      {!!ast.inputs.length && (
         <table className="bg-white overflow-x w-full">
           <tbody>
-            {ast.inputs.map((input, idx) => (
+            {ast.inputs.map((input, i) => (
               <tr
-                key={idx}
-                className={`${idx !== ast.inputs.length - 1 ? "border-b" : ""}`}
+                key={i}
+                className={`${i !== ast.inputs.length - 1 ? "border-b" : ""}`}
               >
                 <td className="px-2 py-1 text-left align-top w-[90px] italic">
                   <span>{input.name}</span>
@@ -215,22 +210,22 @@ function FunctionCallAccordionContent({
                       type="text"
                       className="px-2 py-1 text-left w-full"
                       placeholder={`${input.type.value.name}`}
-                      onChange={(e) => handleInputChange(idx, e.target.value)}
+                      onChange={(e) => onChange(i, e.target.value)}
                       value={
-                        idx < state.inputs.length
-                          ? state.inputs[idx]?.value ?? ""
+                        i < state.inputs.length
+                          ? state.inputs[i]?.value ?? ""
                           : ""
                       }
                     />
                   ) : (
                     <FunctionArgEditor
-                      key={idx}
+                      key={i}
                       functionName={ast.name}
                       argInfo={input}
-                      onChange={(value) => handleInputChange(idx, value)}
+                      onChange={(value) => onChange(i, value)}
                       value={
-                        idx < state.inputs.length
-                          ? state.inputs[idx]?.value
+                        i < state.inputs.length
+                          ? state.inputs[i]?.value
                           : input.type.type === "struct"
                             ? "{\n\t\n}"
                             : input.type.type === "array"
@@ -245,40 +240,56 @@ function FunctionCallAccordionContent({
             ))}
           </tbody>
         </table>
-      ) : (
-        <></>
       )}
 
-      {state.hasCalled ? (
+      {state.hasCalled && (
         <div className="w-full flex flex-col gap-1">
           <p className="font-bold text-sm uppercase">Result</p>
-
           <div className="bg-white">
-            {loading ? (
+            {state.loading ? (
               <div className="text-gray-600">Loading...</div>
             ) : state.error ? (
               <div className="text-red-500 p-3 bg-red-50 border border-red-200">
                 <p className="font-medium">Error:</p>
                 <p className="text-sm">{state.error.toString()}</p>
               </div>
-            ) : state.result !== null ? (
-              <FunctionCallResult data={state.result} />
+            ) : state.result ? (
+              <FormResult data={state.result} />
             ) : null}
           </div>
         </div>
-      ) : (
-        <></>
       )}
     </div>
   );
 }
 
-interface FunctionCallResultProps {
-  data: Result;
+type CallResult = string | string[] | bigint | bigint[]
+
+interface ResultProps {
+  data: CallResult | InvokeFunctionResponse;
 }
 
-function FunctionCallResult({ data }: FunctionCallResultProps) {
+function FormResult({ data }: ResultProps) {
+  if (typeof data === "object" && "transaction_hash" in data) {
+    return (
+      <div className="px-3 py-2 border border-borderGray">
+        <p className="">Transaction Hash</p>
+        <Link
+          to={`../transaction/${data.transaction_hash}`}
+          className="underline break-all hover:text-borderGray"
+        >
+          {data.transaction_hash}
+        </Link>
+      </div>
+    )
+  }
+
+  return <CallResult data={data} />
+}
+
+function CallResult({ data }: { data: CallResult }) {
   const [display, setDisplay] = useState<FeltDisplayVariants>("hex");
+
   return (
     <div className="px-3 py-2 border border-borderGray flex flex-col gap-3">
       <FeltDisplayAsToggle
@@ -289,7 +300,7 @@ function FunctionCallResult({ data }: FunctionCallResultProps) {
       {Array.isArray(data) ? (
         <FeltList list={data as bigint[]} displayAs={display} />
       ) : (
-        <FeltDisplay value={data} displayAs={display} />
+        <FeltDisplay value={data as bigint} displayAs={display} />
       )}
     </div>
   );

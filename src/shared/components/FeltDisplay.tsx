@@ -4,7 +4,7 @@ import { truncateString } from "../utils/string";
 import { useScreen } from "../hooks/useScreen";
 
 type FeltDisplayProps = {
-  value?: bigint | number;
+  value?: string | bigint | number;
   alwaysTruncate?: boolean;
   truncateLength?: number;
   displayAs?: FeltDisplayVariants;

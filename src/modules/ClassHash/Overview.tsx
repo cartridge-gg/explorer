@@ -1,7 +1,6 @@
 import { AccordionItem } from "@/shared/components/accordion";
 import { Code } from "@/shared/components/contract/Code";
-import { ContractReadInterface } from "@/shared/components/contract/ReadContractInterface";
-import { ContractWriteInterface } from "@/shared/components/contract/WriteContractInterface";
+import { ContractForm } from "@/shared/components/contract/Form";
 import { FunctionAbiWithAst } from "@/shared/utils/abi";
 
 export function Overview({
@@ -23,13 +22,13 @@ export function Overview({
     <div className="bg-white flex flex-col gap-1 mt-[6px] overflow-auto">
       <AccordionItem
         title={`Read Functions (${readFuncs.length})`}
-        content={<ContractReadInterface functions={readFuncs} />}
+        content={<ContractForm functions={readFuncs} />}
         disabled={!readFuncs.length}
         titleClassName="z-20"
       />
       <AccordionItem
         title={`Write Functions (${writeFuncs.length})`}
-        content={<ContractWriteInterface functions={writeFuncs} />}
+        content={<ContractForm functions={writeFuncs} />}
         disabled={!writeFuncs.length}
         titleClassName="z-20"
       />
