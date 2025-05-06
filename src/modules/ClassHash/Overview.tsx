@@ -22,16 +22,18 @@ export function Overview({
     <div className="bg-white flex flex-col gap-1 mt-[6px] overflow-auto">
       <AccordionItem
         title={`Read Functions (${readFuncs.length})`}
-        content={<ContractForm functions={readFuncs} />}
         disabled={!readFuncs.length}
         titleClassName="z-20"
-      />
+      >
+        <ContractForm functions={readFuncs} />
+      </AccordionItem>
       <AccordionItem
         title={`Write Functions (${writeFuncs.length})`}
-        content={<ContractForm functions={writeFuncs} />}
         disabled={!writeFuncs.length}
         titleClassName="z-20"
-      />
+      >
+        <ContractForm functions={writeFuncs} />
+      </AccordionItem>
       <div className="border border-borderGray p-4">
         <Code abi={abi} sierra={sierra} />
       </div>

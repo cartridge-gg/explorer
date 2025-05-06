@@ -5,7 +5,7 @@ type FeltListProps = {
   /**
    * Array of felts to be displayed in the list
    */
-  list: bigint[];
+  list: bigint[] | string[];
   displayAs?: FeltDisplayVariants;
   /**
    * Whether to display the index column
@@ -27,12 +27,10 @@ export default function FeltList({
               key={index}
               className={`${index !== list.length - 1 ? "border-b" : ""}`}
             >
-              {showIndex ? (
+              {!!showIndex && (
                 <td className="px-4 text-center font-bold select-none w-[54px]">
                   {index}
                 </td>
-              ) : (
-                <></>
               )}
 
               <td className="px-4 text-left">

@@ -5,7 +5,7 @@ import { useCallback } from "react";
 import { AnchorHTMLAttributes } from "react";
 
 interface AddressDisplayProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
-  value: bigint | number;
+  value: string | bigint | number;
   alwaysTruncate?: boolean;
   truncateLength?: number;
 }

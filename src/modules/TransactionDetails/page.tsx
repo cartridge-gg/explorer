@@ -71,9 +71,8 @@ const FinalityStatus = ({ status }: { status: string }) => {
   };
   return (
     <div
-      className={`text-white px-2 h-5 w-[84px] flex items-center justify-center font-bold ${
-        status_color_map[status?.toLowerCase() as keyof typeof status_color_map]
-      }`}
+      className={`text-white px-2 h-5 w-[84px] flex items-center justify-center font-bold ${status_color_map[status?.toLowerCase() as keyof typeof status_color_map]
+        }`}
     >
       {status}
     </div>
@@ -207,8 +206,8 @@ export default function TransactionDetails() {
 
               const eventKey = matchingParsedEvent
                 ? Object.keys(matchingParsedEvent).find((key) =>
-                    key.includes("::")
-                  )
+                  key.includes("::")
+                )
                 : "";
 
               return {
@@ -256,7 +255,7 @@ export default function TransactionDetails() {
       } else {
         const key_map =
           EXECUTION_RESOURCES_KEY_MAP[
-            key as keyof typeof EXECUTION_RESOURCES_KEY_MAP
+          key as keyof typeof EXECUTION_RESOURCES_KEY_MAP
           ];
 
         if (key_map) {
@@ -558,26 +557,20 @@ export default function TransactionDetails() {
             </SectionBoxEntry>
           </SectionBox>
 
-          {TransactionDetails?.sender_address || TransactionDetails?.nonce ? (
+          {(!!TransactionDetails?.sender_address || !!TransactionDetails?.nonce) && (
             <SectionBox title="Sender" variant="upper-half">
-              {TransactionDetails?.sender_address ? (
+              {!!TransactionDetails?.sender_address && (
                 <SectionBoxEntry title="Address">
                   <AddressDisplay value={TransactionDetails?.sender_address} />
                 </SectionBoxEntry>
-              ) : (
-                <></>
               )}
 
-              {TransactionDetails?.nonce ? (
+              {!!TransactionDetails?.nonce && (
                 <SectionBoxEntry title="Nonce">
                   {Number(TransactionDetails?.nonce)}
                 </SectionBoxEntry>
-              ) : (
-                <></>
               )}
             </SectionBox>
-          ) : (
-            <></>
           )}
 
           <SectionBox title="Resource Bounds" variant="upper-half">
@@ -589,13 +582,13 @@ export default function TransactionDetails() {
                     <td>
                       {TransactionDetails?.resource_bounds?.l1_gas?.max_amount
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                TransactionDetails?.resource_bounds?.l1_gas
-                                  ?.max_amount
-                              )
+                          Number(
+                            cairo.felt(
+                              TransactionDetails?.resource_bounds?.l1_gas
+                                ?.max_amount
                             )
                           )
+                        )
                         : 0}{" "}
                       WEI
                     </td>
@@ -606,13 +599,13 @@ export default function TransactionDetails() {
                       {TransactionDetails?.resource_bounds?.l1_gas
                         ?.max_price_per_unit
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                TransactionDetails?.resource_bounds?.l1_gas
-                                  ?.max_price_per_unit
-                              )
+                          Number(
+                            cairo.felt(
+                              TransactionDetails?.resource_bounds?.l1_gas
+                                ?.max_price_per_unit
                             )
                           )
+                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -628,13 +621,13 @@ export default function TransactionDetails() {
                     <td>
                       {TransactionDetails?.resource_bounds?.l2_gas?.max_amount
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                TransactionDetails?.resource_bounds?.l2_gas
-                                  ?.max_amount
-                              )
+                          Number(
+                            cairo.felt(
+                              TransactionDetails?.resource_bounds?.l2_gas
+                                ?.max_amount
                             )
                           )
+                        )
                         : 0}{" "}
                       WEI
                     </td>
@@ -645,13 +638,13 @@ export default function TransactionDetails() {
                       {TransactionDetails?.resource_bounds?.l2_gas
                         ?.max_price_per_unit
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                TransactionDetails?.resource_bounds?.l2_gas
-                                  ?.max_price_per_unit
-                              )
+                          Number(
+                            cairo.felt(
+                              TransactionDetails?.resource_bounds?.l2_gas
+                                ?.max_price_per_unit
                             )
                           )
+                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -685,8 +678,8 @@ export default function TransactionDetails() {
           <SectionBox title="Actual Fee" variant="upper-half">
             {TransactionReceipt?.actual_fee?.amount
               ? formatNumber(
-                  Number(cairo.felt(TransactionReceipt?.actual_fee?.amount))
-                )
+                Number(cairo.felt(TransactionReceipt?.actual_fee?.amount))
+              )
               : 0}{" "}
             {TransactionReceipt?.actual_fee?.unit}
           </SectionBox>

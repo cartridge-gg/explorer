@@ -72,8 +72,8 @@ export function ContractForm({
   }
 
   return (
-    <Accordion
-      items={() =>
+    <Accordion>
+      {
         functions.map(({ ast, ...func }, i) => (
           <AccordionItem
             key={i}
@@ -85,23 +85,22 @@ export function ContractForm({
                 <span>({func.inputs.map((arg) => arg.name).join(", ")})</span>
               </div>
             }
-            content={
-              <FunctionForm
-                key={i}
-                ast={ast}
-                contract={contract}
-                state={form[func.name] || initFormState}
-                onUpdate={(update) => {
-                  onUpdate(func.name, update);
-                }}
-                isRead={isReadFunction(func)}
-              />
-            }
             disabled={!contract && !func.inputs.length}
-          />
+          >
+            <FunctionForm
+              key={i}
+              ast={ast}
+              contract={contract}
+              state={form[func.name] || initFormState}
+              onUpdate={(update) => {
+                onUpdate(func.name, update);
+              }}
+              isRead={isReadFunction(func)}
+            />
+          </AccordionItem>
         ))
       }
-    />
+    </Accordion>
   );
 }
 

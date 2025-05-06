@@ -1,7 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from "react";
 import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { AbiEntry, CallData, FunctionAbi, hash } from "starknet";
-import { truncateString } from "@/shared/utils/string";
 import {
   convertObjectValuesToDisplayValues,
   convertValue,
@@ -232,8 +231,8 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
 
       <div className="overflow-auto">
         {selectedTab === "decoded" ? (
-          <Accordion
-            items={() =>
+          <Accordion>
+            {
               decodedCalldata.map((item, idx) => (
                 <AccordionItem
                   key={idx}
@@ -255,82 +254,76 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
                       <span>({item.params.map((arg) => arg).join(", ")})</span>
                     </div>
                   }
-                  content={
-                    <>
-                      <div className="flex gap-3 justify-between mb-3">
-                        <CalldataEncodingToggle
-                          displayAs={decodedRawMap[item.selector]}
-                          onChange={(value) =>
-                            setDecodedRawMap((prev) => ({
-                              ...prev,
-                              [item.selector]: value,
-                            }))
-                          }
-                        />
+                >
+                  <div className="flex gap-3 justify-between mb-3">
+                    <CalldataEncodingToggle
+                      displayAs={decodedRawMap[item.selector]}
+                      onChange={(value) =>
+                        setDecodedRawMap((prev) => ({
+                          ...prev,
+                          [item.selector]: value,
+                        }))
+                      }
+                    />
 
-                        {decodedRawMap[item.selector] === "decoded" ? (
-                          <FeltDisplayAsToggle
-                            displayAs={convertValueTabMap[item.selector]}
-                            onChange={(format) => {
-                              setConvertValueTabMap((prev) => ({
-                                ...prev,
-                                [item.selector]: format as Exclude<
-                                  FeltDisplayVariants,
-                                  "string"
-                                >,
-                              }));
-                            }}
-                          />
-                        ) : (
-                          <></>
-                        )}
-                      </div>
+                    {decodedRawMap[item.selector] === "decoded" && (
+                      <FeltDisplayAsToggle
+                        displayAs={convertValueTabMap[item.selector]}
+                        onChange={(format) => {
+                          setConvertValueTabMap((prev) => ({
+                            ...prev,
+                            [item.selector]: format as Exclude<
+                              FeltDisplayVariants,
+                              "string"
+                            >,
+                          }));
+                        }}
+                      />
+                    )}
+                  </div>
 
-                      <div className="bg-white border overflow-auto">
-                        {decodedRawMap[item.selector] === "decoded" ? (
-                          <table className="overflow-x w-full">
-                            <tbody>
-                              {item.data.map((arg, rowIndex, array) => (
-                                <tr
-                                  key={rowIndex}
-                                  className={`${
-                                    rowIndex !== array.length - 1
-                                      ? "border-b"
-                                      : ""
-                                  }`}
-                                >
-                                  <td className="px-2 py-1 text-left align-top">
-                                    <span className="font-bold">
-                                      {arg.name}
-                                    </span>
-                                  </td>
+                  <div className="bg-white border overflow-auto">
+                    {decodedRawMap[item.selector] === "decoded" ? (
+                      <table className="overflow-x w-full">
+                        <tbody>
+                          {item.data.map((arg, rowIndex, array) => (
+                            <tr
+                              key={rowIndex}
+                              className={`${rowIndex !== array.length - 1
+                                ? "border-b"
+                                : ""
+                                }`}
+                            >
+                              <td className="px-2 py-1 text-left align-top">
+                                <span className="font-bold">
+                                  {arg.name}
+                                </span>
+                              </td>
 
-                                  <td className="px-2 py-1 text-left align-top ">
-                                    <span className="text-gray-500">
-                                      {arg.type}
-                                    </span>
-                                  </td>
+                              <td className="px-2 py-1 text-left align-top ">
+                                <span className="text-gray-500">
+                                  {arg.type}
+                                </span>
+                              </td>
 
-                                  <td className="px-2 py-1 text-left overflow-x-auto">
-                                    <ValueRenderer
-                                      value={arg.value}
-                                      type={convertValueTabMap[item.selector]}
-                                    />
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        ) : (
-                          <FeltList list={item.raw_args} displayAs="hex" />
-                        )}
-                      </div>
-                    </>
-                  }
-                />
+                              <td className="px-2 py-1 text-left overflow-x-auto">
+                                <ValueRenderer
+                                  value={arg.value}
+                                  type={convertValueTabMap[item.selector]}
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <FeltList list={item.raw_args} displayAs="hex" />
+                    )}
+                  </div>
+                </AccordionItem>
               ))
             }
-          />
+          </Accordion>
         ) : (
           <FeltList list={calldata.flatMap((calldata) => calldata.args)} />
         )}

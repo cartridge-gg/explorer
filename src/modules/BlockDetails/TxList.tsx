@@ -77,13 +77,12 @@ export default function TxList({ transactions }: TxListProps) {
       ),
       cell: (info) => (
         <div
-          className={`flex items-center justify-center border border-primary uppercase font-bold text-white px-2 py-0 h-[15px] text-sm w-[67px] ${
-            info.renderValue() === "SUCCEEDED"
-              ? "bg-[#7BA797]"
-              : info.renderValue() === "REVERTED"
+          className={`flex items-center justify-center border border-primary uppercase font-bold text-white px-2 py-0 h-[15px] text-sm w-[67px] ${info.renderValue() === "SUCCEEDED"
+            ? "bg-[#7BA797]"
+            : info.renderValue() === "REVERTED"
               ? "bg-[#C4806D]"
               : ""
-          }`}
+            }`}
         >
           {info.renderValue()}
         </div>
@@ -183,13 +182,12 @@ export default function TxList({ transactions }: TxListProps) {
                     return (
                       <td
                         key={cell.id}
-                        className={`text-left px-[15px] ${
-                          cell.column.id === "hash"
-                            ? "hover:underline "
-                            : cell.column.id === "id"
+                        className={`text-left px-[15px] ${cell.column.id === "hash"
+                          ? "hover:underline "
+                          : cell.column.id === "id"
                             ? "text-center"
                             : ""
-                        } `}
+                          } `}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -214,9 +212,9 @@ export default function TxList({ transactions }: TxListProps) {
             <strong>{table.getPageCount()}</strong> pages
           </div>
 
-          {table.getPageCount() > 1 ? (
+          {table.getPageCount() > 1 && (
             <div className="gap-2 h-[20px] font-bold grid grid-cols-2 w-[145px] select-none">
-              {pagination.pageIndex !== 0 ? (
+              {pagination.pageIndex !== 0 && (
                 <button
                   onClick={() =>
                     setPagination((prev) => ({
@@ -228,8 +226,6 @@ export default function TxList({ transactions }: TxListProps) {
                 >
                   Prev
                 </button>
-              ) : (
-                <></>
               )}
 
               <button
@@ -249,8 +245,6 @@ export default function TxList({ transactions }: TxListProps) {
                 Next
               </button>
             </div>
-          ) : (
-            <></>
           )}
         </div>
       </div>
