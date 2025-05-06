@@ -106,6 +106,7 @@ export default function JRPCPlayground() {
       method: selected.name,
       params: scheme?.methods.find(m => m.name === selected.name)?.params?.map((p) => ({ name: p.name, value: "" })) ?? []
     }))
+    setResponse(undefined)
   }, [scheme])
 
   const onParamChange = useCallback((name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
