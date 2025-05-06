@@ -80,7 +80,7 @@ export default function JRPCPlayground() {
   const [response, setResponse] = useState<JRPCResponse>();
   const requestJSON = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, ...json } = request
+    const { id, ...json } = formatRequest(request)
     return JSON.stringify(json, null, 2)
   }, [request])
 
@@ -121,7 +121,7 @@ export default function JRPCPlayground() {
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify(request),
+      body: JSON.stringify(formatRequest(request)),
     })
     const json = await res.json();
     setResponse(json)
@@ -283,4 +283,18 @@ export default function JRPCPlayground() {
       </div>
     </div>
   );
+}
+
+function formatRequest(request: JRPCRequest) {
+  const { params, ...json } = request
+  return {
+    ...json,
+    params: params?.map(p => {
+      try {
+        return JSON.parse(p.value)
+      } catch {
+        return p.value
+      }
+    }),
+  }
 }
