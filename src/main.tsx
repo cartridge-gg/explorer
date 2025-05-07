@@ -10,20 +10,23 @@ import { CallCartProvider } from "./store/ShoppingCartProvider";
 import { BlockNumberProvider } from "./store/BlockNumberProvider";
 import { BrowserRouter } from "react-router-dom";
 import { basePath } from "./constants/rpc";
+import { PostHogProvider } from "./store/PostHogProvider";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <StarknetProvider>
-        <BrowserRouter basename={basePath()}>
-          <ToastProvider>
-            <CallCartProvider>
-              <BlockNumberProvider>
-                <App />
-              </BlockNumberProvider>
-            </CallCartProvider>
-          </ToastProvider>
-        </BrowserRouter>
+        <PostHogProvider>
+          <BrowserRouter basename={basePath()}>
+            <ToastProvider>
+              <CallCartProvider>
+                <BlockNumberProvider>
+                  <App />
+                </BlockNumberProvider>
+              </CallCartProvider>
+            </ToastProvider>
+          </BrowserRouter>
+        </PostHogProvider>
       </StarknetProvider>
     </QueryClientProvider>
   </StrictMode>
