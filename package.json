@@ -36,6 +36,7 @@
     "lucide-react": "^0.477.0",
     "monaco-editor": "^0.52.2",
     "path": "^0.12.7",
+    "posthog-js": "^1.240.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.1.3",
