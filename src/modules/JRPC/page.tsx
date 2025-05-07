@@ -1,82 +1,35 @@
 import { rpcUrl } from "@/constants/rpc";
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
 import { BreadcrumbItem, BreadcrumbSeparator } from "@/shared/components/breadcrumbs";
-
 import { Breadcrumb } from "@/shared/components/breadcrumbs";
 import PageHeader from "@/shared/components/PageHeader";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { BreadcrumbPage, cn, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@cartridge/ui-next";
 import { useQuery } from "@tanstack/react-query";
 import { InfoIcon, PlayIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { fromCamelCase } from "@/shared/utils/string";
-interface OpenRPCSchema {
-  methods: JRPCMethod[];
-  components?: {
-    schemas?: Record<string, JSONSchema>;
-  };
-}
+import { OpenRPC } from "./open-rpc";
 
-interface JRPCMethod {
-  name: string;
-  summary: string;
-  params?: JRPCParam[];
-  result: {
-    name: string;
-    schema: JSONSchema;
-  };
-}
-
-interface JRPCParam {
-  name: string;
-  description?: string;
-  schema: JSONSchema;
-  value: string;
-}
-
-interface JSONSchema {
-  type?: string;
-  $ref?: string;
-  items?: JSONSchema;
-  properties?: Record<string, JSONSchema>;
-  required?: string[];
-  enum?: string[];
-  description?: string;
-}
-
-interface JRPCRequest {
-  jsonrpc: "2.0";
-  id: number;
-  method: string;
-  params?: Pick<JRPCParam, "name" | "value">[];
-}
-
-interface JRPCResponse {
-  jsonrpc: "2.0";
-  id: number;
-  result?: unknown;
-  error?: {
-    code: number;
-    message: string;
-  };
-}
-
-export default function JRPCPlayground() {
+export default function Playground() {
   const { data: specVersion } = useSpecVersion();
-  const { data: scheme } = useQuery({
-    queryKey: ["starknet", "scheme"],
-    queryFn: async () => {
-      const response = await fetch(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${specVersion}/api/starknet_api_openrpc.json`);
-      const data = await response.json() as OpenRPCSchema;
-      return data;
-    },
+  const { data: rpc } = useQuery({
+    queryKey: ["starknet", "rpc", specVersion],
+    queryFn: () => OpenRPC.fromUrl(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${specVersion}/api/starknet_api_openrpc.json`),
+    enabled: !!specVersion,
+  });
+
+  return null
+}
+
+export function JRPCPlayground() {
+  const { data: specVersion } = useSpecVersion();
+  const { data: schema } = useQuery({
+    queryKey: ["starknet", "rpc", specVersion],
+    queryFn: () => OpenRPC.fromUrl(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${specVersion}/api/starknet_api_openrpc.json`),
   });
   const [search, setSearch] = useState("");
-  const [request, setRequest] = useState<JRPCRequest>({
-    id: 0,
-    jsonrpc: "2.0",
-    method: "starknet_specVersion",
-  });
+  const [selected, setSelected] = useState<OpenwRPCMethod | undefined>(undefined);
   const [response, setResponse] = useState<JRPCResponse>();
   const requestJSON = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -90,24 +43,6 @@ export default function JRPCPlayground() {
     const { id, ...json } = response
     return JSON.stringify(json, null, 2)
   }, [response])
-
-  useEffect(() => {
-    setRequest(req => ({
-      id: req.id === 0 ? 0 : req.id + 1,
-      jsonrpc: "2.0",
-      method: scheme?.methods[0].name ?? "",
-    }))
-  }, [scheme])
-
-  const onMethodChange = useCallback((selected: JRPCMethod) => () => {
-    setRequest(req => ({
-      id: req.id === 0 ? 0 : req.id + 1,
-      jsonrpc: "2.0",
-      method: selected.name,
-      params: scheme?.methods.find(m => m.name === selected.name)?.params?.map((p) => ({ name: p.name, value: "" })) ?? []
-    }))
-    setResponse(undefined)
-  }, [scheme])
 
   const onParamChange = useCallback((name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setRequest(req => ({
@@ -129,14 +64,15 @@ export default function JRPCPlayground() {
   }, [request]);
 
   const methods = useMemo(() => {
-    if (!scheme?.methods) return [];
-    if (!search) return scheme.methods;
+    const methods = schema?.getMethodList();
+    if (!methods) return [];
+    if (!search) return methods;
 
-    return scheme.methods.filter(method =>
-      method.name.toLowerCase().includes(search.toLowerCase()) ??
-      method.summary.toLowerCase().includes(search.toLowerCase())
+    return methods.filter(m =>
+      m.name.toLowerCase().includes(search.toLowerCase()) ??
+      m.summary.toLowerCase().includes(search.toLowerCase())
     );
-  }, [scheme?.methods, search]);
+  }, [schema, search]);
 
   return (
     <div id="json-playground" className="w-full flex-grow gap-8">
@@ -204,14 +140,14 @@ export default function JRPCPlayground() {
               </div>
               <div>
                 {
-                  scheme?.methods.find((m) => m.name === request.method)
+                  schema?.methods.find((m) => m.name === request.method)
                     ?.summary
                 }
               </div>
             </div>
 
             <div className="flex flex-col gap-2">
-              {scheme?.methods
+              {schema?.methods
                 .find((m) => m.name === request.method)
                 ?.params?.map((param) => (
                   <div key={param.name} className="flex flex-col gap-2">
@@ -286,7 +222,7 @@ export default function JRPCPlayground() {
   );
 }
 
-function formatRequest(request: JRPCRequest) {
+function formatRequest(request: Request) {
   const { params, ...json } = request
   return {
     ...json,

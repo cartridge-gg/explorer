@@ -33,6 +33,7 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
     "get-starknet": "^3.3.3",
+    "json-schema-library": "^10.0.0",
     "lucide-react": "^0.477.0",
     "monaco-editor": "^0.52.2",
     "path": "^0.12.7",
