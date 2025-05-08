@@ -19,6 +19,10 @@ import {
 import FunctionArgEditor from "@/shared/components/FunctionInputEditor";
 import { useAccount } from "@starknet-react/core";
 import { Link } from "react-router-dom";
+import AddIcon from "@/shared/icons/Add";
+import { cn } from "@cartridge/ui-next";
+import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
+import { useToast } from "@/shared/components/toast";
 
 export interface ContractFormProps {
   contract?: Contract;
@@ -137,7 +141,10 @@ function FunctionForm({
     onUpdate({ loading: true });
 
     try {
-      const calldata = state.inputs.map((input, i) => convertToCalldata(ast.inputs[i].type, input.value));
+      const calldata = state.inputs.flatMap(
+        (input, idx) => convertToCalldata(ast.inputs[idx].type, input.value)
+      );
+
       if (isRead) {
         const result = await contract.call(ast.name, calldata, { parseRequest: false, parseResponse: false });
         onUpdate({ result: result as CallResult, error: undefined });
@@ -176,9 +183,37 @@ function FunctionForm({
     [state, onUpdate]
   );
 
+  const { toast } = useToast();
+  const { addCall } = useCallCartDispatch();
+
+  const onAddToCart = useCallback(() => {
+    if (!contract || isRead || !account) {
+      return;
+    }
+
+    const calldata = state.inputs.flatMap(
+      (input, idx) => convertToCalldata(ast.inputs[idx].type, input.value)
+    );
+
+    addCall({
+      calldata: calldata,
+      entrypoint: ast.name,
+      contractAddress: contract.address,
+    });
+    toast(`Function call added: ${ast.name}`, "success");
+  }, [
+    toast,
+    contract,
+    ast,
+    state.inputs,
+    addCall,
+    account,
+    isRead
+  ]);
+
   return (
     <div className="flex flex-col gap-[10px] items-end">
-      {contract && (
+      {contract && isRead ? (
         <button
           disabled={state.loading}
           onClick={onCallOrExecute}
@@ -189,6 +224,46 @@ function FunctionForm({
         >
           {state.loading ? "Calling..." : "Call"}
         </button>
+      ) : (
+        <div className="flex gap-2">
+          <button
+            onClick={onAddToCart}
+            disabled={!account}
+            className={
+              cn(
+                `bg-white w-[19px] h-[19px] flex items-center justify-center border`,
+                !account
+                  ? "border-gray-300 text-gray-300 cursor-not-allowed"
+                  : "border-borderGray hover:border-0 hover:bg-primary hover:text-white cursor-pointer"
+              )
+            }
+            title={
+              !account
+                ? "Please connect your wallet first"
+                : "Add to cart"
+            }
+          >
+            <AddIcon />
+          </button>
+
+          <button
+            disabled={!account || state.loading}
+            onClick={onCallOrExecute}
+            className={`px-3 py-[2px] text-sm uppercase font-bold w-fit text-white ${!account || state.loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-primary hover:bg-[#6E6E6E]"
+              }`}
+            title={
+              !account
+                ? "Please connect your wallet first"
+                : state.loading
+                  ? "Transaction in progress"
+                  : ""
+            }
+          >
+            {state.loading ? "Executing..." : "Execute"}
+          </button>
+        </div>
       )}
 
       {!!ast.inputs.length && (
