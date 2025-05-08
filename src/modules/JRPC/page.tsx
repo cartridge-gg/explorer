@@ -7,7 +7,7 @@ import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { BreadcrumbPage, cn, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@cartridge/ui-next";
 import { useQuery } from "@tanstack/react-query";
 import { InfoIcon, PlayIcon } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { fromCamelCase } from "@/shared/utils/string";
 import { OpenRPC } from "./open-rpc";
 
@@ -18,6 +18,11 @@ export default function Playground() {
     queryFn: () => OpenRPC.fromUrl(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${specVersion}/api/starknet_api_openrpc.json`),
     enabled: !!specVersion,
   });
+
+  useEffect(() => {
+    if (!rpc) return;
+    console.log({ list: rpc?.getMethodList() })
+  }, [rpc])
 
   return null
 }
