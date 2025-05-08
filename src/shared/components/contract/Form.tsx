@@ -142,7 +142,15 @@ function FunctionForm({
 
     try {
       const calldata = state.inputs.flatMap(
-        (input, idx) => convertToCalldata(ast.inputs[idx].type, input.value)
+        (input, idx) => {
+          let value;
+          try {
+            value = JSON.parse(input.value);
+          } catch {
+            value = input.value
+          }
+          return convertToCalldata(ast.inputs[idx].type, value)
+        }
       );
 
       if (isRead) {
@@ -192,7 +200,15 @@ function FunctionForm({
     }
 
     const calldata = state.inputs.flatMap(
-      (input, idx) => convertToCalldata(ast.inputs[idx].type, input.value)
+      (input, idx) => {
+        let value;
+        try {
+          value = JSON.parse(input.value);
+        } catch {
+          value = input.value
+        }
+        return convertToCalldata(ast.inputs[idx].type, value)
+      }
     );
 
     addCall({
