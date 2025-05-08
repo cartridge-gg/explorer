@@ -46,7 +46,7 @@ export interface IOpenRPC {
 //   description?: string;
 // }
 
-interface Method {
+export interface Method {
   name: string;
   // tags?: (Tag | Reference)[]
   summary?: string;

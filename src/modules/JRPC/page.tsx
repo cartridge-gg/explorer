@@ -7,40 +7,48 @@ import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { BreadcrumbPage, cn, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@cartridge/ui-next";
 import { useQuery } from "@tanstack/react-query";
 import { InfoIcon, PlayIcon } from "lucide-react";
-import { useCallback, useMemo, useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { fromCamelCase } from "@/shared/utils/string";
-import { OpenRPC } from "./open-rpc";
+import { OpenRPC, Method, Request, Response } from "./open-rpc";
 
-export default function Playground() {
+export default function JRPCPlayground() {
   const { data: specVersion } = useSpecVersion();
-  const { data: rpc } = useQuery({
+  const { data: methodList } = useQuery({
     queryKey: ["starknet", "rpc", specVersion],
-    queryFn: () => OpenRPC.fromUrl(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${specVersion}/api/starknet_api_openrpc.json`),
+    queryFn: async () => {
+      const rpc = await OpenRPC.fromUrl(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${specVersion}/api/starknet_api_openrpc.json`)
+      return rpc.getMethodList()
+    },
     enabled: !!specVersion,
   });
 
-  useEffect(() => {
-    if (!rpc) return;
-    console.log({ list: rpc?.getMethodList() })
-  }, [rpc])
-
-  return null
-}
-
-export function JRPCPlayground() {
-  const { data: specVersion } = useSpecVersion();
-  const { data: schema } = useQuery({
-    queryKey: ["starknet", "rpc", specVersion],
-    queryFn: () => OpenRPC.fromUrl(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${specVersion}/api/starknet_api_openrpc.json`),
-  });
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<OpenwRPCMethod | undefined>(undefined);
-  const [response, setResponse] = useState<JRPCResponse>();
+  const methods = useMemo(() => {
+    const methods = methodList;
+    if (!methods) return [];
+    if (!search) return methods;
+
+    return methods.filter(m =>
+      m.name.toLowerCase().includes(search.toLowerCase()) ??
+      m.description?.toLowerCase().includes(search.toLowerCase()) ??
+      m.summary?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [methodList, search]);
+
+  const [selected, setSelected] = useState<Method | undefined>(() => methods?.[0]);
+  const [response, setResponse] = useState<Response>();
+
+  useEffect(() => {
+    if (selected || !methods.length) return;
+    setSelected(methods[0]);
+  }, [selected, methods])
+
   const requestJSON = useMemo(() => {
+    if (!selected) return
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, ...json } = formatRequest(request)
+    const { id, ...json } = formatRequest(selected)
     return JSON.stringify(json, null, 2)
-  }, [request])
+  }, [selected])
 
   const responseJSON = useMemo(() => {
     if (!response) return ""
@@ -50,7 +58,7 @@ export function JRPCPlayground() {
   }, [response])
 
   const onParamChange = useCallback((name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setRequest(req => ({
+    setSelected(req => ({
       ...req,
       params: req.params?.map(p => p.name === name ? ({ ...p, value: e.target.value }) : p)
     }))
@@ -62,22 +70,11 @@ export function JRPCPlayground() {
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify(formatRequest(request)),
+      body: JSON.stringify(formatRequest(selected)),
     })
     const json = await res.json();
     setResponse(json)
-  }, [request]);
-
-  const methods = useMemo(() => {
-    const methods = schema?.getMethodList();
-    if (!methods) return [];
-    if (!search) return methods;
-
-    return methods.filter(m =>
-      m.name.toLowerCase().includes(search.toLowerCase()) ??
-      m.summary.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [schema, search]);
+  }, [selected]);
 
   return (
     <div id="json-playground" className="w-full flex-grow gap-8">
@@ -118,16 +115,16 @@ export function JRPCPlayground() {
                   contentClassName="p-0 overflow-y-scroll"
                 >
                   <div>
-                    {methods.map((method) => (
+                    {methods?.map((method) => (
                       <div
                         className={cn(
                           "py-1 px-3",
-                          method.name === request.method
+                          method.name === selected?.name
                             ? "bg-[#DBDBDB]"
                             : "bg-[#F3F3F3] cursor-pointer",
                         )}
                         key={method.name}
-                        onClick={onMethodChange(method)}
+                        onClick={() => setSelected(method)}
                       >
                         {method.name.replace("starknet_", "")}
                       </div>
@@ -141,48 +138,43 @@ export function JRPCPlayground() {
           <div className="h-full flex-grow grid grid-rows-[min-content_1fr] gap-8 w-80">
             <div className="flex flex-col gap-2">
               <div className="uppercase font-bold text-lg">
-                {fromCamelCase(request.method.replace("starknet_", ""))}
+                {fromCamelCase(selected?.name?.replace("starknet_", "") ?? "")}
               </div>
               <div>
                 {
-                  schema?.methods.find((m) => m.name === request.method)
-                    ?.summary
+                  methods?.find((m) => m.name === selected?.name)?.summary
                 }
               </div>
             </div>
 
             <div className="flex flex-col gap-2">
-              {schema?.methods
-                .find((m) => m.name === request.method)
-                ?.params?.map((param) => (
-                  <div key={param.name} className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="uppercase">{param.name}</div>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger className="size-4 flex items-center justify-center">
-                            <InfoIcon className="size-3" />
-                          </TooltipTrigger>
-                          <TooltipContent
-                            side="right"
-                            className="bg-[#F3F3F3] p-2 max-w-[300px]"
-                          >
-                            <div>{param.description}</div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-
-                    <input
-                      className="bg-white border border-borderGray px-3 py-1 text-base rounded-none search-input relative focus:outline-none focus:ring-0"
-                      value={
-                        request.params?.find((p) => p.name === param.name)
-                          ?.value ?? ""
-                      }
-                      onChange={onParamChange(param.name)}
-                    />
+              {selected?.params?.map((param) => (
+                <div key={param.name} className="flex flex-col gap-2">
+                  {console.log(param)}
+                  <div className="flex items-center gap-2">
+                    <div className="uppercase">{param.name}</div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger className="size-4 flex items-center justify-center">
+                          <InfoIcon className="size-3" />
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="right"
+                          className="bg-[#F3F3F3] p-2 max-w-[300px]"
+                        >
+                          <div>{param.description}</div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
-                ))}
+
+                  <input
+                    className="bg-white border border-borderGray px-3 py-1 text-base rounded-none search-input relative focus:outline-none focus:ring-0"
+                    value={selected?.params?.find((p) => p.name === param.name)?.value ?? ""}
+                    onChange={onParamChange(param.name)}
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -227,10 +219,11 @@ export function JRPCPlayground() {
   );
 }
 
-function formatRequest(request: Request) {
-  const { params, ...json } = request
+function formatRequest(request: Method): Request {
+  const { id, name, params } = request
   return {
-    ...json,
+    id,
+    name,
     params: params?.map(p => {
       try {
         return JSON.parse(p.value)
