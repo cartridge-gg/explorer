@@ -298,7 +298,7 @@ function FunctionForm({
                   {input.type.type === "primitive" ? (
                     <input
                       type="text"
-                      className="px-2 py-1 text-left w-full"
+                      className="px-2 py-1 text-left w-full disabled:cursor-not-allowed"
                       placeholder={`${input.type.value.name}`}
                       onChange={(e) => onChange(i, e.target.value)}
                       value={
@@ -306,6 +306,7 @@ function FunctionForm({
                           ? state.inputs[i]?.value ?? ""
                           : ""
                       }
+                      disabled={!contract}
                     />
                   ) : (
                     <FunctionArgEditor
