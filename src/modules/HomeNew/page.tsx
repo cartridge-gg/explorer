@@ -1,7 +1,5 @@
-import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 import HomeSearchBar from "./SearchBar";
 import ChainDisplay from "@/shared/components/ChainDisplay";
-import { useQuery } from "@tanstack/react-query";
 import AccountDisplay from "@/shared/components/AccountDisplay";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { Link } from "react-router-dom";
@@ -44,7 +42,7 @@ function ChainInfoContainer() {
 
   return (
     <Link
-      to="/jrpc"
+      to="/openrpc"
       className="absolute bottom-0 left-0 flex flex-col uppercase text-sm items-start gap-1"
     >
       <ChainInfoItem

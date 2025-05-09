@@ -6,7 +6,7 @@ import EventDetails from "@/modules/EventDetails/page";
 import Home from "@/modules/HomeNew/page";
 import TransactionDetails from "@/modules/TransactionDetails/page";
 import TransactionsList from "@/modules/TransactionsList/page";
-import JRPCPlayground from "@/modules/JRPC/page";
+import { OpenRpcPlayground } from "@/modules/OpenRpc/page";
 import NotFound from "@/modules/NotFound/page";
 
 export const ROUTES = {
@@ -42,9 +42,9 @@ export const ROUTES = {
     urlPath: "/class/:classHash",
     component: <ClassHashDetails />,
   },
-  JRPC: {
-    urlPath: "/jrpc",
-    component: <JRPCPlayground />,
+  OPEN_RPC: {
+    urlPath: "/openrpc",
+    component: <OpenRpcPlayground />,
   },
   NOT_FOUND: {
     urlPath: "*",
