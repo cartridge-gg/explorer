@@ -3,6 +3,7 @@ import ChainDisplay from "@/shared/components/ChainDisplay";
 import AccountDisplay from "@/shared/components/AccountDisplay";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { Link } from "react-router-dom";
+import { ROUTES } from "@/constants/routes";
 
 // const POLLING_INTERVAL = 3000; // 3 seconds
 
@@ -42,7 +43,7 @@ function ChainInfoContainer() {
 
   return (
     <Link
-      to="/openrpc"
+      to={ROUTES.JSON_RPC.urlPath}
       className="absolute bottom-0 left-0 flex flex-col uppercase text-sm items-start gap-1"
     >
       <ChainInfoItem
