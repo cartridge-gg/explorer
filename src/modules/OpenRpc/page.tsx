@@ -115,6 +115,14 @@ export function OpenRpcPlayground() {
         loading: true,
       }
     }))
+    const f = form[selected.name]
+    const params = f.inputs.map(p => {
+      try {
+        return JSON.parse(p.value)
+      } catch {
+        return p.value
+      }
+    })
     const res = await fetch(rpcUrl(), {
       headers: {
         "Content-Type": "application/json",
@@ -124,7 +132,7 @@ export function OpenRpcPlayground() {
         jsonrpc: "2.0",
         id,
         method: selected.name,
-        params: form[selected.name].inputs.map(p => p.value)
+        params
       }),
     })
     const json = await res.json();

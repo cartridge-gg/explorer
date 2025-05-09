@@ -1,7 +1,5 @@
-import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 import HomeSearchBar from "./SearchBar";
 import ChainDisplay from "@/shared/components/ChainDisplay";
-import { useQuery } from "@tanstack/react-query";
 import AccountDisplay from "@/shared/components/AccountDisplay";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { Link } from "react-router-dom";
