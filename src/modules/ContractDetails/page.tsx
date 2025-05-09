@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { useState } from "react";
@@ -106,7 +106,9 @@ export default function ContractDetails() {
             </SectionBoxEntry>
 
             <SectionBoxEntry title="Class Hash">
-              {isMobile && classHash ? truncateString(classHash) : classHash}
+              <Link to={`../class/${classHash}`} className="hover:underline">
+                {isMobile && classHash ? truncateString(classHash) : classHash}
+              </Link>
             </SectionBoxEntry>
           </SectionBox>
 
@@ -177,6 +179,6 @@ export default function ContractDetails() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
