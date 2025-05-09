@@ -10,6 +10,7 @@ import { InfoIcon, PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fromCamelCase } from "@/shared/utils/string";
 import { OpenRPC, Method } from "./open-rpc";
+import { ParamEditor } from "./Editor";
 
 interface FormState {
   inputs: { name: string, value: string }[];
@@ -79,7 +80,7 @@ export default function JRPCPlayground() {
     setSelected(method)
     setForm(prev => ({
       ...prev,
-      [method.name]: prev[method.name] ? prev[method.name] : {
+      [method.name]: prev[method.name] ?? {
         inputs: method.params?.map(p => ({ name: p.name, value: "" })),
         result: null,
         hasCalled: false,
@@ -88,7 +89,7 @@ export default function JRPCPlayground() {
     }))
   }, [])
 
-  const onParamChange = useCallback((i: number, value: string) => {
+  const onParamChange = useCallback((i: number, value?: string) => {
     if (!selected) return;
 
     setForm(prev => ({
@@ -97,7 +98,7 @@ export default function JRPCPlayground() {
         ...prev[selected.name],
         inputs: prev[selected.name].inputs.map(
           (p, ii) => ii === i
-            ? { ...p, value }
+            ? { ...p, value: value ?? "" }
             : p
         ),
       }
@@ -119,7 +120,12 @@ export default function JRPCPlayground() {
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify({ id, name: selected.name, params: form[selected.name].inputs.map(p => p.value) }),
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id,
+        method: selected.name,
+        params: form[selected.name].inputs.map(p => p.value)
+      }),
     })
     const json = await res.json();
     setId(id => id + 1)
@@ -217,36 +223,55 @@ export default function JRPCPlayground() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              {selected?.params?.map((p, i) => {
-                return (
-                  <div key={p.name} className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="uppercase">{p.name}</div>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger className="size-4 flex items-center justify-center">
-                            <InfoIcon className="size-3" />
-                          </TooltipTrigger>
-                          <TooltipContent
-                            side="right"
-                            className="bg-[#F3F3F3] p-2 max-w-[300px]"
-                          >
-                            <div>{p.description ?? p.summary}</div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
+            {!!selected?.params?.length && (
+              <table className="bg-white overflow-x-auto max-h-[200px]">
+                <tbody>
+                  {selected.params.map((p, i) => (
+                    <tr
+                      key={i}
+                      className={i === selected.params.length - 1 ? "border-b" : ""}
+                    >
+                      <td className="px-2 py-1 text-left align-top w-[90px] italic">
+                        <div className="flex items-center gap-2">
+                          <span>{p.name}</span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger >
+                                <InfoIcon className="size-3" />
+                              </TooltipTrigger>
+                              <TooltipContent
+                                side="right"
+                                className="bg-[#F3F3F3] p-2 max-w-[300px]"
+                              >
+                                <div>{p.description ?? p.summary}</div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </td>
 
-                    <input
-                      className="bg-white border border-borderGray px-3 py-1 text-base rounded-none search-input relative focus:outline-none focus:ring-0"
-                      value={form[selected.name].inputs[i].value as string ?? ""}
-                      onChange={(e) => onParamChange(i, e.target.value)}
-                    />
-                  </div>
-                )
-              })}
-            </div>
+                      <td className="text-left align-top p-0">
+                        {OpenRPC.isPrimitive(p) ? (
+                          <input
+                            type="text"
+                            className="px-2 py-1 text-left w-full"
+                            value={form[selected.name].inputs[i].value}
+                            onChange={(e) => onParamChange(i, e.target.value)}
+                          />
+                        ) : (
+                          <ParamEditor
+                            name={`${selected.name}_${p.name}`}
+                            schema={p.schema}
+                            value={form[selected.name].inputs[i].value}
+                            onChange={(value) => onParamChange(i, value)}
+                          />
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 

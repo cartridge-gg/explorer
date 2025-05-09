@@ -66,7 +66,7 @@ export interface ContentDescriptor {
   summary?: string;
   description?: string
   required?: boolean;
-  schema: Schema;
+  schema: Schema | Reference;
   deprecated?: boolean
 }
 
@@ -78,45 +78,6 @@ interface Schema {
   params: (/* Example | */ Reference)[];
   result?: /* Example | */ Reference;
 }
-
-// // Used in `starknet_getStorageProof`
-// interface StringObject {
-//   type: "string";
-//   enum?: string[],
-//   description?: string;
-//   pattern?: string;
-// }
-
-// // Used in `starknet_getTransactionByBlockIdAndIndex`
-// interface NumberObject {
-//   title: string;
-//   type: "number";
-//   minimum?: number;
-// }
-
-// // Used in `BLOCK_NUMBER`
-// interface IntegerObject {
-//   title: string;
-//   type: "integer";
-//   minimum?: number;
-// }
-
-// // Used in `BLOCK_BODY_WITH_TX_HASHES`
-// interface ObjectObject {
-//   type: "object";
-//   properties: Record<string, Schema>;
-//   required?: string[];
-// }
-
-// // Used in`starknet_getEvents`
-// interface AllOf {
-//   title: string;
-//   allOf: Schema[];
-// }
-
-// interface Not<T> {
-//   not: T
-// }
 
 // interface ExamplePairing {
 //   name: string;
@@ -201,7 +162,12 @@ export class OpenRPC {
     if (!m) return;
     const method = {
       ...m,
-      params: m.params.map(p => ({...p, ...OpenRPC.resolveReference(p.schema, this.root)}))
+      params: m.params.map(
+        p => ({
+          ...p,
+          schema: OpenRPC.resolveReference(p.schema, this.root)
+        })
+      )
     }
     return method
   }
@@ -219,7 +185,7 @@ export class OpenRPC {
           properties: Object.entries(schema.properties).reduce(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (acc: any, [key, p]: any) => {
-              return {...acc, [key]: {...p, ...OpenRPC.resolveReference(p, root)}}
+              return {...acc, [key]: OpenRPC.resolveReference(p, root)}
             },
             schema.properties
           )
@@ -233,12 +199,12 @@ export class OpenRPC {
         if ("oneOf" in schema) {
           return {
             ...schema,
-            oneOf: schema.oneOf.map(s => ({...s, ...OpenRPC.resolveReference(s, root)}))
+            oneOf: schema.oneOf.map(s => OpenRPC.resolveReference(s, root))
           }
         } else if ("allOf" in schema) {
           return {
             ...schema,
-            allOf: schema.allOf.map(s => ({...s, ...OpenRPC.resolveReference(s, root)}))
+            allOf: schema.allOf.map(s => OpenRPC.resolveReference(s, root))
           }
         }
         return schema
@@ -247,5 +213,21 @@ export class OpenRPC {
 
   static isReference(val: unknown): val is Reference {
     return typeof val === "object" && val !== null && "$ref" in val;
+  }
+
+  static isPrimitive(cd: ContentDescriptor) {
+    if (!("type" in cd)) {
+      return false;
+    }
+
+    switch (cd.type) {
+      case "string":
+      case "number":
+      case "integer":
+      case "boolean":
+        return true;
+      default:
+        return false;
+    }
   }
 }
