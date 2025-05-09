@@ -4,7 +4,7 @@ import { cn } from "@cartridge/ui-next";
 
 export function Accordion({ children }: PropsWithChildren) {
   return (
-    <div className="accordion-container [&_div:not(:last-child)_.accordion-header]:mb-[-1px] [&_div:last-child_.shadow-inner]:border-b">
+    <div className="accordion-container [&_div:not(:last-child)_.accordion-header]:mb-[-1px]">
       {children}
     </div>
   );

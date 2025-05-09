@@ -189,7 +189,7 @@ export function JsonRpcPlayground() {
               onChange={(e) => setSearch(e.target.value)}
             />
 
-            <div className="max-h-[30vh] sl:max-h-none overflow-y-auto">
+            <div className="max-h-[30vh] sl:max-h-none overflow-y-auto border-b border-borderGray">
               <Accordion>
                 <AccordionItem
                   open
