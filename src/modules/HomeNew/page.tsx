@@ -44,7 +44,7 @@ function ChainInfoContainer() {
 
   return (
     <Link
-      to="/jrpc"
+      to="/openrpc"
       className="absolute bottom-0 left-0 flex flex-col uppercase text-sm items-start gap-1"
     >
       <ChainInfoItem

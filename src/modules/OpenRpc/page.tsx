@@ -19,7 +19,7 @@ interface FormState {
   loading: boolean;
 }
 
-export default function JRPCPlayground() {
+export function OpenRpcPlayground() {
   const { data: specVersion } = useSpecVersion();
   const { data: rpc } = useQuery({
     queryKey: ["starknet", "rpc", specVersion],
