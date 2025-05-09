@@ -9,22 +9,29 @@ import { useQuery } from "@tanstack/react-query";
 import { InfoIcon, PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fromCamelCase } from "@/shared/utils/string";
-import { OpenRPC, Method, Request, Response } from "./open-rpc";
+import { OpenRPC, Method } from "./open-rpc";
+
+interface FormState {
+  inputs: { name: string, value: string }[];
+  result: unknown;
+  hasCalled: boolean;
+  loading: boolean;
+}
 
 export default function JRPCPlayground() {
   const { data: specVersion } = useSpecVersion();
-  const { data: methodList } = useQuery({
+  const { data: rpc } = useQuery({
     queryKey: ["starknet", "rpc", specVersion],
     queryFn: async () => {
       const rpc = await OpenRPC.fromUrl(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${specVersion}/api/starknet_api_openrpc.json`)
-      return rpc.getMethodList()
+      return rpc
     },
     enabled: !!specVersion,
   });
 
   const [search, setSearch] = useState("");
   const methods = useMemo(() => {
-    const methods = methodList;
+    const methods = rpc?.getMethodList();
     if (!methods) return [];
     if (!search) return methods;
 
@@ -33,48 +40,111 @@ export default function JRPCPlayground() {
       m.description?.toLowerCase().includes(search.toLowerCase()) ??
       m.summary?.toLowerCase().includes(search.toLowerCase())
     );
-  }, [methodList, search]);
+  }, [rpc, search]);
 
+  const [id, setId] = useState(0);
   const [selected, setSelected] = useState<Method | undefined>(() => methods?.[0]);
-  const [response, setResponse] = useState<Response>();
-
-  useEffect(() => {
-    if (selected || !methods.length) return;
-    setSelected(methods[0]);
-  }, [selected, methods])
+  const [form, setForm] = useState<Record<string, FormState>>({});
 
   const requestJSON = useMemo(() => {
-    if (!selected) return
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, ...json } = formatRequest(selected)
-    return JSON.stringify(json, null, 2)
-  }, [selected])
+    if (!selected || !form[selected.name]) return
+    const { inputs } = form[selected.name]
+
+    return JSON.stringify({
+      jsonrpc: "2.0",
+      method: selected.name,
+      params: inputs?.map(p => {
+        if (typeof p.value === "undefined") {
+          return ""
+        }
+
+        try {
+          return JSON.parse(p.value)
+        } catch {
+          return p.value
+        }
+      }),
+    }, null, 2)
+  }, [selected, form])
 
   const responseJSON = useMemo(() => {
-    if (!response) return ""
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, ...json } = response
-    return JSON.stringify(json, null, 2)
-  }, [response])
+    if (!selected || !form[selected.name]) return ""
 
-  const onParamChange = useCallback((name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelected(req => ({
-      ...req,
-      params: req.params?.map(p => p.name === name ? ({ ...p, value: e.target.value }) : p)
+    const { result } = form[selected.name]
+    if (!result) return ""
+    return JSON.stringify(result, null, 2)
+  }, [selected, form])
+
+  const onMethodChange = useCallback((method: Method) => {
+    setSelected(method)
+    setForm(prev => ({
+      ...prev,
+      [method.name]: prev[method.name] ? prev[method.name] : {
+        inputs: method.params?.map(p => ({ name: p.name, value: "" })),
+        result: null,
+        hasCalled: false,
+        loading: false,
+      }
     }))
   }, [])
 
+  const onParamChange = useCallback((i: number, value: string) => {
+    if (!selected) return;
+
+    setForm(prev => ({
+      ...prev,
+      [selected.name]: {
+        ...prev[selected.name],
+        inputs: prev[selected.name].inputs.map(
+          (p, ii) => ii === i
+            ? { ...p, value }
+            : p
+        ),
+      }
+    }))
+  }, [selected]);
+
   const onExecute = useCallback(async () => {
+    if (!selected) return;
+
+    setForm(prev => ({
+      ...prev,
+      [selected.name]: {
+        ...prev[selected.name],
+        loading: true,
+      }
+    }))
     const res = await fetch(rpcUrl(), {
       headers: {
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify(formatRequest(selected)),
+      body: JSON.stringify({ id, name: selected.name, params: form[selected.name].inputs.map(p => p.value) }),
     })
     const json = await res.json();
-    setResponse(json)
-  }, [selected]);
+    setId(id => id + 1)
+    setForm(prev => ({
+      ...prev,
+      [selected.name]: {
+        ...prev[selected.name],
+        result: json,
+        hasCalled: true,
+        loading: false,
+      }
+    }))
+  }, [id, selected, form]);
+
+  useEffect(() => {
+    if (!methods.length) return;
+    setSelected(methods[0])
+    setForm(prev => ({
+      ...prev,
+      [methods[0].name]: {
+        ...prev[methods[0].name],
+        inputs: methods[0].params?.map(p => ({ name: p.name, value: "" })),
+      }
+    }))
+  }, [methods])
 
   return (
     <div id="json-playground" className="w-full flex-grow gap-8">
@@ -124,7 +194,7 @@ export default function JRPCPlayground() {
                             : "bg-[#F3F3F3] cursor-pointer",
                         )}
                         key={method.name}
-                        onClick={() => setSelected(method)}
+                        onClick={() => onMethodChange(method)}
                       >
                         {method.name.replace("starknet_", "")}
                       </div>
@@ -148,33 +218,34 @@ export default function JRPCPlayground() {
             </div>
 
             <div className="flex flex-col gap-2">
-              {selected?.params?.map((param) => (
-                <div key={param.name} className="flex flex-col gap-2">
-                  {console.log(param)}
-                  <div className="flex items-center gap-2">
-                    <div className="uppercase">{param.name}</div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger className="size-4 flex items-center justify-center">
-                          <InfoIcon className="size-3" />
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="right"
-                          className="bg-[#F3F3F3] p-2 max-w-[300px]"
-                        >
-                          <div>{param.description}</div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
+              {selected?.params?.map((p, i) => {
+                return (
+                  <div key={p.name} className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="uppercase">{p.name}</div>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="size-4 flex items-center justify-center">
+                            <InfoIcon className="size-3" />
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="right"
+                            className="bg-[#F3F3F3] p-2 max-w-[300px]"
+                          >
+                            <div>{p.description ?? p.summary}</div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
 
-                  <input
-                    className="bg-white border border-borderGray px-3 py-1 text-base rounded-none search-input relative focus:outline-none focus:ring-0"
-                    value={selected?.params?.find((p) => p.name === param.name)?.value ?? ""}
-                    onChange={onParamChange(param.name)}
-                  />
-                </div>
-              ))}
+                    <input
+                      className="bg-white border border-borderGray px-3 py-1 text-base rounded-none search-input relative focus:outline-none focus:ring-0"
+                      value={form[selected.name].inputs[i].value as string ?? ""}
+                      onChange={(e) => onParamChange(i, e.target.value)}
+                    />
+                  </div>
+                )
+              })}
             </div>
           </div>
         </div>
@@ -217,19 +288,4 @@ export default function JRPCPlayground() {
       </div>
     </div>
   );
-}
-
-function formatRequest(request: Method): Request {
-  const { id, name, params } = request
-  return {
-    id,
-    name,
-    params: params?.map(p => {
-      try {
-        return JSON.parse(p.value)
-      } catch {
-        return p.value
-      }
-    }),
-  }
 }

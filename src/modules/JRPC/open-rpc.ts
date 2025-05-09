@@ -1,5 +1,4 @@
 import { compileSchema } from "json-schema-library";
-
 import { SchemaNode } from "json-schema-library";
 
 // https://spec.open-rpc.org/#openrpc-object
@@ -62,7 +61,7 @@ export interface Method {
   // examples?: (ExamplePairing | Reference)[];
 }
 
-interface ContentDescriptor {
+export interface ContentDescriptor {
   name: string;
   summary?: string;
   description?: string
@@ -172,28 +171,6 @@ interface Reference {
   $ref: string;
 }
 
-export interface Request {
-  jsonrpc: "2.0";
-  id: number;
-  method: string;
-  params?: RequestParam[];
-}
-
-interface RequestParam {
-  name: string;
-  value: unknown;
-}
-
-export interface Response {
-  jsonrpc: "2.0";
-  id: number;
-  result?: unknown;
-  error?: {
-    code: number;
-    message: string;
-  };
-}
-
 export class OpenRPC {
   readonly schema: IOpenRPC;
   readonly root: SchemaNode;
@@ -224,7 +201,7 @@ export class OpenRPC {
     if (!m) return;
     const method = {
       ...m,
-      params: m.params.map(p => OpenRPC.resolveReference(p.schema, this.root))
+      params: m.params.map(p => ({...p, ...OpenRPC.resolveReference(p.schema, this.root)}))
     }
     return method
   }
@@ -256,12 +233,12 @@ export class OpenRPC {
         if ("oneOf" in schema) {
           return {
             ...schema,
-            oneOf: schema.oneOf.map(t => OpenRPC.resolveReference(t, root))
+            oneOf: schema.oneOf.map(s => ({...s, ...OpenRPC.resolveReference(s, root)}))
           }
         } else if ("allOf" in schema) {
           return {
             ...schema,
-            allOf: schema.allOf.map(t => OpenRPC.resolveReference(t, root))
+            allOf: schema.allOf.map(s => ({...s, ...OpenRPC.resolveReference(s, root)}))
           }
         }
         return schema
