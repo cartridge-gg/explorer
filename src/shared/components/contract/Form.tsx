@@ -15,6 +15,7 @@ import {
   FunctionAst,
   FunctionInputWithValue,
   isReadFunction,
+  createJsonSchemaFromTypeNode,
 } from "@/shared/utils/abi";
 import { useAccount } from "@starknet-react/core";
 import { Link } from "react-router-dom";
@@ -285,9 +286,8 @@ function FunctionForm({
       <ParamForm
         params={ast.inputs.map((input, i) => ({
           name: input.name,
-          schema: {
-            type: input.type.type,
-          },
+          schema: createJsonSchemaFromTypeNode(input.type) as { type: string },
+          placeholder: input.type.value.name,
           value: i < state.inputs.length
             ? state.inputs[i]?.value
             : input.type.type === "struct"

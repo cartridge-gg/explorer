@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fromCamelCase } from "@/shared/utils/string";
-import { OpenRPC, Method, Schema } from "./open-rpc";
+import { OpenRPC, Method } from "./open-rpc";
 import { ParamForm } from "@/shared/form";
 
 interface FormState {

@@ -68,10 +68,6 @@ export type FunctionInputWithValue = AbiEntry & {
   value: string;
 };
 
-export interface ConstructorAbi {
-  inputs: AbiEntry[]
-};
-
 export interface FunctionAbiWithAst extends FunctionAbi {
   ast: FunctionAst;
 };
@@ -86,7 +82,6 @@ export function createJsonSchemaFromTypeNode(type: TypeNode): unknown {
     case "enum":
       return createEnumSchema(type.value);
     case "option":
-      console.log("option element type", type.value.element_type);
       return createJsonSchemaFromTypeNode(type.value.element_type);
     case "array":
       return createArraySchema(type.value);
@@ -184,7 +179,6 @@ function buildTypeRegistries(
   const structRegistry = new Map<string, AbiStruct>();
   const enumRegistry = new Map<string, AbiEnum>();
 
-  // console.log("abi", abi);
   for (const item of abi) {
     if (item.type === "struct") {
       structRegistry.set(item.name, item);
@@ -459,15 +453,12 @@ export function convertToCalldata(type: TypeNode, value: any): Calldata {
 
 function convertStructToCalldata(type: StructType, value: any): Calldata {
   let calldata: Calldata = [];
-  console.log("struct value", value);
 
   type.members.forEach(([memberName, memberType]) => {
     const memberValue = value[memberName];
     const memberCalldata = convertToCalldata(memberType, memberValue);
     calldata = calldata.concat(memberCalldata);
   });
-
-  console.log("type", type, calldata);
 
   return calldata;
 }
@@ -478,9 +469,7 @@ function convertArrayToCalldata(type: ArrayType, value: any[]): Calldata {
   calldata.push(arrayLength.toString());
 
   value.forEach((elem) => {
-    console.log("element_type", type.element_type, "elem", elem);
     const elemCalldata = convertToCalldata(type.element_type, elem);
-    console.log("elemcalldata", elemCalldata);
     calldata = calldata.concat(elemCalldata);
   });
 
@@ -530,19 +519,13 @@ function convertPrimitiveToCalldata(
 }
 
 export function parseAbi(abi: Abi) {
-  let constructor: ConstructorAbi;
+  let constructor: FunctionAbiWithAst;
   const functions: FunctionAbiWithAst[] = [];
 
   abi.forEach((item) => {
     switch (item.type) {
       case "constructor": {
-        const _item = item as Omit<FunctionAbi, "outputs">;
-        constructor = {
-          inputs: _item.inputs.map((input) => ({
-            name: input.name,
-            type: input.type,
-          })),
-        };
+        constructor = getFunctionAbiWithAst(abi, item);
         break;
       }
       case "interface": {

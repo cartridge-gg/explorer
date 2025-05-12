@@ -8,6 +8,7 @@ import { useCallback } from "react"
 export function ParamForm({
   params,
   onChange,
+  disabled = false,
 }: {
   params: {
     name: string,
@@ -15,8 +16,10 @@ export function ParamForm({
     summary?: string,
     value: string,
     schema: { type: string }
+    placeholder?: string
   }[]
   onChange: (i: number, value: string) => void
+  disabled?: boolean
 }) {
   if (params.length === 0) return null
 
@@ -56,6 +59,8 @@ export function ParamForm({
                   className="px-2 py-1 text-left w-full"
                   value={p.value}
                   onChange={(e) => onChange(i, e.target.value)}
+                  disabled={disabled}
+                  placeholder={p.placeholder}
                 />
               ) : (
                 <ParamEditor
@@ -63,6 +68,7 @@ export function ParamForm({
                   schema={p.schema}
                   value={p.value}
                   onChange={(value) => onChange(i, value ?? "")}
+                  readOnly={disabled}
                 />
               )}
             </td>
