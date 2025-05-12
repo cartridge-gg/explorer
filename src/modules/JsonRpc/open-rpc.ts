@@ -19,7 +19,6 @@ export interface IOpenRPC {
 //   license?: License;
 //   version: string;
 // }
-
 // interface Contact {
 //   name?: string;
 //   url?: string;
@@ -71,8 +70,9 @@ export interface ContentDescriptor {
 }
 
 // TODO: Is there apppropriate type in `json-schema-library`? Otherwise too many type assertions
-interface Schema {
+export interface Schema {
   name: string;
+  type?: string;
   description?: string;
   summary?: string;
   params: (/* Example | */ Reference)[];
@@ -215,12 +215,12 @@ export class OpenRPC {
     return typeof val === "object" && val !== null && "$ref" in val;
   }
 
-  static isPrimitive(cd: ContentDescriptor) {
-    if (!("type" in cd)) {
+  static isPrimitive(schema: { type: string }) {
+    if (!("type" in schema)) {
       return false;
     }
 
-    switch (cd.type) {
+    switch (schema.type) {
       case "string":
       case "number":
       case "integer":

@@ -22,7 +22,7 @@ import AddIcon from "@/shared/icons/Add";
 import { cn } from "@cartridge/ui-next";
 import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
 import { useToast } from "@/shared/components/toast";
-import { ParamEditor } from "../ParamEditor";
+import { ParamForm } from "@/shared/form";
 
 export interface ContractFormProps {
   contract?: Contract;
@@ -282,55 +282,23 @@ function FunctionForm({
         </div>
       )}
 
-      {!!ast.inputs.length && (
-        <table className="bg-white overflow-x w-full">
-          <tbody>
-            {ast.inputs.map((input, i) => (
-              <tr
-                key={i}
-                className={`${i !== ast.inputs.length - 1 ? "border-b" : ""}`}
-              >
-                <td className="px-2 py-1 text-left align-top w-[90px] italic">
-                  <span>{input.name}</span>
-                </td>
+      <ParamForm
+        params={ast.inputs.map((input, i) => ({
+          name: input.name,
+          schema: {
+            type: input.type.type,
+          },
+          value: i < state.inputs.length
+            ? state.inputs[i]?.value
+            : input.type.type === "struct"
+              ? "{\n\t\n}"
+              : input.type.type === "array"
+                ? "[\n\t\n]"
+                : "",
 
-                <td className="text-left align-top p-0">
-                  {input.type.type === "primitive" ? (
-                    <input
-                      type="text"
-                      className="px-2 py-1 text-left w-full disabled:cursor-not-allowed"
-                      placeholder={`${input.type.value.name}`}
-                      onChange={(e) => onChange(i, e.target.value)}
-                      value={
-                        i < state.inputs.length
-                          ? state.inputs[i]?.value ?? ""
-                          : ""
-                      }
-                      disabled={!contract}
-                    />
-                  ) : (
-                    <ParamEditor
-                      name={`${ast.name}_${input.name}`}
-                      onChange={(value) => onChange(i, value ?? "")}
-                      schema={input}
-                      value={
-                        i < state.inputs.length
-                          ? state.inputs[i]?.value
-                          : input.type.type === "struct"
-                            ? "{\n\t\n}"
-                            : input.type.type === "array"
-                              ? "[\n\t\n]"
-                              : ""
-                      }
-                      readOnly={!contract}
-                    />
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+        }))}
+        onChange={(i, value) => onChange(i, value)}
+      />
 
       {state.hasCalled && (
         <div className="w-full flex flex-col gap-1">
