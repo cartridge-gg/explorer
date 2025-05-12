@@ -6,12 +6,14 @@ export function ParamEditor({
   name,
   schema,
   value,
-  onChange
+  onChange,
+  readOnly = false,
 }: {
   name: string,
   schema: unknown,
   value: string,
   onChange: (value?: string) => void
+  readOnly?: boolean;
 }) {
   const onMount = useCallback((editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
     const uri = monaco.Uri.parse(`file:///${name}.json`)
@@ -39,6 +41,7 @@ export function ParamEditor({
       onMount={onMount}
       onChange={onChange}
       options={{
+        readOnly,
         lineNumbers: "off",
         cursorStyle: "line",
         automaticLayout: true,

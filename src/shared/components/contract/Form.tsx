@@ -16,13 +16,13 @@ import {
   FunctionInputWithValue,
   isReadFunction,
 } from "@/shared/utils/abi";
-import FunctionArgEditor from "@/shared/components/FunctionInputEditor";
 import { useAccount } from "@starknet-react/core";
 import { Link } from "react-router-dom";
 import AddIcon from "@/shared/icons/Add";
 import { cn } from "@cartridge/ui-next";
 import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
 import { useToast } from "@/shared/components/toast";
+import { ParamEditor } from "../ParamEditor";
 
 export interface ContractFormProps {
   contract?: Contract;
@@ -309,11 +309,10 @@ function FunctionForm({
                       disabled={!contract}
                     />
                   ) : (
-                    <FunctionArgEditor
-                      key={i}
-                      functionName={ast.name}
-                      argInfo={input}
-                      onChange={(value) => onChange(i, value)}
+                    <ParamEditor
+                      name={`${ast.name}_${input.name}`}
+                      onChange={(value) => onChange(i, value ?? "")}
+                      schema={input}
                       value={
                         i < state.inputs.length
                           ? state.inputs[i]?.value

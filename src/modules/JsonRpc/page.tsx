@@ -9,8 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import { InfoIcon, PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fromCamelCase } from "@/shared/utils/string";
+import { ParamEditor } from "@/shared/components/ParamEditor";
 import { OpenRPC, Method } from "./open-rpc";
-import { ParamEditor } from "./Editor";
 
 interface FormState {
   inputs: { name: string, value: string }[];
