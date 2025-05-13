@@ -3,11 +3,10 @@ import ChainDisplay from "@/shared/components/ChainDisplay";
 import AccountDisplay from "@/shared/components/AccountDisplay";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { Link } from "react-router-dom";
-import { ROUTES } from "@/constants/routes";
 
 // const POLLING_INTERVAL = 3000; // 3 seconds
 
-export default function Home() {
+export function Home() {
   // // Fetch the latest block number
   // const { data: latestBlockNumber } = useQuery({
   //   queryKey: QUERY_KEYS.getBlockNumber,
@@ -43,7 +42,7 @@ function ChainInfoContainer() {
 
   return (
     <Link
-      to={ROUTES.JSON_RPC.urlPath}
+      to="./json-rpc"
       className="absolute bottom-0 left-0 flex flex-col uppercase text-sm items-start gap-1"
     >
       <ChainInfoItem

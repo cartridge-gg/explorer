@@ -1,6 +1,4 @@
-import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
-import { ROUTES } from "@/constants/routes";
 import { EventTableData } from "@/types/types";
 import {
   ColumnDef,
@@ -10,37 +8,14 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useCallback, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 interface EventListProps {
   events: EventTableData[];
 }
 
-export default function EventList({ events }: EventListProps) {
-  const navigate = useNavigate();
-  const { isMobile } = useScreen();
-  const navigateToTxn = useCallback(
-    (txnHash: string) => {
-      navigate(
-        `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(":txHash", txnHash)}`
-      );
-    },
-    [navigate]
-  );
-
-  const navigateToContract = useCallback(
-    (contractAddress: string) => {
-      navigate(
-        `${ROUTES.CONTRACT_DETAILS.urlPath.replace(
-          ":contractAddress",
-          contractAddress
-        )}`
-      );
-    },
-    [navigate]
-  );
-
+export function EventList({ events }: EventListProps) {
   const columnHelper = createColumnHelper<EventTableData>();
   const columns: ColumnDef<EventTableData, any>[] = [
     columnHelper.accessor("id", {
@@ -48,11 +23,11 @@ export default function EventList({ events }: EventListProps) {
       cell: (info) => info.renderValue(),
     }),
     columnHelper.accessor("txn_hash", {
-      header: () => <th className="px-[15px] text-left">Transaction</th>,
+      header: () => <th className="px-4 text-left">Transaction</th>,
       cell: (info) => truncateString(info.renderValue()),
     }),
     columnHelper.accessor("from", {
-      header: () => <th className="px-[15px] text-left">From Address</th>,
+      header: () => <th className="px-4 text-left">From Address</th>,
       cell: (info) => truncateString(info.renderValue()),
     }),
   ];
@@ -97,52 +72,38 @@ export default function EventList({ events }: EventListProps) {
           <tbody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row, id) => (
-                <tr
-                  key={id}
-                  className="hover:bg-button-whiteInitialHover cursor-pointer"
-                >
-                  {row.getVisibleCells().map((cell) => {
-                    if (cell.column.id === "txn_hash") {
-                      return (
-                        <td
-                          key={cell.id}
-                          onClick={() => navigateToTxn(row.original.txn_hash)}
-                          className={
-                            "hover:underline cursor-pointer text-left px-[15px]"
-                          }
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      );
-                    } else if (cell.column.id === "from") {
-                      return (
-                        <td
-                          key={cell.id}
-                          onClick={() => navigateToContract(row.original.from)}
-                          className={
-                            "hover:underline cursor-pointer text-left px-[15px]"
-                          }
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      );
-                    } else {
-                      return (
-                        <td key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      );
-                    }
-                  })}
+                <tr key={id} >
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="p-0">
+                      {(() => {
+                        switch (cell.column.id) {
+                          case "txn_hash":
+                            return (
+                              <Link to={`../tx/${row.original.txn_hash}`} className="flex px-4 hover:bg-button-whiteInitialHover hover:underline">
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext()
+                                )}
+                              </Link>
+                            )
+                          case "from":
+                            return (
+                              <Link to={`../contract/${row.original.from}`} className="flex px-4 hover:bg-button-whiteInitialHover hover:underline">
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext()
+                                )}
+                              </Link>
+                            )
+                          default:
+                            return flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )
+                        }
+                      })()}
+                    </td>
+                  ))}
                 </tr>
               ))
             ) : (
@@ -190,6 +151,6 @@ export default function EventList({ events }: EventListProps) {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

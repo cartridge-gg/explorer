@@ -24,8 +24,8 @@ import {
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
-import TxList from "./TxList";
-import EventList from "./EventList";
+import { TxList } from "./TxList";
+import { EventList } from "./EventList";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { QUERY_KEYS } from "@/services/starknet_provider_config";
 import BlockNavigation from "./BlockNavigation";
@@ -33,7 +33,7 @@ import AddressDisplay from "@/shared/components/AddressDisplay";
 
 const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
 
-export default function BlockDetails() {
+export function Block() {
   const { isMobile } = useScreen();
   const { blockId } = useParams<{ blockId: string }>();
   const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);

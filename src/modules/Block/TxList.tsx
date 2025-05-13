@@ -8,32 +8,22 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ROUTES } from "@/constants/routes";
 import TxTypeToggle from "./TxTypeToggle";
 import { TransactionTableData } from "@/types/types";
-import { useNavigate } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { useWindowDimensions } from "@/shared/hooks/useWindow";
+import { cn } from "@cartridge/ui-next";
+import { useNavigate } from "react-router-dom";
 
 interface TxListProps {
   transactions: TransactionTableData[];
 }
 
-export default function TxList({ transactions }: TxListProps) {
-  const navigate = useNavigate();
+export function TxList({ transactions }: TxListProps) {
   const { isMobile } = useScreen();
   const { height } = useWindowDimensions();
-
-  const navigateToTxn = useCallback(
-    (txnHash: string) => {
-      navigate(
-        `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(":txHash", txnHash)}`
-      );
-    },
-    [navigate]
-  );
-
+  const navigate = useNavigate();
   const columnHelper = createColumnHelper<TransactionTableData>();
 
   const transaction_columns: ColumnDef<TransactionTableData, any>[] = [
@@ -42,7 +32,7 @@ export default function TxList({ transactions }: TxListProps) {
       cell: (info) => info.renderValue(),
     }),
     columnHelper.accessor("hash", {
-      header: () => <th className="px-[15px] text-left">Hash</th>,
+      header: () => <th className="px-4 text-left">Hash</th>,
       cell: (info) => (
         <>
           {isMobile
@@ -57,7 +47,7 @@ export default function TxList({ transactions }: TxListProps) {
       },
     }),
     columnHelper.accessor("type", {
-      header: () => <th className="w-[122px] px-[15px] text-left">Type</th>,
+      header: () => <th className="w-[122px] px-4 text-left">Type</th>,
       cell: (info) => (
         <span className="text-nowrap">
           {info.renderValue().replace(/_/g, " ")}
@@ -71,13 +61,13 @@ export default function TxList({ transactions }: TxListProps) {
     }),
     columnHelper.accessor("status", {
       header: (ctx) => (
-        <th key={ctx.header.id} className="px-[15px] text-left w-[103px]">
+        <th key={ctx.header.id} className="px-4 text-left w-[103px]">
           Status
         </th>
       ),
       cell: (info) => (
         <div
-          className={`flex items-center justify-center border border-primary uppercase font-bold text-white px-2 py-0 h-[15px] text-sm w-[67px] ${info.renderValue() === "SUCCEEDED"
+          className={`w-full flex items-center justify-center border border-primary uppercase font-bold text-white px-2 py-0 h-[15px] text-sm ${info.renderValue() === "SUCCEEDED"
             ? "bg-[#7BA797]"
             : info.renderValue() === "REVERTED"
               ? "bg-[#C4806D]"
@@ -172,30 +162,20 @@ export default function TxList({ transactions }: TxListProps) {
 
           <tbody>
             {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row, id) => (
+              table.getRowModel().rows.map((row, i) => (
                 <tr
-                  key={id}
-                  onClick={() => navigateToTxn(row.original.hash)}
+                  key={i}
                   className="hover:bg-button-whiteInitialHover cursor-pointer"
+                  onClick={() => navigate(`../tx/${row.original.hash}`)}
                 >
-                  {row.getVisibleCells().map((cell) => {
-                    return (
-                      <td
-                        key={cell.id}
-                        className={`text-left px-[15px] ${cell.column.id === "hash"
-                          ? "hover:underline "
-                          : cell.column.id === "id"
-                            ? "text-center"
-                            : ""
-                          } `}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    );
-                  })}
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className={cn("", cell.column.id === "id" ? "text-center" : undefined)}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
                 </tr>
               ))
             ) : (
@@ -248,6 +228,6 @@ export default function TxList({ transactions }: TxListProps) {
           )}
         </div>
       </div>
-    </div>
+    </div >
   );
 }

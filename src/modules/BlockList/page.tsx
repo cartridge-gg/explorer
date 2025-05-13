@@ -8,27 +8,24 @@ import {
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ROUTES } from "@/constants/routes";
-import { RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { getPaginatedBlockNumbers } from "@/shared/utils/rpc_utils";
-import { truncateString } from "@/shared/utils/string";
 import { useScreen } from "@/shared/hooks/useScreen";
+import { truncateString } from "@/shared/utils/string";
 
 const ROWS_TO_RENDER = 20;
-const BLOCKS_BATCH_SIZE = 5; // Number of blocks to fetch at once
 
 const columnHelper = createColumnHelper();
 
-const TransactionsTable = () => {
+export function BlockList() {
   const navigate = useNavigate();
-  const { isMobile } = useScreen();
-  const [transactions, setTransactions] = useState([]);
+  const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
-  const [lastProcessedBlockIndex, setLastProcessedBlockIndex] = useState(0);
   const [isFetching, setIsFetching] = useState(false);
+  const { isMobile } = useScreen();
 
   const { data: latestBlockNumber } = useQuery({
-    queryKey: ["latestBlockNumber"],
+    queryKey: [QUERY_KEYS.getBlockNumber],
     queryFn: () => RPC_PROVIDER.getBlockNumber(),
   });
 
@@ -47,68 +44,42 @@ const TransactionsTable = () => {
         setIsFetching(false);
       }
     },
+    onSuccess: (blocks) => {
+      const newBlocks = blocks.map((block) => ({
+        number: block.block_number.toString(),
+        status: block.status,
+        hash: block.block_hash,
+        age: block.timestamp.toString(),
+      }));
+
+      setData(newBlocks);
+    },
   });
 
   useEffect(() => {
     if (!latestBlockNumber) return;
 
-    const startBlockNumber =
-      latestBlockNumber - currentPage * BLOCKS_BATCH_SIZE;
     const blockNumbers = getPaginatedBlockNumbers(
-      startBlockNumber,
-      BLOCKS_BATCH_SIZE
+      latestBlockNumber - currentPage * ROWS_TO_RENDER,
+      ROWS_TO_RENDER
     );
 
-    fetchBlocks.mutate(blockNumbers, {
-      onSuccess: (blocks) => {
-        const newTransactions = [];
-        let processedBlocks = 0;
-
-        // Start from where we left off in the previous batch
-        for (let i = lastProcessedBlockIndex; i < blocks.length; i++) {
-          const block = blocks[i];
-          if (!block || !block.transactions) continue;
-
-          for (const tx of block.transactions) {
-            newTransactions.push({
-              type: tx.type,
-              hash: tx.transaction_hash,
-              age: block.timestamp.toString(),
-            });
-
-            // If we have enough transactions for the current page
-            if (newTransactions.length >= ROWS_TO_RENDER) {
-              setLastProcessedBlockIndex(i);
-              setTransactions(newTransactions.slice(0, ROWS_TO_RENDER));
-              return;
-            }
-          }
-          processedBlocks++;
-        }
-
-        // If we've processed all blocks but still need more transactions
-        if (
-          processedBlocks === blocks.length &&
-          newTransactions.length < ROWS_TO_RENDER
-        ) {
-          setLastProcessedBlockIndex(0); // Reset for next batch
-          // You might want to fetch more blocks here
-        }
-
-        setTransactions(newTransactions);
-      },
-    });
+    fetchBlocks.mutate(blockNumbers);
   }, [latestBlockNumber, currentPage]);
 
   const columns = [
-    columnHelper.accessor("type", {
-      header: "Type",
-      cell: (info) => info.getValue(),
+    columnHelper.accessor("status", {
+      header: "Status",
+      cell: (info) => <span>{info.getValue()}</span>,
+    }),
+    columnHelper.accessor("number", {
+      header: "Block Number",
+      cell: (info) => info.renderValue(),
     }),
     columnHelper.accessor("hash", {
-      header: "Transaction Hash",
+      header: "Block Hash",
       cell: (info) => (
-        <div className="">
+        <div className="overflow-hidden ">
           {isMobile ? truncateString(info.renderValue()) : info.renderValue()}
         </div>
       ),
@@ -122,25 +93,25 @@ const TransactionsTable = () => {
   ];
 
   const table = useReactTable({
-    data: transactions,
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
   return (
-    <div className=" text-white px-2 py-4 rounded-lg">
+    <div className="text-white px-2 py-4 rounded-lg ">
       <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
-        <h1 className="text-white">Transactions List</h1>
+        <h1 className="text-white">Blocks List</h1>
       </div>
       <div className="overflow-x-auto md:w-full">
-        <table className="w-full mt-2 table-auto border-collapse border-t border-b border-[#8E8E8E] border-l-4 border-r">
+        <table className="w-full mt-2 table-auto border-collapse border-spacing-12 border-t border-b border-[#8E8E8E] border-l-4 border-r">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="">
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="p-2 text-black font-bold text-left text-sm"
+                    className="px-2 text-sm text-left whitespace-nowrap text-black font-bold"
                   >
                     {header.isPlaceholder
                       ? null
@@ -155,19 +126,15 @@ const TransactionsTable = () => {
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="  text-black">
+              <tr
+                key={row.id}
+                className="hover:bg-button-whiteInitialHover cursor-pointer"
+                onClick={() => navigate(`./${row.original.hash}`)}
+              >
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
-                    onClick={() =>
-                      navigate(
-                        `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(
-                          ":txHash",
-                          cell.row.original.hash
-                        )}`
-                      )
-                    }
-                    className="p-2 text-sm"
+                    className="w-1 p-2 text-sm whitespace-nowrap text-black"
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
@@ -181,19 +148,13 @@ const TransactionsTable = () => {
       <div className="flex justify-center mt-4 gap-4">
         <button
           disabled={currentPage === 0}
-          onClick={() => {
-            setCurrentPage((prev) => Math.max(prev - 1, 0));
-            setLastProcessedBlockIndex(0); // Reset index when changing pages
-          }}
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
           className="px-4 py-2 bg-gray-700 disabled:opacity-50"
         >
           Previous
         </button>
         <button
-          onClick={() => {
-            setCurrentPage((prev) => prev + 1);
-            setLastProcessedBlockIndex(0); // Reset index when changing pages
-          }}
+          onClick={() => setCurrentPage((prev) => prev + 1)}
           className="px-4 py-2 bg-gray-700 disabled:opacity-50"
         >
           {isFetching ? "Loading..." : "Next"}
@@ -202,5 +163,3 @@ const TransactionsTable = () => {
     </div>
   );
 };
-
-export default TransactionsTable;

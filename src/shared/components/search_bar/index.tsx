@@ -1,4 +1,3 @@
-import { ROUTES } from "@/constants/routes";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { useScreen } from "@/shared/hooks/useScreen";
 import SearchTool from "@/shared/icons/SearchTool";
@@ -48,7 +47,7 @@ export default function SearchBar() {
         return true;
       }
       return false;
-    } catch (_) {
+    } catch {
       return false;
     }
   };
@@ -62,7 +61,7 @@ export default function SearchBar() {
         return true;
       }
       return false;
-    } catch (_) {
+    } catch {
       return false;
     }
   };
@@ -75,7 +74,7 @@ export default function SearchBar() {
       if (result) {
         return true;
       }
-    } catch (_) {
+    } catch {
       return false;
     }
   };
@@ -89,7 +88,7 @@ export default function SearchBar() {
         return true;
       }
       return false;
-    } catch (_) {
+    } catch {
       return false;
     }
   };
@@ -131,16 +130,21 @@ export default function SearchBar() {
   };
 
   const handleResultClick = () => {
-    if (resultType === "transaction") {
-      navigate(ROUTES.TRANSACTION_DETAILS.urlPath.replace(":txHash", search));
-    } else if (resultType === "block") {
-      navigate(ROUTES.BLOCK_DETAILS.urlPath.replace(":blockId", search));
-    } else if (resultType === "contract") {
-      navigate(
-        ROUTES.CONTRACT_DETAILS.urlPath.replace(":contractAddress", search)
-      );
-    } else if (resultType === "class") {
-      navigate(ROUTES.CLASS_HASH_DETAILS.urlPath.replace(":classHash", search));
+    switch (resultType) {
+      case "transaction":
+        navigate(`../tx/${search}`);
+        break;
+      case "block":
+        navigate(`../block/${search}`);
+        break;
+      case "contract":
+        navigate(`../contract/${search}`);
+        break;
+      case "class":
+        navigate(`../class/${search}`);
+        break;
+      default:
+        break;
     }
 
     setIsDropdownOpen(false);

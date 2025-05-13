@@ -21,7 +21,7 @@ import { SectionBoxEntry } from "@/shared/components/section";
 
 const DisplayFormat = ["dec", "hex", "string"] as const;
 
-export default function EventDetails() {
+export function Event() {
   const { eventId } = useParams<{
     eventId: string;
   }>();
