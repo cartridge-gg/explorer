@@ -1,8 +1,9 @@
+import { JsonSchema } from "json-schema-library";
 import {
   Abi,
-  AbiEntry,
   AbiEnum,
   AbiStruct,
+  BigNumberish,
   Calldata,
   FunctionAbi,
   InterfaceAbi,
@@ -11,168 +12,147 @@ import {
 
 // TypeNode and related types
 export interface PrimitiveType {
+  type: "primitive";
   name: string;
 }
 
 export interface StructType {
+  type: "struct";
   name: string;
   members: Array<[string, TypeNode]>;
 }
 
 export interface EnumType {
+  type: "enum";
   name: string;
   variants: Array<{ name: string; ty?: string }>;
 }
 
 export interface OptionType {
+  type: "option";
   name: string;
-  element_type: TypeNode;
+  elementType: TypeNode;
 }
 
 interface ArrayType {
+  type: "array";
   name: string;
-  element_type: TypeNode;
+  elementType: TypeNode;
 }
 
 export interface GenericType {
+  type: "generic";
   name: string;
-  type_arguments: Array<TypeNode>;
+  typeArguments: TypeNode[];
 }
 
 export interface UnknownType {
+  type: "unknown";
   name: string;
 }
 
 export type TypeNode =
-  | { type: "primitive"; value: PrimitiveType }
-  | { type: "struct"; value: StructType }
-  | { type: "enum"; value: EnumType }
-  | { type: "option"; value: OptionType }
-  | { type: "array"; value: ArrayType }
-  | { type: "generic"; value: GenericType }
-  | { type: "unknown"; value: UnknownType };
+  | PrimitiveType
+  | StructType
+  | EnumType
+  | OptionType
+  | ArrayType
+  | GenericType
+  | UnknownType;
 
 // Input node for function parameters
-export interface ArgumentNode {
-  name: string;
+export interface ArgumentNode extends Pick<FunctionAbi, "name" | "stateMutability" | "state_mutability"> {
   type: TypeNode;
+  schema: JsonSchema;
 }
 
-// Function AST representation
-export interface FunctionAst {
-  name: string;
-  inputs: Array<ArgumentNode>;
-}
-
-export type FunctionInputWithValue = AbiEntry & {
+export type FunctionInputWithValue = ArgumentNode & {
   value: string;
 };
 
-export interface ConstructorAbi {
-  inputs: AbiEntry[]
+export interface FunctionAbiWithAst extends Omit<FunctionAbi, "inputs"> {
+  inputs: ArgumentNode[];
 };
 
-export interface FunctionAbiWithAst extends FunctionAbi {
-  ast: FunctionAst;
-};
-
-
-export function createJsonSchemaFromTypeNode(type: TypeNode): unknown {
-  switch (type.type) {
+export function toJsonSchema(node: TypeNode): JsonSchema {
+  switch (node.type) {
     case "primitive":
-      return createPrimitiveSchema(type.value);
-    case "struct":
-      return createStructSchema(type.value);
-    case "enum":
-      return createEnumSchema(type.value);
-    case "option":
-      console.log("option element type", type.value.element_type);
-      return createJsonSchemaFromTypeNode(type.value.element_type);
+      return { type: "string", title: node.name };
+    case "struct": {
+      const properties: Record<string, unknown> = {};
+      const required: string[] = [];
+
+      node.members.forEach(([name, typeNode]) => {
+        properties[name] = toJsonSchema(typeNode);
+        if (typeNode.type !== "option") {
+          required.push(name);
+        }
+      });
+
+      return {
+        type: "object",
+        title: node.name,
+        properties,
+        required,
+        additionalProperties: false,
+      }
+    }
+    case "enum": {
+      // Special case for core::bool which is an enum in Cairo
+      if (node.name === "core::bool") {
+        return { type: "boolean", title: node.name };
+      }
+
+      // For enums, we'll represent them as a string with allowed values
+      const enumValues = node.variants.map((variant) => variant.name);
+
+      return {
+        type: "string",
+        enum: enumValues,
+        title: node.name,
+      };
+    }
+    case "option": {
+      return toJsonSchema(node.elementType);
+    }
     case "array":
-      return createArraySchema(type.value);
-    case "generic":
-      return createGenericSchema(type.value);
+      return {
+        type: "array",
+        title: node.name,
+        items: toJsonSchema(node.elementType),
+      };
+    case "generic": {
+      // For generics, we'll try to construct a sensible schema based on the type arguments
+      if (node.name.includes("Option")) {
+        // Handle Option<T> as nullable T
+        const innerSchema = toJsonSchema(node.typeArguments[0]) as object;
+        return {
+          ...innerSchema,
+          nullable: true,
+        };
+      }
+
+      if (node.name.includes("Map") || node.name.includes("Dict")) {
+        // Handle Map/Dict as an object with additional properties
+        return {
+          type: "object",
+          additionalProperties:
+            node.typeArguments.length > 1
+              ? toJsonSchema(node.typeArguments[1])
+              : true,
+        };
+      }
+
+      // Default handling for other generic types
+      return {
+        type: "object",
+        title: node.name,
+      };
+    }
     case "unknown":
     default:
-      return { type: "object", title: type.value.name };
+      return { type: "object", title: node.name };
   }
-}
-
-function createPrimitiveSchema(primitive: PrimitiveType): any {
-  return { type: "string", title: primitive.name };
-}
-
-function createStructSchema(struct: StructType): any {
-  const properties: Record<string, any> = {};
-  const required: string[] = [];
-
-  struct.members.forEach(([name, typeNode]) => {
-    properties[name] = createJsonSchemaFromTypeNode(typeNode);
-    if (typeNode.type !== "option") {
-      required.push(name);
-    }
-  });
-
-  return {
-    type: "object",
-    title: struct.name,
-    properties,
-    required,
-    additionalProperties: false,
-  };
-}
-
-function createEnumSchema(enumType: EnumType): any {
-  // Special case for core::bool which is an enum in Cairo
-  if (enumType.name === "core::bool") {
-    return { type: "boolean", title: enumType.name };
-  }
-
-  // For enums, we'll represent them as a string with allowed values
-  const enumValues = enumType.variants.map((variant) => variant.name);
-
-  return {
-    type: "string",
-    enum: enumValues,
-    title: enumType.name,
-  };
-}
-
-function createArraySchema(array: ArrayType): any {
-  return {
-    type: "array",
-    title: array.name,
-    items: createJsonSchemaFromTypeNode(array.element_type),
-  };
-}
-
-function createGenericSchema(generic: GenericType): any {
-  // For generics, we'll try to construct a sensible schema based on the type arguments
-  if (generic.name.includes("Option")) {
-    // Handle Option<T> as nullable T
-    const innerSchema = createJsonSchemaFromTypeNode(generic.type_arguments[0]);
-    return {
-      ...innerSchema,
-      nullable: true,
-    };
-  }
-
-  if (generic.name.includes("Map") || generic.name.includes("Dict")) {
-    // Handle Map/Dict as an object with additional properties
-    return {
-      type: "object",
-      additionalProperties:
-        generic.type_arguments.length > 1
-          ? createJsonSchemaFromTypeNode(generic.type_arguments[1])
-          : true,
-    };
-  }
-
-  // Default handling for other generic types
-  return {
-    type: "object",
-    title: generic.name,
-  };
 }
 
 /**
@@ -184,7 +164,6 @@ function buildTypeRegistries(
   const structRegistry = new Map<string, AbiStruct>();
   const enumRegistry = new Map<string, AbiEnum>();
 
-  // console.log("abi", abi);
   for (const item of abi) {
     if (item.type === "struct") {
       structRegistry.set(item.name, item);
@@ -196,95 +175,105 @@ function buildTypeRegistries(
   return [structRegistry, enumRegistry];
 }
 
-/**
- * Builds an abstract syntax tree for a function's inputs
- */
-function getFunctionAst(
-  abi: Abi,
-  functionName: string
-): FunctionAst | undefined {
-  const [structRegistry, enumRegistry] = buildTypeRegistries(abi);
-  const targetFunction = findFunctionInAbi(abi, functionName);
-  if (!targetFunction) {
-    return;
+export function toCalldata(node: TypeNode, value: unknown): Calldata {
+  switch (node.type) {
+    case "primitive":
+      {
+        switch (node.name) {
+          case "core::integer::u256": {
+            const { low, high } = uint256.bnToUint256(value as BigNumberish);
+            return [low.toString(), high.toString()];
+          }
+          // case "core::integer::u512":
+          case "core::felt252":
+          case "core::integer::u8":
+          case "core::integer::u16":
+          case "core::integer::u32":
+          case "core::integer::u64":
+          case "core::integer::u128":
+          case "core::starknet::class_hash::ClassHash":
+          default:
+            return [value as string];
+        }
+      }
+    case "struct": {
+      const _value = typeof value === "string" ? JSON.parse(value) : value
+      return node.members.flatMap(([memberName, memberType]) => toCalldata(memberType, _value[memberName]))
+    }
+    case "enum":
+      return node.name === "core::bool"
+        ? value ? ["1"] : ["0"]
+        : []
+    case "option":
+      return value
+        ? ["0", ...toCalldata(node.elementType, value)]
+        : ["1"]
+    case "array":
+      {
+        const _value = value as unknown[]
+        const arrayLength = BigInt(_value.length);
+        return [
+          arrayLength.toString(),
+          ..._value.flatMap((elem: unknown) => toCalldata(node.elementType, elem))
+        ]
+      }
+    case "generic":
+    case "unknown":
+    default:
+      return [];
   }
+}
 
-  // Parse the inputs
-  const inputs = targetFunction.inputs.map((input) => ({
-    name: input.name,
-    type: resolveType(input.type, structRegistry, enumRegistry),
-  }));
+export function parseAbi(abi: Abi) {
+  let constructor: FunctionAbiWithAst;
+  const functions: FunctionAbiWithAst[] = [];
+  const parse = parseFunctionCreator(abi)
+
+  abi.forEach((item) => {
+    switch (item.type) {
+      case "constructor": {
+        constructor = parse(item)
+        break;
+      }
+      case "function": {
+        functions.push(parse(item))
+        break;
+      }
+      case "interface": {
+        (item as InterfaceAbi).items.forEach((item) => {
+          if (item.type !== "function") return
+          functions.push(parse(item))
+        });
+        break;
+      }
+      default:
+        break;
+      }
+  });
 
   return {
-    name: targetFunction.name,
-    inputs,
+    constructor: constructor!,
+    readFuncs: functions.filter(isReadFunction),
+    writeFuncs: functions.filter((f) => !isReadFunction(f)),
   };
 }
 
 /**
- * Finds a function in the ABI, searching through top-level functions and interfaces
- * @param abi The contract ABI
- * @param functionName The name of the function to find
- * @returns The function ABI or undefined if not found
+ * Return function to parse function's inputs and return with JSON schema
  */
-function findFunctionInAbi(
-  abi: Abi,
-  functionName: string
-): FunctionAbi | undefined {
-  // First try to find it at the top level
-  const directFunction = abi.find(
-    (item): item is FunctionAbi =>
-      "type" in item &&
-      (item.type === "function" ||
-        item.type === "l1_handler" ||
-        item.type === "constructor") &&
-      "name" in item &&
-      item.name === functionName
-  );
-
-  if (directFunction) {
-    return directFunction;
-  }
-
-  // Example of "type: interface"
-  // {
-  //   "type": "interface",
-  //   "name": "controller::account::ICartridgeAccount",
-  //   "items": [
-  //     {
-  //       "type": "function",
-  //       "name": "__validate_declare__",
-  //       "inputs": [
-  //         {
-  //           "name": "class_hash",
-  //           "type": "core::felt252"
-  //         }
-  //       ],
-  //       "outputs": [
-  //         {
-  //           "type": "core::felt252"
-  //         }
-  //       ],
-  //       "state_mutability": "external"
-  //     },
-  //   ]
-  // },
-  //
-  // If not found, look in interfaces
-  for (const item of abi) {
-    if ("type" in item && item.type === "interface" && "items" in item) {
-      const interfaceAbi = item as InterfaceAbi;
-      const interfaceFunction = interfaceAbi.items.find(
-        (func) => func.name === functionName
-      );
-
-      if (interfaceFunction) {
-        return interfaceFunction;
-      }
-    }
-  }
-
-  return undefined;
+function parseFunctionCreator(abi: Abi) {
+  const [structRegistry, enumRegistry] = buildTypeRegistries(abi);
+  return (func: FunctionAbi): FunctionAbiWithAst => ({
+      ...func,
+      inputs: func.inputs.map((input) => {
+        const type = resolveType(input.type, structRegistry, enumRegistry)
+        return {
+          name: input.name,
+          type,
+          schema: toJsonSchema(type),
+        }
+    })
+  })
 }
 
 /**
@@ -324,14 +313,12 @@ function resolveType(
 
             return {
               type: "array",
-              value: {
-                name: structDef.name,
-                element_type: resolveType(
-                  elementType,
-                  structRegistry,
-                  enumRegistry
-                ),
-              },
+              name: structDef.name,
+              elementType: resolveType(
+                elementType,
+                structRegistry,
+                enumRegistry
+              ),
             };
           }
         }
@@ -340,12 +327,10 @@ function resolveType(
       // If we couldn't determine the element type, create a generic array type
       return {
         type: "array",
-        value: {
-          name: structDef.name,
-          element_type: {
-            type: "primitive",
-            value: { name: "felt252" }, // Default element type
-          },
+        name: structDef.name,
+        elementType: {
+          type: "primitive",
+          name: "felt252", // Default element type
         },
       };
     }
@@ -360,10 +345,8 @@ function resolveType(
 
     return {
       type: "struct",
-      value: {
-        name: structDef.name,
-        members,
-      },
+      name: structDef.name,
+      members,
     };
   }
 
@@ -381,27 +364,17 @@ function resolveType(
         throw new Error("Option enum must have a 'Some' variant");
       }
 
-      const element_type = resolveType(
-        some_type.type,
-        structRegistry,
-        enumRegistry
-      );
-
       return {
         type: "option",
-        value: {
-          name: enumDef.name,
-          element_type,
-        },
+        name: enumDef.name,
+        elementType: resolveType(some_type.type, structRegistry, enumRegistry),
       };
     }
 
     return {
       type: "enum",
-      value: {
-        name: enumDef.name,
-        variants: [...enumDef.variants],
-      },
+      name: enumDef.name,
+      variants: [...enumDef.variants],
     };
   }
 
@@ -419,166 +392,19 @@ function resolveType(
 
     return {
       type: "array",
-      value: {
-        name: elementType,
-        element_type: resolveType(elementType, structRegistry, enumRegistry),
-      },
+      name: elementType,
+      elementType: resolveType(elementType, structRegistry, enumRegistry),
     };
   }
 
   // Default to primitive type
   return {
     type: "primitive",
-    value: {
-      name: typeStr,
-    },
+    name: typeStr,
   };
 }
 
-export function convertToCalldata(type: TypeNode, value: any): Calldata {
-  switch (type.type) {
-    case "primitive":
-      return convertPrimitiveToCalldata(type.value, value as string);
-    case "struct":
-      return convertStructToCalldata(
-        type.value,
-        typeof value === "string" ? JSON.parse(value) : value
-      );
-    case "enum":
-      return convertEnumToCalldata(type.value, value);
-    case "option":
-      return convertOptionToCalldata(type.value, value);
-    case "array":
-      return convertArrayToCalldata(type.value, value as any[]);
-    case "generic":
-    case "unknown":
-    default:
-      return [];
-  }
-}
-
-function convertStructToCalldata(type: StructType, value: any): Calldata {
-  let calldata: Calldata = [];
-  console.log("struct value", value);
-
-  type.members.forEach(([memberName, memberType]) => {
-    const memberValue = value[memberName];
-    const memberCalldata = convertToCalldata(memberType, memberValue);
-    calldata = calldata.concat(memberCalldata);
-  });
-
-  console.log("type", type, calldata);
-
-  return calldata;
-}
-
-function convertArrayToCalldata(type: ArrayType, value: any[]): Calldata {
-  let calldata: Calldata = [];
-  const arrayLength = BigInt(value.length);
-  calldata.push(arrayLength.toString());
-
-  value.forEach((elem) => {
-    console.log("element_type", type.element_type, "elem", elem);
-    const elemCalldata = convertToCalldata(type.element_type, elem);
-    console.log("elemcalldata", elemCalldata);
-    calldata = calldata.concat(elemCalldata);
-  });
-
-  return calldata;
-}
-
-function convertEnumToCalldata(type: EnumType, value: any): Calldata {
-  if (type.name === "core::bool") {
-    return convertBooleanToCalldata(value as boolean);
-  } else {
-    return [];
-  }
-}
-
-function convertOptionToCalldata(type: OptionType, value: any): Calldata {
-  if (value) {
-    return ["0", ...convertToCalldata(type.element_type, value)];
-  } else {
-    return ["1"];
-  }
-}
-
-function convertBooleanToCalldata(value: boolean): Calldata {
-  return value ? ["1"] : ["0"];
-}
-
-function convertPrimitiveToCalldata(
-  type: PrimitiveType,
-  value: string
-): Calldata {
-  switch (type.name) {
-    case "core::integer::u256": {
-      const {low, high} = uint256.bnToUint256(value);
-      return [low.toString(), high.toString()];
-    }
-    // case "core::integer::u512":
-    case "core::felt252":
-    case "core::integer::u8":
-    case "core::integer::u16":
-    case "core::integer::u32":
-    case "core::integer::u64":
-    case "core::integer::u128":
-    case "core::starknet::class_hash::ClassHash":
-    default:
-      return [value];
-  }
-}
-
-export function parseAbi(abi: Abi) {
-  let constructor: ConstructorAbi;
-  const functions: FunctionAbiWithAst[] = [];
-
-  abi.forEach((item) => {
-    switch (item.type) {
-      case "constructor": {
-        const _item = item as Omit<FunctionAbi, "outputs">;
-        constructor = {
-          inputs: _item.inputs.map((input) => ({
-            name: input.name,
-            type: input.type,
-          })),
-        };
-        break;
-      }
-      case "interface": {
-        const _item = item as InterfaceAbi;
-        _item.items.forEach((item) => {
-          if (item.type === "function") {
-            functions.push(getFunctionAbiWithAst(abi, item));
-          }
-        });
-        break;
-      }
-      case "function": {
-            functions.push(getFunctionAbiWithAst(abi, item));
-        break;
-      }
-      default:
-        break;
-      }
-  });
-
-  return {
-    constructor: constructor!,
-    readFuncs: functions.filter(isReadFunction),
-    writeFuncs: functions.filter((f) => !isReadFunction(f)),
-  };
-}
-
-function getFunctionAbiWithAst(abi: Abi, item: FunctionAbi) {
-  const ast = getFunctionAst(abi, item.name)!;
-  return {
-    ...item,
-    ast,
-  };
-}
-
-export function isReadFunction(func: FunctionAbi) {
+export function isReadFunction(func: FunctionAbiWithAst) {
   return (
     func.state_mutability === "view" ||
     func.state_mutability === "pure" ||

@@ -1,8 +1,8 @@
 import { ContractClassResponse } from "starknet";
-import { ConstructorAbi, FunctionAbiWithAst, parseAbi } from "./abi";
+import { FunctionAbiWithAst, parseAbi } from "./abi";
 
 export interface ContractClassInfo {
-  constructor: ConstructorAbi;
+  constructor: FunctionAbiWithAst;
   readFuncs: FunctionAbiWithAst[];
   writeFuncs: FunctionAbiWithAst[];
   code: {

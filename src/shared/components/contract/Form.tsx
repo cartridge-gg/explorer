@@ -10,19 +10,18 @@ import {
   InvokeFunctionResponse,
 } from "starknet";
 import {
-  convertToCalldata,
   FunctionAbiWithAst,
-  FunctionAst,
   FunctionInputWithValue,
   isReadFunction,
+  toCalldata,
 } from "@/shared/utils/abi";
-import FunctionArgEditor from "@/shared/components/FunctionInputEditor";
 import { useAccount } from "@starknet-react/core";
 import { Link } from "react-router-dom";
 import AddIcon from "@/shared/icons/Add";
 import { cn } from "@cartridge/ui-next";
 import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
 import { useToast } from "@/shared/components/toast";
+import { ParamForm } from "@/shared/form";
 
 export interface ContractFormProps {
   contract?: Contract;
@@ -78,29 +77,24 @@ export function ContractForm({
   return (
     <Accordion>
       {
-        functions.map(({ ast, ...func }, i) => (
+        functions.map((f, i) => (
           <AccordionItem
             key={i}
             titleClassName="h-[45px] z-10"
             title={
               <div className="flex flex-row items-center gap-2">
                 <span className="font-bold">fn</span>
-                <span className="italic">{func.name}</span>
-                <span>({func.inputs.map((arg) => arg.name).join(", ")})</span>
+                <span className="italic">{f.name}</span>
+                <span>({f.inputs.map((arg) => arg.name).join(", ")})</span>
               </div>
             }
-            disabled={!contract && !func.inputs.length}
+            disabled={!contract && !f.inputs.length}
           >
             <FunctionForm
-              key={i}
-              ast={ast}
+              item={f}
               contract={contract}
-              state={form[func.name] || initFormState}
-              onUpdate={(update) => {
-                onUpdate(func.name, update);
-              }}
-              isRead={isReadFunction(func)}
-            />
+              state={form[f.name] || initFormState}
+              onUpdate={(update) => onUpdate(f.name, update)} />
           </AccordionItem>
         ))
       }
@@ -109,10 +103,9 @@ export function ContractForm({
 }
 
 interface FunctionFormProps {
+  item: FunctionAbiWithAst;
   /** The contract instance to interact with */
   contract?: Contract;
-  ast: FunctionAst;
-  isRead: boolean;
   /** Current state of the accordion content, including inputs, results and errors */
   state: FormState;
   /** Callback to update the state of this accordion item in order to preserve the state */
@@ -120,13 +113,13 @@ interface FunctionFormProps {
 }
 
 function FunctionForm({
-  ast,
+  item: f,
   contract,
-  isRead,
   onUpdate,
   state,
 }: FunctionFormProps) {
   const { account } = useAccount();
+  const isRead = isReadFunction(f);
 
   const onCallOrExecute = useCallback(async () => {
     if (!contract || (!isRead && !account)) {
@@ -149,17 +142,17 @@ function FunctionForm({
           } catch {
             value = input.value
           }
-          return convertToCalldata(ast.inputs[idx].type, value)
+          return toCalldata(f.inputs[idx].type, value)
         }
       );
 
       if (isRead) {
-        const result = await contract.call(ast.name, calldata, { parseRequest: false, parseResponse: false });
+        const result = await contract.call(f.name, calldata, { parseRequest: false, parseResponse: false });
         onUpdate({ result: result as CallResult, error: undefined });
       } else {
         const result = await account!.execute([{
           calldata: calldata,
-          entrypoint: ast.name,
+          entrypoint: f.name,
           contractAddress: contract.address,
         }])
         onUpdate({ result: result, error: undefined });
@@ -171,7 +164,7 @@ function FunctionForm({
       onUpdate({ hasCalled: true, loading: false });
     };
   }, [
-    ast,
+    f,
     contract,
     account,
     state.inputs,
@@ -207,20 +200,20 @@ function FunctionForm({
         } catch {
           value = input.value
         }
-        return convertToCalldata(ast.inputs[idx].type, value)
+        return toCalldata(f.inputs[idx].type, value)
       }
     );
 
     addCall({
       calldata: calldata,
-      entrypoint: ast.name,
+      entrypoint: f.name,
       contractAddress: contract.address,
     });
-    toast(`Function call added: ${ast.name}`, "success");
+    toast(`Function call added: ${f.name}`, "success");
   }, [
     toast,
     contract,
-    ast,
+    f,
     state.inputs,
     addCall,
     account,
@@ -229,7 +222,7 @@ function FunctionForm({
 
   return (
     <div className="flex flex-col gap-[10px] items-end">
-      {contract && isRead ? (
+      {!!contract && (isRead ? (
         <button
           disabled={state.loading}
           onClick={onCallOrExecute}
@@ -280,58 +273,23 @@ function FunctionForm({
             {state.loading ? "Executing..." : "Execute"}
           </button>
         </div>
-      )}
+      ))}
 
-      {!!ast.inputs.length && (
-        <table className="bg-white overflow-x w-full">
-          <tbody>
-            {ast.inputs.map((input, i) => (
-              <tr
-                key={i}
-                className={`${i !== ast.inputs.length - 1 ? "border-b" : ""}`}
-              >
-                <td className="px-2 py-1 text-left align-top w-[90px] italic">
-                  <span>{input.name}</span>
-                </td>
+      <ParamForm
+        params={f.inputs.map((input, i) => ({
+          ...input,
+          value: i < state.inputs.length
+            ? state.inputs[i]?.value
+            : input.type.type === "struct"
+              ? "{\n\t\n}"
+              : input.type.type === "array"
+                ? "[\n\t\n]"
+                : "",
 
-                <td className="text-left align-top p-0">
-                  {input.type.type === "primitive" ? (
-                    <input
-                      type="text"
-                      className="px-2 py-1 text-left w-full disabled:cursor-not-allowed"
-                      placeholder={`${input.type.value.name}`}
-                      onChange={(e) => onChange(i, e.target.value)}
-                      value={
-                        i < state.inputs.length
-                          ? state.inputs[i]?.value ?? ""
-                          : ""
-                      }
-                      disabled={!contract}
-                    />
-                  ) : (
-                    <FunctionArgEditor
-                      key={i}
-                      functionName={ast.name}
-                      argInfo={input}
-                      onChange={(value) => onChange(i, value)}
-                      value={
-                        i < state.inputs.length
-                          ? state.inputs[i]?.value
-                          : input.type.type === "struct"
-                            ? "{\n\t\n}"
-                            : input.type.type === "array"
-                              ? "[\n\t\n]"
-                              : ""
-                      }
-                      readOnly={!contract}
-                    />
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+        }))}
+        onChange={(i, value) => onChange(i, value)}
+        disabled={!contract || (!isRead && !account)}
+      />
 
       {state.hasCalled && (
         <div className="w-full flex flex-col gap-1">

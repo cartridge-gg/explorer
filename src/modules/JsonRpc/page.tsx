@@ -4,13 +4,13 @@ import { BreadcrumbItem, BreadcrumbSeparator } from "@/shared/components/breadcr
 import { Breadcrumb } from "@/shared/components/breadcrumbs";
 import PageHeader from "@/shared/components/PageHeader";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
-import { BreadcrumbPage, cn, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@cartridge/ui-next";
+import { BreadcrumbPage, cn } from "@cartridge/ui-next";
 import { useQuery } from "@tanstack/react-query";
-import { InfoIcon, PlayIcon } from "lucide-react";
+import { PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fromCamelCase } from "@/shared/utils/string";
 import { OpenRPC, Method } from "./open-rpc";
-import { ParamEditor } from "./Editor";
+import { ParamForm } from "@/shared/form";
 
 interface FormState {
   inputs: { name: string, value: string }[];
@@ -224,62 +224,16 @@ export function JsonRpcPlayground() {
               <div className="uppercase font-bold text-lg">
                 {fromCamelCase(selected?.name?.replace("starknet_", "") ?? "")}
               </div>
-              <div>
-                {
-                  methods?.find((m) => m.name === selected?.name)?.summary
-                }
-              </div>
+              {selected?.summary && <div>{selected.summary}</div>}
             </div>
 
-            {!!selected?.params?.length && (
-              <table className="bg-white overflow-x-auto max-h-[200px]">
-                <tbody>
-                  {selected.params.map((p, i) => (
-                    <tr
-                      key={i}
-                      className={i === selected.params.length - 1 ? "border-b" : ""}
-                    >
-                      <td className="px-2 py-1 text-left align-top w-[90px] italic">
-                        <div className="flex items-center gap-2">
-                          <span>{p.name}</span>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger >
-                                <InfoIcon className="size-3" />
-                              </TooltipTrigger>
-                              <TooltipContent
-                                side="right"
-                                className="bg-[#F3F3F3] p-2 max-w-[300px]"
-                              >
-                                <div>{p.description ?? p.summary}</div>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      </td>
-
-                      <td className="text-left align-top p-0">
-                        {OpenRPC.isPrimitive(p) ? (
-                          <input
-                            type="text"
-                            className="px-2 py-1 text-left w-full"
-                            value={form[selected.name].inputs[i].value}
-                            onChange={(e) => onParamChange(i, e.target.value)}
-                          />
-                        ) : (
-                          <ParamEditor
-                            name={`${selected.name}_${p.name}`}
-                            schema={p.schema}
-                            value={form[selected.name].inputs[i].value}
-                            onChange={(value) => onParamChange(i, value)}
-                          />
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+            <ParamForm
+              params={selected?.params.map((p, i) => ({
+                ...p,
+                value: form[selected.name].inputs[i].value,
+              })) ?? []}
+              onChange={(i, value) => onParamChange(i, value)}
+            />
           </div>
         </div>
 

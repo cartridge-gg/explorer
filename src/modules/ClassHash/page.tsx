@@ -20,7 +20,10 @@ const DataTabs = ["Overview", "Deploy"];
 
 const initialData: ContractClassInfo = {
   constructor: {
-    inputs: []
+    inputs: [],
+    name: "constructor",
+    outputs: [],
+    type: "constructor"
   },
   readFuncs: [],
   writeFuncs: [],

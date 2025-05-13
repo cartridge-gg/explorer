@@ -1,16 +1,16 @@
-import { ConstructorAbi, FunctionInputWithValue } from "@/shared/utils/abi";
+import { FunctionAbiWithAst, FunctionInputWithValue } from "@/shared/utils/abi";
 import { useToast } from "@/shared/components/toast";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { DeployContractResponse, RawArgsObject, uint256 } from "starknet";
+import { ParamForm } from "@/shared/form";
 
-export function Deploy({ classHash, constructor }: { classHash: string, constructor: ConstructorAbi }) {
+export function Deploy({ classHash, constructor }: { classHash: string, constructor: FunctionAbiWithAst }) {
   const { toast } = useToast();
   const { account } = useAccount();
   const initialInputs = useMemo(() => constructor.inputs.map(input => ({
-    name: input.name,
-    type: input.type,
+    ...input,
     value: ""
   })), [constructor.inputs]);
   const [form, setForm] = useState<{
@@ -22,12 +22,12 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
   });
   const [isDeploying, setIsDeploying] = useState(false);
 
-  const onInputChange = useCallback((name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onInputChange = useCallback((i: number, value: string) => {
     setForm(form => ({
       ...form,
-      inputs: form.inputs.map(input =>
-        input.name === name
-          ? { ...input, value: e.target.value }
+      inputs: form.inputs.map((input, ii) =>
+        i == ii
+          ? { ...input, value }
           : input
       )
     }));
@@ -80,34 +80,14 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
         </div>
       )}
 
-      {!!constructor.inputs.length && (
-        <table className="bg-white overflow-x w-full">
-          <tbody>
-            {constructor.inputs.map((input, idx) => (
-              <tr
-                key={idx}
-                className={`${idx !== constructor.inputs.length - 1 ? "border-b" : ""}`}
-              >
-                <td className="px-2 py-1 text-left align-top w-[90px] italic">
-                  <span>{input.name}</span>
-                </td>
-
-                <td className="text-left align-top p-0">
-                  <input
-                    type="text"
-                    className="px-2 py-1 text-left w-full"
-                    placeholder={`${input.type}`}
-                    value={form.inputs[idx]!.value}
-                    onChange={onInputChange(input.name)}
-                    disabled={!account || isDeploying}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
+      <ParamForm
+        params={constructor.inputs.map((input, i) => ({
+          ...input,
+          value: form.inputs[i]!.value,
+        }))}
+        onChange={onInputChange}
+        disabled={!account || isDeploying}
+      />
       <button
         className="bg-primary text-white px-4 py-2 self-start hover:bg-primary/80 disabled:bg-primary/50"
         onClick={onDeploy}
@@ -124,7 +104,7 @@ function toRawArgs(inputs: FunctionInputWithValue[]) {
 }
 
 function toMultiType(input: FunctionInputWithValue) {
-  switch (input.type) {
+  switch (input.type.name) {
     case "Uint256":
       return uint256.bnToUint256(input.value);
     default:
