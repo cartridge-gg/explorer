@@ -180,8 +180,8 @@ export function JsonRpcPlayground() {
       />
 
       <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
-        <div className="flex flex-col md:flex-row justify-stretch border border-borderGray overflow-hidden py-5 px-4 gap-4 bg-white">
-          <div className="min-w-[320px] flex flex-col gap-[6px] sl:overflow-y-auto">
+        <div className="flex flex-col md:flex-row justify-stretch border border-borderGray overflow-hidden py-5 px-4 gap-4 bg-white lg:max-w-[780px]">
+          <div className="min-w-[250px] flex flex-col gap-[6px] sl:overflow-y-auto">
             <input
               className="bg-white border border-borderGray px-4 py-2 text-base rounded-none search-input relative focus:outline-none focus:ring-0"
               placeholder="Search"
@@ -219,7 +219,7 @@ export function JsonRpcPlayground() {
             </div>
           </div>
 
-          <div className="h-full flex-grow grid grid-rows-[min-content_1fr] gap-8 w-80">
+          <div className="h-full grid grid-rows-[min-content_1fr] gap-8">
             <div className="flex flex-col gap-2">
               <div className="uppercase font-bold text-lg">
                 {fromCamelCase(selected?.name?.replace("starknet_", "") ?? "")}
@@ -237,7 +237,7 @@ export function JsonRpcPlayground() {
           </div>
         </div>
 
-        <div className="flex flex-col flex-grow gap-2 border border-borderGray overflow-hidden py-5 px-4 bg-white">
+        <div className="flex flex-col flex-1 gap-2 border border-borderGray py-5 px-4 bg-white">
           <button
             onClick={onExecute}
             className="bg-black text-white px-2 py-1 text-sm self-end flex items-center gap-3 uppercase font-bold hover:bg-opacity-80"
@@ -245,32 +245,35 @@ export function JsonRpcPlayground() {
             Execute
             <PlayIcon className="size-2 fill-white" />
           </button>
-          <Accordion>
-            <AccordionItem
-              key="request"
-              title="request"
-              titleClassName="uppercase"
-              open
-            >
-              <div className="overflow-x-auto">
-                <code>
-                  <pre>{requestJSON}</pre>
-                </code>
-              </div>
-            </AccordionItem>
-            <AccordionItem
-              key="response"
-              title="response"
-              titleClassName="uppercase"
-              open
-            >
-              <div className="min-h-80 overflow-x-auto">
-                <code>
-                  <pre>{responseJSON}</pre>
-                </code>
-              </div>
-            </AccordionItem>
-          </Accordion>
+
+          <div className="overflow-auto">
+            <Accordion>
+              <AccordionItem
+                key="request"
+                title="request"
+                titleClassName="uppercase"
+                open
+              >
+                <div className="overflow-x-auto">
+                  <code>
+                    <pre>{requestJSON}</pre>
+                  </code>
+                </div>
+              </AccordionItem>
+              <AccordionItem
+                key="response"
+                title="response"
+                titleClassName="uppercase"
+                open
+              >
+                <div className="min-h-80 overflow-x-auto">
+                  <code>
+                    <pre>{responseJSON}</pre>
+                  </code>
+                </div>
+              </AccordionItem>
+            </Accordion>
+          </div>
         </div>
       </div>
     </div>
