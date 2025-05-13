@@ -6,7 +6,6 @@ import * as icons from "lucide-react";
 import { truncateString } from "../utils/string";
 import { Call } from "starknet";
 import { useNavigate } from "react-router-dom";
-import { ROUTES } from "@/constants/routes";
 
 interface AccountModalProps {
   isOpen: boolean;
@@ -132,11 +131,6 @@ function ExecutionResultView({
 }: ExecutionResultViewProps) {
   const navigate = useNavigate();
 
-  const handleTxHashClick = useCallback(() => {
-    onModalClose();
-    navigate(ROUTES.TRANSACTION_DETAILS.urlPath.replace(":txHash", txHash));
-  }, [onModalClose, navigate, txHash]);
-
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-6">
@@ -155,7 +149,10 @@ function ExecutionResultView({
           <div className="border border-borderGray p-[10px]">
             <div className="font-bold uppercase mb-1">Tx Hash</div>
             <a
-              onClick={handleTxHashClick}
+              onClick={() => {
+                onModalClose();
+                navigate(`../tx/${txHash}`);
+              }}
               className="break-all cursor-pointer hover:underline"
             >
               {txHash}
@@ -452,8 +449,8 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                         key={index}
                         onClick={() => handleCallClick(index, call)}
                         className={`account-call-entry hover:bg-gray-100 cursor-pointer ${expandedCall && expandedCall.index === index
-                            ? "bg-gray-100"
-                            : ""
+                          ? "bg-gray-100"
+                          : ""
                           }`}
                       >
                         <td className="w-[40px]">{index + 1}</td>

@@ -1,13 +1,13 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { getPaginatedBlockNumbers } from "@/shared/utils/rpc_utils";
-import BlocksTable from "./components/BlocksTable";
-import TransactionTable from "./components/TransactionsTable";
+import { BlocksTable } from "./components/BlocksTable";
+import { TransactionTable } from "./components/TransactionsTable";
 import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 
 const POLLING_INTERVAL = 3000; // 3 seconds
 const INITIAL_BLOCKS_TO_FETCH = 10;
 
-export default function Home() {
+export function Home() {
   // Fetch the latest block number
   const { data: latestBlockNumber } = useQuery({
     queryKey: QUERY_KEYS.getBlockNumber,
@@ -19,14 +19,14 @@ export default function Home() {
   const latestBlocksQueries = useQueries({
     queries: latestBlockNumber
       ? getPaginatedBlockNumbers(
-          latestBlockNumber,
-          INITIAL_BLOCKS_TO_FETCH
-        ).map((blockNumber) => ({
-          queryKey: [QUERY_KEYS.getBlockWithTxs, blockNumber],
-          queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockNumber),
-          enabled: !!blockNumber,
-          refetchInterval: POLLING_INTERVAL,
-        }))
+        latestBlockNumber,
+        INITIAL_BLOCKS_TO_FETCH
+      ).map((blockNumber) => ({
+        queryKey: [QUERY_KEYS.getBlockWithTxs, blockNumber],
+        queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockNumber),
+        enabled: !!blockNumber,
+        refetchInterval: POLLING_INTERVAL,
+      }))
       : [],
   });
 

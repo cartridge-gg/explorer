@@ -1,30 +1,43 @@
 import "./App.css";
-import { ROUTES } from "./constants/routes";
+
 import { Routes, Route, useLocation } from "react-router-dom";
-import Header from "./shared/components/header";
+import { Header } from "@/shared/components/header";
+import { Home } from "@/modules/HomeNew/page";
+import { Transaction } from "@/modules/Transaction/page";
+import { Block } from "@/modules/Block/page";
+import { BlockList } from "@/modules/BlockList/page";
+import { Contract } from "@/modules/Contract/page";
+import { TransactionList } from "@/modules/TransactionList/page";
+import { Event } from "@/modules/Event/page";
+import { ClassHash } from "@/modules/ClassHash/page";
+import { JsonRpcPlayground } from "@/modules/JsonRpc/page";
+import { NotFound } from "@/modules/NotFound/page";
+import { cn } from "@cartridge/ui-next";
 
 export function App() {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
-  const fullScreen = isHomePage || !Object
-    .values(ROUTES)
-    .map(r => r.urlPath)
-    .includes(location.pathname)
 
   return (
     <div
-      className={`flex flex-col gap-[20px] px-[20px] py-[25px] xl:px-[45px] w-full min-w-[320px] ${fullScreen ? "h-screen" : "lg:h-screen"
-        }`}
+      className={cn(
+        "flex flex-col gap-[20px] px-[20px] py-[25px] xl:px-[45px] w-full min-w-[320px]",
+        isHomePage ? "h-screen" : "lg:h-screen",
+      )}
     >
       {!isHomePage && <Header />}
 
       <Routes>
-        {Object.keys(ROUTES).map((routeKey, index) => {
-          const route = ROUTES[routeKey as keyof typeof ROUTES];
-          return (
-            <Route key={index} path={route.urlPath} element={route.component} />
-          );
-        })}
+        <Route path="/" element={<Home />} />
+        <Route path="/txns" element={<TransactionList />} />
+        <Route path="/tx/:txHash" element={<Transaction />} />
+        <Route path="/blocks" element={<BlockList />} />
+        <Route path="/block/:blockId" element={<Block />} />
+        <Route path="/class/:classHash" element={<ClassHash />} />
+        <Route path="/contract/:contractAddress" element={<Contract />} />
+        <Route path="/events/:eventId" element={<Event />} />
+        <Route path="/json-rpc" element={<JsonRpcPlayground />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );

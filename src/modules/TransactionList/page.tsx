@@ -8,7 +8,6 @@ import {
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ROUTES } from "@/constants/routes";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { getPaginatedBlockNumbers } from "@/shared/utils/rpc_utils";
 import { truncateString } from "@/shared/utils/string";
@@ -19,7 +18,7 @@ const BLOCKS_BATCH_SIZE = 5; // Number of blocks to fetch at once
 
 const columnHelper = createColumnHelper();
 
-const TransactionsTable = () => {
+export function TransactionList() {
   const navigate = useNavigate();
   const { isMobile } = useScreen();
   const [transactions, setTransactions] = useState([]);
@@ -145,9 +144,9 @@ const TransactionsTable = () => {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </th>
                 ))}
               </tr>
@@ -159,14 +158,7 @@ const TransactionsTable = () => {
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
-                    onClick={() =>
-                      navigate(
-                        `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(
-                          ":txHash",
-                          cell.row.original.hash
-                        )}`
-                      )
-                    }
+                    onClick={() => navigate(`../tx/${cell.row.original.hash}`)}
                     className="p-2 text-sm"
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -202,5 +194,3 @@ const TransactionsTable = () => {
     </div>
   );
 };
-
-export default TransactionsTable;

@@ -3,7 +3,7 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
-import { Contract } from "starknet";
+import { Contract as StarknetContract } from "starknet";
 import { BreadcrumbPage } from "@cartridge/ui-next";
 import {
   Breadcrumb,
@@ -14,7 +14,7 @@ import {
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
-import { SectionBoxEntry } from "@/shared/components/section";
+import { SectionBoxEntry } from "@/shared/components/section"
 import useBalances from "@/shared/hooks/useBalances";
 import { getContractClassInfo, ContractClassInfo } from "@/shared/utils/contract";
 import { Code } from "@/shared/components/contract/Code";
@@ -23,7 +23,7 @@ import { ContractForm } from "@/shared/components/contract/Form";
 
 const DataTabs = ["Read Contract", "Write Contract", "Code"];
 
-const initialData: Omit<ContractClassInfo, "constructor"> & { contract?: Contract } = {
+const initialData: Omit<ContractClassInfo, "constructor"> & { contract?: StarknetContract } = {
   contract: undefined,
   readFuncs: [],
   writeFuncs: [],
@@ -33,7 +33,7 @@ const initialData: Omit<ContractClassInfo, "constructor"> & { contract?: Contrac
   },
 };
 
-export default function ContractDetails() {
+export function Contract() {
   const { contractAddress } = useParams<{
     contractAddress: string;
   }>();
@@ -54,7 +54,7 @@ export default function ContractDetails() {
       const contractClass = await RPC_PROVIDER.getClassAt(contractAddress);
       const { readFuncs, writeFuncs, code } = getContractClassInfo(contractClass);
 
-      const contract = new Contract(
+      const contract = new StarknetContract(
         contractClass.abi,
         contractAddress!,
         RPC_PROVIDER
@@ -79,9 +79,9 @@ export default function ContractDetails() {
     <div id="contract-details" className="w-full flex-grow gap-8">
       <div className="mb-2">
         <Breadcrumb>
-          <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+          <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem href="/">Contracts</BreadcrumbItem>
+          <BreadcrumbItem>Contracts</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbPage className=" text-sm">

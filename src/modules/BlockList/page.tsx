@@ -8,7 +8,6 @@ import {
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ROUTES } from "@/constants/routes";
 import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { getPaginatedBlockNumbers } from "@/shared/utils/rpc_utils";
 import { useScreen } from "@/shared/hooks/useScreen";
@@ -18,7 +17,7 @@ const ROWS_TO_RENDER = 20;
 
 const columnHelper = createColumnHelper();
 
-const BlocksList = () => {
+export function BlockList() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -94,7 +93,7 @@ const BlocksList = () => {
   ];
 
   const table = useReactTable({
-    data: data,
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -117,9 +116,9 @@ const BlocksList = () => {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </th>
                 ))}
               </tr>
@@ -127,19 +126,15 @@ const BlocksList = () => {
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="">
+              <tr
+                key={row.id}
+                className="hover:bg-button-whiteInitialHover cursor-pointer"
+                onClick={() => navigate(`./${row.original.hash}`)}
+              >
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
-                    onClick={() =>
-                      navigate(
-                        `${ROUTES.BLOCK_DETAILS.urlPath.replace(
-                          ":blockNumber",
-                          cell.row.original.hash
-                        )}`
-                      )
-                    }
-                    className="w-1 p-2 text-sm whitespace-nowrap text-black cursor-pointer"
+                    className="w-1 p-2 text-sm whitespace-nowrap text-black"
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
@@ -168,5 +163,3 @@ const BlocksList = () => {
     </div>
   );
 };
-
-export default BlocksList;

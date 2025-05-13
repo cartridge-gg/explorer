@@ -1,7 +1,5 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import FeltDisplay from "./FeltDisplay";
-import { ROUTES } from "@/constants/routes";
-import { useCallback } from "react";
 import { AnchorHTMLAttributes } from "react";
 
 interface AddressDisplayProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
@@ -16,30 +14,14 @@ export default function AddressDisplay({
   truncateLength,
   ...props
 }: AddressDisplayProps) {
-  const navigate = useNavigate();
-
-  const handleClick = useCallback(() => {
-    const contractAddress = BigInt(value).toString(16);
-    navigate(
-      ROUTES.CONTRACT_DETAILS.urlPath.replace(
-        ":contractAddress",
-        `0x${contractAddress}`
-      )
-    );
-  }, [value, navigate]);
-
   return (
-    <a
-      className="cursor-pointer hover:underline"
-      onClick={handleClick}
-      {...props}
-    >
+    <Link to={`../contract/${BigInt(value).toString(16)}`} className="hover:underline" {...props}>
       <FeltDisplay
         value={value}
         displayAs="hex"
         alwaysTruncate={alwaysTruncate}
         truncateLength={truncateLength}
       />
-    </a>
+    </Link>
   );
 }

@@ -27,7 +27,6 @@ import {
   BreadcrumbSeparator,
   BreadcrumbItem,
 } from "@/shared/components/breadcrumbs";
-import { ROUTES } from "@/constants/routes";
 import { DataTable, TableCell, TableHead } from "@/shared/components/dataTable";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import PageHeader from "@/shared/components/PageHeader";
@@ -79,7 +78,7 @@ const FinalityStatus = ({ status }: { status: string }) => {
   );
 };
 
-export default function TransactionDetails() {
+export function Transaction() {
   const navigate = useNavigate();
   const { txHash } = useParams<{ txHash: string }>();
   const { isMobile } = useScreen();
@@ -316,33 +315,6 @@ export default function TransactionDetails() {
     processTransactionDetails();
   }, [TransactionDetails, processTransactionDetails]);
 
-  const navigateToBlock = useCallback(
-    (block_number: string) => {
-      navigate(
-        `${ROUTES.BLOCK_DETAILS.urlPath.replace(":blockNumber", block_number)}`
-      );
-    },
-    [navigate]
-  );
-
-  const navigateToContract = useCallback(
-    (contract_address: string) => {
-      navigate(
-        `${ROUTES.CONTRACT_DETAILS.urlPath.replace(
-          ":contractAddress",
-          contract_address
-        )}`
-      );
-    },
-    [navigate]
-  );
-
-  const navigateToEvent = useCallback(
-    (event_id: string) => {
-      navigate(`${ROUTES.EVENT_DETAILS.urlPath.replace(":eventId", event_id)}`);
-    },
-    [navigate]
-  );
   const events_columns = [
     eventColumnHelper.accessor("id", {
       header() {
@@ -355,7 +327,7 @@ export default function TransactionDetails() {
       cell: (info) => (
         <TableCell
           className="flex border-0 pr-4 justify-start cursor-pointer text-left"
-          onClick={() => navigateToEvent(info.getValue().toString())}
+          onClick={() => navigate(`../event/${info.getValue().toString()}`)}
         >
           <span className="whitespace-nowrap hover:text-blue-400 transition-all">
             {truncateString(info.getValue())}
@@ -373,7 +345,7 @@ export default function TransactionDetails() {
       },
       cell: (info) => (
         <TableCell
-          onClick={() => navigateToContract(info.getValue())}
+          onClick={() => navigate(`../contract/${info.getValue()}`)}
           className="w-1 pr-4 border-0 text-left hover:underline cursor-pointer"
         >
           <span>{truncateString(info.getValue())}</span>
@@ -404,7 +376,7 @@ export default function TransactionDetails() {
       },
       cell: (info) => (
         <TableCell
-          onClick={() => navigateToBlock(info.getValue().toString())}
+          onClick={() => navigate(`../block/${info.getValue().toString()}`)}
           className="w-1 text-right border-0 cursor-pointer hover:text-blue-400 transition-all"
         >
           <span>{info.getValue()}</span>
@@ -439,7 +411,7 @@ export default function TransactionDetails() {
       },
       cell: (info) => (
         <TableCell
-          onClick={() => navigateToContract(info.getValue())}
+          onClick={() => navigate(`../contract/${info.getValue()}`)}
           className="text-left border-0 cursor-pointer hover:text-blue-400 transition-all pr-4"
         >
           <span>{truncateString(info.getValue())}</span>
@@ -492,7 +464,7 @@ export default function TransactionDetails() {
         const block_number = info.getValue();
         return (
           <TableCell
-            onClick={() => navigateToBlock(block_number.toString())}
+            onClick={() => navigate(`../block/${block_number.toString()}`)}
             className="text-right border-0 cursor-pointer hover:text-blue-400 transition-all"
           >
             <span>{block_number}</span>
@@ -519,9 +491,9 @@ export default function TransactionDetails() {
     <div id="tx-details" className="w-full flex-grow gap-8">
       <div className="mb-2">
         <Breadcrumb>
-          <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+          <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem href="/txns">Transactions</BreadcrumbItem>
+          <BreadcrumbItem to="../txns">Transactions</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             {isMobile && txHash ? truncateString(txHash) : txHash}

@@ -1,5 +1,6 @@
 import * as React from "react";
 import RightChevron from "@/shared/icons/RightChevron";
+import { Link, LinkProps } from "react-router-dom";
 
 function Breadcrumb({
   children,
@@ -15,16 +16,16 @@ function Breadcrumb({
 }
 
 function BreadcrumbItem({
-  href,
+  to,
   children,
   ...props
-}: React.ComponentPropsWithoutRef<"a">) {
+}: Partial<LinkProps>) {
   return (
     <li className={"uppercase inline-flex items-center gap-1.5"}>
-      {href ? (
-        <a className="hover:underline" href={href} {...props}>
+      {to ? (
+        <Link className="hover:underline" to={to} {...props}>
           {children}
-        </a>
+        </Link>
       ) : (
         <span {...props}>{children}</span>
       )}

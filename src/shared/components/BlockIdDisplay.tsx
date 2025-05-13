@@ -1,7 +1,5 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import FeltDisplay from "./FeltDisplay";
-import { ROUTES } from "@/constants/routes";
-import { useCallback } from "react";
 import { AnchorHTMLAttributes } from "react";
 
 interface BlockIdDisplayProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
@@ -16,29 +14,10 @@ export default function BlockIdDisplay({
   truncateLength,
   ...props
 }: BlockIdDisplayProps) {
-  const navigate = useNavigate();
-
-  const handleClick = useCallback(() => {
-    let blockId = value;
-
-    // If value is bigint or number, convert it
-    if (typeof value === "bigint") {
-      blockId = value.toString();
-    } else if (typeof value === "number") {
-      blockId = value.toString();
-    }
-
-    navigate(
-      ROUTES.BLOCK_DETAILS.urlPath.replace(":blockId", blockId.toString())
-    );
-  }, [value, navigate]);
+  const blockId = ["bigint", "number"].includes(typeof value) ? value.toString() : value;
 
   return (
-    <a
-      className="cursor-pointer hover:underline"
-      onClick={handleClick}
-      {...props}
-    >
+    <Link to={`../block/${blockId}`} className="hover:underline" {...props}>
       {typeof value === "number" ? (
         value
       ) : (
@@ -48,6 +27,6 @@ export default function BlockIdDisplay({
           truncateLength={truncateLength}
         />
       )}
-    </a>
+    </Link>
   );
 }

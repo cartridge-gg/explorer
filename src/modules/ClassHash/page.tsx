@@ -15,7 +15,7 @@ import { Deploy } from "./Deploy";
 import { getContractClassInfo, ContractClassInfo } from "@/shared/utils/contract";
 import { validateAndParseAddress } from "starknet";
 import { useToast } from "@/shared/components/toast";
-import NotFound from "../NotFound/page";
+import { NotFound } from "@/modules/NotFound/page";
 const DataTabs = ["Overview", "Deploy"];
 
 const initialData: ContractClassInfo = {
@@ -33,7 +33,7 @@ const initialData: ContractClassInfo = {
   }
 };
 
-export default function ClassHashDetails() {
+export function ClassHash() {
   const { classHash } = useParams();
   const { isMobile } = useScreen();
   const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
@@ -97,9 +97,9 @@ export default function ClassHashDetails() {
   return (
     <div id="class-details" className="w-full flex-grow">
       <Breadcrumb className="mb-2">
-        <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+        <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
         <BreadcrumbSeparator />
-        <BreadcrumbItem href="/">Class</BreadcrumbItem>
+        <BreadcrumbItem>Class</BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
           <BreadcrumbPage className="text-sm">

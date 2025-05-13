@@ -1,4 +1,3 @@
-import { ROUTES } from "@/constants/routes";
 import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { useScreen } from "@/shared/hooks/useScreen";
 import SearchTool from "@/shared/icons/SearchTool";
@@ -167,23 +166,21 @@ export default function HomeSearchBar() {
   );
 
   const handleResultClick = useCallback(() => {
-    if (result?.type === "tx") {
-      navigate(
-        ROUTES.TRANSACTION_DETAILS.urlPath.replace(":txHash", result.value)
-      );
-    } else if (result?.type === "block") {
-      navigate(ROUTES.BLOCK_DETAILS.urlPath.replace(":blockId", result.value));
-    } else if (result?.type === "contract") {
-      navigate(
-        ROUTES.CONTRACT_DETAILS.urlPath.replace(
-          ":contractAddress",
-          result.value
-        )
-      );
-    } else if (result?.type === "class") {
-      navigate(
-        ROUTES.CLASS_HASH_DETAILS.urlPath.replace(":classHash", result.value)
-      );
+    switch (result?.type) {
+      case "tx":
+        navigate(`./tx/${result.value}`);
+        break;
+      case "block":
+        navigate(`./block/${result.value}`);
+        break;
+      case "contract":
+        navigate(`./contract/${result.value}`);
+        break;
+      case "class":
+        navigate(`./class/${result.value}`);
+        break;
+      default:
+        break
     }
 
     setIsDropdownOpen(false);
@@ -221,9 +218,8 @@ export default function HomeSearchBar() {
   return (
     <div
       id="home-search-bar"
-      className={`bg-white min-w-[200px] w-full h-[42px] flex relative border border-borderGray items-center shadow ${
-        isDropdownOpen && result ? "border-b-0" : ""
-      }`}
+      className={`bg-white min-w-[200px] w-full h-[42px] flex relative border border-borderGray items-center shadow ${isDropdownOpen && result ? "border-b-0" : ""
+        }`}
     >
       <input
         ref={inputRef}

@@ -54,11 +54,11 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
         (
           <div>
             Contract {" "}
-            <Link to={`/contract/${result.contract_address}`} className="underline">
+            <Link to={`../contract/${result.contract_address}`} className="underline">
               {result.contract_address}
             </Link>{" "}
             is deployed successfully at tx: {" "}
-            <Link to={`/tx/${result.transaction_hash}`} className="underline">
+            <Link to={`../tx/${result.transaction_hash}`} className="underline">
               {result.transaction_hash}
             </Link>
           </div>

@@ -1,12 +1,11 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   createColumnHelper,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { BlockWithTxHashes } from "starknet";
-import { useNavigate } from "react-router-dom";
-import { ROUTES } from "@/constants/routes";
+import { Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import LinkArrow from "@/shared/icons/LinkArrow";
 
@@ -35,17 +34,13 @@ const columns = [
   }),
 ];
 
-export default function TransactionTable(props: {
+export function TransactionTable(props: {
   blocks: (BlockWithTxHashes | undefined)[];
   isBlocksLoading: boolean;
 }) {
   const { isBlocksLoading, blocks } = props;
   const navigate = useNavigate();
   const [data, setData] = React.useState<Transaction[]>([]);
-
-  const handleNavigate = useCallback(() => {
-    navigate(ROUTES.TRANSACTION_LIST.urlPath);
-  }, [navigate]);
 
   // filter out top 10 transactions from the latest blocks
   useEffect(() => {
@@ -95,13 +90,13 @@ export default function TransactionTable(props: {
     <div className=" text-black rounded-lg w-full">
       <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
         <h1 className="text-white">Transactions</h1>
-        <div
-          onClick={handleNavigate}
-          className="flex flex-row items-center gap-2 cursor-pointer"
+        <Link
+          to="./txns"
+          className="flex flex-row items-center gap-2"
         >
           <h4 className="text-white">View all transactions</h4>
           <LinkArrow color={"#fff"} />
-        </div>
+        </Link>
       </div>
 
       <div className=" w-screen sm:w-full overflow-x-auto h-full flex">
@@ -111,13 +106,7 @@ export default function TransactionTable(props: {
               <tr
                 key={row.id}
                 className="text-sm"
-                onClick={() =>
-                  navigate(
-                    `${ROUTES.TRANSACTION_DETAILS.urlPath.replace(
-                      ":txHash",
-                      row.original.hash
-                    )}`
-                  )
+                onClick={() => navigate(`./tx/${row.original.hash}`)
                 }
               >
                 <td className="w-full p-2 cursor-pointer">

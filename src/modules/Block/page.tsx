@@ -24,8 +24,8 @@ import {
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
-import TxList from "./TxList";
-import EventList from "./EventList";
+import { TxList } from "./TxList";
+import { EventList } from "./EventList";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { QUERY_KEYS } from "@/services/starknet_provider_config";
 import BlockNavigation from "./BlockNavigation";
@@ -33,7 +33,7 @@ import AddressDisplay from "@/shared/components/AddressDisplay";
 
 const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
 
-export default function BlockDetails() {
+export function Block() {
   const { isMobile } = useScreen();
   const { blockId } = useParams<{ blockId: string }>();
   const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
@@ -145,9 +145,9 @@ export default function BlockDetails() {
     <div id="block-details" className="w-full flex-grow gap-8">
       <div className="flex justify-between mb-2">
         <Breadcrumb className="flex items-center">
-          <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+          <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem href="/blocks">Blocks</BreadcrumbItem>
+          <BreadcrumbItem to="../blocks">Blocks</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>{blockId}</BreadcrumbItem>
         </Breadcrumb>
@@ -163,8 +163,8 @@ export default function BlockDetails() {
           <div className="text-[#5D5D5D]">
             {BlockWithReceipts?.timestamp
               ? dayjs
-                  .unix(BlockWithReceipts.timestamp)
-                  .format("MMM D YYYY HH:mm:ss")
+                .unix(BlockWithReceipts.timestamp)
+                .format("MMM D YYYY HH:mm:ss")
               : ""}
           </div>
         }
@@ -203,12 +203,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockWithReceipts?.l1_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockWithReceipts?.l1_gas_price?.price_in_wei
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockWithReceipts?.l1_gas_price?.price_in_wei
                             )
                           )
+                        )
                         : 0}{" "}
                       WEI
                     </td>
@@ -218,12 +218,12 @@ export default function BlockDetails() {
                     <td>
                       {BlockWithReceipts?.l1_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockWithReceipts?.l1_gas_price?.price_in_fri
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockWithReceipts?.l1_gas_price?.price_in_fri
                             )
                           )
+                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -240,13 +240,13 @@ export default function BlockDetails() {
                     <td>
                       {BlockWithReceipts?.l1_data_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockWithReceipts?.l1_data_gas_price
-                                  ?.price_in_wei
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockWithReceipts?.l1_data_gas_price
+                                ?.price_in_wei
                             )
                           )
+                        )
                         : 0}{" "}
                       ETH
                     </td>
@@ -256,13 +256,13 @@ export default function BlockDetails() {
                     <td>
                       {BlockWithReceipts?.l1_data_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockWithReceipts?.l1_data_gas_price
-                                  ?.price_in_fri
-                              )
+                          Number(
+                            cairo.felt(
+                              BlockWithReceipts?.l1_data_gas_price
+                                ?.price_in_fri
                             )
                           )
+                        )
                         : 0}{" "}
                       FRI
                     </td>
