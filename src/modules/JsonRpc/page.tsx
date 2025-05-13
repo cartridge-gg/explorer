@@ -164,9 +164,9 @@ export function JsonRpcPlayground() {
     <div id="json-playground" className="w-full flex-grow gap-8">
       <div className="mb-2">
         <Breadcrumb>
-          <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+          <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem href="/">
+          <BreadcrumbItem>
             <BreadcrumbPage className="text-sm">
               JSON-RPC Playground
             </BreadcrumbPage>

@@ -164,9 +164,9 @@ export default function EventDetails() {
     <div className="w-full flex-grow gap-8">
       <Breadcrumb className="mb-3">
         <BreadcrumbSeparator />
-        <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+        <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
         <BreadcrumbSeparator />
-        <BreadcrumbItem href="/events">Events</BreadcrumbItem>
+        <BreadcrumbItem>Events</BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
           {isMobile && eventId ? truncateString(eventId) : eventId}
@@ -204,8 +204,8 @@ export default function EventDetails() {
             <SectionBoxEntry title="Timestamp">
               {BlockDetails?.timestamp
                 ? `${BlockDetails.timestamp} (${dayjs
-                    .unix(BlockDetails.timestamp || 0)
-                    .format("MMM D YYYY HH:mm:ss")})`
+                  .unix(BlockDetails.timestamp || 0)
+                  .format("MMM D YYYY HH:mm:ss")})`
                 : "Loading..."}
             </SectionBoxEntry>
           </SectionBox>
@@ -259,11 +259,10 @@ export default function EventDetails() {
                   {DisplayFormat.map((format) => (
                     <button
                       key={format}
-                      className={`px-2 py-1 text-xs ${
-                        (displayFormats["keys"] ?? "hex") === format
-                          ? "bg-[#4A4A4A] text-white"
-                          : "bg-gray-200"
-                      }`}
+                      className={`px-2 py-1 text-xs ${(displayFormats["keys"] ?? "hex") === format
+                        ? "bg-[#4A4A4A] text-white"
+                        : "bg-gray-200"
+                        }`}
                       onClick={() => handleFormatChange("keys", format)}
                     >
                       {format}
@@ -320,11 +319,10 @@ export default function EventDetails() {
                   {DisplayFormat.map((format) => (
                     <button
                       key={format}
-                      className={`px-2 py-1 text-xs ${
-                        (displayFormats["data"] ?? "hex") === format
-                          ? "bg-[#4A4A4A] text-white"
-                          : "bg-gray-200"
-                      }`}
+                      className={`px-2 py-1 text-xs ${(displayFormats["data"] ?? "hex") === format
+                        ? "bg-[#4A4A4A] text-white"
+                        : "bg-gray-200"
+                        }`}
                       onClick={() => handleFormatChange("data", format)}
                     >
                       {format}

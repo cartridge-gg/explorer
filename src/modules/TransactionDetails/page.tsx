@@ -519,9 +519,9 @@ export default function TransactionDetails() {
     <div id="tx-details" className="w-full flex-grow gap-8">
       <div className="mb-2">
         <Breadcrumb>
-          <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+          <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem href="/txns">Transactions</BreadcrumbItem>
+          <BreadcrumbItem to="../txns">Transactions</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             {isMobile && txHash ? truncateString(txHash) : txHash}

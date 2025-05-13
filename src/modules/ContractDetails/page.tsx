@@ -79,9 +79,9 @@ export default function ContractDetails() {
     <div id="contract-details" className="w-full flex-grow gap-8">
       <div className="mb-2">
         <Breadcrumb>
-          <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+          <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem href="/">Contracts</BreadcrumbItem>
+          <BreadcrumbItem>Contracts</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbPage className=" text-sm">

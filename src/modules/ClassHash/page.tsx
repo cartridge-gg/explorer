@@ -97,9 +97,9 @@ export default function ClassHashDetails() {
   return (
     <div id="class-details" className="w-full flex-grow">
       <Breadcrumb className="mb-2">
-        <BreadcrumbItem href="/">Explorer</BreadcrumbItem>
+        <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
         <BreadcrumbSeparator />
-        <BreadcrumbItem href="/">Class</BreadcrumbItem>
+        <BreadcrumbItem>Class</BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
           <BreadcrumbPage className="text-sm">
