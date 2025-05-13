@@ -1,10 +1,11 @@
-import { OpenRPC } from "@/modules/JsonRpc/open-rpc";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@cartridge/ui-next";
 import { Editor, Monaco } from "@monaco-editor/react"
 import { InfoIcon } from "lucide-react";
 import { editor } from "monaco-editor";
 import { useCallback } from "react"
-
+import { JsonSchema } from "json-schema-library";
+import { isPrimitive } from "@/shared/utils/json-schema";
+import { TypeNode } from "@/shared/utils/abi";
 export function ParamForm({
   params,
   onChange,
@@ -15,8 +16,8 @@ export function ParamForm({
     description?: string,
     summary?: string,
     value: string,
-    schema: { type: string }
-    placeholder?: string
+    schema: JsonSchema,
+    type?: TypeNode
   }[]
   onChange: (i: number, value: string) => void
   disabled?: boolean
@@ -53,14 +54,14 @@ export function ParamForm({
             </td>
 
             <td className="text-left align-top p-0">
-              {OpenRPC.isPrimitive(p.schema) ? (
+              {isPrimitive(p.schema) ? (
                 <input
                   type="text"
                   className="px-2 py-1 text-left w-full"
                   value={p.value}
                   onChange={(e) => onChange(i, e.target.value)}
                   disabled={disabled}
-                  placeholder={p.placeholder}
+                  placeholder={p.type?.name}
                 />
               ) : (
                 <ParamEditor

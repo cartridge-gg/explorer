@@ -1,4 +1,4 @@
-import { compileSchema } from "json-schema-library";
+import { compileSchema, JsonSchema } from "json-schema-library";
 import { SchemaNode } from "json-schema-library";
 
 // https://spec.open-rpc.org/#openrpc-object
@@ -65,18 +65,8 @@ export interface ContentDescriptor {
   summary?: string;
   description?: string
   required?: boolean;
-  schema: Schema | Reference;
+  schema: JsonSchema | Reference;
   deprecated?: boolean
-}
-
-// TODO: Is there apppropriate type in `json-schema-library`? Otherwise too many type assertions
-export interface Schema {
-  name: string;
-  type?: string;
-  description?: string;
-  summary?: string;
-  params: (/* Example | */ Reference)[];
-  result?: /* Example | */ Reference;
 }
 
 // interface ExamplePairing {
@@ -108,7 +98,7 @@ export interface Schema {
 
 interface Components {
   // contentDescriptors?: Record<string, ContentDescriptor>;
-  schemas: Record<string, Schema>;
+  schemas: Record<string, JsonSchema>;
   // examples?: Record<string, Example>;
   // links?: Record<string, Link>;
   // errors?: Record<string, Error>;
@@ -173,9 +163,9 @@ export class OpenRPC {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static resolveReference(schema: Schema | Reference, root: SchemaNode): any {
+  static resolveReference(schema: JsonSchema | Reference, root: SchemaNode): any {
     if (OpenRPC.isReference(schema)) {
-      return OpenRPC.resolveReference(root.getNodeRef(schema.$ref)!.schema as Schema, root)
+      return OpenRPC.resolveReference(root.getNodeRef(schema.$ref)!.schema as JsonSchema, root)
     }
 
     switch (schema.type) {
@@ -199,12 +189,12 @@ export class OpenRPC {
         if ("oneOf" in schema) {
           return {
             ...schema,
-            oneOf: schema.oneOf.map(s => OpenRPC.resolveReference(s, root))
+            oneOf: schema.oneOf.map((s: JsonSchema) => OpenRPC.resolveReference(s, root))
           }
         } else if ("allOf" in schema) {
           return {
             ...schema,
-            allOf: schema.allOf.map(s => OpenRPC.resolveReference(s, root))
+            allOf: schema.allOf.map((s: JsonSchema) => OpenRPC.resolveReference(s, root))
           }
         }
         return schema
@@ -213,21 +203,5 @@ export class OpenRPC {
 
   static isReference(val: unknown): val is Reference {
     return typeof val === "object" && val !== null && "$ref" in val;
-  }
-
-  static isPrimitive(schema: { type: string }) {
-    if (!("type" in schema)) {
-      return false;
-    }
-
-    switch (schema.type) {
-      case "string":
-      case "number":
-      case "integer":
-      case "boolean":
-        return true;
-      default:
-        return false;
-    }
   }
 }

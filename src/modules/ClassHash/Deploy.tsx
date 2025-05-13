@@ -1,4 +1,4 @@
-import { FunctionAbiWithAst, FunctionInputWithValue, createJsonSchemaFromTypeNode } from "@/shared/utils/abi";
+import { FunctionAbiWithAst, FunctionInputWithValue } from "@/shared/utils/abi";
 import { useToast } from "@/shared/components/toast";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
@@ -10,8 +10,7 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
   const { toast } = useToast();
   const { account } = useAccount();
   const initialInputs = useMemo(() => constructor.inputs.map(input => ({
-    name: input.name,
-    type: input.type,
+    ...input,
     value: ""
   })), [constructor.inputs]);
   const [form, setForm] = useState<{
@@ -83,9 +82,7 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
 
       <ParamForm
         params={constructor.inputs.map((input, i) => ({
-          name: input.name,
-          schema: createJsonSchemaFromTypeNode(constructor.ast.inputs[i].type) as { type: string },
-          placeholder: constructor.ast.inputs[i].type.value.name,
+          ...input,
           value: form.inputs[i]!.value,
         }))}
         onChange={onInputChange}
@@ -107,7 +104,7 @@ function toRawArgs(inputs: FunctionInputWithValue[]) {
 }
 
 function toMultiType(input: FunctionInputWithValue) {
-  switch (input.type) {
+  switch (input.type.name) {
     case "Uint256":
       return uint256.bnToUint256(input.value);
     default:

@@ -10,12 +10,10 @@ import {
   InvokeFunctionResponse,
 } from "starknet";
 import {
-  convertToCalldata,
   FunctionAbiWithAst,
-  FunctionAst,
   FunctionInputWithValue,
   isReadFunction,
-  createJsonSchemaFromTypeNode,
+  toCalldata,
 } from "@/shared/utils/abi";
 import { useAccount } from "@starknet-react/core";
 import { Link } from "react-router-dom";
@@ -79,28 +77,28 @@ export function ContractForm({
   return (
     <Accordion>
       {
-        functions.map(({ ast, ...func }, i) => (
+        functions.map((f, i) => (
           <AccordionItem
             key={i}
             titleClassName="h-[45px] z-10"
             title={
               <div className="flex flex-row items-center gap-2">
                 <span className="font-bold">fn</span>
-                <span className="italic">{func.name}</span>
-                <span>({func.inputs.map((arg) => arg.name).join(", ")})</span>
+                <span className="italic">{f.name}</span>
+                <span>({f.inputs.map((arg) => arg.name).join(", ")})</span>
               </div>
             }
-            disabled={!contract && !func.inputs.length}
+            disabled={!contract && !f.inputs.length}
           >
             <FunctionForm
               key={i}
-              ast={ast}
+              function={f}
               contract={contract}
-              state={form[func.name] || initFormState}
+              state={form[f.name] || initFormState}
               onUpdate={(update) => {
-                onUpdate(func.name, update);
+                onUpdate(f.name, update);
               }}
-              isRead={isReadFunction(func)}
+              isRead={isReadFunction(f)}
             />
           </AccordionItem>
         ))
@@ -110,9 +108,9 @@ export function ContractForm({
 }
 
 interface FunctionFormProps {
+  function: FunctionAbiWithAst;
   /** The contract instance to interact with */
   contract?: Contract;
-  ast: FunctionAst;
   isRead: boolean;
   /** Current state of the accordion content, including inputs, results and errors */
   state: FormState;
@@ -121,7 +119,7 @@ interface FunctionFormProps {
 }
 
 function FunctionForm({
-  ast,
+  function: f,
   contract,
   isRead,
   onUpdate,
@@ -150,17 +148,17 @@ function FunctionForm({
           } catch {
             value = input.value
           }
-          return convertToCalldata(ast.inputs[idx].type, value)
+          return toCalldata(f.inputs[idx].type, value)
         }
       );
 
       if (isRead) {
-        const result = await contract.call(ast.name, calldata, { parseRequest: false, parseResponse: false });
+        const result = await contract.call(f.name, calldata, { parseRequest: false, parseResponse: false });
         onUpdate({ result: result as CallResult, error: undefined });
       } else {
         const result = await account!.execute([{
           calldata: calldata,
-          entrypoint: ast.name,
+          entrypoint: f.name,
           contractAddress: contract.address,
         }])
         onUpdate({ result: result, error: undefined });
@@ -172,7 +170,7 @@ function FunctionForm({
       onUpdate({ hasCalled: true, loading: false });
     };
   }, [
-    ast,
+    f,
     contract,
     account,
     state.inputs,
@@ -208,20 +206,20 @@ function FunctionForm({
         } catch {
           value = input.value
         }
-        return convertToCalldata(ast.inputs[idx].type, value)
+        return toCalldata(f.inputs[idx].type, value)
       }
     );
 
     addCall({
       calldata: calldata,
-      entrypoint: ast.name,
+      entrypoint: f.name,
       contractAddress: contract.address,
     });
-    toast(`Function call added: ${ast.name}`, "success");
+    toast(`Function call added: ${f.name}`, "success");
   }, [
     toast,
     contract,
-    ast,
+    f,
     state.inputs,
     addCall,
     account,
@@ -284,10 +282,8 @@ function FunctionForm({
       )}
 
       <ParamForm
-        params={ast.inputs.map((input, i) => ({
-          name: input.name,
-          schema: createJsonSchemaFromTypeNode(input.type) as { type: string },
-          placeholder: input.type.value.name,
+        params={f.inputs.map((input, i) => ({
+          ...input,
           value: i < state.inputs.length
             ? state.inputs[i]?.value
             : input.type.type === "struct"
