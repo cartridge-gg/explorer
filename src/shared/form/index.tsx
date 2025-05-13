@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@cartridge/ui-next";
+import { cn, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@cartridge/ui-next";
 import { Editor, Monaco } from "@monaco-editor/react"
 import { InfoIcon } from "lucide-react";
 import { editor } from "monaco-editor";
@@ -6,6 +6,7 @@ import { useCallback } from "react"
 import { JsonSchema } from "json-schema-library";
 import { isPrimitive } from "@/shared/utils/json-schema";
 import { TypeNode } from "@/shared/utils/abi";
+
 export function ParamForm({
   params,
   onChange,
@@ -57,7 +58,7 @@ export function ParamForm({
               {isPrimitive(p.schema) ? (
                 <input
                   type="text"
-                  className="px-2 py-1 text-left w-full"
+                  className={cn("px-2 py-1 text-left w-full", disabled && "cursor-not-allowed")}
                   value={p.value}
                   onChange={(e) => onChange(i, e.target.value)}
                   disabled={disabled}

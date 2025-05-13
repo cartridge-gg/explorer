@@ -91,15 +91,10 @@ export function ContractForm({
             disabled={!contract && !f.inputs.length}
           >
             <FunctionForm
-              key={i}
-              function={f}
+              item={f}
               contract={contract}
               state={form[f.name] || initFormState}
-              onUpdate={(update) => {
-                onUpdate(f.name, update);
-              }}
-              isRead={isReadFunction(f)}
-            />
+              onUpdate={(update) => onUpdate(f.name, update)} />
           </AccordionItem>
         ))
       }
@@ -108,10 +103,9 @@ export function ContractForm({
 }
 
 interface FunctionFormProps {
-  function: FunctionAbiWithAst;
+  item: FunctionAbiWithAst;
   /** The contract instance to interact with */
   contract?: Contract;
-  isRead: boolean;
   /** Current state of the accordion content, including inputs, results and errors */
   state: FormState;
   /** Callback to update the state of this accordion item in order to preserve the state */
@@ -119,13 +113,13 @@ interface FunctionFormProps {
 }
 
 function FunctionForm({
-  function: f,
+  item: f,
   contract,
-  isRead,
   onUpdate,
   state,
 }: FunctionFormProps) {
   const { account } = useAccount();
+  const isRead = isReadFunction(f);
 
   const onCallOrExecute = useCallback(async () => {
     if (!contract || (!isRead && !account)) {
@@ -228,7 +222,7 @@ function FunctionForm({
 
   return (
     <div className="flex flex-col gap-[10px] items-end">
-      {contract && isRead ? (
+      {!!contract && (isRead ? (
         <button
           disabled={state.loading}
           onClick={onCallOrExecute}
@@ -279,7 +273,7 @@ function FunctionForm({
             {state.loading ? "Executing..." : "Execute"}
           </button>
         </div>
-      )}
+      ))}
 
       <ParamForm
         params={f.inputs.map((input, i) => ({
@@ -294,6 +288,7 @@ function FunctionForm({
 
         }))}
         onChange={(i, value) => onChange(i, value)}
+        disabled={!contract || (!isRead && !account)}
       />
 
       {state.hasCalled && (
