@@ -55,10 +55,10 @@ export function Block() {
     data_gas: 0,
   });
 
-  const { data: BlockWithReceipts } = useQuery({
+  const { data: BlockWithReceipts, isLoading } = useQuery({
     queryKey: [QUERY_KEYS.getBlockWithReceipts, blockId],
-    queryFn: () => RPC_PROVIDER.getBlockWithReceipts(blockId ?? 0),
-    enabled: !!blockId,
+    queryFn: () => RPC_PROVIDER.getBlockWithReceipts(blockId),
+    enabled: typeof blockId !== "undefined",
     staleTime: STALE_TIME,
     gcTime: CACHE_TIME,
   });
@@ -140,6 +140,12 @@ export function Block() {
 
     setTxsTable(transactions_table_data);
   }, [BlockWithReceipts]);
+
+  if (isLoading) {
+    return <div className="w-full h-screen flex items-center justify-center animate-pulse">
+      <div className="text-sm text-gray-500">Loading...</div>
+    </div>;
+  }
 
   return (
     <div id="block-details" className="w-full flex-grow gap-8">

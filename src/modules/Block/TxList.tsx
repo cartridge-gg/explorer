@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useMemo } from "react";
+import { useCallback, useState, useEffect, useMemo, Fragment } from "react";
 import {
   ColumnDef,
   createColumnHelper,
@@ -26,7 +26,7 @@ export function TxList({ transactions }: TxListProps) {
   const navigate = useNavigate();
   const columnHelper = createColumnHelper<TransactionTableData>();
 
-  const transaction_columns: ColumnDef<TransactionTableData, any>[] = [
+  const transactionColumns: ColumnDef<TransactionTableData, any>[] = useMemo(() => [
     columnHelper.accessor("id", {
       header: () => <th className="w-[52px]">No</th>,
       cell: (info) => info.renderValue(),
@@ -60,8 +60,8 @@ export function TxList({ transactions }: TxListProps) {
       },
     }),
     columnHelper.accessor("status", {
-      header: (ctx) => (
-        <th key={ctx.header.id} className="px-4 text-left w-[103px]">
+      header: () => (
+        <th className="px-4 text-left w-[103px]">
           Status
         </th>
       ),
@@ -78,7 +78,7 @@ export function TxList({ transactions }: TxListProps) {
         </div>
       ),
     }),
-  ];
+  ], [isMobile, columnHelper]);
 
   // Calculate pageSize based on window height
   const calculatePageSize = useCallback(() => {
@@ -114,7 +114,7 @@ export function TxList({ transactions }: TxListProps) {
 
   const table = useReactTable<TransactionTableData>({
     data: transactions,
-    columns: transaction_columns,
+    columns: transactionColumns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -141,7 +141,7 @@ export function TxList({ transactions }: TxListProps) {
 
   return (
     <div className="h-full space-y-3 grid grid-rows-[min-content_1fr]">
-      <TxTypeToggle onFilterChange={(type) => handleTransactionFilter(type)} />
+      <TxTypeToggle onFilterChange={handleTransactionFilter} />
 
       <div className="grid grid-rows-[1fr_min-content] gap-3">
         <table className="w-full h-min">
@@ -151,10 +151,12 @@ export function TxList({ transactions }: TxListProps) {
                 .getHeaderGroups()
                 .map((headerGroup) =>
                   headerGroup.headers.map((header) =>
-                    flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )
+                    <Fragment key={header.id}>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </Fragment>
                   )
                 )}
             </tr>
@@ -169,7 +171,7 @@ export function TxList({ transactions }: TxListProps) {
                   onClick={() => navigate(`../tx/${row.original.hash}`)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className={cn("", cell.column.id === "id" ? "text-center" : undefined)}>
+                    <td key={cell.id} className={cn(cell.column.id === "id" ? "text-center" : "text-left")}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

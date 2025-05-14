@@ -228,7 +228,6 @@ export function JsonRpcPlayground() {
               <Accordion>
                 <AccordionItem
                   open
-                  key="starknet"
                   title="Starknet"
                   titleClassName="uppercase font-bold"
                   contentClassName="p-0 overflow-y-scroll"
@@ -293,7 +292,6 @@ export function JsonRpcPlayground() {
           <div className="w-full overflow-auto">
             <Accordion>
               <AccordionItem
-                key="request"
                 title="request"
                 titleClassName="uppercase"
                 open
@@ -305,7 +303,6 @@ export function JsonRpcPlayground() {
                 </div>
               </AccordionItem>
               <AccordionItem
-                key="response"
                 title="response"
                 titleClassName="uppercase"
                 open
