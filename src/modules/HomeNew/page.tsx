@@ -1,4 +1,4 @@
-import HomeSearchBar from "./SearchBar";
+import { SearchBar } from "@/shared/components/SearchBar";
 import ChainDisplay from "@/shared/components/ChainDisplay";
 import AccountDisplay from "@/shared/components/AccountDisplay";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
@@ -29,7 +29,7 @@ export function Home() {
           <ChainDisplay />
         </div>
 
-        <HomeSearchBar />
+        <SearchBar />
       </div>
 
       <ChainInfoContainer />
