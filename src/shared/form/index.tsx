@@ -25,6 +25,7 @@ export function ParamForm({
 }) {
   if (params.length === 0) return null
 
+
   return (
     <table className="w-full bg-white overflow-x-auto max-h-[200px]">
       <tbody>
@@ -66,7 +67,7 @@ export function ParamForm({
                 />
               ) : (
                 <ParamEditor
-                  name={`${name}_${p.name}`}
+                  name={p.name}
                   schema={p.schema}
                   value={p.value}
                   onChange={(value) => onChange(i, value ?? "")}

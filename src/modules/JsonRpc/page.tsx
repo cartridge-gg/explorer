@@ -161,7 +161,7 @@ export function JsonRpcPlayground() {
   }, [methods])
 
   return (
-    <div id="json-playground" className="w-full flex-grow gap-8">
+    <div id="json-playground" className="w-full gap-8">
       <div className="mb-2">
         <Breadcrumb>
           <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
@@ -179,8 +179,8 @@ export function JsonRpcPlayground() {
         title={`JSON-RPC Playground (${specVersion})`}
       />
 
-      <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
-        <div className="flex flex-col md:flex-row justify-stretch border border-borderGray overflow-hidden py-5 px-4 gap-4 bg-white lg:max-w-[780px]">
+      <div className="flex flex-col sl:flex-row sl:h-[76vh] w-full">
+        <div className="flex flex-col flex-1 md:flex-row justify-stretch border border-borderGray overflow-hidden py-5 px-4 gap-4 bg-white">
           <div className="min-w-[250px] flex flex-col gap-[6px] sl:overflow-y-auto">
             <input
               className="bg-white border border-borderGray px-4 py-2 text-base rounded-none search-input relative focus:outline-none focus:ring-0"
@@ -219,7 +219,7 @@ export function JsonRpcPlayground() {
             </div>
           </div>
 
-          <div className="h-full grid grid-rows-[min-content_1fr] gap-8">
+          <div className="w-full flex flex-col gap-8">
             <div className="flex flex-col gap-2">
               <div className="uppercase font-bold text-lg">
                 {fromCamelCase(selected?.name?.replace("starknet_", "") ?? "")}
@@ -232,12 +232,12 @@ export function JsonRpcPlayground() {
                 ...p,
                 value: form[selected.name].inputs[i].value,
               })) ?? []}
-              onChange={(i, value) => onParamChange(i, value)}
+              onChange={onParamChange}
             />
           </div>
         </div>
 
-        <div className="flex flex-col flex-1 gap-2 border border-borderGray py-5 px-4 bg-white">
+        <div className="w-full flex-1 flex flex-col gap-2 border border-borderGray py-5 px-4 bg-white max-w-[800px]">
           <button
             onClick={onExecute}
             className="bg-black text-white px-2 py-1 text-sm self-end flex items-center gap-3 uppercase font-bold hover:bg-opacity-80"
@@ -246,7 +246,7 @@ export function JsonRpcPlayground() {
             <PlayIcon className="size-2 fill-white" />
           </button>
 
-          <div className="overflow-auto">
+          <div className="w-full overflow-auto">
             <Accordion>
               <AccordionItem
                 key="request"
@@ -254,7 +254,7 @@ export function JsonRpcPlayground() {
                 titleClassName="uppercase"
                 open
               >
-                <div className="overflow-x-auto">
+                <div className="w-full overflow-x-auto">
                   <code>
                     <pre>{requestJSON}</pre>
                   </code>
