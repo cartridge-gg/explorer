@@ -129,7 +129,7 @@ export function BlockList() {
               <tr
                 key={row.id}
                 className="hover:bg-button-whiteInitialHover cursor-pointer"
-                onClick={() => navigate(`./${row.original.hash}`)}
+                onClick={() => navigate(`../block/${row.original.hash}`)}
               >
                 {row.getVisibleCells().map((cell) => (
                   <td
