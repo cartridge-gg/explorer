@@ -1,9 +1,9 @@
-import { FunctionAbiWithAst, FunctionInputWithValue } from "@/shared/utils/abi";
+import { FunctionAbiWithAst, FunctionInputWithValue, toCalldata } from "@/shared/utils/abi";
 import { useToast } from "@/shared/components/toast";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { DeployContractResponse, RawArgsObject, uint256 } from "starknet";
+import { DeployContractResponse } from "starknet";
 import { ParamForm } from "@/shared/form";
 
 export function Deploy({ classHash, constructor }: { classHash: string, constructor: FunctionAbiWithAst }) {
@@ -42,7 +42,7 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
     try {
       const result = await account.deployContract({
         classHash: classHash,
-        constructorCalldata: toRawArgs(form.inputs)
+        constructorCalldata: form.inputs.map(input => toCalldata(input.type, input.value))
       });
       setForm(form => ({
         ...form,
@@ -97,17 +97,4 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
       </button>
     </div>
   )
-}
-
-function toRawArgs(inputs: FunctionInputWithValue[]) {
-  return inputs.reduce((acc, input) => ({ ...acc, [input.name]: toMultiType(input) }), {} as RawArgsObject);
-}
-
-function toMultiType(input: FunctionInputWithValue) {
-  switch (input.type.name) {
-    case "Uint256":
-      return uint256.bnToUint256(input.value);
-    default:
-      return BigInt(input.value);
-  }
 }
