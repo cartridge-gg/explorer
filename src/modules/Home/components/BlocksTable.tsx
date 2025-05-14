@@ -8,11 +8,8 @@ import {
 import { BlockWithTxHashes } from "starknet";
 import dayjs from "dayjs";
 import { Link, useNavigate } from "react-router-dom";
-import relativeTime from "dayjs/plugin/relativeTime";
 import LinkArrow from "@/shared/icons/LinkArrow";
 import { Block } from "@/types/types";
-
-dayjs.extend(relativeTime);
 
 const columnHelper = createColumnHelper<Block>();
 

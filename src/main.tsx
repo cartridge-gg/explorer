@@ -11,6 +11,10 @@ import { BlockNumberProvider } from "./store/BlockNumberProvider";
 import { BrowserRouter } from "react-router-dom";
 import { basePath } from "./constants/rpc";
 import { PostHogProvider } from "./store/PostHogProvider";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
