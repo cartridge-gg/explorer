@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { fromCamelCase } from "@/shared/utils/string";
 import { OpenRPC, Method } from "./open-rpc";
 import { ParamForm } from "@/shared/form";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface FormState {
   inputs: { name: string, value: string }[];
@@ -23,12 +24,12 @@ export function JsonRpcPlayground() {
   const { data: specVersion } = useSpecVersion();
   const { data: rpc } = useQuery({
     queryKey: ["starknet", "rpc", specVersion],
-    queryFn: async () => {
-      const rpc = await OpenRPC.fromUrl(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${specVersion}/api/starknet_api_openrpc.json`)
-      return rpc
-    },
+    queryFn: () => OpenRPC.fromUrl(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${specVersion}/api/starknet_api_openrpc.json`),
     enabled: !!specVersion,
   });
+
+  const { hash } = useLocation();
+  const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
   const methods = useMemo(() => {
@@ -44,7 +45,7 @@ export function JsonRpcPlayground() {
   }, [rpc, search]);
 
   const [id, setId] = useState(0);
-  const [selected, setSelected] = useState<Method | undefined>(() => methods?.[0]);
+  const [selected, setSelected] = useState<Method | undefined>(() => methods?.find(m => m.name === hash.replace("#", "")) ?? methods?.[0]);
   const [form, setForm] = useState<Record<string, FormState>>({});
 
   const onMethodChange = useCallback((method: Method) => {
@@ -58,7 +59,8 @@ export function JsonRpcPlayground() {
         loading: false,
       }
     }))
-  }, [])
+    navigate(`#${method.name}`)
+  }, [navigate])
 
   const onParamChange = useCallback((i: number, value?: string) => {
     if (!selected) return;
@@ -194,6 +196,13 @@ export function JsonRpcPlayground() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [methods, selected, onMethodChange, onExecute]);
+
+  useEffect(() => {
+    const method = methods.find(m => m.name === hash.replace("#", ""));
+    if (!method) return;
+    onMethodChange(method);
+  }, [hash, methods, onMethodChange]);
+
 
   return (
     <div id="json-playground" className="w-full gap-8">
