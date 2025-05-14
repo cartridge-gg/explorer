@@ -10,9 +10,11 @@ import { TypeNode } from "@/shared/utils/abi";
 export function ParamForm({
   params,
   onChange,
+  onSubmit,
   disabled = false,
 }: {
   params: {
+    id?: string,
     name: string,
     description?: string,
     summary?: string,
@@ -21,10 +23,10 @@ export function ParamForm({
     type?: TypeNode
   }[]
   onChange: (i: number, value: string) => void
+  onSubmit?: (i: number, value: string) => void
   disabled?: boolean
 }) {
   if (params.length === 0) return null
-
 
   return (
     <table className="w-full bg-white overflow-x-auto max-h-[200px]">
@@ -63,14 +65,23 @@ export function ParamForm({
                   value={p.value}
                   onChange={(e) => onChange(i, e.target.value)}
                   disabled={disabled}
+                  onKeyDown={(e) => {
+                    switch (e.key) {
+                      case "Enter":
+                        onSubmit?.(i, p.value);
+                        break;
+                    }
+                  }}
                   placeholder={p.type?.name}
                 />
               ) : (
                 <ParamEditor
+                  id={p.id}
                   name={p.name}
                   schema={p.schema}
                   value={p.value}
                   onChange={(value) => onChange(i, value ?? "")}
+                  onSubmit={(value) => onSubmit?.(i, value ?? "")}
                   readOnly={disabled}
                 />
               )}
@@ -83,23 +94,38 @@ export function ParamForm({
 }
 
 function ParamEditor({
+  id,
   name,
   schema,
   value,
   onChange,
+  onSubmit,
   readOnly = false,
 }: {
+  id?: string,
   name: string,
   schema: unknown,
   value: string,
-  onChange: (value?: string) => void
+  onChange: (value?: string) => void,
+  onSubmit?: (value: string) => void,
   readOnly?: boolean;
 }) {
   const onMount = useCallback((editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
-    const uri = monaco.Uri.parse(`file:///${name}.json`)
+    const uri = monaco.Uri.parse(`file:///${id ?? name}.json`)
     const model = monaco.editor.getModel(uri) ?? monaco.editor.createModel(value, "json", uri);
 
     editor.setModel(model);
+    if (onSubmit) {
+      editor.addAction({
+        id: "submit",
+        label: "Submit",
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+        run: () => {
+          onSubmit(value);
+        }
+      })
+    }
+
     monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
       validate: true,
       schemas: [
@@ -112,7 +138,7 @@ function ParamEditor({
         },
       ],
     })
-  }, [name, schema, value])
+  }, [name, schema, value, onSubmit])
 
   return (
     <Editor

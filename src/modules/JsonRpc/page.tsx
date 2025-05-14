@@ -47,35 +47,6 @@ export function JsonRpcPlayground() {
   const [selected, setSelected] = useState<Method | undefined>(() => methods?.[0]);
   const [form, setForm] = useState<Record<string, FormState>>({});
 
-  const requestJSON = useMemo(() => {
-    if (!selected || !form[selected.name]) return
-    const { inputs } = form[selected.name]
-
-    return JSON.stringify({
-      jsonrpc: "2.0",
-      method: selected.name,
-      params: inputs?.map(p => {
-        if (typeof p.value === "undefined") {
-          return ""
-        }
-
-        try {
-          return JSON.parse(p.value)
-        } catch {
-          return p.value
-        }
-      }),
-    }, null, 2)
-  }, [selected, form])
-
-  const responseJSON = useMemo(() => {
-    if (!selected || !form[selected.name]) return ""
-
-    const { result } = form[selected.name]
-    if (!result) return ""
-    return JSON.stringify(result, null, 2)
-  }, [selected, form])
-
   const onMethodChange = useCallback((method: Method) => {
     setSelected(method)
     setForm(prev => ({
@@ -104,6 +75,35 @@ export function JsonRpcPlayground() {
       }
     }))
   }, [selected]);
+
+  const requestJSON = useMemo(() => {
+    if (!selected || !form[selected.name]) return
+    const { inputs } = form[selected.name]
+
+    return JSON.stringify({
+      jsonrpc: "2.0",
+      method: selected.name,
+      params: inputs?.map(p => {
+        if (typeof p.value === "undefined") {
+          return ""
+        }
+
+        try {
+          return JSON.parse(p.value)
+        } catch {
+          return p.value
+        }
+      }),
+    }, null, 2)
+  }, [selected, form])
+
+  const responseJSON = useMemo(() => {
+    if (!selected || !form[selected.name]) return ""
+
+    const { result } = form[selected.name]
+    if (!result) return ""
+    return JSON.stringify(result, null, 2)
+  }, [selected, form])
 
   const onExecute = useCallback(async () => {
     if (!selected) return;
@@ -160,6 +160,41 @@ export function JsonRpcPlayground() {
     }))
   }, [methods])
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (!methods.length) return;
+
+      const currentIndex = methods.findIndex(m => m.name === selected?.name);
+      if (currentIndex === -1) return;
+
+      switch (e.key) {
+        case "ArrowDown":
+        case "j": {
+          e.preventDefault();
+          const newIndex = Math.min(methods.length - 1, currentIndex + 1);
+          onMethodChange(methods[newIndex]);
+          break;
+        }
+        case "ArrowUp":
+        case "k": {
+          e.preventDefault();
+          const newIndex = Math.max(0, currentIndex - 1);
+          onMethodChange(methods[newIndex]);
+          break;
+        }
+        case "Enter": {
+          if (!e.metaKey && !e.ctrlKey) return
+          e.preventDefault();
+          onExecute();
+          break;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [methods, selected, onMethodChange, onExecute]);
+
   return (
     <div id="json-playground" className="w-full gap-8">
       <div className="mb-2">
@@ -179,7 +214,7 @@ export function JsonRpcPlayground() {
         title={`JSON-RPC Playground (${specVersion})`}
       />
 
-      <div className="flex flex-col sl:flex-row sl:h-[76vh] w-full">
+      <div className="flex flex-col sl:flex-row sl:h-[76vh] w-full gap-4">
         <div className="flex flex-col flex-1 md:flex-row justify-stretch border border-borderGray overflow-hidden py-5 px-4 gap-4 bg-white">
           <div className="min-w-[250px] flex flex-col gap-[6px] sl:overflow-y-auto">
             <input
@@ -230,20 +265,29 @@ export function JsonRpcPlayground() {
             <ParamForm
               params={selected?.params.map((p, i) => ({
                 ...p,
+                id: `${selected.name}-${i}`,
                 value: form[selected.name].inputs[i].value,
               })) ?? []}
               onChange={onParamChange}
+              onSubmit={onExecute}
             />
           </div>
         </div>
 
-        <div className="w-full flex-1 flex flex-col gap-2 border border-borderGray py-5 px-4 bg-white max-w-[800px]">
+        <div className="w-full flex-1 flex flex-col gap-2 border border-borderGray py-5 px-4 bg-white lg:max-w-[800px]">
           <button
             onClick={onExecute}
             className="bg-black text-white px-2 py-1 text-sm self-end flex items-center gap-3 uppercase font-bold hover:bg-opacity-80"
           >
-            Execute
-            <PlayIcon className="size-2 fill-white" />
+            {form[selected?.name ?? ""]?.loading
+              ? "Executing..."
+              : (
+                <>
+                  Execute
+                  <PlayIcon className="size-2 fill-white" />
+                </>
+              )
+            }
           </button>
 
           <div className="w-full overflow-auto">
