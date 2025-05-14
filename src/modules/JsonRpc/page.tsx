@@ -265,6 +265,7 @@ export function JsonRpcPlayground() {
             <ParamForm
               params={selected?.params.map((p, i) => ({
                 ...p,
+                id: `${selected.name}-${i}`,
                 value: form[selected.name].inputs[i].value,
               })) ?? []}
               onChange={onParamChange}

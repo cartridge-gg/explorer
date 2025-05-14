@@ -14,6 +14,7 @@ export function ParamForm({
   disabled = false,
 }: {
   params: {
+    id?: string,
     name: string,
     description?: string,
     summary?: string,
@@ -75,6 +76,7 @@ export function ParamForm({
                 />
               ) : (
                 <ParamEditor
+                  id={p.id}
                   name={p.name}
                   schema={p.schema}
                   value={p.value}
@@ -92,6 +94,7 @@ export function ParamForm({
 }
 
 function ParamEditor({
+  id,
   name,
   schema,
   value,
@@ -99,6 +102,7 @@ function ParamEditor({
   onSubmit,
   readOnly = false,
 }: {
+  id?: string,
   name: string,
   schema: unknown,
   value: string,
@@ -107,7 +111,7 @@ function ParamEditor({
   readOnly?: boolean;
 }) {
   const onMount = useCallback((editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
-    const uri = monaco.Uri.parse(`file:///${name}.json`)
+    const uri = monaco.Uri.parse(`file:///${id ?? name}.json`)
     const model = monaco.editor.getModel(uri) ?? monaco.editor.createModel(value, "json", uri);
 
     editor.setModel(model);
