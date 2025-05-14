@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchDataCreator } from "@cartridge/utils";
 import { AddressByUsernameDocument, AddressByUsernameQuery, AddressByUsernameQueryVariables } from "@cartridge/utils/api/cartridge";
 
-export default function HomeSearchBar() {
+export function SearchBar() {
   const navigate = useNavigate();
   const { isMobile } = useScreen();
 

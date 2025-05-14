@@ -1,4 +1,4 @@
-import SearchBar from "../search_bar";
+import { SearchBar } from "@/shared/components/SearchBar";
 import ChainDisplay from "../ChainDisplay";
 import AccountDisplay from "../AccountDisplay";
 
