@@ -47,35 +47,6 @@ export function JsonRpcPlayground() {
   const [selected, setSelected] = useState<Method | undefined>(() => methods?.[0]);
   const [form, setForm] = useState<Record<string, FormState>>({});
 
-  const requestJSON = useMemo(() => {
-    if (!selected || !form[selected.name]) return
-    const { inputs } = form[selected.name]
-
-    return JSON.stringify({
-      jsonrpc: "2.0",
-      method: selected.name,
-      params: inputs?.map(p => {
-        if (typeof p.value === "undefined") {
-          return ""
-        }
-
-        try {
-          return JSON.parse(p.value)
-        } catch {
-          return p.value
-        }
-      }),
-    }, null, 2)
-  }, [selected, form])
-
-  const responseJSON = useMemo(() => {
-    if (!selected || !form[selected.name]) return ""
-
-    const { result } = form[selected.name]
-    if (!result) return ""
-    return JSON.stringify(result, null, 2)
-  }, [selected, form])
-
   const onMethodChange = useCallback((method: Method) => {
     setSelected(method)
     setForm(prev => ({
@@ -104,6 +75,35 @@ export function JsonRpcPlayground() {
       }
     }))
   }, [selected]);
+
+  const requestJSON = useMemo(() => {
+    if (!selected || !form[selected.name]) return
+    const { inputs } = form[selected.name]
+
+    return JSON.stringify({
+      jsonrpc: "2.0",
+      method: selected.name,
+      params: inputs?.map(p => {
+        if (typeof p.value === "undefined") {
+          return ""
+        }
+
+        try {
+          return JSON.parse(p.value)
+        } catch {
+          return p.value
+        }
+      }),
+    }, null, 2)
+  }, [selected, form])
+
+  const responseJSON = useMemo(() => {
+    if (!selected || !form[selected.name]) return ""
+
+    const { result } = form[selected.name]
+    if (!result) return ""
+    return JSON.stringify(result, null, 2)
+  }, [selected, form])
 
   const onExecute = useCallback(async () => {
     if (!selected) return;
@@ -159,6 +159,35 @@ export function JsonRpcPlayground() {
       }
     }))
   }, [methods])
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (!methods.length) return;
+
+      const currentIndex = methods.findIndex(m => m.name === selected?.name);
+      if (currentIndex === -1) return;
+
+      switch (e.key) {
+        case "ArrowDown":
+        case "j": {
+          e.preventDefault();
+          const newIndex = Math.min(methods.length - 1, currentIndex + 1);
+          onMethodChange(methods[newIndex]);
+          break;
+        }
+        case "ArrowUp":
+        case "k": {
+          e.preventDefault();
+          const newIndex = Math.max(0, currentIndex - 1);
+          onMethodChange(methods[newIndex]);
+          break;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [methods, selected, onMethodChange]);
 
   return (
     <div id="json-playground" className="w-full gap-8">
