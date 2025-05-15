@@ -77,17 +77,12 @@ export function JsonRpcPlayground() {
 
   const onParamChange = useCallback(
     (i: number, value?: string) => {
-      if (!selected) return;
-
-      setForm((prev) => ({
-        ...prev,
-        [selected.name]: {
-          ...prev[selected.name],
-          inputs: prev[selected.name].inputs.map((p, ii) =>
-            ii === i ? { ...p, value: value ?? "" } : p,
-          ),
-        },
-      }));
+      if (!selected || typeof value === "undefined") return;
+      setForm((prev) => {
+        const newForm = { ...prev };
+        newForm[selected.name].inputs[i].value = value;
+        return prev;
+      });
     },
     [selected],
   );
