@@ -25,6 +25,7 @@ export function WalletConnectModal({
         onClose();
       } catch (error) {
         console.error("Connection error:", error);
+        localStorage.removeItem("lastUsedConnector");
       } finally {
         setConnecting(null);
       }
