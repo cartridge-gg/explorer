@@ -1,22 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
 import { Connector, useConnect } from "@starknet-react/core";
-import { availableConnectors } from "@/store/starknetProvider";
 import CrossIcon from "@/shared/icons/Cross";
 import { connectorIconToSrc } from "@/shared/utils/image";
+import { cn } from "@cartridge/ui-next";
 
 interface WalletConnectModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export default function WalletConnectModal({
+export function WalletConnectModal({
   isOpen,
   onClose,
 }: WalletConnectModalProps) {
-  const { connect } = useConnect();
+  const { connect, connectors } = useConnect();
   const [connecting, setConnecting] = useState<string | null>(null);
 
-  const handleConnect = useCallback(
+  const onConnect = useCallback(
     (connector: Connector) => {
       try {
         setConnecting(connector.id);
@@ -37,15 +37,13 @@ export default function WalletConnectModal({
     if (!lastUsedConnector) {
       return;
     }
-    const connector = availableConnectors.find(
-      (c) => c.id === lastUsedConnector,
-    );
+    const connector = connectors.find((c) => c.id === lastUsedConnector);
     if (!connector) {
       return;
     }
-    handleConnect(connector);
+    onConnect(connector);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [connectors]);
 
   if (!isOpen) return null;
 
@@ -62,18 +60,24 @@ export default function WalletConnectModal({
           <h2 className="text-lg font-bold uppercase">Connect A Wallet</h2>
         </div>
 
-        <div className="">
-          {availableConnectors.map((connector) => {
-            return (
+        <div>
+          {connectors
+            .sort((a, b) => {
+              if (a.id === "controller") return -1;
+              if (b.id === "controller") return 1;
+              return 0;
+            })
+            .map((connector) => (
               <button
                 key={connector.id}
-                onClick={() => handleConnect(connector)}
+                onClick={() => onConnect(connector)}
                 disabled={!!connecting}
-                className={`mt-[-1px] flex items-center justify-between w-full p-3 border hover:bg-[#EEEEEE] ${
+                className={cn(
+                  "mt-[-1px] flex items-center justify-between w-full p-3 border hover:bg-[#EEEEEE] transition-colors",
                   connecting === connector.id
                     ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
-                } transition-colors`}
+                    : "border-gray-200 hover:border-gray-300",
+                )}
               >
                 <div className="w-full flex items-center justify-between">
                   <img
@@ -88,8 +92,7 @@ export default function WalletConnectModal({
                   <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
                 )}
               </button>
-            );
-          })}
+            ))}
         </div>
       </div>
     </div>

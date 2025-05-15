@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@cartridge/connector": "^0.7.13",
-    "@cartridge/controller": "^0.7.13",
     "@cartridge/presets": "github:cartridge-gg/presets#2373780",
     "@cartridge/ui-next": "0.7.13",
     "@cartridge/utils": "^0.7.13",

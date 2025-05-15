@@ -100,7 +100,6 @@ declare global {
     RPC_URL?: string;
     CHAIN_ID?: string;
     BASE_PATH?: string;
-    ENABLE_CONTROLLER?: boolean;
   }
 }
 

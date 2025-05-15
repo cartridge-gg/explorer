@@ -9,7 +9,7 @@ import {
   HTMLAttributes,
   useEffect,
 } from "react";
-import WalletConnectModal from "./wallet_connect";
+import { WalletConnectModal } from "./WalletConnect";
 import { AccountModal } from "./AccountModal";
 import { useCallCart } from "@/store/ShoppingCartProvider";
 import ControllerConnector from "@cartridge/connector/controller";
