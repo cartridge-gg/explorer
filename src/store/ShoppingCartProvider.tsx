@@ -22,16 +22,16 @@ const initialState: CallCartState = {
 // Create the context
 const CallCartContext = createContext<
   | {
-    state: CallCartState;
-    dispatch: React.Dispatch<CallCartAction>;
-  }
+      state: CallCartState;
+      dispatch: React.Dispatch<CallCartAction>;
+    }
   | undefined
 >(undefined);
 
 // Reducer function
 function callCartReducer(
   state: CallCartState,
-  action: CallCartAction
+  action: CallCartAction,
 ): CallCartState {
   switch (action.type) {
     case "ADD_CALL":

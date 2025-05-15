@@ -6,7 +6,7 @@ export interface IOpenRPC {
   // openrpc: string;
   // info: Info;
   // servers?: Server[];
-  methods: (Method /* | Reference */)[];
+  methods: Method /* | Reference */[];
   components?: Components;
   // externalDocs?: ExternalDocumentation;
 }
@@ -50,7 +50,7 @@ export interface Method {
   summary?: string;
   description?: string;
   // externalDocs?: ExternalDocumentation;
-  params: (ContentDescriptor /* | Reference */)[];
+  params: ContentDescriptor /* | Reference */[];
   // result: ContentDescriptor | Reference;
   // deprecated?: boolean;
   // servers?: Server[];
@@ -63,10 +63,10 @@ export interface Method {
 export interface ContentDescriptor {
   name: string;
   summary?: string;
-  description?: string
+  description?: string;
   required?: boolean;
   schema: JsonSchema | Reference;
-  deprecated?: boolean
+  deprecated?: boolean;
 }
 
 // interface ExamplePairing {
@@ -128,76 +128,89 @@ export class OpenRPC {
 
   constructor(schema: IOpenRPC) {
     this.schema = schema;
-    this.root = compileSchema(schema)
+    this.root = compileSchema(schema);
   }
 
   static async fromUrl(url: string) {
     const response = await fetch(url);
-    const data = await response.json() as IOpenRPC;
-    return new OpenRPC(data)
+    const data = (await response.json()) as IOpenRPC;
+    return new OpenRPC(data);
   }
 
   getMethodList() {
-    return this.schema.methods.map(m => this.getMethod(m.name)).filter(m => m !== undefined)
+    return this.schema.methods
+      .map((m) => this.getMethod(m.name))
+      .filter((m) => m !== undefined);
   }
 
   getMethod(nameOrIndex: string | number) {
-    const m = typeof nameOrIndex === "string" ? this.schema.methods.find(m => {
-      if (!("name" in m)) {
-        return false;
-      }
+    const m =
+      typeof nameOrIndex === "string"
+        ? this.schema.methods.find((m) => {
+            if (!("name" in m)) {
+              return false;
+            }
 
-      return m.name === nameOrIndex
-    }) : this.schema.methods[nameOrIndex]
+            return m.name === nameOrIndex;
+          })
+        : this.schema.methods[nameOrIndex];
     if (!m) return;
     const method = {
       ...m,
-      params: m.params.map(
-        p => ({
-          ...p,
-          schema: OpenRPC.resolveReference(p.schema, this.root)
-        })
-      )
-    }
-    return method
+      params: m.params.map((p) => ({
+        ...p,
+        schema: OpenRPC.resolveReference(p.schema, this.root),
+      })),
+    };
+    return method;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static resolveReference(schema: JsonSchema | Reference, root: SchemaNode): any {
+  static resolveReference(schema: JsonSchema | Reference, root: SchemaNode) {
     if (OpenRPC.isReference(schema)) {
-      return OpenRPC.resolveReference(root.getNodeRef(schema.$ref)!.schema as JsonSchema, root)
+      return OpenRPC.resolveReference(
+        root.getNodeRef(schema.$ref)!.schema as JsonSchema,
+        root,
+      );
     }
 
     switch (schema.type) {
       case "object":
         return {
           ...schema,
-          properties: Object.entries(schema.properties).reduce(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (acc: any, [key, p]: any) => {
-              return {...acc, [key]: OpenRPC.resolveReference(p, root)}
-            },
-            schema.properties
-          )
-        }
+          properties: Object.entries(schema.properties).reduce<
+            Record<string, JsonSchema>
+          >((acc, [key, p]) => {
+            return {
+              ...acc,
+              [key]: OpenRPC.resolveReference(
+                p as JsonSchema | Reference,
+                root,
+              ),
+            };
+          }, schema.properties),
+        };
       case "array":
         return {
           ...schema,
-          items: OpenRPC.resolveReference(schema.items, root)
-        }
+          items: OpenRPC.resolveReference(schema.items, root),
+        };
       default:
         if ("oneOf" in schema) {
           return {
             ...schema,
-            oneOf: schema.oneOf.map((s: JsonSchema) => OpenRPC.resolveReference(s, root))
-          }
+            oneOf: schema.oneOf.map((s: JsonSchema) =>
+              OpenRPC.resolveReference(s, root),
+            ),
+          };
         } else if ("allOf" in schema) {
           return {
             ...schema,
-            allOf: schema.allOf.map((s: JsonSchema) => OpenRPC.resolveReference(s, root))
-          }
+            allOf: schema.allOf.map((s: JsonSchema) =>
+              OpenRPC.resolveReference(s, root),
+            ),
+          };
         }
-        return schema
+        return schema;
     }
   }
 

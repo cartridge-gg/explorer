@@ -26,59 +26,60 @@ export function TxList({ transactions }: TxListProps) {
   const navigate = useNavigate();
   const columnHelper = createColumnHelper<TransactionTableData>();
 
-  const transactionColumns: ColumnDef<TransactionTableData, any>[] = useMemo(() => [
-    columnHelper.accessor("id", {
-      header: () => <th className="w-[52px]">No</th>,
-      cell: (info) => info.renderValue(),
-    }),
-    columnHelper.accessor("hash", {
-      header: () => <th className="px-4 text-left">Hash</th>,
-      cell: (info) => (
-        <>
-          {isMobile
-            ? truncateString(info.renderValue(), 4)
-            : info.renderValue()}
-        </>
-      ),
-      filterFn: (row, columnId, filterValue) => {
-        const rowValue: string = row.getValue(columnId);
-        if (filterValue === undefined || filterValue === "All") return true;
-        return rowValue.includes(filterValue.toUpperCase());
-      },
-    }),
-    columnHelper.accessor("type", {
-      header: () => <th className="w-[122px] px-4 text-left">Type</th>,
-      cell: (info) => (
-        <span className="text-nowrap">
-          {info.renderValue().replace(/_/g, " ")}
-        </span>
-      ),
-      filterFn: (row, columnId, filterValue) => {
-        const rowValue: string = row.getValue(columnId);
-        if (filterValue === undefined || filterValue === "All") return true;
-        return rowValue.includes(filterValue.toUpperCase());
-      },
-    }),
-    columnHelper.accessor("status", {
-      header: () => (
-        <th className="px-4 text-left w-[103px]">
-          Status
-        </th>
-      ),
-      cell: (info) => (
-        <div
-          className={`w-full flex items-center justify-center border border-primary uppercase font-bold text-white px-2 py-0 h-[15px] text-sm ${info.renderValue() === "SUCCEEDED"
-            ? "bg-[#7BA797]"
-            : info.renderValue() === "REVERTED"
-              ? "bg-[#C4806D]"
-              : ""
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transactionColumns: ColumnDef<TransactionTableData, any>[] = useMemo(
+    () => [
+      columnHelper.accessor("id", {
+        header: () => <th className="w-[52px]">No</th>,
+        cell: (info) => info.renderValue(),
+      }),
+      columnHelper.accessor("hash", {
+        header: () => <th className="px-4 text-left">Hash</th>,
+        cell: (info) => (
+          <>
+            {isMobile
+              ? truncateString(info.renderValue(), 4)
+              : info.renderValue()}
+          </>
+        ),
+        filterFn: (row, columnId, filterValue) => {
+          const rowValue: string = row.getValue(columnId);
+          if (filterValue === undefined || filterValue === "All") return true;
+          return rowValue.includes(filterValue.toUpperCase());
+        },
+      }),
+      columnHelper.accessor("type", {
+        header: () => <th className="w-[122px] px-4 text-left">Type</th>,
+        cell: (info) => (
+          <span className="text-nowrap">
+            {info.renderValue().replace(/_/g, " ")}
+          </span>
+        ),
+        filterFn: (row, columnId, filterValue) => {
+          const rowValue: string = row.getValue(columnId);
+          if (filterValue === undefined || filterValue === "All") return true;
+          return rowValue.includes(filterValue.toUpperCase());
+        },
+      }),
+      columnHelper.accessor("status", {
+        header: () => <th className="px-4 text-left w-[103px]">Status</th>,
+        cell: (info) => (
+          <div
+            className={`w-full flex items-center justify-center border border-primary uppercase font-bold text-white px-2 py-0 h-[15px] text-sm ${
+              info.renderValue() === "SUCCEEDED"
+                ? "bg-[#7BA797]"
+                : info.renderValue() === "REVERTED"
+                  ? "bg-[#C4806D]"
+                  : ""
             }`}
-        >
-          {info.renderValue()}
-        </div>
-      ),
-    }),
-  ], [isMobile, columnHelper]);
+          >
+            {info.renderValue()}
+          </div>
+        ),
+      }),
+    ],
+    [isMobile, columnHelper],
+  );
 
   // Calculate pageSize based on window height
   const calculatePageSize = useCallback(() => {
@@ -90,7 +91,7 @@ export function TxList({ transactions }: TxListProps) {
     const availableHeight = componentHeight;
     const calculatedPageSize = Math.max(
       5,
-      Math.floor(availableHeight / rowHeight)
+      Math.floor(availableHeight / rowHeight),
     );
 
     return calculatedPageSize;
@@ -136,7 +137,7 @@ export function TxList({ transactions }: TxListProps) {
         pageSize,
       });
     },
-    [table, pageSize]
+    [table, pageSize],
   );
 
   return (
@@ -150,14 +151,14 @@ export function TxList({ transactions }: TxListProps) {
               {table
                 .getHeaderGroups()
                 .map((headerGroup) =>
-                  headerGroup.headers.map((header) =>
+                  headerGroup.headers.map((header) => (
                     <Fragment key={header.id}>
                       {flexRender(
                         header.column.columnDef.header,
-                        header.getContext()
+                        header.getContext(),
                       )}
                     </Fragment>
-                  )
+                  )),
                 )}
             </tr>
           </thead>
@@ -171,10 +172,15 @@ export function TxList({ transactions }: TxListProps) {
                   onClick={() => navigate(`../tx/${row.original.hash}`)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className={cn(cell.column.id === "id" ? "text-center" : "text-left")}>
+                    <td
+                      key={cell.id}
+                      className={cn(
+                        cell.column.id === "id" ? "text-center" : "text-left",
+                      )}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </td>
                   ))}
@@ -218,7 +224,7 @@ export function TxList({ transactions }: TxListProps) {
                     ...prev,
                     pageIndex: Math.min(
                       table.getPageCount() - 1,
-                      prev.pageIndex + 1
+                      prev.pageIndex + 1,
                     ),
                   }))
                 }
@@ -230,6 +236,6 @@ export function TxList({ transactions }: TxListProps) {
           )}
         </div>
       </div>
-    </div >
+    </div>
   );
 }

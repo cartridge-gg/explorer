@@ -61,7 +61,8 @@ export type TypeNode =
   | UnknownType;
 
 // Input node for function parameters
-export interface ArgumentNode extends Pick<FunctionAbi, "name" | "stateMutability" | "state_mutability"> {
+export interface ArgumentNode
+  extends Pick<FunctionAbi, "name" | "stateMutability" | "state_mutability"> {
   type: TypeNode;
   schema: JsonSchema;
 }
@@ -72,7 +73,7 @@ export type FunctionInputWithValue = ArgumentNode & {
 
 export interface FunctionAbiWithAst extends Omit<FunctionAbi, "inputs"> {
   inputs: ArgumentNode[];
-};
+}
 
 export function toJsonSchema(node: TypeNode): JsonSchema {
   switch (node.type) {
@@ -95,7 +96,7 @@ export function toJsonSchema(node: TypeNode): JsonSchema {
         properties,
         required,
         additionalProperties: false,
-      }
+      };
     }
     case "enum": {
       // Special case for core::bool which is an enum in Cairo
@@ -159,7 +160,7 @@ export function toJsonSchema(node: TypeNode): JsonSchema {
  * Builds type registries for structs and enums from the ABI
  */
 function buildTypeRegistries(
-  abi: Abi
+  abi: Abi,
 ): [Map<string, AbiStruct>, Map<string, AbiEnum>] {
   const structRegistry = new Map<string, AbiStruct>();
   const enumRegistry = new Map<string, AbiEnum>();
@@ -177,46 +178,44 @@ function buildTypeRegistries(
 
 export function toCalldata(node: TypeNode, value: unknown): Calldata {
   switch (node.type) {
-    case "primitive":
-      {
-        switch (node.name) {
-          case "core::integer::u256": {
-            const { low, high } = uint256.bnToUint256(value as BigNumberish);
-            return [low.toString(), high.toString()];
-          }
-          // case "core::integer::u512":
-          case "core::felt252":
-          case "core::integer::u8":
-          case "core::integer::u16":
-          case "core::integer::u32":
-          case "core::integer::u64":
-          case "core::integer::u128":
-          case "core::starknet::class_hash::ClassHash":
-          default:
-            return [value as string];
+    case "primitive": {
+      switch (node.name) {
+        case "core::integer::u256": {
+          const { low, high } = uint256.bnToUint256(value as BigNumberish);
+          return [low.toString(), high.toString()];
         }
+        // case "core::integer::u512":
+        case "core::felt252":
+        case "core::integer::u8":
+        case "core::integer::u16":
+        case "core::integer::u32":
+        case "core::integer::u64":
+        case "core::integer::u128":
+        case "core::starknet::class_hash::ClassHash":
+        default:
+          return [value as string];
       }
+    }
     case "struct": {
-      const _value = typeof value === "string" ? JSON.parse(value) : value
-      return node.members.flatMap(([memberName, memberType]) => toCalldata(memberType, _value[memberName]))
+      const _value = typeof value === "string" ? JSON.parse(value) : value;
+      return node.members.flatMap(([memberName, memberType]) =>
+        toCalldata(memberType, _value[memberName]),
+      );
     }
     case "enum":
-      return node.name === "core::bool"
-        ? value ? ["1"] : ["0"]
-        : []
+      return node.name === "core::bool" ? (value ? ["1"] : ["0"]) : [];
     case "option":
-      return value
-        ? ["0", ...toCalldata(node.elementType, value)]
-        : ["1"]
-    case "array":
-      {
-        const _value = value as unknown[]
-        const arrayLength = BigInt(_value.length);
-        return [
-          arrayLength.toString(),
-          ..._value.flatMap((elem: unknown) => toCalldata(node.elementType, elem))
-        ]
-      }
+      return value ? ["0", ...toCalldata(node.elementType, value)] : ["1"];
+    case "array": {
+      const _value = value as unknown[];
+      const arrayLength = BigInt(_value.length);
+      return [
+        arrayLength.toString(),
+        ..._value.flatMap((elem: unknown) =>
+          toCalldata(node.elementType, elem),
+        ),
+      ];
+    }
     case "generic":
     case "unknown":
     default:
@@ -227,28 +226,28 @@ export function toCalldata(node: TypeNode, value: unknown): Calldata {
 export function parseAbi(abi: Abi) {
   let constructor: FunctionAbiWithAst;
   const functions: FunctionAbiWithAst[] = [];
-  const parse = parseFunctionCreator(abi)
+  const parse = parseFunctionCreator(abi);
 
   abi.forEach((item) => {
     switch (item.type) {
       case "constructor": {
-        constructor = parse(item)
+        constructor = parse(item);
         break;
       }
       case "function": {
-        functions.push(parse(item))
+        functions.push(parse(item));
         break;
       }
       case "interface": {
         (item as InterfaceAbi).items.forEach((item) => {
-          if (item.type !== "function") return
-          functions.push(parse(item))
+          if (item.type !== "function") return;
+          functions.push(parse(item));
         });
         break;
       }
       default:
         break;
-      }
+    }
   });
 
   return {
@@ -264,16 +263,16 @@ export function parseAbi(abi: Abi) {
 function parseFunctionCreator(abi: Abi) {
   const [structRegistry, enumRegistry] = buildTypeRegistries(abi);
   return (func: FunctionAbi): FunctionAbiWithAst => ({
-      ...func,
-      inputs: func.inputs.map((input) => {
-        const type = resolveType(input.type, structRegistry, enumRegistry)
-        return {
-          name: input.name,
-          type,
-          schema: toJsonSchema(type),
-        }
-    })
-  })
+    ...func,
+    inputs: func.inputs.map((input) => {
+      const type = resolveType(input.type, structRegistry, enumRegistry);
+      return {
+        name: input.name,
+        type,
+        schema: toJsonSchema(type),
+      };
+    }),
+  });
 }
 
 /**
@@ -282,7 +281,7 @@ function parseFunctionCreator(abi: Abi) {
 function resolveType(
   typeStr: string,
   structRegistry: Map<string, AbiStruct>,
-  enumRegistry: Map<string, AbiEnum>
+  enumRegistry: Map<string, AbiEnum>,
 ): TypeNode {
   // Check if it's a struct
   if (structRegistry.has(typeStr)) {
@@ -317,7 +316,7 @@ function resolveType(
               elementType: resolveType(
                 elementType,
                 structRegistry,
-                enumRegistry
+                enumRegistry,
               ),
             };
           }
@@ -357,7 +356,7 @@ function resolveType(
     if (enumDef.name.startsWith("core::option::Option")) {
       // Option enum MUST have a 'Some' variant
       const some_type = enumDef.variants.find(
-        (variant) => variant.name === "Some"
+        (variant) => variant.name === "Some",
       );
 
       if (!some_type) {

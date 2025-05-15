@@ -6,17 +6,14 @@ import { FunctionAbiWithAst } from "@/shared/utils/abi";
 export function Overview({
   readFuncs,
   writeFuncs,
-  code: {
-    abi,
-    sierra
-  }
+  code: { abi, sierra },
 }: {
-  readFuncs: FunctionAbiWithAst[],
-  writeFuncs: FunctionAbiWithAst[],
+  readFuncs: FunctionAbiWithAst[];
+  writeFuncs: FunctionAbiWithAst[];
   code: {
-    abi: string,
-    sierra?: string
-  }
+    abi: string;
+    sierra?: string;
+  };
 }) {
   return (
     <div className="bg-white flex flex-col gap-1 mt-[6px] overflow-auto">
@@ -38,5 +35,5 @@ export function Overview({
         <Code abi={abi} sierra={sierra} />
       </div>
     </div>
-  )
+  );
 }

@@ -15,7 +15,11 @@ export default function AddressDisplay({
   ...props
 }: AddressDisplayProps) {
   return (
-    <Link to={`../contract/${BigInt(value).toString(16)}`} className="hover:underline" {...props}>
+    <Link
+      to={`../contract/${BigInt(value).toString(16)}`}
+      className="hover:underline"
+      {...props}
+    >
       <FeltDisplay
         value={value}
         displayAs="hex"

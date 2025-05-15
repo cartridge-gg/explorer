@@ -65,7 +65,7 @@ interface UseBalancesReturn {
 
 function useBalances(
   contractAddress: string,
-  addresses: FeeTokenAddresses = DEFAULT_ADDRESSES
+  addresses: FeeTokenAddresses = DEFAULT_ADDRESSES,
 ): UseBalancesReturn {
   const {
     data: ethBalance,
@@ -94,7 +94,7 @@ function useBalances(
       const strkContract = new Contract(
         ERC20_ABI,
         addresses.strk,
-        RPC_PROVIDER
+        RPC_PROVIDER,
       );
       const { balance } = await strkContract.call("balanceOf", [
         contractAddress,

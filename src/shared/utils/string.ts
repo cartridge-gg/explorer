@@ -22,7 +22,6 @@ export function formatSnakeCaseToDisplayValue(variable: string) {
 
 export function fromCamelCase(str: string) {
   if (!str) return "";
-  const [first, ...rest] = str.replace(/([A-Z])/g, ' $1');
-  return [first.toUpperCase(), ...rest].join('');
+  const [first, ...rest] = str.replace(/([A-Z])/g, " $1");
+  return [first.toUpperCase(), ...rest].join("");
 }
-

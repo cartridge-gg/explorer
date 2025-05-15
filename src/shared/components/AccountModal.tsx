@@ -174,6 +174,7 @@ function ExecutionResultView({
 
 // Error result component
 interface ErrorResultViewProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: any;
   onBack: () => void;
 }
@@ -226,6 +227,7 @@ const ErrorResultView: React.FC<ErrorResultViewProps> = ({ error, onBack }) => {
 
 type ExecuteResult = {
   txHash: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: any;
   loading: boolean;
 };
@@ -448,10 +450,11 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                       <tr
                         key={index}
                         onClick={() => handleCallClick(index, call)}
-                        className={`account-call-entry hover:bg-gray-100 cursor-pointer ${expandedCall && expandedCall.index === index
-                          ? "bg-gray-100"
-                          : ""
-                          }`}
+                        className={`account-call-entry hover:bg-gray-100 cursor-pointer ${
+                          expandedCall && expandedCall.index === index
+                            ? "bg-gray-100"
+                            : ""
+                        }`}
                       >
                         <td className="w-[40px]">{index + 1}</td>
                         <td className="w-[92px] px-[10px]">
@@ -470,9 +473,10 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                   disabled={executeResult.loading}
                   className={`
                     bg-primary uppercase font-bold text-white p-2
-                    ${executeResult.loading
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-opacity-80"
+                    ${
+                      executeResult.loading
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:bg-opacity-80"
                     }
                   `}
                 >

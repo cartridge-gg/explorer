@@ -1,6 +1,9 @@
 import { rpcUrl } from "@/constants/rpc";
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
-import { BreadcrumbItem, BreadcrumbSeparator } from "@/shared/components/breadcrumbs";
+import {
+  BreadcrumbItem,
+  BreadcrumbSeparator,
+} from "@/shared/components/breadcrumbs";
 import { Breadcrumb } from "@/shared/components/breadcrumbs";
 import PageHeader from "@/shared/components/PageHeader";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
@@ -14,7 +17,7 @@ import { ParamForm } from "@/shared/form";
 import { useLocation, useNavigate } from "react-router-dom";
 
 interface FormState {
-  inputs: { name: string, value: string }[];
+  inputs: { name: string; value: string }[];
   result: unknown;
   hasCalled: boolean;
   loading: boolean;
@@ -24,7 +27,10 @@ export function JsonRpcPlayground() {
   const { data: specVersion } = useSpecVersion();
   const { data: rpc } = useQuery({
     queryKey: ["starknet", "rpc", specVersion],
-    queryFn: () => OpenRPC.fromUrl(`https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${specVersion}/api/starknet_api_openrpc.json`),
+    queryFn: () =>
+      OpenRPC.fromUrl(
+        `https://raw.githubusercontent.com/starkware-libs/starknet-specs/v${specVersion}/api/starknet_api_openrpc.json`,
+      ),
     enabled: !!specVersion,
   });
 
@@ -37,94 +43,106 @@ export function JsonRpcPlayground() {
     if (!methods) return [];
     if (!search) return methods;
 
-    return methods.filter(m =>
-      m.name.toLowerCase().includes(search.toLowerCase()) ??
-      m.description?.toLowerCase().includes(search.toLowerCase()) ??
-      m.summary?.toLowerCase().includes(search.toLowerCase())
+    return methods.filter(
+      (m) =>
+        m.name.toLowerCase().includes(search.toLowerCase()) ??
+        m.description?.toLowerCase().includes(search.toLowerCase()) ??
+        m.summary?.toLowerCase().includes(search.toLowerCase()),
     );
   }, [rpc, search]);
 
   const [id, setId] = useState(0);
-  const [selected, setSelected] = useState<Method | undefined>(() => methods?.find(m => m.name === hash.replace("#", "")) ?? methods?.[0]);
+  const [selected, setSelected] = useState<Method | undefined>(
+    () =>
+      methods?.find((m) => m.name === hash.replace("#", "")) ?? methods?.[0],
+  );
   const [form, setForm] = useState<Record<string, FormState>>({});
 
-  const onMethodChange = useCallback((method: Method) => {
-    setSelected(method)
-    setForm(prev => ({
-      ...prev,
-      [method.name]: prev[method.name] ?? {
-        inputs: method.params?.map(p => ({ name: p.name, value: "" })),
-        result: null,
-        hasCalled: false,
-        loading: false,
-      }
-    }))
-    navigate(`#${method.name}`)
-  }, [navigate])
+  const onMethodChange = useCallback(
+    (method: Method) => {
+      setSelected(method);
+      setForm((prev) => ({
+        ...prev,
+        [method.name]: prev[method.name] ?? {
+          inputs: method.params?.map((p) => ({ name: p.name, value: "" })),
+          result: null,
+          hasCalled: false,
+          loading: false,
+        },
+      }));
+      navigate(`#${method.name}`);
+    },
+    [navigate],
+  );
 
-  const onParamChange = useCallback((i: number, value?: string) => {
-    if (!selected) return;
+  const onParamChange = useCallback(
+    (i: number, value?: string) => {
+      if (!selected) return;
 
-    setForm(prev => ({
-      ...prev,
-      [selected.name]: {
-        ...prev[selected.name],
-        inputs: prev[selected.name].inputs.map(
-          (p, ii) => ii === i
-            ? { ...p, value: value ?? "" }
-            : p
-        ),
-      }
-    }))
-  }, [selected]);
+      setForm((prev) => ({
+        ...prev,
+        [selected.name]: {
+          ...prev[selected.name],
+          inputs: prev[selected.name].inputs.map((p, ii) =>
+            ii === i ? { ...p, value: value ?? "" } : p,
+          ),
+        },
+      }));
+    },
+    [selected],
+  );
 
   const requestJSON = useMemo(() => {
-    if (!selected || !form[selected.name]) return
-    const { inputs } = form[selected.name]
+    if (!selected || !form[selected.name]) return;
+    const { inputs } = form[selected.name];
 
-    return JSON.stringify({
-      jsonrpc: "2.0",
-      method: selected.name,
-      params: inputs?.map(p => {
-        if (typeof p.value === "undefined") {
-          return ""
-        }
+    return JSON.stringify(
+      {
+        jsonrpc: "2.0",
+        method: selected.name,
+        params: inputs?.map((p) => {
+          if (typeof p.value === "undefined") {
+            return "";
+          }
 
-        try {
-          return JSON.parse(p.value)
-        } catch {
-          return p.value
-        }
-      }),
-    }, null, 2)
-  }, [selected, form])
+          try {
+            return JSON.parse(p.value);
+          } catch {
+            return p.value;
+          }
+        }),
+      },
+      null,
+      2,
+    );
+  }, [selected, form]);
 
   const responseJSON = useMemo(() => {
-    if (!selected || !form[selected.name]) return ""
+    if (!selected || !form[selected.name]) return "";
 
-    const { result } = form[selected.name]
-    if (!result) return ""
-    return JSON.stringify(result, null, 2)
-  }, [selected, form])
+    const { result } = form[selected.name];
+    if (!result) return "";
+    return JSON.stringify(result, null, 2);
+  }, [selected, form]);
 
   const onExecute = useCallback(async () => {
     if (!selected) return;
 
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       [selected.name]: {
         ...prev[selected.name],
         loading: true,
-      }
-    }))
-    const f = form[selected.name]
-    const params = f.inputs.map(p => {
+      },
+    }));
+    const f = form[selected.name];
+    const params = f.inputs.map((p) => {
       try {
-        return JSON.parse(p.value)
+        return JSON.parse(p.value);
       } catch {
-        return p.value
+        return p.value;
       }
-    })
+    });
     const res = await fetch(rpcUrl(), {
       headers: {
         "Content-Type": "application/json",
@@ -134,39 +152,39 @@ export function JsonRpcPlayground() {
         jsonrpc: "2.0",
         id,
         method: selected.name,
-        params
+        params,
       }),
-    })
+    });
     const json = await res.json();
-    setId(id => id + 1)
-    setForm(prev => ({
+    setId((id) => id + 1);
+    setForm((prev) => ({
       ...prev,
       [selected.name]: {
         ...prev[selected.name],
         result: json,
         hasCalled: true,
         loading: false,
-      }
-    }))
+      },
+    }));
   }, [id, selected, form]);
 
   useEffect(() => {
     if (!methods.length) return;
-    setSelected(methods[0])
-    setForm(prev => ({
+    setSelected(methods[0]);
+    setForm((prev) => ({
       ...prev,
       [methods[0].name]: {
         ...prev[methods[0].name],
-        inputs: methods[0].params?.map(p => ({ name: p.name, value: "" })),
-      }
-    }))
-  }, [methods])
+        inputs: methods[0].params?.map((p) => ({ name: p.name, value: "" })),
+      },
+    }));
+  }, [methods]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (!methods.length) return;
 
-      const currentIndex = methods.findIndex(m => m.name === selected?.name);
+      const currentIndex = methods.findIndex((m) => m.name === selected?.name);
       if (currentIndex === -1) return;
 
       switch (e.key) {
@@ -185,24 +203,23 @@ export function JsonRpcPlayground() {
           break;
         }
         case "Enter": {
-          if (!e.metaKey && !e.ctrlKey) return
+          if (!e.metaKey && !e.ctrlKey) return;
           e.preventDefault();
           onExecute();
           break;
         }
       }
-    };
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [methods, selected, onMethodChange, onExecute]);
 
   useEffect(() => {
-    const method = methods.find(m => m.name === hash.replace("#", ""));
+    const method = methods.find((m) => m.name === hash.replace("#", ""));
     if (!method) return;
     onMethodChange(method);
   }, [hash, methods, onMethodChange]);
-
 
   return (
     <div id="json-playground" className="w-full gap-8">
@@ -271,11 +288,13 @@ export function JsonRpcPlayground() {
             </div>
 
             <ParamForm
-              params={selected?.params.map((p, i) => ({
-                ...p,
-                id: `${selected.name}-${i}`,
-                value: form[selected.name].inputs[i].value,
-              })) ?? []}
+              params={
+                selected?.params.map((p, i) => ({
+                  ...p,
+                  id: `${selected.name}-${i}`,
+                  value: form[selected.name].inputs[i].value,
+                })) ?? []
+              }
               onChange={onParamChange}
               onSubmit={onExecute}
             />
@@ -287,35 +306,26 @@ export function JsonRpcPlayground() {
             onClick={onExecute}
             className="bg-black text-white px-2 py-1 text-sm self-end flex items-center gap-3 uppercase font-bold hover:bg-opacity-80"
           >
-            {form[selected?.name ?? ""]?.loading
-              ? "Executing..."
-              : (
-                <>
-                  Execute
-                  <PlayIcon className="size-2 fill-white" />
-                </>
-              )
-            }
+            {form[selected?.name ?? ""]?.loading ? (
+              "Executing..."
+            ) : (
+              <>
+                Execute
+                <PlayIcon className="size-2 fill-white" />
+              </>
+            )}
           </button>
 
           <div className="w-full overflow-auto">
             <Accordion>
-              <AccordionItem
-                title="request"
-                titleClassName="uppercase"
-                open
-              >
+              <AccordionItem title="request" titleClassName="uppercase" open>
                 <div className="w-full overflow-x-auto">
                   <code>
                     <pre>{requestJSON}</pre>
                   </code>
                 </div>
               </AccordionItem>
-              <AccordionItem
-                title="response"
-                titleClassName="uppercase"
-                open
-              >
+              <AccordionItem title="response" titleClassName="uppercase" open>
                 <div className="min-h-80 overflow-x-auto">
                   <code>
                     <pre>{responseJSON}</pre>

@@ -33,5 +33,5 @@ createRoot(document.getElementById("root")!).render(
         </PostHogProvider>
       </StarknetProvider>
     </QueryClientProvider>
-  </StrictMode>
+  </StrictMode>,
 );

@@ -15,7 +15,13 @@ export function SectionBoxEntry({
 }: SectionBoxEntryProps) {
   return (
     <div>
-      <div className={cn(`uppercase mb-[5px]`, bold ? "font-bold" : undefined, className)}>
+      <div
+        className={cn(
+          `uppercase mb-[5px]`,
+          bold ? "font-bold" : undefined,
+          className,
+        )}
+      >
         {title}
       </div>
       <div>{children}</div>

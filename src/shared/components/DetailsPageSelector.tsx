@@ -38,7 +38,10 @@ export default function DetailsPageSelector({
             key={item.name}
             name={item.name}
             value={item.value}
-            className={cn("flex items-center font-bold px-[15px] py-1 border border-borderGray hover:bg-button-whiteInitialHover", isMobile ? "justify-center" : "justify-start")}
+            className={cn(
+              "flex items-center font-bold px-[15px] py-1 border border-borderGray hover:bg-button-whiteInitialHover",
+              isMobile ? "justify-center" : "justify-start",
+            )}
           />
         ))}
       </Selector>

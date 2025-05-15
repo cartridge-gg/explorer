@@ -30,7 +30,7 @@ interface SelectorContextType {
  * the currently selected tab state from their parent Container
  */
 const SelectorContext = createContext<SelectorContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export interface SelectorProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -54,7 +54,7 @@ export function Selector({
   ...props
 }: SelectorProps) {
   const [selected, setSelected] = useState<string | undefined>(
-    initialSelectedTab
+    initialSelectedTab,
   );
 
   // Notify parent component of initial selection
@@ -62,7 +62,7 @@ export function Selector({
     if (initialSelectedTab && onSelect) {
       onSelect(initialSelectedTab);
     }
-  }, [initialSelectedTab]);
+  }, [initialSelectedTab, onSelect]);
 
   // Handle tab selection and propagate changes to parent component
   const handleTabSelect = useCallback(
@@ -72,7 +72,7 @@ export function Selector({
         onSelect(tab);
       }
     },
-    [onSelect]
+    [onSelect],
   );
 
   return (
@@ -126,7 +126,7 @@ export function SelectorItem({
 
   const computedSelectedStyle = React.useMemo<React.CSSProperties>(
     () => selectedStyled || defaultSelectedStyle,
-    [selectedStyled]
+    [selectedStyled],
   );
 
   return (

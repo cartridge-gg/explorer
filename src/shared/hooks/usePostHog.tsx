@@ -7,4 +7,4 @@ export function usePostHog() {
     throw new Error("usePostHog must be used within a PostHogProvider");
   }
   return context.posthog;
-};
+}

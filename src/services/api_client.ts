@@ -30,7 +30,7 @@ export default class API_CLIENT {
         });
 
         return Promise.reject(error);
-      }
+      },
     );
   }
 

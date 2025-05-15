@@ -63,21 +63,24 @@ export const convertValue = (value: string | number) => {
       hex: "0x" + bnValue.toString(16),
       string: shortString.decodeShortString(bnValue.toString()),
     };
-  } catch (_error) {
+  } catch {
     return null;
   }
 };
 
 // recurse throught an object and covert all values to hex
 export const convertObjectValuesToDisplayValues = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   obj: any,
-  type: Exclude<(typeof FeltDisplayVariants)[number], "string">
+  type: Exclude<FeltDisplayVariants[number], "string">,
 ) => {
   for (const key in obj) {
     if (typeof obj[key] === "object") {
       convertObjectValuesToDisplayValues(obj[key], type);
     } else {
-      obj[key] = convertValue(obj[key])?.[type];
+      obj[key] = convertValue(obj[key])?.[
+        type as keyof ReturnType<typeof convertValue>
+      ];
     }
   }
   return obj;

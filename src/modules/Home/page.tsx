@@ -19,14 +19,14 @@ export function Home() {
   const latestBlocksQueries = useQueries({
     queries: latestBlockNumber
       ? getPaginatedBlockNumbers(
-        latestBlockNumber,
-        INITIAL_BLOCKS_TO_FETCH
-      ).map((blockNumber) => ({
-        queryKey: [QUERY_KEYS.getBlockWithTxs, blockNumber],
-        queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockNumber),
-        enabled: !!blockNumber,
-        refetchInterval: POLLING_INTERVAL,
-      }))
+          latestBlockNumber,
+          INITIAL_BLOCKS_TO_FETCH,
+        ).map((blockNumber) => ({
+          queryKey: [QUERY_KEYS.getBlockWithTxs, blockNumber],
+          queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockNumber),
+          enabled: !!blockNumber,
+          refetchInterval: POLLING_INTERVAL,
+        }))
       : [],
   });
 

@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Connector, useConnect } from "@starknet-react/core";
-import {
-  availableConnectors,
-} from "@/store/starknetProvider";
+import { availableConnectors } from "@/store/starknetProvider";
 import CrossIcon from "@/shared/icons/Cross";
 import { connectorIconToSrc } from "@/shared/utils/image";
 
@@ -18,27 +16,32 @@ export default function WalletConnectModal({
   const { connect } = useConnect();
   const [connecting, setConnecting] = useState<string | null>(null);
 
-  const handleConnect = useCallback((connector: Connector) => {
-    try {
-      setConnecting(connector.id);
-      connect({ connector });
-      localStorage.setItem("lastUsedConnector", connector.id);
-      onClose();
-    } catch (error) {
-      console.error("Connection error:", error);
-    } finally {
-      setConnecting(null);
-    }
-  }, [connect, onClose]);
+  const handleConnect = useCallback(
+    (connector: Connector) => {
+      try {
+        setConnecting(connector.id);
+        connect({ connector });
+        localStorage.setItem("lastUsedConnector", connector.id);
+        onClose();
+      } catch (error) {
+        console.error("Connection error:", error);
+      } finally {
+        setConnecting(null);
+      }
+    },
+    [connect, onClose],
+  );
 
   useEffect(() => {
     const lastUsedConnector = localStorage.getItem("lastUsedConnector");
     if (!lastUsedConnector) {
-      return
+      return;
     }
-    const connector = availableConnectors.find(c => c.id === lastUsedConnector)
+    const connector = availableConnectors.find(
+      (c) => c.id === lastUsedConnector,
+    );
     if (!connector) {
-      return
+      return;
     }
     handleConnect(connector);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -66,10 +69,11 @@ export default function WalletConnectModal({
                 key={connector.id}
                 onClick={() => handleConnect(connector)}
                 disabled={!!connecting}
-                className={`mt-[-1px] flex items-center justify-between w-full p-3 border hover:bg-[#EEEEEE] ${connecting === connector.id
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300"
-                  } transition-colors`}
+                className={`mt-[-1px] flex items-center justify-between w-full p-3 border hover:bg-[#EEEEEE] ${
+                  connecting === connector.id
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-200 hover:border-gray-300"
+                } transition-colors`}
               >
                 <div className="w-full flex items-center justify-between">
                   <img

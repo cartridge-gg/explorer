@@ -13,5 +13,5 @@ const LinkArrow = (props) => (
   >
     <path d="M13 5h6v6M19 5 5 19" />
   </svg>
-)
-export default LinkArrow
+);
+export default LinkArrow;
