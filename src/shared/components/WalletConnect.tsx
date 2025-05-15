@@ -13,14 +13,14 @@ export function WalletConnectModal({
   isOpen,
   onClose,
 }: WalletConnectModalProps) {
-  const { connect, connectors } = useConnect();
+  const { connectAsync, connectors } = useConnect();
   const [connecting, setConnecting] = useState<string | null>(null);
 
   const onConnect = useCallback(
-    (connector: Connector) => {
+    async (connector: Connector) => {
       try {
         setConnecting(connector.id);
-        connect({ connector });
+        await connectAsync({ connector });
         localStorage.setItem("lastUsedConnector", connector.id);
         onClose();
       } catch (error) {
@@ -30,7 +30,7 @@ export function WalletConnectModal({
         setConnecting(null);
       }
     },
-    [connect, onClose],
+    [connectAsync, onClose],
   );
 
   useEffect(() => {
