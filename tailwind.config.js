@@ -1,6 +1,9 @@
+import { cartridgeTWPreset } from "@cartridge/ui/preset";
+
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  presets: [cartridgeTWPreset],
   theme: {
     extend: {
       colors: {
