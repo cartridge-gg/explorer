@@ -14,16 +14,21 @@ import {
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
-import { SectionBoxEntry } from "@/shared/components/section"
+import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";
-import { getContractClassInfo, ContractClassInfo } from "@/shared/utils/contract";
+import {
+  getContractClassInfo,
+  ContractClassInfo,
+} from "@/shared/utils/contract";
 import { Code } from "@/shared/components/contract/Code";
 import { useQuery } from "@tanstack/react-query";
 import { ContractForm } from "@/shared/components/contract/Form";
 
 const DataTabs = ["Read Contract", "Write Contract", "Code"];
 
-const initialData: Omit<ContractClassInfo, "constructor"> & { contract?: StarknetContract } = {
+const initialData: Omit<ContractClassInfo, "constructor"> & {
+  contract?: StarknetContract;
+} = {
   contract: undefined,
   readFuncs: [],
   writeFuncs: [],
@@ -41,7 +46,9 @@ export function Contract() {
   const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
   const [classHash, setClassHash] = useState<string | null>(null);
 
-  const { data: { contract, readFuncs, writeFuncs, code } } = useQuery({
+  const {
+    data: { contract, readFuncs, writeFuncs, code },
+  } = useQuery({
     queryKey: ["contractClass", contractAddress],
     queryFn: async () => {
       if (!contractAddress) return initialData;
@@ -52,19 +59,20 @@ export function Contract() {
 
       // process contract functions
       const contractClass = await RPC_PROVIDER.getClassAt(contractAddress);
-      const { readFuncs, writeFuncs, code } = getContractClassInfo(contractClass);
+      const { readFuncs, writeFuncs, code } =
+        getContractClassInfo(contractClass);
 
       const contract = new StarknetContract(
         contractClass.abi,
         contractAddress!,
-        RPC_PROVIDER
+        RPC_PROVIDER,
       );
 
       return {
         contract,
         readFuncs,
         writeFuncs,
-        code
+        code,
       };
     },
     enabled: !!contractAddress,
@@ -157,28 +165,35 @@ export function Contract() {
             <div className="w-full h-full overflow-auto">
               {(() => {
                 if (!contract) {
-                  return null
+                  return null;
                 }
 
                 switch (selectedDataTab) {
                   case "Read Contract":
-                    return <ContractForm functions={readFuncs} contract={contract} />
+                    return (
+                      <ContractForm functions={readFuncs} contract={contract} />
+                    );
                   case "Write Contract":
-                    return <ContractForm functions={writeFuncs} contract={contract} />
+                    return (
+                      <ContractForm
+                        functions={writeFuncs}
+                        contract={contract}
+                      />
+                    );
                   case "Code":
-                    return <Code abi={code.abi} sierra={code.sierra} />
+                    return <Code abi={code.abi} sierra={code.sierra} />;
                   default:
                     return (
                       <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
                         <span className="text-[#D0D0D0]">No data found</span>
                       </div>
-                    )
+                    );
                 }
               })()}
             </div>
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 }

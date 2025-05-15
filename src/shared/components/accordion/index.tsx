@@ -33,7 +33,7 @@ interface AccordionItemProps extends PropsWithChildren {
   open?: boolean;
   /**
    * Whether the accordion is disabled
-  */
+   */
   disabled?: boolean;
 }
 
@@ -50,22 +50,30 @@ export function AccordionItem({
 
   const toggleAccordion = React.useCallback(
     () => setIsOpen((prev) => !prev),
-    [setIsOpen]
+    [setIsOpen],
   );
 
   return (
     <div className={cn("accordion w-full", containerClassName)}>
       <div
         onClick={disabled ? undefined : toggleAccordion}
-        className={cn("accordion-header sticky top-0 bg-white  border border-borderGray px-4 gap-3 py-2 grid grid-cols-[1fr_min-content] items-center z-10", disabled ? "cursor-default" : "cursor-pointer", titleClassName)}
+        className={cn(
+          "accordion-header sticky top-0 bg-white  border border-borderGray px-4 gap-3 py-2 grid grid-cols-[1fr_min-content] items-center z-10",
+          disabled ? "cursor-default" : "cursor-pointer",
+          titleClassName,
+        )}
       >
         <div className={"accordion-title overflow-x-auto"}>{title}</div>
-        {!disabled && (isOpen ? <AccordionCollapseIcon /> : <AccordionExpandIcon />)}
+        {!disabled &&
+          (isOpen ? <AccordionCollapseIcon /> : <AccordionExpandIcon />)}
       </div>
 
       {isOpen && (
         <div
-          className={cn("bg-[#F1F1F1] p-3 border-x border-borderGray shadow-inner", contentClassName)}
+          className={cn(
+            "bg-[#F1F1F1] p-3 border-x border-borderGray shadow-inner",
+            contentClassName,
+          )}
         >
           {children || <EmptyAccordionContent />}
         </div>

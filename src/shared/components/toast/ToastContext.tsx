@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, ReactNode, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useCallback,
+} from "react";
 import { ToastContainer } from "./ToastContainer";
 import { ToastType, ToastVariant } from "./Toast";
 
@@ -12,7 +18,11 @@ interface ToastContextType {
    * @param variant - Visual style (success, error, warning, info)
    * @param duration - How long to show in ms (default: 3000ms)
    */
-  toast: (message: ToastType["message"], variant: ToastVariant, duration?: number) => void;
+  toast: (
+    message: ToastType["message"],
+    variant: ToastVariant,
+    duration?: number,
+  ) => void;
 
   /**
    * Removes a specific toast by ID
@@ -34,10 +44,17 @@ export const useToast = () => {
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<ToastType[]>([]);
 
-  const showToast = useCallback<ToastContextType["toast"]>((message, variant, duration = 3000) => {
-    const id = Date.now().toString(36) + Math.random().toString(36).substring(2);
-    setToasts((prevToasts) => [...prevToasts, { id, message, variant, duration }]);
-  }, []);
+  const showToast = useCallback<ToastContextType["toast"]>(
+    (message, variant, duration = 3000) => {
+      const id =
+        Date.now().toString(36) + Math.random().toString(36).substring(2);
+      setToasts((prevToasts) => [
+        ...prevToasts,
+        { id, message, variant, duration },
+      ]);
+    },
+    [],
+  );
 
   const removeToast = useCallback<ToastContextType["removeToast"]>((id) => {
     setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));

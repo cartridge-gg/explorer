@@ -3,14 +3,14 @@
  * @param icon The connector icon
  * @returns A data URL
  */
-export function connectorIconToSrc(icon: string | { light: string, dark: string }): string {
-  const _icon = typeof icon === "string"
-    ? icon
-    : icon.light;
-    return _icon.startsWith("<svg")
-      // workaround for Argent Web Wallet
-      ? encodeSvgToBase64(_icon)
-      : _icon
+export function connectorIconToSrc(
+  icon: string | { light: string; dark: string },
+): string {
+  const _icon = typeof icon === "string" ? icon : icon.light;
+  return _icon.startsWith("<svg")
+    ? // workaround for Argent Web Wallet
+      encodeSvgToBase64(_icon)
+    : _icon;
 }
 
 /**
@@ -21,7 +21,7 @@ export function connectorIconToSrc(icon: string | { light: string, dark: string 
 function encodeSvgToBase64(svgString: string): string {
   if (!svgString) return "";
   // Remove any whitespace and newlines
-  const cleanedSvg = svgString.replace(/\s+/g, ' ').trim();
+  const cleanedSvg = svgString.replace(/\s+/g, " ").trim();
   // Encode to base64
   const base64 = btoa(cleanedSvg);
   // Create data URL

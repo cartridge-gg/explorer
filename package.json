@@ -9,8 +9,11 @@
     "build": "vite build",
     "check-types": "tsc --noEmit",
     "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@cartridge/connector": "^0.7.13",
@@ -57,6 +60,7 @@
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
     "postcss": "^8.5.1",
+    "prettier": "^3.5.3",
     "tailwindcss": "^3.4.17",
     "turbo": "^2.3.3",
     "typescript": "~5.6.2",

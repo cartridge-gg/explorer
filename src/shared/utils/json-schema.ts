@@ -1,6 +1,5 @@
 import { JsonSchema } from "json-schema-library";
 
-
 export function isPrimitive(schema: JsonSchema) {
   if (!("type" in schema)) {
     return false;

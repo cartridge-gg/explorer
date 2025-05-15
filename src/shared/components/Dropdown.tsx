@@ -35,7 +35,7 @@ interface DropdownContextType {
  * the currently selected item state from their parent Container
  */
 const DropdownContext = createContext<DropdownContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export interface DropdownProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -61,7 +61,7 @@ export function Dropdown({
   ...props
 }: DropdownProps) {
   const [selected, setSelected] = useState<string | undefined>(
-    initialSelectedItem
+    initialSelectedItem,
   );
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,7 +72,7 @@ export function Dropdown({
     if (initialSelectedItem && onSelect) {
       onSelect(initialSelectedItem);
     }
-  }, [initialSelectedItem]);
+  }, [initialSelectedItem, onSelect]);
 
   // Handle item selection and propagate changes to parent component
   const handleItemSelect = useCallback(
@@ -83,7 +83,7 @@ export function Dropdown({
         onSelect(item);
       }
     },
-    [onSelect]
+    [onSelect],
   );
 
   // Close dropdown when clicking outside
@@ -203,7 +203,7 @@ export function DropdownItem({
 
   const computedSelectedStyle = useMemo<React.CSSProperties>(
     () => selectedStyled || defaultDropdownSelectedStyle,
-    [selectedStyled]
+    [selectedStyled],
   );
 
   return (

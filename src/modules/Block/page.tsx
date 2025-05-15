@@ -142,9 +142,11 @@ export function Block() {
   }, [BlockWithReceipts]);
 
   if (isLoading) {
-    return <div className="w-full h-screen flex items-center justify-center animate-pulse">
-      <div className="text-sm text-gray-500">Loading...</div>
-    </div>;
+    return (
+      <div className="w-full h-screen flex items-center justify-center animate-pulse">
+        <div className="text-sm text-gray-500">Loading...</div>
+      </div>
+    );
   }
 
   return (
@@ -169,8 +171,8 @@ export function Block() {
           <div className="text-[#5D5D5D]">
             {BlockWithReceipts?.timestamp
               ? dayjs
-                .unix(BlockWithReceipts.timestamp)
-                .format("MMM D YYYY HH:mm:ss")
+                  .unix(BlockWithReceipts.timestamp)
+                  .format("MMM D YYYY HH:mm:ss")
               : ""}
           </div>
         }
@@ -209,12 +211,12 @@ export function Block() {
                     <td>
                       {BlockWithReceipts?.l1_gas_price
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              BlockWithReceipts?.l1_gas_price?.price_in_wei
-                            )
+                            Number(
+                              cairo.felt(
+                                BlockWithReceipts?.l1_gas_price?.price_in_wei,
+                              ),
+                            ),
                           )
-                        )
                         : 0}{" "}
                       WEI
                     </td>
@@ -224,12 +226,12 @@ export function Block() {
                     <td>
                       {BlockWithReceipts?.l1_gas_price
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              BlockWithReceipts?.l1_gas_price?.price_in_fri
-                            )
+                            Number(
+                              cairo.felt(
+                                BlockWithReceipts?.l1_gas_price?.price_in_fri,
+                              ),
+                            ),
                           )
-                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -246,13 +248,13 @@ export function Block() {
                     <td>
                       {BlockWithReceipts?.l1_data_gas_price
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              BlockWithReceipts?.l1_data_gas_price
-                                ?.price_in_wei
-                            )
+                            Number(
+                              cairo.felt(
+                                BlockWithReceipts?.l1_data_gas_price
+                                  ?.price_in_wei,
+                              ),
+                            ),
                           )
-                        )
                         : 0}{" "}
                       ETH
                     </td>
@@ -262,13 +264,13 @@ export function Block() {
                     <td>
                       {BlockWithReceipts?.l1_data_gas_price
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              BlockWithReceipts?.l1_data_gas_price
-                                ?.price_in_fri
-                            )
+                            Number(
+                              cairo.felt(
+                                BlockWithReceipts?.l1_data_gas_price
+                                  ?.price_in_fri,
+                              ),
+                            ),
                           )
-                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -332,7 +334,7 @@ export function Block() {
                           <>
                             <th className="w-[111px]">
                               {formatSnakeCaseToDisplayValue(
-                                array[index + 1][0]
+                                array[index + 1][0],
                               )}
                             </th>
                             <td>{formatNumber(array[index + 1][1])}</td>
@@ -345,7 +347,7 @@ export function Block() {
                         )}
                       </tr>
                     ) : null;
-                  }
+                  },
                 )}
               </tbody>
             </table>

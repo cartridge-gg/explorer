@@ -14,7 +14,9 @@ export default function BlockIdDisplay({
   truncateLength,
   ...props
 }: BlockIdDisplayProps) {
-  const blockId = ["bigint", "number"].includes(typeof value) ? value.toString() : value;
+  const blockId = ["bigint", "number"].includes(typeof value)
+    ? value.toString()
+    : value;
 
   return (
     <Link to={`../block/${blockId}`} className="hover:underline" {...props}>

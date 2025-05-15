@@ -6,7 +6,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchDataCreator } from "@cartridge/utils";
-import { AddressByUsernameDocument, AddressByUsernameQuery, AddressByUsernameQueryVariables } from "@cartridge/utils/api/cartridge";
+import {
+  AddressByUsernameDocument,
+  AddressByUsernameQuery,
+  AddressByUsernameQueryVariables,
+} from "@cartridge/utils/api/cartridge";
 
 export function SearchBar() {
   const navigate = useNavigate();
@@ -106,9 +110,14 @@ export function SearchBar() {
           .fetchQuery({
             queryKey: [QUERY_KEYS.getController, input],
             queryFn: async () => {
-              const fetchData = fetchDataCreator(`${import.meta.env.VITE_CARTRIDGE_API_URL ?? "https://api.cartridge.gg"}/query`);
+              const fetchData = fetchDataCreator(
+                `${import.meta.env.VITE_CARTRIDGE_API_URL ?? "https://api.cartridge.gg"}/query`,
+              );
               try {
-                const res = await fetchData<AddressByUsernameQuery, AddressByUsernameQueryVariables>(AddressByUsernameDocument, {
+                const res = await fetchData<
+                  AddressByUsernameQuery,
+                  AddressByUsernameQueryVariables
+                >(AddressByUsernameDocument, {
                   username: input,
                 });
                 return res.account?.controllers?.edges?.[0]?.node?.address;
@@ -123,11 +132,10 @@ export function SearchBar() {
             return false;
           });
 
-        return Promise.all([controllerPromise])
+        return Promise.all([controllerPromise]);
       }
-
     },
-    [queryClient]
+    [queryClient],
   );
 
   const handleSearch = useCallback(
@@ -162,7 +170,7 @@ export function SearchBar() {
         }
       });
     },
-    [performSearch]
+    [performSearch],
   );
 
   const handleResultClick = useCallback(() => {
@@ -180,7 +188,7 @@ export function SearchBar() {
         navigate(`./class/${result.value}`);
         break;
       default:
-        break
+        break;
     }
 
     setIsDropdownOpen(false);
@@ -218,8 +226,9 @@ export function SearchBar() {
   return (
     <div
       id="home-search-bar"
-      className={`bg-white min-w-[200px] w-full h-[42px] flex relative border border-borderGray items-center shadow ${isDropdownOpen && result ? "border-b-0" : ""
-        }`}
+      className={`bg-white min-w-[200px] w-full h-[42px] flex relative border border-borderGray items-center shadow ${
+        isDropdownOpen && result ? "border-b-0" : ""
+      }`}
     >
       <input
         ref={inputRef}
@@ -261,8 +270,9 @@ export function SearchBar() {
                 tabIndex={0}
                 onKeyDown={handleKeyDown}
                 onClick={handleResultClick}
-                className={`flex flex-row hover:bg-gray-100 cursor-pointer items-center gap-2 justify-between w-full px-2 py-1 outline-none ${isResultFocused ? "bg-gray-100" : ""
-                  }`}
+                className={`flex flex-row hover:bg-gray-100 cursor-pointer items-center gap-2 justify-between w-full px-2 py-1 outline-none ${
+                  isResultFocused ? "bg-gray-100" : ""
+                }`}
               >
                 <span className="font-bold uppercase">{result.type}</span>
 

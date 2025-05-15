@@ -30,6 +30,7 @@ export function Event() {
   const [eventIndex, setEventIndex] = useState<string | null>(null);
   const [eventData, setEventData] = useState<EventDataItem[]>([]);
   const [eventKeys, setEventKeys] = useState<EventDataItem[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [event, setEvent] = useState<any | null>(null);
   const [displayFormats, setDisplayFormats] = useState<
     Record<string, DisplayFormatTypes>
@@ -64,7 +65,7 @@ export function Event() {
     if (!eventsData) return;
 
     const contract_abi = await RPC_PROVIDER.getClassAt(
-      eventsData.from_address
+      eventsData.from_address,
     ).then((res) => res.abi);
 
     const eventsC = await RPC_PROVIDER.getEvents({
@@ -83,13 +84,13 @@ export function Event() {
       eventsC.events,
       abiEvents,
       abiStructs,
-      abiEnums
+      abiEnums,
     );
 
     if (!parsedEvent) return;
 
     const eventDataMap = parsedEvent.filter(
-      (e) => e.transaction_hash === TransactionReceipt?.transaction_hash
+      (e) => e.transaction_hash === TransactionReceipt?.transaction_hash,
     )?.[0];
 
     if (!eventDataMap) return;
@@ -97,7 +98,7 @@ export function Event() {
     const currentEvent = eventDataMap;
     // should contain ":"
     const eventDataKey = Object.keys(currentEvent).filter((key) =>
-      key.includes(":")
+      key.includes(":"),
     );
 
     const eventKeyType: Record<string, string> = {};
@@ -109,6 +110,7 @@ export function Event() {
         const eventInputType = abiEvents[key].members;
 
         // process the eventInputType
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         eventInputType?.forEach((input: any) => {
           if (input.kind === "key") {
             eventKeyType[input.name] = input.type;
@@ -179,7 +181,9 @@ export function Event() {
         subtext={isMobile && eventId ? truncateString(eventId) : eventId}
         subtextRightComponent={
           <div className="text-[#5D5D5D]">
-            {dayjs.unix(BlockDetails?.timestamp).format("MMM D YYYY HH:mm:ss")}{" "}
+            {dayjs
+              .unix(BlockDetails?.timestamp)
+              .format("MMM D YYYY HH:mm:ss")}{" "}
           </div>
         }
       />
@@ -204,8 +208,8 @@ export function Event() {
             <SectionBoxEntry title="Timestamp">
               {BlockDetails?.timestamp
                 ? `${BlockDetails.timestamp} (${dayjs
-                  .unix(BlockDetails.timestamp || 0)
-                  .format("MMM D YYYY HH:mm:ss")})`
+                    .unix(BlockDetails.timestamp || 0)
+                    .format("MMM D YYYY HH:mm:ss")})`
                 : "Loading..."}
             </SectionBoxEntry>
           </SectionBox>
@@ -220,7 +224,7 @@ export function Event() {
                         <p key={index}>
                           {isMobile ? truncateString(key) : key}
                         </p>
-                      )
+                      ),
                   )
                 ) : (
                   <p>No data found</p>
@@ -259,10 +263,11 @@ export function Event() {
                   {DisplayFormat.map((format) => (
                     <button
                       key={format}
-                      className={`px-2 py-1 text-xs ${(displayFormats["keys"] ?? "hex") === format
-                        ? "bg-[#4A4A4A] text-white"
-                        : "bg-gray-200"
-                        }`}
+                      className={`px-2 py-1 text-xs ${
+                        (displayFormats["keys"] ?? "hex") === format
+                          ? "bg-[#4A4A4A] text-white"
+                          : "bg-gray-200"
+                      }`}
                       onClick={() => handleFormatChange("keys", format)}
                     >
                       {format}
@@ -319,10 +324,11 @@ export function Event() {
                   {DisplayFormat.map((format) => (
                     <button
                       key={format}
-                      className={`px-2 py-1 text-xs ${(displayFormats["data"] ?? "hex") === format
-                        ? "bg-[#4A4A4A] text-white"
-                        : "bg-gray-200"
-                        }`}
+                      className={`px-2 py-1 text-xs ${
+                        (displayFormats["data"] ?? "hex") === format
+                          ? "bg-[#4A4A4A] text-white"
+                          : "bg-gray-200"
+                      }`}
                       onClick={() => handleFormatChange("data", format)}
                     >
                       {format}

@@ -10,7 +10,7 @@ const Table = React.forwardRef<
     ref={ref}
     className={cn(
       "w-full table-auto border-collapse border-spacing-0",
-      className
+      className,
     )}
     {...props}
   />
@@ -49,7 +49,7 @@ const TableFooter = React.forwardRef<
     ref={ref}
     className={cn(
       "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
-      className
+      className,
     )}
     {...props}
   />
@@ -111,10 +111,10 @@ function DataTable<T>({
                   <TableHead key={header.id}>
                     {flexRender(
                       header.column.columnDef.header,
-                      header.getContext()
+                      header.getContext(),
                     )}
                   </TableHead>
-                ))
+                )),
               )}
           </TableRow>
         </TableHeader>
@@ -128,7 +128,7 @@ function DataTable<T>({
                     <TableCell className="py-1" key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   );
@@ -171,7 +171,7 @@ function DataTable<T>({
                 ...prev,
                 pageIndex: Math.min(
                   table.getPageCount() - 1,
-                  prev.pageIndex + 1
+                  prev.pageIndex + 1,
                 ),
               }))
             }

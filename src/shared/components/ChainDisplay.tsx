@@ -2,7 +2,7 @@ import useChain from "../hooks/useChain";
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 
 export default function ChainDisplay(
-  props: React.HTMLAttributes<HTMLDivElement>
+  props: React.HTMLAttributes<HTMLDivElement>,
 ) {
   const { id: chainId, isLoading, error } = useChain();
   const containerRef = useRef<HTMLDivElement>(null);

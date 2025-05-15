@@ -9,7 +9,7 @@ export interface ToastType {
   message: string | ReactNode;
   variant: ToastVariant;
   duration?: number;
-};
+}
 
 export interface ToastProps extends ToastType {
   onClose: () => void;
@@ -71,7 +71,7 @@ export const Toast = ({
         bgColor,
         textColor,
         borderColor,
-        isVisible ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
+        isVisible ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0",
       )}
       role="alert"
     >
@@ -88,7 +88,9 @@ export const Toast = ({
         <icons.X strokeWidth={1.5} width={10} height={10} />
       </button>
 
-      <div className="w-full max-w-xs text-sm font-medium break-words">{message}</div>
+      <div className="w-full max-w-xs text-sm font-medium break-words">
+        {message}
+      </div>
     </div>
   );
 };

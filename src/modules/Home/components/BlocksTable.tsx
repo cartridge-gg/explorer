@@ -30,20 +30,28 @@ const columns: ColumnDef<Block, string>[] = [
   }),
 ];
 
-export function BlocksTable({ isBlocksLoading, blocks }: {
+export function BlocksTable({
+  isBlocksLoading,
+  blocks,
+}: {
   blocks: (BlockWithTxHashes | undefined)[];
   isBlocksLoading: boolean;
 }) {
   const navigate = useNavigate();
-  const data = useMemo<Block[]>(() =>
-    blocks
-      .filter((block) => block !== undefined)
-      .map((block) => ({
-        number: block.block_number.toString(),
-        hash: block.block_hash,
-        age: block.timestamp.toString(),
-      } as Block)
-      ), [blocks]);
+  const data = useMemo<Block[]>(
+    () =>
+      blocks
+        .filter((block) => block !== undefined)
+        .map(
+          (block) =>
+            ({
+              number: block.block_number.toString(),
+              hash: block.block_hash,
+              age: block.timestamp.toString(),
+            }) as Block,
+        ),
+    [blocks],
+  );
 
   const table = useReactTable({
     data,
@@ -63,10 +71,7 @@ export function BlocksTable({ isBlocksLoading, blocks }: {
     <div className="text-black rounded-lg w-full">
       <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
         <h1 className="text-white">Blocks</h1>
-        <Link
-          to={`./blocks`}
-          className="flex flex-row items-center gap-2"
-        >
+        <Link to={`./blocks`} className="flex flex-row items-center gap-2">
           <h4 className="text-white">View all blocks</h4>
           <LinkArrow color={"#fff"} />
         </Link>
@@ -111,4 +116,4 @@ export function BlocksTable({ isBlocksLoading, blocks }: {
       </div>
     </div>
   );
-};
+}

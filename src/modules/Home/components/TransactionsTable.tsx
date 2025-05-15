@@ -90,10 +90,7 @@ export function TransactionTable(props: {
     <div className=" text-black rounded-lg w-full">
       <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
         <h1 className="text-white">Transactions</h1>
-        <Link
-          to="./txns"
-          className="flex flex-row items-center gap-2"
-        >
+        <Link to="./txns" className="flex flex-row items-center gap-2">
           <h4 className="text-white">View all transactions</h4>
           <LinkArrow color={"#fff"} />
         </Link>
@@ -106,8 +103,7 @@ export function TransactionTable(props: {
               <tr
                 key={row.id}
                 className="text-sm"
-                onClick={() => navigate(`./tx/${row.original.hash}`)
-                }
+                onClick={() => navigate(`./tx/${row.original.hash}`)}
               >
                 <td className="w-full p-2 cursor-pointer">
                   <div className="flex items-center overflow-hidden">

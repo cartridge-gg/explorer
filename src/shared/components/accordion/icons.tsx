@@ -1,5 +1,5 @@
 export function AccordionExpandIcon(
-  props: React.HTMLAttributes<HTMLSpanElement>
+  props: React.HTMLAttributes<HTMLSpanElement>,
 ) {
   return (
     <span {...props} className="select-none">
@@ -9,7 +9,7 @@ export function AccordionExpandIcon(
 }
 
 export function AccordionCollapseIcon(
-  props: React.HTMLAttributes<HTMLSpanElement>
+  props: React.HTMLAttributes<HTMLSpanElement>,
 ) {
   return (
     <span {...props} className="select-none">

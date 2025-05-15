@@ -66,7 +66,7 @@ const ValueRenderer = ({
       typeof value === "object"
         ? convertObjectValuesToDisplayValues(value, type)
         : convertValue(value)?.[type],
-    [value, type]
+    [value, type],
   );
 
   return <pre>{JSON.stringify(displayValue, null, 2)}</pre>;
@@ -119,7 +119,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
             item.items?.forEach((func: AbiItem) => {
               if (func.type === "function") {
                 const funcNameSelector = hash.getSelectorFromName(
-                  func.name || ""
+                  func.name || "",
                 );
                 if (funcNameSelector === data.selector) {
                   matchingFunction = func;
@@ -136,7 +136,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
         const { inputs } = myCallData.parser
           .getLegacyFormat()
           .find(
-            (abiItem: AbiEntry) => abiItem.name === matchingFunction?.name
+            (abiItem: AbiEntry) => abiItem.name === matchingFunction?.name,
           ) as FunctionAbi;
 
         const inputsTypes = inputs.map((inp: { type: string }) => {
@@ -145,7 +145,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
 
         const decoded = myCallData.decodeParameters(
           inputsTypes,
-          formattedParams
+          formattedParams,
         );
 
         const formattedResponse: DecodedArg[] = [];
@@ -232,97 +232,90 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
       <div className="overflow-auto">
         {selectedTab === "decoded" ? (
           <Accordion>
-            {
-              decodedCalldata.map((item, idx) => (
-                <AccordionItem
-                  key={idx}
-                  titleClassName="h-[45px]"
-                  title={
-                    <div className="flex flex-row items-center gap-2">
-                      <span className="">
-                        <AddressDisplay
-                          alwaysTruncate={true}
-                          truncateLength={3}
-                          value={item.contract}
-                        />
-                      </span>
-                      <span>
-                        <ArrowRightIcon className="w-3 h-3" />
-                      </span>
-                      <span className="font-bold">fn</span>
-                      <span className="italic">{item.function_name}</span>
-                      <span>({item.params.map((arg) => arg).join(", ")})</span>
-                    </div>
-                  }
-                >
-                  <div className="flex gap-3 justify-between mb-3">
-                    <CalldataEncodingToggle
-                      displayAs={decodedRawMap[item.selector]}
-                      onChange={(value) =>
-                        setDecodedRawMap((prev) => ({
-                          ...prev,
-                          [item.selector]: value,
-                        }))
-                      }
-                    />
-
-                    {decodedRawMap[item.selector] === "decoded" && (
-                      <FeltDisplayAsToggle
-                        displayAs={convertValueTabMap[item.selector]}
-                        onChange={(format) => {
-                          setConvertValueTabMap((prev) => ({
-                            ...prev,
-                            [item.selector]: format as Exclude<
-                              FeltDisplayVariants,
-                              "string"
-                            >,
-                          }));
-                        }}
+            {decodedCalldata.map((item, idx) => (
+              <AccordionItem
+                key={idx}
+                titleClassName="h-[45px]"
+                title={
+                  <div className="flex flex-row items-center gap-2">
+                    <span className="">
+                      <AddressDisplay
+                        alwaysTruncate={true}
+                        truncateLength={3}
+                        value={item.contract}
                       />
-                    )}
+                    </span>
+                    <span>
+                      <ArrowRightIcon className="w-3 h-3" />
+                    </span>
+                    <span className="font-bold">fn</span>
+                    <span className="italic">{item.function_name}</span>
+                    <span>({item.params.map((arg) => arg).join(", ")})</span>
                   </div>
+                }
+              >
+                <div className="flex gap-3 justify-between mb-3">
+                  <CalldataEncodingToggle
+                    displayAs={decodedRawMap[item.selector]}
+                    onChange={(value) =>
+                      setDecodedRawMap((prev) => ({
+                        ...prev,
+                        [item.selector]: value,
+                      }))
+                    }
+                  />
 
-                  <div className="bg-white border overflow-auto">
-                    {decodedRawMap[item.selector] === "decoded" ? (
-                      <table className="overflow-x w-full">
-                        <tbody>
-                          {item.data.map((arg, rowIndex, array) => (
-                            <tr
-                              key={rowIndex}
-                              className={`${rowIndex !== array.length - 1
-                                ? "border-b"
-                                : ""
-                                }`}
-                            >
-                              <td className="px-2 py-1 text-left align-top">
-                                <span className="font-bold">
-                                  {arg.name}
-                                </span>
-                              </td>
+                  {decodedRawMap[item.selector] === "decoded" && (
+                    <FeltDisplayAsToggle
+                      displayAs={convertValueTabMap[item.selector]}
+                      onChange={(format) => {
+                        setConvertValueTabMap((prev) => ({
+                          ...prev,
+                          [item.selector]: format as Exclude<
+                            FeltDisplayVariants,
+                            "string"
+                          >,
+                        }));
+                      }}
+                    />
+                  )}
+                </div>
 
-                              <td className="px-2 py-1 text-left align-top ">
-                                <span className="text-gray-500">
-                                  {arg.type}
-                                </span>
-                              </td>
+                <div className="bg-white border overflow-auto">
+                  {decodedRawMap[item.selector] === "decoded" ? (
+                    <table className="overflow-x w-full">
+                      <tbody>
+                        {item.data.map((arg, rowIndex, array) => (
+                          <tr
+                            key={rowIndex}
+                            className={`${
+                              rowIndex !== array.length - 1 ? "border-b" : ""
+                            }`}
+                          >
+                            <td className="px-2 py-1 text-left align-top">
+                              <span className="font-bold">{arg.name}</span>
+                            </td>
 
-                              <td className="px-2 py-1 text-left overflow-x-auto">
-                                <ValueRenderer
-                                  value={arg.value}
-                                  type={convertValueTabMap[item.selector]}
-                                />
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    ) : (
-                      <FeltList list={item.raw_args} displayAs="hex" />
-                    )}
-                  </div>
-                </AccordionItem>
-              ))
-            }
+                            <td className="px-2 py-1 text-left align-top ">
+                              <span className="text-gray-500">{arg.type}</span>
+                            </td>
+
+                            <td className="px-2 py-1 text-left overflow-x-auto">
+                              <ValueRenderer
+                                value={arg.value}
+                                type={convertValueTabMap[item.selector]}
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <FeltList list={item.raw_args} displayAs="hex" />
+                  )}
+                </div>
+              </AccordionItem>
+            ))}
           </Accordion>
         ) : (
           <FeltList list={calldata.flatMap((calldata) => calldata.args)} />

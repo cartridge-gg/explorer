@@ -34,7 +34,7 @@ export function BlockList() {
       try {
         setIsFetching(true);
         const blockDataPromises = blockNumbers.map((blockNumber) =>
-          RPC_PROVIDER.getBlockWithTxs(blockNumber)
+          RPC_PROVIDER.getBlockWithTxs(blockNumber),
         );
         return Promise.all(blockDataPromises);
       } catch (error) {
@@ -61,7 +61,7 @@ export function BlockList() {
 
     const blockNumbers = getPaginatedBlockNumbers(
       latestBlockNumber - currentPage * ROWS_TO_RENDER,
-      ROWS_TO_RENDER
+      ROWS_TO_RENDER,
     );
 
     fetchBlocks.mutate(blockNumbers);
@@ -116,9 +116,9 @@ export function BlockList() {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </th>
                 ))}
               </tr>
@@ -162,4 +162,4 @@ export function BlockList() {
       </div>
     </div>
   );
-};
+}

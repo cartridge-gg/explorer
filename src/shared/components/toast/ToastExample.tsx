@@ -20,7 +20,7 @@ export const ToastExample = () => {
           onClick={() =>
             showToast(
               "An error occurred while processing your request.",
-              "error"
+              "error",
             )
           }
         >

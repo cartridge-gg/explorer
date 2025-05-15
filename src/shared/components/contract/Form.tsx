@@ -5,10 +5,7 @@ import FeltDisplayAsToggle, {
 } from "@/shared/components/FeltDisplayAsToggle";
 import FeltList from "@/shared/components/FeltList";
 import { useCallback, useState } from "react";
-import {
-  Contract,
-  InvokeFunctionResponse,
-} from "starknet";
+import { Contract, InvokeFunctionResponse } from "starknet";
 import {
   FunctionAbiWithAst,
   FunctionInputWithValue,
@@ -40,21 +37,15 @@ const initFormState: FormState = {
   inputs: [],
   hasCalled: false,
   loading: false,
-}
+};
 
-export function ContractForm({
-  contract,
-  functions,
-}: ContractFormProps) {
+export function ContractForm({ contract, functions }: ContractFormProps) {
   const [form, setForm] = useState<{
     [key: string]: FormState;
   }>({});
 
   const onUpdate = useCallback(
-    (
-      name: string,
-      value: Partial<(typeof form)[string]>
-    ) => {
+    (name: string, value: Partial<(typeof form)[string]>) => {
       setForm((prev) => ({
         ...prev,
         [name]: {
@@ -63,7 +54,7 @@ export function ContractForm({
         },
       }));
     },
-    []
+    [],
   );
 
   if (!functions.length) {
@@ -71,33 +62,32 @@ export function ContractForm({
       <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
         <span className="text-[#D0D0D0]">No functions found</span>
       </div>
-    )
+    );
   }
 
   return (
     <Accordion>
-      {
-        functions.map((f, i) => (
-          <AccordionItem
-            key={i}
-            titleClassName="h-[45px] z-10"
-            title={
-              <div className="flex flex-row items-center gap-2">
-                <span className="font-bold">fn</span>
-                <span className="italic">{f.name}</span>
-                <span>({f.inputs.map((arg) => arg.name).join(", ")})</span>
-              </div>
-            }
-            disabled={!contract && !f.inputs.length}
-          >
-            <FunctionForm
-              item={f}
-              contract={contract}
-              state={form[f.name] || initFormState}
-              onUpdate={(update) => onUpdate(f.name, update)} />
-          </AccordionItem>
-        ))
-      }
+      {functions.map((f, i) => (
+        <AccordionItem
+          key={i}
+          titleClassName="h-[45px] z-10"
+          title={
+            <div className="flex flex-row items-center gap-2">
+              <span className="font-bold">fn</span>
+              <span className="italic">{f.name}</span>
+              <span>({f.inputs.map((arg) => arg.name).join(", ")})</span>
+            </div>
+          }
+          disabled={!contract && !f.inputs.length}
+        >
+          <FunctionForm
+            item={f}
+            contract={contract}
+            state={form[f.name] || initFormState}
+            onUpdate={(update) => onUpdate(f.name, update)}
+          />
+        </AccordionItem>
+      ))}
     </Accordion>
   );
 }
@@ -129,32 +119,35 @@ function FunctionForm({
         hasCalled: true,
       });
       return;
-    };
+    }
 
     onUpdate({ loading: true });
 
     try {
-      const calldata = state.inputs.flatMap(
-        (input, idx) => {
-          let value;
-          try {
-            value = JSON.parse(input.value);
-          } catch {
-            value = input.value
-          }
-          return toCalldata(f.inputs[idx].type, value)
+      const calldata = state.inputs.flatMap((input, idx) => {
+        let value;
+        try {
+          value = JSON.parse(input.value);
+        } catch {
+          value = input.value;
         }
-      );
+        return toCalldata(f.inputs[idx].type, value);
+      });
 
       if (isRead) {
-        const result = await contract.call(f.name, calldata, { parseRequest: false, parseResponse: false });
+        const result = await contract.call(f.name, calldata, {
+          parseRequest: false,
+          parseResponse: false,
+        });
         onUpdate({ result: result as CallResult, error: undefined });
       } else {
-        const result = await account!.execute([{
-          calldata: calldata,
-          entrypoint: f.name,
-          contractAddress: contract.address,
-        }])
+        const result = await account!.execute([
+          {
+            calldata: calldata,
+            entrypoint: f.name,
+            contractAddress: contract.address,
+          },
+        ]);
         onUpdate({ result: result, error: undefined });
       }
     } catch (error) {
@@ -162,15 +155,8 @@ function FunctionForm({
       onUpdate({ error: error as Error, result: undefined });
     } finally {
       onUpdate({ hasCalled: true, loading: false });
-    };
-  }, [
-    f,
-    contract,
-    account,
-    state.inputs,
-    isRead,
-    onUpdate,
-  ]);
+    }
+  }, [f, contract, account, state.inputs, isRead, onUpdate]);
 
   const onChange = useCallback(
     (inputIndex: number, value: string) => {
@@ -181,7 +167,7 @@ function FunctionForm({
       };
       onUpdate({ inputs: newInputs });
     },
-    [state, onUpdate]
+    [state, onUpdate],
   );
 
   const { toast } = useToast();
@@ -192,17 +178,15 @@ function FunctionForm({
       return;
     }
 
-    const calldata = state.inputs.flatMap(
-      (input, idx) => {
-        let value;
-        try {
-          value = JSON.parse(input.value);
-        } catch {
-          value = input.value
-        }
-        return toCalldata(f.inputs[idx].type, value)
+    const calldata = state.inputs.flatMap((input, idx) => {
+      let value;
+      try {
+        value = JSON.parse(input.value);
+      } catch {
+        value = input.value;
       }
-    );
+      return toCalldata(f.inputs[idx].type, value);
+    });
 
     addCall({
       calldata: calldata,
@@ -210,82 +194,73 @@ function FunctionForm({
       contractAddress: contract.address,
     });
     toast(`Function call added: ${f.name}`, "success");
-  }, [
-    toast,
-    contract,
-    f,
-    state.inputs,
-    addCall,
-    account,
-    isRead
-  ]);
+  }, [toast, contract, f, state.inputs, addCall, account, isRead]);
 
   return (
     <div className="flex flex-col gap-[10px] items-end">
-      {!!contract && (isRead ? (
-        <button
-          disabled={state.loading}
-          onClick={onCallOrExecute}
-          className={`px-3 py-[2px] text-sm uppercase font-bold w-fit  ${state.loading
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-primary hover:bg-[#6E6E6E]"
-            } text-white`}
-        >
-          {state.loading ? "Calling..." : "Call"}
-        </button>
-      ) : (
-        <div className="flex gap-2">
+      {!!contract &&
+        (isRead ? (
           <button
-            onClick={onAddToCart}
-            disabled={!account}
-            className={
-              cn(
+            disabled={state.loading}
+            onClick={onCallOrExecute}
+            className={`px-3 py-[2px] text-sm uppercase font-bold w-fit  ${
+              state.loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-primary hover:bg-[#6E6E6E]"
+            } text-white`}
+          >
+            {state.loading ? "Calling..." : "Call"}
+          </button>
+        ) : (
+          <div className="flex gap-2">
+            <button
+              onClick={onAddToCart}
+              disabled={!account}
+              className={cn(
                 `bg-white w-[19px] h-[19px] flex items-center justify-center border`,
                 !account
                   ? "border-gray-300 text-gray-300 cursor-not-allowed"
-                  : "border-borderGray hover:border-0 hover:bg-primary hover:text-white cursor-pointer"
-              )
-            }
-            title={
-              !account
-                ? "Please connect your wallet first"
-                : "Add to cart"
-            }
-          >
-            <AddIcon />
-          </button>
+                  : "border-borderGray hover:border-0 hover:bg-primary hover:text-white cursor-pointer",
+              )}
+              title={
+                !account ? "Please connect your wallet first" : "Add to cart"
+              }
+            >
+              <AddIcon />
+            </button>
 
-          <button
-            disabled={!account || state.loading}
-            onClick={onCallOrExecute}
-            className={`px-3 py-[2px] text-sm uppercase font-bold w-fit text-white ${!account || state.loading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-primary hover:bg-[#6E6E6E]"
+            <button
+              disabled={!account || state.loading}
+              onClick={onCallOrExecute}
+              className={`px-3 py-[2px] text-sm uppercase font-bold w-fit text-white ${
+                !account || state.loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-primary hover:bg-[#6E6E6E]"
               }`}
-            title={
-              !account
-                ? "Please connect your wallet first"
-                : state.loading
-                  ? "Transaction in progress"
-                  : ""
-            }
-          >
-            {state.loading ? "Executing..." : "Execute"}
-          </button>
-        </div>
-      ))}
+              title={
+                !account
+                  ? "Please connect your wallet first"
+                  : state.loading
+                    ? "Transaction in progress"
+                    : ""
+              }
+            >
+              {state.loading ? "Executing..." : "Execute"}
+            </button>
+          </div>
+        ))}
 
       <ParamForm
         params={f.inputs.map((input, i) => ({
           ...input,
-          value: i < state.inputs.length
-            ? state.inputs[i]?.value
-            : input.type.type === "struct"
-              ? "{\n\t\n}"
-              : input.type.type === "array"
-                ? "[\n\t\n]"
-                : "",
-
+          value:
+            i < state.inputs.length
+              ? state.inputs[i]?.value
+              : input.type.type === "struct"
+                ? "{\n\t\n}"
+                : input.type.type === "array"
+                  ? "[\n\t\n]"
+                  : "",
         }))}
         onChange={(i, value) => onChange(i, value)}
         disabled={!contract || (!isRead && !account)}
@@ -312,7 +287,7 @@ function FunctionForm({
   );
 }
 
-type CallResult = string | string[] | bigint | bigint[]
+type CallResult = string | string[] | bigint | bigint[];
 
 interface ResultProps {
   data: CallResult | InvokeFunctionResponse;
@@ -330,10 +305,10 @@ function FormResult({ data }: ResultProps) {
           {data.transaction_hash}
         </Link>
       </div>
-    )
+    );
   }
 
-  return <CallResult data={data} />
+  return <CallResult data={data} />;
 }
 
 function CallResult({ data }: { data: CallResult }) {
@@ -342,8 +317,7 @@ function CallResult({ data }: { data: CallResult }) {
   return (
     <div className="px-3 py-2 border border-borderGray flex flex-col gap-3">
       <FeltDisplayAsToggle
-        onChange={(value) => setDisplay(value as FeltDisplayVariants)
-        }
+        onChange={(value) => setDisplay(value as FeltDisplayVariants)}
         asString={true}
       />
       {Array.isArray(data) ? (

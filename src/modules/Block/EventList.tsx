@@ -17,6 +17,7 @@ interface EventListProps {
 
 export function EventList({ events }: EventListProps) {
   const columnHelper = createColumnHelper<EventTableData>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const columns: ColumnDef<EventTableData, any>[] = [
     columnHelper.accessor("id", {
       header: () => <th className="w-[52px]">No</th>,
@@ -62,9 +63,9 @@ export function EventList({ events }: EventListProps) {
                   headerGroup.headers.map((header) =>
                     flexRender(
                       header.column.columnDef.header,
-                      header.getContext()
-                    )
-                  )
+                      header.getContext(),
+                    ),
+                  ),
                 )}
             </tr>
           </thead>
@@ -72,34 +73,40 @@ export function EventList({ events }: EventListProps) {
           <tbody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row, id) => (
-                <tr key={id} >
+                <tr key={id}>
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="p-0">
                       {(() => {
                         switch (cell.column.id) {
                           case "txn_hash":
                             return (
-                              <Link to={`../tx/${row.original.txn_hash}`} className="flex px-4 hover:bg-button-whiteInitialHover hover:underline">
+                              <Link
+                                to={`../tx/${row.original.txn_hash}`}
+                                className="flex px-4 hover:bg-button-whiteInitialHover hover:underline"
+                              >
                                 {flexRender(
                                   cell.column.columnDef.cell,
-                                  cell.getContext()
+                                  cell.getContext(),
                                 )}
                               </Link>
-                            )
+                            );
                           case "from":
                             return (
-                              <Link to={`../contract/${row.original.from}`} className="flex px-4 hover:bg-button-whiteInitialHover hover:underline">
+                              <Link
+                                to={`../contract/${row.original.from}`}
+                                className="flex px-4 hover:bg-button-whiteInitialHover hover:underline"
+                              >
                                 {flexRender(
                                   cell.column.columnDef.cell,
-                                  cell.getContext()
+                                  cell.getContext(),
                                 )}
                               </Link>
-                            )
+                            );
                           default:
                             return flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext()
-                            )
+                              cell.getContext(),
+                            );
                         }
                       })()}
                     </td>
@@ -140,7 +147,7 @@ export function EventList({ events }: EventListProps) {
                   ...prev,
                   pageIndex: Math.min(
                     table.getPageCount() - 1,
-                    prev.pageIndex + 1
+                    prev.pageIndex + 1,
                   ),
                 }))
               }
@@ -151,6 +158,6 @@ export function EventList({ events }: EventListProps) {
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 }

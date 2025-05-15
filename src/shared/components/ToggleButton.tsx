@@ -20,7 +20,7 @@ export default function ToggleButton<T extends ToggleVariants>({
     (value: string) => {
       if (onChange) onChange(value as T[number]);
     },
-    [onChange]
+    [onChange],
   );
 
   return (

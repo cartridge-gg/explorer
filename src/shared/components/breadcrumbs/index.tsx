@@ -15,11 +15,7 @@ function Breadcrumb({
   );
 }
 
-function BreadcrumbItem({
-  to,
-  children,
-  ...props
-}: Partial<LinkProps>) {
+function BreadcrumbItem({ to, children, ...props }: Partial<LinkProps>) {
   return (
     <li className={"uppercase inline-flex items-center gap-1.5"}>
       {to ? (

@@ -6,20 +6,20 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 export type CodeProps = {
   abi?: string;
   sierra?: string;
-}
+};
 
 export function Code({ abi, sierra }: CodeProps) {
   const variants = useMemo(() => {
     const _varriants = ["contract abi"];
     if (sierra) {
-      _varriants.push("sierra bytecode")
+      _varriants.push("sierra bytecode");
     }
     return _varriants;
   }, [sierra]);
 
-  const [selectedTab, setSelectedTab] = useState<
-    (typeof variants)[number]
-  >(variants[0]);
+  const [selectedTab, setSelectedTab] = useState<(typeof variants)[number]>(
+    variants[0],
+  );
 
   const [copied, setCopied] = useState(false);
   const onCopy = useCallback(() => {
@@ -39,7 +39,7 @@ export function Code({ abi, sierra }: CodeProps) {
         setCopied(true);
         break;
     }
-  }, [abi, sierra, selectedTab])
+  }, [abi, sierra, selectedTab]);
 
   useEffect(() => {
     if (copied) {
@@ -47,7 +47,7 @@ export function Code({ abi, sierra }: CodeProps) {
         setCopied(false);
       }, 2000);
     }
-  }, [copied])
+  }, [copied]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -79,33 +79,37 @@ export function Code({ abi, sierra }: CodeProps) {
       {(() => {
         switch (selectedTab) {
           case "contract abi":
-            return <Editor
-              className="min-h-[80vh]"
-              defaultLanguage="json"
-              value={abi}
-              options={{
-                readOnly: true,
-                scrollbar: {
-                  alwaysConsumeMouseWheel: false
-                }
-              }}
-            />
+            return (
+              <Editor
+                className="min-h-[80vh]"
+                defaultLanguage="json"
+                value={abi}
+                options={{
+                  readOnly: true,
+                  scrollbar: {
+                    alwaysConsumeMouseWheel: false,
+                  },
+                }}
+              />
+            );
           case "sierra bytecode":
             if (!sierra) {
-              return null
+              return null;
             }
 
-            return <Editor
-              className="min-h-[80vh]"
-              defaultLanguage="json"
-              value={sierra}
-              options={{
-                readOnly: true,
-                scrollbar: {
-                  alwaysConsumeMouseWheel: false
-                }
-              }}
-            />;
+            return (
+              <Editor
+                className="min-h-[80vh]"
+                defaultLanguage="json"
+                value={sierra}
+                options={{
+                  readOnly: true,
+                  scrollbar: {
+                    alwaysConsumeMouseWheel: false,
+                  },
+                }}
+              />
+            );
         }
       })()}
     </div>

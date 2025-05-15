@@ -20,7 +20,7 @@ export default function FeltDisplayAsToggle({
   const filteredVariants = useMemo(
     () =>
       FeltDisplayVariantsSet.filter((type) => type !== "string" || asString),
-    [asString]
+    [asString],
   );
 
   return (

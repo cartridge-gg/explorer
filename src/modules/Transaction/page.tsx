@@ -70,8 +70,9 @@ const FinalityStatus = ({ status }: { status: string }) => {
   };
   return (
     <div
-      className={`text-white px-2 h-5 w-[84px] flex items-center justify-center font-bold ${status_color_map[status?.toLowerCase() as keyof typeof status_color_map]
-        }`}
+      className={`text-white px-2 h-5 w-[84px] flex items-center justify-center font-bold ${
+        status_color_map[status?.toLowerCase() as keyof typeof status_color_map]
+      }`}
     >
       {status}
     </div>
@@ -171,9 +172,8 @@ export function Transaction() {
         Object.entries(eventsByContract).map(
           async ([address, eventEntries]) => {
             // Fetch contract ABI once per contract
-            const { abi: contract_abi } = await RPC_PROVIDER.getClassAt(
-              address
-            );
+            const { abi: contract_abi } =
+              await RPC_PROVIDER.getClassAt(address);
 
             // Get all events for this contract in one call
             const eventsResponse = await RPC_PROVIDER.getEvents({
@@ -193,20 +193,20 @@ export function Transaction() {
               eventsResponse.events,
               abiEvents,
               abiStructs,
-              abiEnums
+              abiEnums,
             );
 
             // Map events while preserving original indices
-            return eventEntries?.map(({ _, originalIndex }) => {
+            return eventEntries?.map(({ originalIndex }) => {
               const matchingParsedEvent = parsedEvents.find(
                 (e: ParsedEvent) =>
-                  e.transaction_hash === TransactionReceipt.transaction_hash
+                  e.transaction_hash === TransactionReceipt.transaction_hash,
               );
 
               const eventKey = matchingParsedEvent
                 ? Object.keys(matchingParsedEvent).find((key) =>
-                  key.includes("::")
-                )
+                    key.includes("::"),
+                  )
                 : "";
 
               return {
@@ -220,8 +220,8 @@ export function Transaction() {
                 },
               };
             });
-          }
-        )
+          },
+        ),
       );
 
       // Flatten and sort by original index to maintain event order
@@ -254,7 +254,7 @@ export function Transaction() {
       } else {
         const key_map =
           EXECUTION_RESOURCES_KEY_MAP[
-          key as keyof typeof EXECUTION_RESOURCES_KEY_MAP
+            key as keyof typeof EXECUTION_RESOURCES_KEY_MAP
           ];
 
         if (key_map) {
@@ -510,7 +510,9 @@ export function Transaction() {
         }
         subtextRightComponent={
           <div className="text-[#5D5D5D]">
-            {dayjs.unix(BlockDetails?.timestamp).format("MMM D YYYY HH:mm:ss")}{" "}
+            {dayjs
+              .unix(BlockDetails?.timestamp)
+              .format("MMM D YYYY HH:mm:ss")}{" "}
           </div>
         }
       />
@@ -529,7 +531,8 @@ export function Transaction() {
             </SectionBoxEntry>
           </SectionBox>
 
-          {(!!TransactionDetails?.sender_address || !!TransactionDetails?.nonce) && (
+          {(!!TransactionDetails?.sender_address ||
+            !!TransactionDetails?.nonce) && (
             <SectionBox title="Sender" variant="upper-half">
               {!!TransactionDetails?.sender_address && (
                 <SectionBoxEntry title="Address">
@@ -554,13 +557,13 @@ export function Transaction() {
                     <td>
                       {TransactionDetails?.resource_bounds?.l1_gas?.max_amount
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              TransactionDetails?.resource_bounds?.l1_gas
-                                ?.max_amount
-                            )
+                            Number(
+                              cairo.felt(
+                                TransactionDetails?.resource_bounds?.l1_gas
+                                  ?.max_amount,
+                              ),
+                            ),
                           )
-                        )
                         : 0}{" "}
                       WEI
                     </td>
@@ -571,13 +574,13 @@ export function Transaction() {
                       {TransactionDetails?.resource_bounds?.l1_gas
                         ?.max_price_per_unit
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              TransactionDetails?.resource_bounds?.l1_gas
-                                ?.max_price_per_unit
-                            )
+                            Number(
+                              cairo.felt(
+                                TransactionDetails?.resource_bounds?.l1_gas
+                                  ?.max_price_per_unit,
+                              ),
+                            ),
                           )
-                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -593,13 +596,13 @@ export function Transaction() {
                     <td>
                       {TransactionDetails?.resource_bounds?.l2_gas?.max_amount
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              TransactionDetails?.resource_bounds?.l2_gas
-                                ?.max_amount
-                            )
+                            Number(
+                              cairo.felt(
+                                TransactionDetails?.resource_bounds?.l2_gas
+                                  ?.max_amount,
+                              ),
+                            ),
                           )
-                        )
                         : 0}{" "}
                       WEI
                     </td>
@@ -610,13 +613,13 @@ export function Transaction() {
                       {TransactionDetails?.resource_bounds?.l2_gas
                         ?.max_price_per_unit
                         ? formatNumber(
-                          Number(
-                            cairo.felt(
-                              TransactionDetails?.resource_bounds?.l2_gas
-                                ?.max_price_per_unit
-                            )
+                            Number(
+                              cairo.felt(
+                                TransactionDetails?.resource_bounds?.l2_gas
+                                  ?.max_price_per_unit,
+                              ),
+                            ),
                           )
-                        )
                         : 0}{" "}
                       FRI
                     </td>
@@ -650,8 +653,8 @@ export function Transaction() {
           <SectionBox title="Actual Fee" variant="upper-half">
             {TransactionReceipt?.actual_fee?.amount
               ? formatNumber(
-                Number(cairo.felt(TransactionReceipt?.actual_fee?.amount))
-              )
+                  Number(cairo.felt(TransactionReceipt?.actual_fee?.amount)),
+                )
               : 0}{" "}
             {TransactionReceipt?.actual_fee?.unit}
           </SectionBox>
@@ -710,7 +713,7 @@ export function Transaction() {
                           <>
                             <th className="w-[111px]">
                               {formatSnakeCaseToDisplayValue(
-                                array[index + 1][0]
+                                array[index + 1][0],
                               )}
                             </th>
                             <td>{formatNumber(array[index + 1][1])}</td>
@@ -723,7 +726,7 @@ export function Transaction() {
                         )}
                       </tr>
                     ) : null;
-                  }
+                  },
                 )}
               </tbody>
             </table>

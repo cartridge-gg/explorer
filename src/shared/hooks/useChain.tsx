@@ -34,10 +34,10 @@ class ChainIdData {
     return this._decoded === "SN_MAIN"
       ? "Mainnet"
       : this._decoded === "SN_SEPOLIA"
-      ? "Sepolia"
-      : this._decoded === "SN_GOERLI"
-      ? "Goerli"
-      : this._decoded;
+        ? "Sepolia"
+        : this._decoded === "SN_GOERLI"
+          ? "Goerli"
+          : this._decoded;
   }
 
   /**

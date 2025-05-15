@@ -1,8 +1,14 @@
-import { cn, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@cartridge/ui-next";
-import { Editor, Monaco } from "@monaco-editor/react"
+import {
+  cn,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@cartridge/ui-next";
+import { Editor, Monaco } from "@monaco-editor/react";
 import { InfoIcon } from "lucide-react";
 import { editor } from "monaco-editor";
-import { useCallback } from "react"
+import { useCallback } from "react";
 import { JsonSchema } from "json-schema-library";
 import { isPrimitive } from "@/shared/utils/json-schema";
 import { TypeNode } from "@/shared/utils/abi";
@@ -14,28 +20,25 @@ export function ParamForm({
   disabled = false,
 }: {
   params: {
-    id?: string,
-    name: string,
-    description?: string,
-    summary?: string,
-    value: string,
-    schema: JsonSchema,
-    type?: TypeNode
-  }[]
-  onChange: (i: number, value: string) => void
-  onSubmit?: (i: number, value: string) => void
-  disabled?: boolean
+    id?: string;
+    name: string;
+    description?: string;
+    summary?: string;
+    value: string;
+    schema: JsonSchema;
+    type?: TypeNode;
+  }[];
+  onChange: (i: number, value: string) => void;
+  onSubmit?: (i: number, value: string) => void;
+  disabled?: boolean;
 }) {
-  if (params.length === 0) return null
+  if (params.length === 0) return null;
 
   return (
     <table className="w-full bg-white overflow-x-auto max-h-[200px]">
       <tbody>
         {params.map((p, i) => (
-          <tr
-            key={i}
-            className={i === params.length - 1 ? "border-b" : ""}
-          >
+          <tr key={i} className={i === params.length - 1 ? "border-b" : ""}>
             <td className="px-2 py-1 text-left align-top w-[90px] italic">
               <div className="flex items-center gap-2">
                 <span>{p.name}</span>
@@ -61,7 +64,10 @@ export function ParamForm({
               {isPrimitive(p.schema) ? (
                 <input
                   type="text"
-                  className={cn("px-2 py-1 text-left w-full", disabled && "cursor-not-allowed")}
+                  className={cn(
+                    "px-2 py-1 text-left w-full",
+                    disabled && "cursor-not-allowed",
+                  )}
                   value={p.value}
                   onChange={(e) => onChange(i, e.target.value)}
                   disabled={disabled}
@@ -90,7 +96,7 @@ export function ParamForm({
         ))}
       </tbody>
     </table>
-  )
+  );
 }
 
 function ParamEditor({
@@ -102,43 +108,48 @@ function ParamEditor({
   onSubmit,
   readOnly = false,
 }: {
-  id?: string,
-  name: string,
-  schema: unknown,
-  value: string,
-  onChange: (value?: string) => void,
-  onSubmit?: (value: string) => void,
+  id?: string;
+  name: string;
+  schema: unknown;
+  value: string;
+  onChange: (value?: string) => void;
+  onSubmit?: (value: string) => void;
   readOnly?: boolean;
 }) {
-  const onMount = useCallback((editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
-    const uri = monaco.Uri.parse(`file:///${id ?? name}.json`)
-    const model = monaco.editor.getModel(uri) ?? monaco.editor.createModel(value, "json", uri);
+  const onMount = useCallback(
+    (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
+      const uri = monaco.Uri.parse(`file:///${id ?? name}.json`);
+      const model =
+        monaco.editor.getModel(uri) ??
+        monaco.editor.createModel(value, "json", uri);
 
-    editor.setModel(model);
-    if (onSubmit) {
-      editor.addAction({
-        id: "submit",
-        label: "Submit",
-        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-        run: () => {
-          onSubmit(value);
-        }
-      })
-    }
+      editor.setModel(model);
+      if (onSubmit) {
+        editor.addAction({
+          id: "submit",
+          label: "Submit",
+          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+          run: () => {
+            onSubmit(value);
+          },
+        });
+      }
 
-    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      validate: true,
-      schemas: [
-        ...(monaco.languages.json.jsonDefaults.diagnosticsOptions
-          ?.schemas || []),
-        {
-          uri: `schema://${name}.json`,
-          fileMatch: [uri.toString()],
-          schema,
-        },
-      ],
-    })
-  }, [name, schema, value, onSubmit])
+      monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+        validate: true,
+        schemas: [
+          ...(monaco.languages.json.jsonDefaults.diagnosticsOptions?.schemas ||
+            []),
+          {
+            uri: `schema://${name}.json`,
+            fileMatch: [uri.toString()],
+            schema,
+          },
+        ],
+      });
+    },
+    [id, name, schema, value, onSubmit],
+  );
 
   return (
     <Editor
@@ -164,11 +175,10 @@ function ParamEditor({
           horizontalHasArrows: true,
           verticalScrollbarSize: 17,
           horizontalScrollbarSize: 17,
-          alwaysConsumeMouseWheel: false
+          alwaysConsumeMouseWheel: false,
         },
       }}
       value={value}
     />
-
-  )
+  );
 }

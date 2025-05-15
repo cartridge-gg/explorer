@@ -36,7 +36,7 @@ export function TransactionList() {
       try {
         setIsFetching(true);
         const blockDataPromises = blockNumbers.map((blockNumber) =>
-          RPC_PROVIDER.getBlockWithTxs(blockNumber)
+          RPC_PROVIDER.getBlockWithTxs(blockNumber),
         );
         return Promise.all(blockDataPromises);
       } catch (error) {
@@ -55,7 +55,7 @@ export function TransactionList() {
       latestBlockNumber - currentPage * BLOCKS_BATCH_SIZE;
     const blockNumbers = getPaginatedBlockNumbers(
       startBlockNumber,
-      BLOCKS_BATCH_SIZE
+      BLOCKS_BATCH_SIZE,
     );
 
     fetchBlocks.mutate(blockNumbers, {
@@ -144,9 +144,9 @@ export function TransactionList() {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </th>
                 ))}
               </tr>
@@ -193,4 +193,4 @@ export function TransactionList() {
       </div>
     </div>
   );
-};
+}

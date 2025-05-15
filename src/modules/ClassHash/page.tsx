@@ -1,5 +1,9 @@
 import { truncateString } from "@/shared/utils/string";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbSeparator } from "@/shared/components/breadcrumbs";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbSeparator,
+} from "@/shared/components/breadcrumbs";
 import { BreadcrumbPage } from "@cartridge/ui-next";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
@@ -12,7 +16,10 @@ import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { useState, useEffect, useRef } from "react";
 import { Overview } from "./Overview";
 import { Deploy } from "./Deploy";
-import { getContractClassInfo, ContractClassInfo } from "@/shared/utils/contract";
+import {
+  getContractClassInfo,
+  ContractClassInfo,
+} from "@/shared/utils/contract";
 import { validateAndParseAddress } from "starknet";
 import { useToast } from "@/shared/components/toast";
 import { NotFound } from "@/modules/NotFound/page";
@@ -23,14 +30,14 @@ const initialData: ContractClassInfo = {
     inputs: [],
     name: "constructor",
     outputs: [],
-    type: "constructor"
+    type: "constructor",
   },
   readFuncs: [],
   writeFuncs: [],
   code: {
     abi: "",
-    sierra: undefined
-  }
+    sierra: undefined,
+  },
 };
 
 export function ClassHash() {
@@ -47,51 +54,49 @@ export function ClassHash() {
   const {
     data: { constructor, readFuncs, writeFuncs, code },
     isLoading,
-    error
+    error,
   } = useQuery({
     queryKey: ["contractClass", classHash],
     queryFn: async () => {
       if (!classHash) return initialData;
       const contractClass = await RPC_PROVIDER.getClassByHash(classHash!);
-      return contractClass
-        ? getContractClassInfo(contractClass)
-        : initialData;
+      return contractClass ? getContractClassInfo(contractClass) : initialData;
     },
     enabled: !!classHash,
     initialData,
   });
 
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   const [classHashError, setClassHashError] = useState<Error>();
-  const isFirstRender = useRef(true)
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    if (!isFirstRender.current) return
-    isFirstRender.current = false
+    if (!isFirstRender.current) return;
+    isFirstRender.current = false;
     try {
       if (!classHash) {
-        throw new Error("Class hash is empty")
+        throw new Error("Class hash is empty");
       }
 
-      validateAndParseAddress(classHash)
+      validateAndParseAddress(classHash);
     } catch (error) {
-      setClassHashError(error as Error)
-      toast(`Invalid class hash: ${classHash}`, "error")
+      setClassHashError(error as Error);
+      toast(`Invalid class hash: ${classHash}`, "error");
     }
-  }, [classHash, toast])
+  }, [classHash, toast]);
 
   useEffect(() => {
-    if (!error) return
+    if (!error) return;
 
-    toast(`Class hash not found: ${classHash}`, "error")
-    setClassHashError(error as Error)
+    toast(`Class hash not found: ${classHash}`, "error");
+    setClassHashError(error as Error);
     // workaround for getting toast multiple times
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [classHash, error])
+  }, [classHash, error]);
 
   if (classHashError) {
-    return <NotFound />
+    return <NotFound />;
   }
 
   return (
@@ -103,9 +108,7 @@ export function ClassHash() {
         <BreadcrumbSeparator />
         <BreadcrumbItem>
           <BreadcrumbPage className="text-sm">
-            {isMobile && classHash
-              ? truncateString(classHash)
-              : classHash}
+            {isMobile && classHash ? truncateString(classHash) : classHash}
           </BreadcrumbPage>
         </BreadcrumbItem>
       </Breadcrumb>
@@ -122,9 +125,7 @@ export function ClassHash() {
           <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
             <SectionBox>
               <SectionBoxEntry title="Class Hash">
-                {isMobile && classHash
-                  ? truncateString(classHash)
-                  : classHash}
+                {isMobile && classHash ? truncateString(classHash) : classHash}
               </SectionBoxEntry>
 
               <SectionBoxEntry title="Compiler Version">
@@ -150,15 +151,23 @@ export function ClassHash() {
             {(() => {
               switch (selectedDataTab) {
                 case "Overview":
-                  return <Overview readFuncs={readFuncs} writeFuncs={writeFuncs} code={code} />;
+                  return (
+                    <Overview
+                      readFuncs={readFuncs}
+                      writeFuncs={writeFuncs}
+                      code={code}
+                    />
+                  );
                 case "Deploy":
-                  return <Deploy classHash={classHash!} constructor={constructor} />;
+                  return (
+                    <Deploy classHash={classHash!} constructor={constructor} />
+                  );
                 default:
                   return (
                     <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
                       <span className="text-[#D0D0D0]">No data found</span>
                     </div>
-                  )
+                  );
               }
             })()}
           </div>

@@ -1,4 +1,8 @@
-import { FunctionAbiWithAst, FunctionInputWithValue, toCalldata } from "@/shared/utils/abi";
+import {
+  FunctionAbiWithAst,
+  FunctionInputWithValue,
+  toCalldata,
+} from "@/shared/utils/abi";
 import { useToast } from "@/shared/components/toast";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
@@ -6,30 +10,38 @@ import { Link } from "react-router-dom";
 import { DeployContractResponse } from "starknet";
 import { ParamForm } from "@/shared/form";
 
-export function Deploy({ classHash, constructor }: { classHash: string, constructor: FunctionAbiWithAst }) {
+export function Deploy({
+  classHash,
+  constructor,
+}: {
+  classHash: string;
+  constructor: FunctionAbiWithAst;
+}) {
   const { toast } = useToast();
   const { account } = useAccount();
-  const initialInputs = useMemo(() => constructor.inputs.map(input => ({
-    ...input,
-    value: ""
-  })), [constructor.inputs]);
+  const initialInputs = useMemo(
+    () =>
+      constructor.inputs.map((input) => ({
+        ...input,
+        value: "",
+      })),
+    [constructor.inputs],
+  );
   const [form, setForm] = useState<{
-    inputs: FunctionInputWithValue[]
+    inputs: FunctionInputWithValue[];
     error?: string;
     result?: DeployContractResponse;
   }>({
-    inputs: initialInputs
+    inputs: initialInputs,
   });
   const [isDeploying, setIsDeploying] = useState(false);
 
   const onInputChange = useCallback((i: number, value: string) => {
-    setForm(form => ({
+    setForm((form) => ({
       ...form,
       inputs: form.inputs.map((input, ii) =>
-        i == ii
-          ? { ...input, value }
-          : input
-      )
+        i == ii ? { ...input, value } : input,
+      ),
     }));
   }, []);
 
@@ -42,28 +54,31 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
     try {
       const result = await account.deployContract({
         classHash: classHash,
-        constructorCalldata: form.inputs.map(input => toCalldata(input.type, input.value))
+        constructorCalldata: form.inputs.map((input) =>
+          toCalldata(input.type, input.value),
+        ),
       });
-      setForm(form => ({
+      setForm((form) => ({
         ...form,
         inputs: initialInputs,
-        result
+        result,
       }));
 
       toast(
-        (
-          <div>
-            Contract {" "}
-            <Link to={`../contract/${result.contract_address}`} className="underline">
-              {result.contract_address}
-            </Link>{" "}
-            is deployed successfully at tx: {" "}
-            <Link to={`../tx/${result.transaction_hash}`} className="underline">
-              {result.transaction_hash}
-            </Link>
-          </div>
-        ),
-        "success"
+        <div>
+          Contract{" "}
+          <Link
+            to={`../contract/${result.contract_address}`}
+            className="underline"
+          >
+            {result.contract_address}
+          </Link>{" "}
+          is deployed successfully at tx:{" "}
+          <Link to={`../tx/${result.transaction_hash}`} className="underline">
+            {result.transaction_hash}
+          </Link>
+        </div>,
+        "success",
       );
     } catch (error) {
       toast(`Failed to deploy contract: ${error}`, "error");
@@ -96,5 +111,5 @@ export function Deploy({ classHash, constructor }: { classHash: string, construc
         {isDeploying ? "Deploying..." : "Deploy"}
       </button>
     </div>
-  )
+  );
 }
