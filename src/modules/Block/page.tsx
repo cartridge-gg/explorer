@@ -7,7 +7,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
 import { useScreen } from "@/shared/hooks/useScreen";
@@ -26,6 +25,11 @@ import BlockNavigation from "./BlockNavigation";
 import AddressDisplay from "@/shared/components/AddressDisplay";
 import { TransactionTableData, EventTableData } from "@/types/types";
 import { NotFound } from "../NotFound/page";
+import {
+  initBlockComputeData,
+  initExecutions,
+  parseExecutionResources,
+} from "@/shared/utils/rpc_utils";
 
 const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
 
@@ -52,20 +56,8 @@ interface BlockData {
 const initialData: BlockData = {
   txs: [],
   events: [],
-  executions: {
-    ecdsa: 0,
-    keccak: 0,
-    bitwise: 0,
-    pedersen: 0,
-    poseidon: 0,
-    range_check: 0,
-    segment_arena: 0,
-  },
-  blockComputeData: {
-    gas: 0,
-    steps: 0,
-    data_gas: 0,
-  },
+  executions: initExecutions,
+  blockComputeData: initBlockComputeData,
 };
 
 export function Block() {
@@ -98,38 +90,17 @@ export function Block() {
       );
       const { executions, blockComputeData } = block.transactions.reduce(
         (acc, { receipt }) => {
-          if (!receipt.execution_resources) return acc;
-
-          Object.keys(receipt.execution_resources).forEach((key) => {
-            switch (key) {
-              case "steps": {
-                acc.blockComputeData.steps =
-                  acc.blockComputeData.steps + receipt.execution_resources[key];
-                break;
-              }
-              case "data_availability": {
-                acc.blockComputeData.gas =
-                  acc.blockComputeData.gas +
-                  receipt.execution_resources[key].l1_gas;
-                acc.blockComputeData.data_gas =
-                  acc.blockComputeData.data_gas +
-                  receipt.execution_resources[key].l1_data_gas;
-                break;
-              }
-              default: {
-                const _key = key as keyof typeof EXECUTION_RESOURCES_KEY_MAP;
-                const keyMap = EXECUTION_RESOURCES_KEY_MAP[
-                  _key
-                ] as keyof typeof acc.executions;
-                if (!keyMap) return acc;
-
-                acc.executions[keyMap] =
-                  acc.executions[keyMap] +
-                  (receipt.execution_resources[_key] ?? 0);
-              }
-            }
-          });
-
+          const r = parseExecutionResources(receipt.execution_resources);
+          acc.executions.ecdsa += r.executions.ecdsa;
+          acc.executions.keccak += r.executions.keccak;
+          acc.executions.bitwise += r.executions.bitwise;
+          acc.executions.pedersen += r.executions.pedersen;
+          acc.executions.poseidon += r.executions.poseidon;
+          acc.executions.range_check += r.executions.range_check;
+          acc.executions.segment_arena += r.executions.segment_arena;
+          acc.blockComputeData.gas += r.blockComputeData.gas;
+          acc.blockComputeData.data_gas += r.blockComputeData.data_gas;
+          acc.blockComputeData.steps += r.blockComputeData.steps;
           return acc;
         },
         {

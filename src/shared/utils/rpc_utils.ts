@@ -1,6 +1,7 @@
-import { cairo, shortString } from "starknet";
+import { cairo, GetTransactionReceiptResponse, shortString } from "starknet";
 import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
+import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
@@ -84,4 +85,57 @@ export const convertObjectValuesToDisplayValues = (
     }
   }
   return obj;
+};
+
+export function parseExecutionResources(
+  execution_resources: GetTransactionReceiptResponse["execution_resources"],
+) {
+  return Object.entries(execution_resources).reduce(
+    (acc, [key, value]) => {
+      switch (key) {
+        case "steps": {
+          acc.blockComputeData.steps += Number(value);
+          break;
+        }
+        case "data_availability": {
+          acc.blockComputeData.gas += value.l1_gas;
+          acc.blockComputeData.data_gas += value.l1_data_gas;
+          break;
+        }
+        default: {
+          const _key = key as keyof typeof EXECUTION_RESOURCES_KEY_MAP;
+          const keyMap = EXECUTION_RESOURCES_KEY_MAP[
+            _key
+          ] as keyof typeof acc.executions;
+          if (!keyMap) return acc;
+
+          acc.executions[keyMap] += Number(value) || 0;
+        }
+      }
+
+      return acc;
+    },
+    {
+      executions: initExecutions,
+      blockComputeData: initBlockComputeData,
+    },
+  );
+}
+
+export const initExecutions = {
+  ecdsa: 0,
+  keccak: 0,
+  bitwise: 0,
+  pedersen: 0,
+  poseidon: 0,
+  range_check: 0,
+  segment_arena: 0,
+  memory_holes: 0,
+  ec_op: 0,
+};
+
+export const initBlockComputeData = {
+  gas: 0,
+  steps: 0,
+  data_gas: 0,
 };

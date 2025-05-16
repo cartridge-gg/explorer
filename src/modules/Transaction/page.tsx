@@ -1,4 +1,4 @@
-import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { formatNumber } from "@/shared/utils/number";
 import {
   formatSnakeCaseToDisplayValue,
@@ -11,23 +11,25 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useCallback, useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
-import { cairo, CallData, events } from "starknet";
-import { decodeCalldata, getEventName } from "@/shared/utils/rpc_utils";
-import CalldataDisplay from "./components/CalldataDisplay";
+import { cairo, CallData, events as eventsLib } from "starknet";
 import {
-  CACHE_TIME,
-  EXECUTION_RESOURCES_KEY_MAP,
-  STALE_TIME,
-} from "@/constants/rpc";
+  decodeCalldata,
+  getEventName,
+  initBlockComputeData,
+  initExecutions,
+  parseExecutionResources,
+} from "@/shared/utils/rpc_utils";
+import CalldataDisplay from "./components/CalldataDisplay";
+import { CACHE_TIME, STALE_TIME } from "@/constants/rpc";
 import {
   Breadcrumb,
   BreadcrumbSeparator,
   BreadcrumbItem,
 } from "@/shared/components/breadcrumbs";
-import { DataTable, TableCell, TableHead } from "@/shared/components/dataTable";
+import { DataTable } from "@/shared/components/dataTable";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBoxEntry } from "@/shared/components/section";
@@ -36,6 +38,8 @@ import dayjs from "dayjs";
 import SignatureDisplay from "./components/SignatureDisplay";
 import AddressDisplay from "@/shared/components/AddressDisplay";
 import BlockIdDisplay from "@/shared/components/BlockIdDisplay";
+import { cn } from "@cartridge/ui-next";
+import { useBlock } from "@starknet-react/core";
 
 const DataTabs = ["Calldata", "Events", "Signature", "Storage Diffs"];
 
@@ -63,102 +67,58 @@ const eventColumnHelper = createColumnHelper<EventData>();
 
 const storageDiffColumnHelper = createColumnHelper<StorageDiffData>();
 
-const FinalityStatus = ({ status }: { status: string }) => {
-  const status_color_map = {
-    succeeded: "bg-[#7BA797]",
-    reverted: "bg-[#C4806D]",
-  };
-  return (
-    <div
-      className={`text-white px-2 h-5 w-[84px] flex items-center justify-center font-bold ${
-        status_color_map[status?.toLowerCase() as keyof typeof status_color_map]
-      }`}
-    >
-      {status}
-    </div>
-  );
-};
-
 export function Transaction() {
   const navigate = useNavigate();
   const { txHash } = useParams<{ txHash: string }>();
   const { isMobile } = useScreen();
-  const [executionData, setExecutionData] = useState({
-    bitwise: 0,
-    pedersen: 0,
-    range_check: 0,
-    poseidon: 0,
-    ecdsa: 0,
-    segment_arena: 0,
-    keccak: 0,
-    memory_holes: 0,
-    ec_op: 0,
-  });
-
-  const [blockComputeData, setBlockComputeData] = useState({
-    gas: 0,
-    data_gas: 0,
-    steps: 0,
-  });
 
   const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
 
-  const [eventsData, setEventsData] = useState<EventData[]>([]);
-  const [callData, setCallData] = useState<
-    { contract: string; selector: string; args: string[] }[]
-  >([]);
   const [eventsPagination, setEventsPagination] = useState({
     pageIndex: 0,
     pageSize: 20,
   });
-
-  const [storageDiffData, setStorageDiffData] = useState([]);
   const [storageDiffPagination, setStorageDiffPagination] = useState({
     pageIndex: 0,
     pageSize: 20,
   });
 
-  const { data: TransactionReceipt } = useQuery({
-    queryKey: [QUERY_KEYS.getTransactionReceipt, txHash],
-    queryFn: () => RPC_PROVIDER.getTransactionReceipt(txHash || ""),
-    enabled: !!txHash,
-    staleTime: STALE_TIME,
-    gcTime: CACHE_TIME,
+  const {
+    data: { tx, calldata },
+  } = useQuery<{
+    tx?: Awaited<ReturnType<typeof RPC_PROVIDER.getTransaction>>;
+    calldata: { contract: string; selector: string; args: string[] }[];
+  }>({
+    queryKey: ["transaction", "calldata", txHash],
+    queryFn: async () => {
+      const tx = await RPC_PROVIDER.getTransaction(txHash || "");
+      return {
+        tx,
+        calldata: "calldata" in tx ? decodeCalldata(tx.calldata) : [],
+      };
+    },
+    enabled: typeof txHash === "string",
+    initialData: {
+      tx: undefined,
+      calldata: [],
+    },
   });
 
-  const { data: TransactionTrace } = useQuery({
-    queryKey: [QUERY_KEYS.getTransactionTrace, txHash],
-    queryFn: () => RPC_PROVIDER.getTransactionTrace(txHash || ""),
-    enabled: !!txHash,
-    staleTime: STALE_TIME,
-    gcTime: CACHE_TIME,
-  });
+  const {
+    data: { receipt, events, executions, blockComputeData },
+  } = useQuery({
+    queryKey: ["transaction-sammary", txHash],
+    queryFn: async () => {
+      const receipt = await RPC_PROVIDER.getTransactionReceipt(txHash || "");
+      const { executions, blockComputeData } = parseExecutionResources(
+        receipt.execution_resources,
+      );
 
-  const { data: TransactionDetails } = useQuery({
-    queryKey: [QUERY_KEYS.getTransaction, txHash],
-    queryFn: () => RPC_PROVIDER.getTransaction(txHash || ""),
-    enabled: !!txHash,
-    staleTime: STALE_TIME,
-    gcTime: CACHE_TIME,
-  });
-
-  const { data: BlockDetails } = useQuery({
-    queryKey: [QUERY_KEYS.getBlock, TransactionReceipt?.block_number],
-    queryFn: () => RPC_PROVIDER.getBlock(TransactionReceipt?.block_number),
-    staleTime: STALE_TIME,
-    gcTime: CACHE_TIME,
-  });
-
-  const processTransactionReceipt = useCallback(async () => {
-    // Check if events are already processed
-    if (eventsData.length > 0 || !TransactionReceipt?.events) return;
-
-    try {
       // Group events by contract address while preserving original indices
       const eventsByContract: Record<
         string,
         Array<{ event: EventData; originalIndex: number }>
-      > = TransactionReceipt?.events.reduce((acc, event, originalIndex) => {
+      > = receipt?.events.reduce((acc, event, originalIndex) => {
         const address = event.from_address;
         if (!acc[address]) {
           acc[address] = [];
@@ -166,230 +126,186 @@ export function Transaction() {
         acc[address].push({ event, originalIndex });
         return acc;
       }, {});
+      const events: EventData[] = (
+        await Promise.all(
+          Object.entries(eventsByContract).map(
+            async ([address, eventEntries]) => {
+              // Fetch contract ABI once per contract
+              const { abi: contract_abi } =
+                await RPC_PROVIDER.getClassAt(address);
 
-      // Process events for each contract
-      const processedEventsArrays = await Promise.all(
-        Object.entries(eventsByContract).map(
-          async ([address, eventEntries]) => {
-            // Fetch contract ABI once per contract
-            const { abi: contract_abi } =
-              await RPC_PROVIDER.getClassAt(address);
+              // Get all events for this contract in one call
+              const eventsResponse = await RPC_PROVIDER.getEvents({
+                address,
+                chunk_size: 100,
+                keys: [eventEntries.map(({ event }) => event.keys).flat()],
+                from_block: { block_number: receipt.block_number },
+                to_block: { block_number: receipt.block_number },
+              });
 
-            // Get all events for this contract in one call
-            const eventsResponse = await RPC_PROVIDER.getEvents({
-              address,
-              chunk_size: 100,
-              keys: [eventEntries.map(({ event }) => event.keys).flat()],
-              from_block: { block_number: TransactionReceipt.block_number },
-              to_block: { block_number: TransactionReceipt.block_number },
-            });
+              // Parse events once per contract
+              const abiEvents = eventsLib.getAbiEvents(contract_abi);
+              const abiStructs = CallData.getAbiStruct(contract_abi);
+              const abiEnums = CallData.getAbiEnum(contract_abi);
 
-            // Parse events once per contract
-            const abiEvents = events.getAbiEvents(contract_abi);
-            const abiStructs = CallData.getAbiStruct(contract_abi);
-            const abiEnums = CallData.getAbiEnum(contract_abi);
-
-            const parsedEvents = events.parseEvents(
-              eventsResponse.events,
-              abiEvents,
-              abiStructs,
-              abiEnums,
-            );
-
-            // Map events while preserving original indices
-            return eventEntries?.map(({ originalIndex }) => {
-              const matchingParsedEvent = parsedEvents.find(
-                (e: ParsedEvent) =>
-                  e.transaction_hash === TransactionReceipt.transaction_hash,
-              );
-
-              const eventKey = matchingParsedEvent
-                ? Object.keys(matchingParsedEvent).find((key) =>
-                    key.includes("::"),
+              // Map events while preserving original indices
+              return eventEntries?.map(({ originalIndex }) => {
+                const matchingParsedEvent = eventsLib
+                  .parseEvents(
+                    eventsResponse.events,
+                    abiEvents,
+                    abiStructs,
+                    abiEnums,
                   )
-                : "";
+                  .find(
+                    (e: ParsedEvent) =>
+                      e.transaction_hash === receipt.transaction_hash,
+                  );
 
-              return {
-                originalIndex,
-                eventData: {
-                  id: `${TransactionReceipt?.transaction_hash}-${originalIndex}`,
-                  from: address,
-                  event_name: getEventName(eventKey || ""),
-                  block: TransactionReceipt?.block_number,
-                  data: matchingParsedEvent,
-                },
-              };
-            });
-          },
-        ),
-      );
+                const eventKey: string = matchingParsedEvent
+                  ? (Object.keys(matchingParsedEvent).find((key) =>
+                      key.includes("::"),
+                    ) ?? "")
+                  : "";
 
-      // Flatten and sort by original index to maintain event order
-      const processedEvents = processedEventsArrays
+                return {
+                  originalIndex,
+                  eventData: {
+                    id: `${receipt.transaction_hash}-${originalIndex}`,
+                    from: address,
+                    event_name: getEventName(eventKey),
+                    block: receipt.block_number,
+                    data: matchingParsedEvent,
+                  },
+                };
+              });
+            },
+          ),
+        )
+      )
         .flat()
         .sort((a, b) => b.originalIndex - a.originalIndex)
         .map(({ eventData }) => eventData);
 
-      // Update state once with all processed events in correct order
-      setEventsData(processedEvents);
-    } catch (error) {
-      console.error("Error processing transaction events:", error);
-      // Optionally set an error state here
-    }
+      return {
+        receipt,
+        events,
+        executions,
+        blockComputeData,
+      };
+    },
+    enabled: typeof txHash === "string",
+    initialData: {
+      receipt: undefined,
+      events: [],
+      executions: initExecutions,
+      blockComputeData: initBlockComputeData,
+    },
+  });
 
-    const receipt = TransactionReceipt?.execution_resources;
-    // process execution resources
-    Object.keys(TransactionReceipt?.execution_resources).forEach((key) => {
-      if (key === "steps") {
-        setBlockComputeData((prev) => ({
-          ...prev,
-          steps: prev.steps + receipt[key],
-        }));
-      } else if (key === "data_availability") {
-        setBlockComputeData((prev) => ({
-          ...prev,
-          gas: prev.gas + receipt[key].l1_gas,
-          data_gas: prev.data_gas + receipt[key].l1_data_gas,
-        }));
-      } else {
-        const key_map =
-          EXECUTION_RESOURCES_KEY_MAP[
-            key as keyof typeof EXECUTION_RESOURCES_KEY_MAP
-          ];
-
-        if (key_map) {
-          setExecutionData((prev) => ({
-            ...prev,
-            [key_map as keyof typeof executionData]:
-              prev[key_map as keyof typeof executionData] + receipt[key],
-          }));
-        }
-      }
-    });
-  }, [TransactionReceipt, eventsData.length]);
-
-  useEffect(() => {
-    if (!TransactionReceipt) return;
-    processTransactionReceipt();
-  }, [TransactionReceipt, processTransactionReceipt]);
-
-  const processTransactionTrace = useCallback(async () => {
-    // check if storage diffs are already processed
-    if (storageDiffData.length > 0) return;
-    // process storage diffs
-    if (TransactionTrace?.state_diff?.storage_diffs) {
-      TransactionTrace?.state_diff?.storage_diffs?.forEach((storage_diff) => {
+  const { data: storageDiff } = useQuery<StorageDiffData[]>({
+    queryKey: ["transaction", txHash, "storageDiff"],
+    queryFn: async () => {
+      const trace = await RPC_PROVIDER.getTransactionTrace(txHash || "");
+      return trace.state_diff?.storage_diffs?.flatMap((storage_diff) => {
         const contract_address = storage_diff.address;
-        const storage_entries = storage_diff.storage_entries.map((entry) => {
-          return {
-            contract_address,
-            key: entry.key,
-            value: entry.value,
-            block_number: TransactionReceipt?.block_number,
-          };
-        });
-        setStorageDiffData((prev) => {
-          return [...prev, ...storage_entries];
-        });
+        return storage_diff.storage_entries.map((entry) => ({
+          contract_address,
+          key: entry.key,
+          value: entry.value,
+          block_number: receipt?.block_number,
+        }));
       });
-    }
-  }, [TransactionTrace, TransactionReceipt, storageDiffData.length]);
+    },
+    initialData: [],
+    enabled: !!txHash,
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
+  });
 
-  useEffect(() => {
-    if (!TransactionTrace || !TransactionReceipt) return;
-    processTransactionTrace();
-  }, [TransactionReceipt, processTransactionTrace, TransactionTrace]);
+  const { data: block } = useBlock({
+    blockIdentifier: receipt?.block_number,
+    enabled: typeof receipt?.block_number === "number",
+  });
 
-  const processTransactionDetails = useCallback(async () => {
-    // process calldata
-    const calldata = TransactionDetails?.calldata;
-
-    if (!calldata) return;
-
-    const transactions = decodeCalldata(calldata);
-    setCallData(transactions);
-  }, [TransactionDetails]);
-
-  useEffect(() => {
-    if (!TransactionDetails) return;
-    processTransactionDetails();
-  }, [TransactionDetails, processTransactionDetails]);
-
-  const events_columns = [
-    eventColumnHelper.accessor("id", {
-      header() {
-        return (
-          <TableHead className="w-1 text-left border-0">
-            <span>ID</span>
-          </TableHead>
-        );
-      },
-      cell: (info) => (
-        <TableCell
-          className="flex border-0 pr-4 justify-start cursor-pointer text-left"
-          onClick={() => navigate(`../event/${info.getValue().toString()}`)}
-        >
-          <span className="whitespace-nowrap hover:text-blue-400 transition-all">
-            {truncateString(info.getValue())}
-          </span>
-        </TableCell>
-      ),
-    }),
-    eventColumnHelper.accessor("from", {
-      header() {
-        return (
-          <TableHead className="text-left border-0">
-            <span>From Address</span>
-          </TableHead>
-        );
-      },
-      cell: (info) => (
-        <TableCell
-          onClick={() => navigate(`../contract/${info.getValue()}`)}
-          className="w-1 pr-4 border-0 text-left hover:underline cursor-pointer"
-        >
-          <span>{truncateString(info.getValue())}</span>
-        </TableCell>
-      ),
-    }),
-    eventColumnHelper.accessor("event_name", {
-      header() {
-        return (
-          <TableHead className="text-left border-0">
-            <span>Event Name</span>
-          </TableHead>
-        );
-      },
-      cell: (info) => (
-        <TableCell className="w-1 text-left border-0 pr-4">
-          <span>{info.getValue()}</span>
-        </TableCell>
-      ),
-    }),
-    eventColumnHelper.accessor("block", {
-      header() {
-        return (
-          <TableHead className="text-right border-0">
-            <span>Block</span>
-          </TableHead>
-        );
-      },
-      cell: (info) => (
-        <TableCell
-          onClick={() => navigate(`../block/${info.getValue().toString()}`)}
-          className="w-1 text-right border-0 cursor-pointer hover:text-blue-400 transition-all"
-        >
-          <span>{info.getValue()}</span>
-        </TableCell>
-      ),
-    }),
-  ];
+  const eventsColumns = useMemo(
+    () => [
+      eventColumnHelper.accessor("id", {
+        header() {
+          return (
+            <div className="w-1 text-left border-0">
+              <span>ID</span>
+            </div>
+          );
+        },
+        cell: (info) => (
+          <div
+            className="flex border-0 pr-4 justify-start cursor-pointer text-left"
+            onClick={() => navigate(`../event/${info.getValue().toString()}`)}
+          >
+            <span className="whitespace-nowrap hover:text-blue-400 transition-all">
+              {truncateString(info.getValue())}
+            </span>
+          </div>
+        ),
+      }),
+      eventColumnHelper.accessor("from", {
+        header() {
+          return (
+            <div className="text-left border-0">
+              <span>From Address</span>
+            </div>
+          );
+        },
+        cell: (info) => (
+          <div
+            onClick={() => navigate(`../contract/${info.getValue()}`)}
+            className="w-1 pr-4 border-0 text-left hover:underline cursor-pointer"
+          >
+            <span>{truncateString(info.getValue())}</span>
+          </div>
+        ),
+      }),
+      eventColumnHelper.accessor("event_name", {
+        header() {
+          return (
+            <div className="text-left border-0">
+              <span>Event Name</span>
+            </div>
+          );
+        },
+        cell: (info) => (
+          <div className="w-1 text-left border-0 pr-4">
+            <span>{info.getValue()}</span>
+          </div>
+        ),
+      }),
+      eventColumnHelper.accessor("block", {
+        header() {
+          return (
+            <div className="text-right border-0">
+              <span>Block</span>
+            </div>
+          );
+        },
+        cell: (info) => (
+          <div
+            onClick={() => navigate(`../block/${info.getValue().toString()}`)}
+            className="w-1 text-right border-0 cursor-pointer hover:text-blue-400 transition-all"
+          >
+            <span>{info.getValue()}</span>
+          </div>
+        ),
+      }),
+    ],
+    [navigate],
+  );
 
   // sort events data by id
 
   const eventsTable = useReactTable({
-    data: eventsData,
-    columns: events_columns,
+    data: events,
+    columns: eventsColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     state: {
@@ -400,83 +316,86 @@ export function Transaction() {
     },
   });
 
-  const storage_diff_columns = [
-    storageDiffColumnHelper.accessor("contract_address", {
-      header() {
-        return (
-          <TableHead className="text-left border-0">
-            <span>Contract Address</span>
-          </TableHead>
-        );
-      },
-      cell: (info) => (
-        <TableCell
-          onClick={() => navigate(`../contract/${info.getValue()}`)}
-          className="text-left border-0 cursor-pointer hover:text-blue-400 transition-all pr-4"
-        >
-          <span>{truncateString(info.getValue())}</span>
-        </TableCell>
-      ),
-    }),
-    storageDiffColumnHelper.accessor("key", {
-      header() {
-        return (
-          <TableHead className="text-left border-0">
-            <span>Key</span>
-          </TableHead>
-        );
-      },
-      cell: (info) => {
-        const key = info.getValue();
-        return (
-          <TableCell className="text-left pr-4">
-            <span className="uppercase">{truncateString(key)}</span>
-          </TableCell>
-        );
-      },
-    }),
-    storageDiffColumnHelper.accessor("value", {
-      header() {
-        return (
-          <TableHead className="text-left border-0">
-            <span>Value</span>
-          </TableHead>
-        );
-      },
-      cell: (info) => {
-        const value = info.getValue();
-        return (
-          <TableCell className="text-left pr-4">
-            <span>{truncateString(value)}</span>
-          </TableCell>
-        );
-      },
-    }),
-    storageDiffColumnHelper.accessor("block_number", {
-      header() {
-        return (
-          <TableHead className="text-right border-0">
-            <span>Block Number</span>
-          </TableHead>
-        );
-      },
-      cell: (info) => {
-        const block_number = info.getValue();
-        return (
-          <TableCell
-            onClick={() => navigate(`../block/${block_number.toString()}`)}
-            className="text-right border-0 cursor-pointer hover:text-blue-400 transition-all"
+  const storageDiffColumns = useMemo(
+    () => [
+      storageDiffColumnHelper.accessor("contract_address", {
+        header() {
+          return (
+            <div className="text-left border-0">
+              <span>Contract Address</span>
+            </div>
+          );
+        },
+        cell: (info) => (
+          <div
+            onClick={() => navigate(`../contract/${info.getValue()}`)}
+            className="text-left border-0 cursor-pointer hover:text-blue-400 transition-all pr-4"
           >
-            <span>{block_number}</span>
-          </TableCell>
-        );
-      },
-    }),
-  ];
+            <span>{truncateString(info.getValue())}</span>
+          </div>
+        ),
+      }),
+      storageDiffColumnHelper.accessor("key", {
+        header() {
+          return (
+            <div className="text-left border-0">
+              <span>Key</span>
+            </div>
+          );
+        },
+        cell: (info) => {
+          const key = info.getValue();
+          return (
+            <div className="text-left pr-4">
+              <span className="uppercase">{truncateString(key)}</span>
+            </div>
+          );
+        },
+      }),
+      storageDiffColumnHelper.accessor("value", {
+        header() {
+          return (
+            <div className="text-left border-0">
+              <span>Value</span>
+            </div>
+          );
+        },
+        cell: (info) => {
+          const value = info.getValue();
+          return (
+            <div className="text-left pr-4">
+              <span>{truncateString(value)}</span>
+            </div>
+          );
+        },
+      }),
+      storageDiffColumnHelper.accessor("block_number", {
+        header() {
+          return (
+            <div className="text-right border-0">
+              <span>Block Number</span>
+            </div>
+          );
+        },
+        cell: (info) => {
+          const block_number = info.getValue();
+          return (
+            <div
+              onClick={() => navigate(`../block/${block_number.toString()}`)}
+              className="text-right border-0 cursor-pointer hover:text-blue-400 transition-all"
+            >
+              <span>{block_number}</span>
+            </div>
+          );
+        },
+      }),
+    ],
+    [navigate],
+  );
 
   const storageDiffTable = useReactTable({
-    data: storageDiffData,
-    columns: storage_diff_columns,
+    data: storageDiff,
+    columns: storageDiffColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     state: {
@@ -503,16 +422,25 @@ export function Transaction() {
 
       <PageHeader
         className="mb-6"
-        title={`Transaction `}
-        subtext={TransactionReceipt?.finality_status}
+        title={`Transaction`}
+        subtext={receipt?.finality_status}
         titleRightComponent={
-          <FinalityStatus status={TransactionReceipt?.execution_status} />
+          <div
+            className={cn(
+              "text-white px-2 h-5 w-[84px] flex items-center justify-center font-bold",
+              receipt
+                ? receipt?.isSuccess()
+                  ? "bg-[#7BA797]"
+                  : "bg-[#C4806D]"
+                : undefined,
+            )}
+          >
+            {receipt?.execution_status}
+          </div>
         }
         subtextRightComponent={
           <div className="text-[#5D5D5D]">
-            {dayjs
-              .unix(BlockDetails?.timestamp)
-              .format("MMM D YYYY HH:mm:ss")}{" "}
+            {dayjs.unix(block?.timestamp).format("MMM D YYYY HH:mm:ss")}{" "}
           </div>
         }
       />
@@ -522,27 +450,26 @@ export function Transaction() {
           <SectionBox variant="upper-half">
             <SectionBoxEntry title="Hash">
               {isMobile
-                ? truncateString(TransactionReceipt?.transaction_hash)
-                : TransactionReceipt?.transaction_hash}
+                ? truncateString(receipt?.transaction_hash)
+                : receipt?.transaction_hash}
             </SectionBoxEntry>
 
             <SectionBoxEntry title="Block">
-              <BlockIdDisplay value={TransactionReceipt?.block_number} />
+              <BlockIdDisplay value={receipt?.block_number} />
             </SectionBoxEntry>
           </SectionBox>
 
-          {(!!TransactionDetails?.sender_address ||
-            !!TransactionDetails?.nonce) && (
+          {(!!tx?.sender_address || !!tx?.nonce) && (
             <SectionBox title="Sender" variant="upper-half">
-              {!!TransactionDetails?.sender_address && (
+              {!!tx?.sender_address && (
                 <SectionBoxEntry title="Address">
-                  <AddressDisplay value={TransactionDetails?.sender_address} />
+                  <AddressDisplay value={tx?.sender_address} />
                 </SectionBoxEntry>
               )}
 
-              {!!TransactionDetails?.nonce && (
+              {!!tx?.nonce && (
                 <SectionBoxEntry title="Nonce">
-                  {Number(TransactionDetails?.nonce)}
+                  {Number(tx?.nonce)}
                 </SectionBoxEntry>
               )}
             </SectionBox>
@@ -555,12 +482,11 @@ export function Transaction() {
                   <tr>
                     <th className="w-1/3">Max Amount</th>
                     <td>
-                      {TransactionDetails?.resource_bounds?.l1_gas?.max_amount
+                      {tx?.resource_bounds?.l1_gas?.max_amount
                         ? formatNumber(
                             Number(
                               cairo.felt(
-                                TransactionDetails?.resource_bounds?.l1_gas
-                                  ?.max_amount,
+                                tx?.resource_bounds?.l1_gas?.max_amount,
                               ),
                             ),
                           )
@@ -571,13 +497,11 @@ export function Transaction() {
                   <tr>
                     <th className="w-1">Max Amount / Unit</th>
                     <td>
-                      {TransactionDetails?.resource_bounds?.l1_gas
-                        ?.max_price_per_unit
+                      {tx?.resource_bounds?.l1_gas?.max_price_per_unit
                         ? formatNumber(
                             Number(
                               cairo.felt(
-                                TransactionDetails?.resource_bounds?.l1_gas
-                                  ?.max_price_per_unit,
+                                tx?.resource_bounds?.l1_gas?.max_price_per_unit,
                               ),
                             ),
                           )
@@ -594,12 +518,11 @@ export function Transaction() {
                   <tr>
                     <th className="w-1/3">Max Amount</th>
                     <td>
-                      {TransactionDetails?.resource_bounds?.l2_gas?.max_amount
+                      {tx?.resource_bounds?.l2_gas?.max_amount
                         ? formatNumber(
                             Number(
                               cairo.felt(
-                                TransactionDetails?.resource_bounds?.l2_gas
-                                  ?.max_amount,
+                                tx?.resource_bounds?.l2_gas?.max_amount,
                               ),
                             ),
                           )
@@ -610,13 +533,11 @@ export function Transaction() {
                   <tr>
                     <th className="w-1">Max Amount / Unit</th>
                     <td>
-                      {TransactionDetails?.resource_bounds?.l2_gas
-                        ?.max_price_per_unit
+                      {tx?.resource_bounds?.l2_gas?.max_price_per_unit
                         ? formatNumber(
                             Number(
                               cairo.felt(
-                                TransactionDetails?.resource_bounds?.l2_gas
-                                  ?.max_price_per_unit,
+                                tx?.resource_bounds?.l2_gas?.max_price_per_unit,
                               ),
                             ),
                           )
@@ -634,29 +555,27 @@ export function Transaction() {
               <tbody>
                 <tr>
                   <th className="w-1/3">Fee</th>
-                  <td>{TransactionDetails?.fee_data_availability_mode}</td>
+                  <td>{tx?.fee_data_availability_mode}</td>
                 </tr>
                 <tr>
                   <th className="w-1/3">Nonce</th>
-                  <td>{TransactionDetails?.nonce_data_availability_mode}</td>
+                  <td>{tx?.nonce_data_availability_mode}</td>
                 </tr>
               </tbody>
             </table>
           </SectionBox>
 
-          {TransactionDetails?.tip ? (
+          {tx?.tip ? (
             <SectionBox title="Tip" variant="upper-half">
-              {TransactionDetails?.tip}
+              {tx.tip}
             </SectionBox>
           ) : null}
 
           <SectionBox title="Actual Fee" variant="upper-half">
-            {TransactionReceipt?.actual_fee?.amount
-              ? formatNumber(
-                  Number(cairo.felt(TransactionReceipt?.actual_fee?.amount)),
-                )
+            {receipt?.actual_fee?.amount
+              ? formatNumber(Number(cairo.felt(receipt?.actual_fee?.amount)))
               : 0}{" "}
-            {TransactionReceipt?.actual_fee?.unit}
+            {receipt?.actual_fee?.unit}
           </SectionBox>
 
           <SectionBox title="Execution Resources" variant="full">
@@ -701,7 +620,7 @@ export function Transaction() {
               </thead>
 
               <tbody className="text-center">
-                {Object.entries(executionData).map(
+                {Object.entries(executions).map(
                   ([key, value], index, array) => {
                     const heading = formatSnakeCaseToDisplayValue(key);
                     return index % 2 === 0 ? (
@@ -744,31 +663,34 @@ export function Transaction() {
           />
 
           <div className="flex-grow flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray overflow-auto">
-            {selectedDataTab === "Calldata" ? (
-              <CalldataDisplay calldata={callData} />
-            ) : selectedDataTab === "Events" ? (
-              <div className="h-full">
-                <DataTable
-                  table={eventsTable}
-                  pagination={eventsPagination}
-                  setPagination={setEventsPagination}
-                />
-              </div>
-            ) : selectedDataTab === "Signature" ? (
-              <SignatureDisplay signature={TransactionDetails?.signature} />
-            ) : selectedDataTab === "Storage Diffs" ? (
-              <div className="h-full">
-                <DataTable
-                  table={storageDiffTable}
-                  pagination={storageDiffPagination}
-                  setPagination={setStorageDiffPagination}
-                />
-              </div>
-            ) : (
-              <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
-                <span className="text-[#D0D0D0]">No data found</span>
-              </div>
-            )}
+            {(() => {
+              switch (selectedDataTab) {
+                case "Calldata":
+                  return <CalldataDisplay calldata={calldata} />;
+                case "Events":
+                  return (
+                    <div className="h-full">
+                      <DataTable
+                        table={eventsTable}
+                        pagination={eventsPagination}
+                        setPagination={setEventsPagination}
+                      />
+                    </div>
+                  );
+                case "Signature":
+                  return <SignatureDisplay signature={tx?.signature} />;
+                case "Storage Diffs":
+                  return (
+                    <div className="h-full">
+                      <DataTable
+                        table={storageDiffTable}
+                        pagination={storageDiffPagination}
+                        setPagination={setStorageDiffPagination}
+                      />
+                    </div>
+                  );
+              }
+            })()}
           </div>
         </div>
       </div>
