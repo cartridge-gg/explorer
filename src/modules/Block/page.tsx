@@ -2,6 +2,7 @@ import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { formatNumber } from "@/shared/utils/number";
 import {
   formatSnakeCaseToDisplayValue,
+  isNumber,
   truncateString,
 } from "@/shared/utils/string";
 import { useQuery } from "@tanstack/react-query";
@@ -30,6 +31,7 @@ import {
   initExecutions,
   parseExecutionResources,
 } from "@/shared/utils/rpc_utils";
+import { isValidAddress } from "@/shared/utils/contract";
 
 const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
 
@@ -121,7 +123,11 @@ export function Block() {
     initialData,
   });
 
-  if (isLoading || (!block && !error)) {
+  if (blockId === undefined || !isNumber(blockId) || !isValidAddress(blockId)) {
+    return <NotFound />;
+  }
+
+  if (isLoading || (!error && !block)) {
     return (
       <div className="w-full h-screen flex items-center justify-center animate-pulse">
         <div className="text-sm text-gray-500">Loading...</div>
