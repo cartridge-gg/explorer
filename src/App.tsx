@@ -12,7 +12,7 @@ import { Event } from "@/modules/Event/page";
 import { ClassHash } from "@/modules/ClassHash/page";
 import { JsonRpcPlayground } from "@/modules/JsonRpc/page";
 import { NotFound } from "@/modules/NotFound/page";
-import { cn } from "@cartridge/ui-next";
+import { cn } from "@cartridge/ui/utils";
 
 export function App() {
   const location = useLocation();

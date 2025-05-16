@@ -18,7 +18,7 @@
   "dependencies": {
     "@cartridge/connector": "^0.7.13",
     "@cartridge/presets": "github:cartridge-gg/presets#2373780",
-    "@cartridge/ui-next": "0.7.13",
+    "@cartridge/ui": "github:cartridge-gg/ui#b61546f",
     "@cartridge/utils": "^0.7.13",
     "@monaco-editor/loader": "^1.5.0",
     "@monaco-editor/react": "^4.7.0",
