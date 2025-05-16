@@ -18,6 +18,8 @@ import { cairo, CallData, events as eventsLib } from "starknet";
 import {
   decodeCalldata,
   getEventName,
+  initBlockComputeData,
+  initExecutions,
   parseExecutionResources,
 } from "@/shared/utils/rpc_utils";
 import CalldataDisplay from "./components/CalldataDisplay";
@@ -27,7 +29,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbItem,
 } from "@/shared/components/breadcrumbs";
-import { DataTable, TableCell, TableHead } from "@/shared/components/dataTable";
+import { DataTable } from "@/shared/components/dataTable";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import PageHeader from "@/shared/components/PageHeader";
 import { SectionBoxEntry } from "@/shared/components/section";
@@ -196,22 +198,8 @@ export function Transaction() {
     initialData: {
       receipt: undefined,
       events: [],
-      executions: {
-        ecdsa: 0,
-        keccak: 0,
-        bitwise: 0,
-        pedersen: 0,
-        poseidon: 0,
-        range_check: 0,
-        segment_arena: 0,
-        memory_holes: 0,
-        ec_op: 0,
-      },
-      blockComputeData: {
-        gas: 0,
-        steps: 0,
-        data_gas: 0,
-      },
+      executions: initExecutions,
+      blockComputeData: initBlockComputeData,
     },
   });
 
@@ -245,68 +233,68 @@ export function Transaction() {
       eventColumnHelper.accessor("id", {
         header() {
           return (
-            <TableHead className="w-1 text-left border-0">
+            <div className="w-1 text-left border-0">
               <span>ID</span>
-            </TableHead>
+            </div>
           );
         },
         cell: (info) => (
-          <TableCell
+          <div
             className="flex border-0 pr-4 justify-start cursor-pointer text-left"
             onClick={() => navigate(`../event/${info.getValue().toString()}`)}
           >
             <span className="whitespace-nowrap hover:text-blue-400 transition-all">
               {truncateString(info.getValue())}
             </span>
-          </TableCell>
+          </div>
         ),
       }),
       eventColumnHelper.accessor("from", {
         header() {
           return (
-            <TableHead className="text-left border-0">
+            <div className="text-left border-0">
               <span>From Address</span>
-            </TableHead>
+            </div>
           );
         },
         cell: (info) => (
-          <TableCell
+          <div
             onClick={() => navigate(`../contract/${info.getValue()}`)}
             className="w-1 pr-4 border-0 text-left hover:underline cursor-pointer"
           >
             <span>{truncateString(info.getValue())}</span>
-          </TableCell>
+          </div>
         ),
       }),
       eventColumnHelper.accessor("event_name", {
         header() {
           return (
-            <TableHead className="text-left border-0">
+            <div className="text-left border-0">
               <span>Event Name</span>
-            </TableHead>
+            </div>
           );
         },
         cell: (info) => (
-          <TableCell className="w-1 text-left border-0 pr-4">
+          <div className="w-1 text-left border-0 pr-4">
             <span>{info.getValue()}</span>
-          </TableCell>
+          </div>
         ),
       }),
       eventColumnHelper.accessor("block", {
         header() {
           return (
-            <TableHead className="text-right border-0">
+            <div className="text-right border-0">
               <span>Block</span>
-            </TableHead>
+            </div>
           );
         },
         cell: (info) => (
-          <TableCell
+          <div
             onClick={() => navigate(`../block/${info.getValue().toString()}`)}
             className="w-1 text-right border-0 cursor-pointer hover:text-blue-400 transition-all"
           >
             <span>{info.getValue()}</span>
-          </TableCell>
+          </div>
         ),
       }),
     ],
@@ -333,71 +321,71 @@ export function Transaction() {
       storageDiffColumnHelper.accessor("contract_address", {
         header() {
           return (
-            <TableHead className="text-left border-0">
+            <div className="text-left border-0">
               <span>Contract Address</span>
-            </TableHead>
+            </div>
           );
         },
         cell: (info) => (
-          <TableCell
+          <div
             onClick={() => navigate(`../contract/${info.getValue()}`)}
             className="text-left border-0 cursor-pointer hover:text-blue-400 transition-all pr-4"
           >
             <span>{truncateString(info.getValue())}</span>
-          </TableCell>
+          </div>
         ),
       }),
       storageDiffColumnHelper.accessor("key", {
         header() {
           return (
-            <TableHead className="text-left border-0">
+            <div className="text-left border-0">
               <span>Key</span>
-            </TableHead>
+            </div>
           );
         },
         cell: (info) => {
           const key = info.getValue();
           return (
-            <TableCell className="text-left pr-4">
+            <div className="text-left pr-4">
               <span className="uppercase">{truncateString(key)}</span>
-            </TableCell>
+            </div>
           );
         },
       }),
       storageDiffColumnHelper.accessor("value", {
         header() {
           return (
-            <TableHead className="text-left border-0">
+            <div className="text-left border-0">
               <span>Value</span>
-            </TableHead>
+            </div>
           );
         },
         cell: (info) => {
           const value = info.getValue();
           return (
-            <TableCell className="text-left pr-4">
+            <div className="text-left pr-4">
               <span>{truncateString(value)}</span>
-            </TableCell>
+            </div>
           );
         },
       }),
       storageDiffColumnHelper.accessor("block_number", {
         header() {
           return (
-            <TableHead className="text-right border-0">
+            <div className="text-right border-0">
               <span>Block Number</span>
-            </TableHead>
+            </div>
           );
         },
         cell: (info) => {
           const block_number = info.getValue();
           return (
-            <TableCell
+            <div
               onClick={() => navigate(`../block/${block_number.toString()}`)}
               className="text-right border-0 cursor-pointer hover:text-blue-400 transition-all"
             >
               <span>{block_number}</span>
-            </TableCell>
+            </div>
           );
         },
       }),

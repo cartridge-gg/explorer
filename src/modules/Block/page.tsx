@@ -25,7 +25,11 @@ import BlockNavigation from "./BlockNavigation";
 import AddressDisplay from "@/shared/components/AddressDisplay";
 import { TransactionTableData, EventTableData } from "@/types/types";
 import { NotFound } from "../NotFound/page";
-import { parseExecutionResources } from "@/shared/utils/rpc_utils";
+import {
+  initBlockComputeData,
+  initExecutions,
+  parseExecutionResources,
+} from "@/shared/utils/rpc_utils";
 
 const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
 
@@ -52,20 +56,8 @@ interface BlockData {
 const initialData: BlockData = {
   txs: [],
   events: [],
-  executions: {
-    ecdsa: 0,
-    keccak: 0,
-    bitwise: 0,
-    pedersen: 0,
-    poseidon: 0,
-    range_check: 0,
-    segment_arena: 0,
-  },
-  blockComputeData: {
-    gas: 0,
-    steps: 0,
-    data_gas: 0,
-  },
+  executions: initExecutions,
+  blockComputeData: initBlockComputeData,
 };
 
 export function Block() {

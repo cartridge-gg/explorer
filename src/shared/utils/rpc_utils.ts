@@ -116,22 +116,26 @@ export function parseExecutionResources(
       return acc;
     },
     {
-      executions: {
-        ecdsa: 0,
-        keccak: 0,
-        bitwise: 0,
-        pedersen: 0,
-        poseidon: 0,
-        range_check: 0,
-        segment_arena: 0,
-        memory_holes: 0,
-        ec_op: 0,
-      },
-      blockComputeData: {
-        gas: 0,
-        steps: 0,
-        data_gas: 0,
-      },
+      executions: initExecutions,
+      blockComputeData: initBlockComputeData,
     },
   );
 }
+
+export const initExecutions = {
+  ecdsa: 0,
+  keccak: 0,
+  bitwise: 0,
+  pedersen: 0,
+  poseidon: 0,
+  range_check: 0,
+  segment_arena: 0,
+  memory_holes: 0,
+  ec_op: 0,
+};
+
+export const initBlockComputeData = {
+  gas: 0,
+  steps: 0,
+  data_gas: 0,
+};
