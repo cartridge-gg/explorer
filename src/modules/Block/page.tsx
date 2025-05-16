@@ -5,17 +5,12 @@ import {
   truncateString,
 } from "@/shared/utils/string";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  CACHE_TIME,
-  EXECUTION_RESOURCES_KEY_MAP,
-  STALE_TIME,
-} from "@/constants/rpc";
+import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
 import { useScreen } from "@/shared/hooks/useScreen";
-import { TransactionTableData, EventTableData } from "@/types/types";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -27,19 +22,37 @@ import { SectionBoxEntry } from "@/shared/components/section";
 import { TxList } from "./TxList";
 import { EventList } from "./EventList";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
-import { QUERY_KEYS } from "@/services/starknet_provider_config";
 import BlockNavigation from "./BlockNavigation";
 import AddressDisplay from "@/shared/components/AddressDisplay";
+import { TransactionTableData, EventTableData } from "@/types/types";
+import { NotFound } from "../NotFound/page";
 
 const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
 
-export function Block() {
-  const { isMobile } = useScreen();
-  const { blockId } = useParams<{ blockId: string }>();
-  const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
-  const [txsTable, setTxsTable] = useState<TransactionTableData[]>([]);
-  const [eventsTable, setEventsTable] = useState<EventTableData[]>([]);
-  const [executionTable, setExecutionTable] = useState({
+interface BlockData {
+  block?: Awaited<ReturnType<typeof RPC_PROVIDER.getBlockWithReceipts>>;
+  txs: TransactionTableData[];
+  events: EventTableData[];
+  executions: {
+    ecdsa: number;
+    keccak: number;
+    bitwise: number;
+    pedersen: number;
+    poseidon: number;
+    range_check: number;
+    segment_arena: number;
+  };
+  blockComputeData: {
+    gas: number;
+    steps: number;
+    data_gas: number;
+  };
+}
+
+const initialData: BlockData = {
+  txs: [],
+  events: [],
+  executions: {
     ecdsa: 0,
     keccak: 0,
     bitwise: 0,
@@ -47,106 +60,106 @@ export function Block() {
     poseidon: 0,
     range_check: 0,
     segment_arena: 0,
-  });
-
-  const [blockComputeData, setBlockComputeData] = useState({
+  },
+  blockComputeData: {
     gas: 0,
     steps: 0,
     data_gas: 0,
-  });
+  },
+};
 
-  const { data: BlockWithReceipts, isLoading } = useQuery({
-    queryKey: [QUERY_KEYS.getBlockWithReceipts, blockId],
-    queryFn: () => RPC_PROVIDER.getBlockWithReceipts(blockId),
-    enabled: typeof blockId !== "undefined",
-    staleTime: STALE_TIME,
-    gcTime: CACHE_TIME,
-  });
+export function Block() {
+  const { isMobile } = useScreen();
+  const { blockId } = useParams<{ blockId: string }>();
+  const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
 
-  useEffect(() => {
-    if (!BlockWithReceipts) return;
-
-    // Reset state before processing
-    setTxsTable([]);
-    setEventsTable([]);
-    setExecutionTable({
-      ecdsa: 0,
-      keccak: 0,
-      bitwise: 0,
-      pedersen: 0,
-      poseidon: 0,
-      range_check: 0,
-      segment_arena: 0,
-    });
-    setBlockComputeData({
-      gas: 0,
-      steps: 0,
-      data_gas: 0,
-    });
-
-    // Process transactions and receipts
-    const transactions_table_data: TransactionTableData[] = [];
-
-    BlockWithReceipts.transactions.forEach(({ transaction, receipt }) => {
-      // Process block events
-      if (receipt.events) {
-        receipt.events.forEach((event) => {
-          setEventsTable((prev) => [
-            ...prev,
-            {
-              id: prev.length + 1,
-              txn_hash: receipt.transaction_hash,
-              from: event.from_address,
-              age: "", // Add required field based on EventTableData interface
-            },
-          ]);
-        });
-      }
-
-      // Process execution resources
-      if (receipt.execution_resources) {
-        Object.keys(receipt.execution_resources).forEach((key) => {
-          if (key === "steps") {
-            setBlockComputeData((prev) => ({
-              ...prev,
-              steps: prev.steps + receipt.execution_resources[key],
-            }));
-          } else if (key === "data_availability") {
-            setBlockComputeData((prev) => ({
-              ...prev,
-              gas: prev.gas + receipt.execution_resources[key].l1_data_gas,
-              data_gas: prev.data_gas + receipt.execution_resources[key].l1_gas,
-            }));
-          } else {
-            const key_map = EXECUTION_RESOURCES_KEY_MAP[key];
-            if (key_map) {
-              setExecutionTable((prev) => ({
-                ...prev,
-                [key_map]: prev[key_map] + receipt.execution_resources[key],
-              }));
-            }
-          }
-        });
-      }
-
-      // Process info for transactions table
-      transactions_table_data.push({
-        id: transactions_table_data.length + 1,
+  const {
+    data: { block, txs, events, executions, blockComputeData },
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["block", blockId],
+    queryFn: async () => {
+      const block = await RPC_PROVIDER.getBlockWithReceipts(blockId);
+      const txs = block.transactions.map(({ transaction, receipt }, id) => ({
+        id,
         type: transaction.type,
         hash: receipt.transaction_hash,
         status: receipt.execution_status,
-      });
-    });
+      }));
+      const events = block.transactions.flatMap(({ receipt }) =>
+        receipt.events.map((e, id) => ({
+          id,
+          txn_hash: receipt.transaction_hash,
+          from: e.from_address,
+          // Add required field based on EventTableData interface
+          age: "",
+        })),
+      );
+      const { executions, blockComputeData } = block.transactions.reduce(
+        (acc, { receipt }) => {
+          if (!receipt.execution_resources) return acc;
 
-    setTxsTable(transactions_table_data);
-  }, [BlockWithReceipts]);
+          Object.keys(receipt.execution_resources).forEach((key) => {
+            switch (key) {
+              case "steps": {
+                acc.blockComputeData.steps =
+                  acc.blockComputeData.steps + receipt.execution_resources[key];
+                break;
+              }
+              case "data_availability": {
+                acc.blockComputeData.gas =
+                  acc.blockComputeData.gas +
+                  receipt.execution_resources[key].l1_gas;
+                acc.blockComputeData.data_gas =
+                  acc.blockComputeData.data_gas +
+                  receipt.execution_resources[key].l1_data_gas;
+                break;
+              }
+              default: {
+                const _key = key as keyof typeof EXECUTION_RESOURCES_KEY_MAP;
+                const keyMap = EXECUTION_RESOURCES_KEY_MAP[
+                  _key
+                ] as keyof typeof acc.executions;
+                if (!keyMap) return acc;
 
-  if (isLoading) {
+                acc.executions[keyMap] =
+                  acc.executions[keyMap] +
+                  (receipt.execution_resources[_key] ?? 0);
+              }
+            }
+          });
+
+          return acc;
+        },
+        {
+          executions: initialData.executions,
+          blockComputeData: initialData.blockComputeData,
+        },
+      );
+
+      return {
+        block,
+        txs,
+        events,
+        executions,
+        blockComputeData,
+      };
+    },
+    enabled: typeof blockId !== "undefined",
+    initialData,
+  });
+
+  if (isLoading || (!block && !error)) {
     return (
       <div className="w-full h-screen flex items-center justify-center animate-pulse">
         <div className="text-sm text-gray-500">Loading...</div>
       </div>
     );
+  }
+
+  if (!block) {
+    return <NotFound />;
   }
 
   return (
@@ -160,19 +173,17 @@ export function Block() {
           <BreadcrumbItem>{blockId}</BreadcrumbItem>
         </Breadcrumb>
 
-        <BlockNavigation currentBlockNumber={BlockWithReceipts?.block_number} />
+        <BlockNavigation currentBlockNumber={block.block_number} />
       </div>
 
       <PageHeader
         className="mb-6"
-        title={`Block #${BlockWithReceipts?.block_number}`}
-        subtext={BlockWithReceipts?.status}
+        title={`Block #${block.block_number}`}
+        subtext={block.status}
         subtextRightComponent={
           <div className="text-[#5D5D5D]">
-            {BlockWithReceipts?.timestamp
-              ? dayjs
-                  .unix(BlockWithReceipts.timestamp)
-                  .format("MMM D YYYY HH:mm:ss")
+            {block.timestamp
+              ? dayjs.unix(block.timestamp).format("MMM D YYYY HH:mm:ss")
               : ""}
           </div>
         }
@@ -182,23 +193,19 @@ export function Block() {
         <div className="sl:w-[468px] sl:min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
           <SectionBox>
             <SectionBoxEntry title="Hash">
-              {isMobile
-                ? truncateString(BlockWithReceipts?.block_hash)
-                : BlockWithReceipts?.block_hash}
+              {isMobile ? truncateString(block.block_hash) : block.block_hash}
             </SectionBoxEntry>
 
             <SectionBoxEntry title="Number">
-              {BlockWithReceipts?.block_number}
+              {block.block_number}
             </SectionBoxEntry>
 
             <SectionBoxEntry title="State root">
-              {isMobile
-                ? truncateString(BlockWithReceipts?.new_root)
-                : BlockWithReceipts?.new_root}
+              {isMobile ? truncateString(block.new_root) : block.new_root}
             </SectionBoxEntry>
 
             <SectionBoxEntry title="Sequencer address">
-              <AddressDisplay value={BlockWithReceipts?.sequencer_address} />
+              <AddressDisplay value={block.sequencer_address} />
             </SectionBoxEntry>
           </SectionBox>
 
@@ -209,13 +216,9 @@ export function Block() {
                   <tr>
                     <th className="w-[67px]">ETH</th>
                     <td>
-                      {BlockWithReceipts?.l1_gas_price
+                      {block.l1_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockWithReceipts?.l1_gas_price?.price_in_wei,
-                              ),
-                            ),
+                            Number(cairo.felt(block.l1_gas_price.price_in_wei)),
                           )
                         : 0}{" "}
                       WEI
@@ -224,13 +227,9 @@ export function Block() {
                   <tr>
                     <th className="w-min">STRK</th>
                     <td>
-                      {BlockWithReceipts?.l1_gas_price
+                      {block.l1_gas_price
                         ? formatNumber(
-                            Number(
-                              cairo.felt(
-                                BlockWithReceipts?.l1_gas_price?.price_in_fri,
-                              ),
-                            ),
+                            Number(cairo.felt(block.l1_gas_price.price_in_fri)),
                           )
                         : 0}{" "}
                       FRI
@@ -246,13 +245,10 @@ export function Block() {
                   <tr>
                     <th className="w-[67px]">ETH</th>
                     <td>
-                      {BlockWithReceipts?.l1_data_gas_price
+                      {block.l1_data_gas_price
                         ? formatNumber(
                             Number(
-                              cairo.felt(
-                                BlockWithReceipts?.l1_data_gas_price
-                                  ?.price_in_wei,
-                              ),
+                              cairo.felt(block.l1_data_gas_price?.price_in_wei),
                             ),
                           )
                         : 0}{" "}
@@ -262,13 +258,10 @@ export function Block() {
                   <tr>
                     <th className="w-min">STRK</th>
                     <td>
-                      {BlockWithReceipts?.l1_data_gas_price
+                      {block.l1_data_gas_price
                         ? formatNumber(
                             Number(
-                              cairo.felt(
-                                BlockWithReceipts?.l1_data_gas_price
-                                  ?.price_in_fri,
-                              ),
+                              cairo.felt(block.l1_data_gas_price?.price_in_fri),
                             ),
                           )
                         : 0}{" "}
@@ -322,7 +315,7 @@ export function Block() {
               </thead>
 
               <tbody className="text-center">
-                {Object.entries(executionTable).map(
+                {Object.entries(executions).map(
                   ([key, value], index, array) => {
                     const heading = formatSnakeCaseToDisplayValue(key);
                     return index % 2 === 0 ? (
@@ -367,9 +360,9 @@ export function Block() {
           <div className="bg-white flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray">
             <div className="w-full h-full">
               {selectedDataTab === "Transactions" ? (
-                <TxList transactions={txsTable} />
+                <TxList transactions={txs} />
               ) : selectedDataTab === "Events" ? (
-                <EventList events={eventsTable} />
+                <EventList events={events} />
               ) : (
                 <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
                   <span className="text-[#D0D0D0]">No data found</span>
