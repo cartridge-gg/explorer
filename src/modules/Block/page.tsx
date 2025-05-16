@@ -2,6 +2,7 @@ import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { formatNumber } from "@/shared/utils/number";
 import {
   formatSnakeCaseToDisplayValue,
+  isNumber,
   truncateString,
 } from "@/shared/utils/string";
 import { useQuery } from "@tanstack/react-query";
@@ -30,6 +31,7 @@ import {
   parseExecutionResources,
 } from "@/shared/utils/rpc_utils";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
+import { isValidAddress } from "@/shared/utils/contract";
 
 interface BlockData {
   block?: Awaited<ReturnType<typeof RPC_PROVIDER.getBlockWithReceipts>>;
@@ -124,7 +126,11 @@ export function Block() {
     initialData,
   });
 
-  if (isLoading || (!block && !error)) {
+  if (blockId === undefined || !isNumber(blockId) || !isValidAddress(blockId)) {
+    return <NotFound />;
+  }
+
+  if (isLoading || (!error && !block)) {
     return (
       <div className="w-full h-screen flex items-center justify-center animate-pulse">
         <div className="text-sm text-gray-500">Loading...</div>
