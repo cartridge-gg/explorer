@@ -7,7 +7,7 @@ export function useWorld() {
     project: string;
     model: string | undefined;
   }>({
-    project: "ryomainnet",
+    project: "pistols-mainnet",
     model: undefined,
   });
 
@@ -92,16 +92,17 @@ export function useWorld() {
         (f) => f.name === queryName,
       );
       const typeName = queryType.type.name.replace("Connection", "");
-      const args = schema.types
+      const fields = schema.types
         .find((t) => t.name === typeName)
-        .fields.filter((f) => f.type.kind === "SCALAR")
-        .map((f) => f.name);
+        .fields.filter((f) => !["entity", "eventMessage"].includes(f.name))
+        .map((f) => resolveFieldType(schema, f));
+
       const res = await graffle.gql`
         query {
           ${queryName} {
             edges {
               node {
-                ${args.join("\n")}
+                ${toQuery(fields)}
               }
             }
           }
@@ -120,6 +121,37 @@ export function useWorld() {
     form,
     setForm,
   };
+}
+
+function resolveFieldType(schema: any, field: any) {
+  switch (field.type.kind) {
+    case "OBJECT": {
+      const t = schema.types.find((t) => t.name === field.type.name);
+      if (!t) {
+        throw new Error(`Type ${field.type.name} not found`);
+      }
+      return {
+        ...field,
+        type: {
+          ...t,
+          fields: t.fields.map((f) => resolveFieldType(schema, f)),
+        },
+      };
+    }
+    default:
+      return field;
+  }
+}
+
+function toQuery(fields: any) {
+  return fields.reduce((acc, f) => {
+    switch (f.type.kind) {
+      case "OBJECT":
+        return `${acc}\n${f.name} {\n${toQuery(f.type.fields)}\n}`;
+      default:
+        return `${acc}\n${f.name}`;
+    }
+  }, "");
 }
 
 const fullTypeFragment = `

@@ -18,7 +18,9 @@ export function World() {
           <input
             className="border border-gray-300 rounded-md p-2"
             value={form.project}
-            onChange={(e) => setForm({ ...form, project: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, project: e.target.value, model: undefined })
+            }
           />
         </div>
       </div>
