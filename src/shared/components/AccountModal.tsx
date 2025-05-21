@@ -6,6 +6,7 @@ import * as icons from "lucide-react";
 import { truncateString } from "../utils/string";
 import { Call } from "starknet";
 import { useNavigate } from "react-router-dom";
+import { Modal, ModalTitle } from "./Modal";
 
 interface AccountModalProps {
   isOpen: boolean;
@@ -433,9 +434,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
           {/* Function Calls Cart Section */}
           <div className="h-full grid grid-rows-[min-content_1fr]">
             <div className="flex justify-between items-end mb-3">
-              <h2 className="w-full flex justify-between gap-3 text-md font-bold uppercase">
-                Calls ({state.calls.length})
-              </h2>
+              <ModalTitle title={`Calls (${state.calls.length})`} />
             </div>
 
             {state.calls.length === 0 ? (
@@ -503,15 +502,9 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
-      <div className="relative flex">
-        {/* Main Account Modal */}
-        <div
-          ref={modalRef}
-          className="relative bg-white p-[15px] w-[380px] shadow-lg max-w-2xl max-h-[50vh] min-h-[464px] overflow-hidden flex flex-col border border-borderGray"
-        >
-          {renderMainContent()}
-        </div>
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <div className="w-[380px] max-w-2xl max-h-[50vh] min-h-[464px] flex flex-col">
+        {renderMainContent()}
 
         {/* Call Detail Modal - only show when in normal view (not execution result view) */}
         {expandedCall && !executeResult.txHash && !executeResult.error && (
@@ -524,6 +517,6 @@ export const AccountModal: React.FC<AccountModalProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </Modal>
   );
 };

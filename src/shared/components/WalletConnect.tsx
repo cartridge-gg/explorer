@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Connector, useConnect } from "@starknet-react/core";
-import CrossIcon from "@/shared/icons/Cross";
 import { connectorIconToSrc } from "@/shared/utils/image";
 import { cn } from "@cartridge/ui-next";
+import { ModalTitle, Modal } from "./Modal";
 
 interface WalletConnectModalProps {
   isOpen: boolean;
@@ -46,21 +46,10 @@ export function WalletConnectModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectors]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white p-[15px] pb-5 w-[350px] border border-borderGray shadow-md">
-        <div className="flex flex-col gap-5 mb-6">
-          <button
-            onClick={onClose}
-            className="flex items-center justify-center border border-borderGray w-[25px] h-[25px] hover:bg-primary hover:border-0 hover:text-white"
-          >
-            <CrossIcon />
-          </button>
-          <h2 className="text-lg font-bold uppercase">Connect A Wallet</h2>
-        </div>
-
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalTitle title="Connect" />
+      <div className="w-[380px] max-w-2xl max-h-[50vh]">
         <div>
           {connectors
             .sort((a, b) => {
@@ -96,6 +85,6 @@ export function WalletConnectModal({
             ))}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
