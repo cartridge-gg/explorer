@@ -7,7 +7,8 @@ import {
 import { Breadcrumb } from "@/shared/components/breadcrumbs";
 import PageHeader from "@/shared/components/PageHeader";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
-import { BreadcrumbPage, cn } from "@cartridge/ui-next";
+import { BreadcrumbPage } from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { useQuery } from "@tanstack/react-query";
 import { PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";

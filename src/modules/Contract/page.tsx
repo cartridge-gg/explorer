@@ -4,7 +4,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Contract as StarknetContract } from "starknet";
-import { BreadcrumbPage } from "@cartridge/ui-next";
+import { BreadcrumbPage } from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,

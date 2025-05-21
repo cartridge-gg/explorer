@@ -1,4 +1,4 @@
-import { cn } from "@cartridge/ui-next";
+import { cn } from "@cartridge/ui/utils";
 
 export interface SectionBoxEntryProps {
   title: string;
