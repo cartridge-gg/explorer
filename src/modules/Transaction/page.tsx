@@ -452,7 +452,7 @@ export function Transaction() {
 
       <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-4">
         <div className="sl:w-[468px] sl:min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
-          <SectionBox variant="upper-half">
+          <SectionBox>
             <SectionBoxEntry title="Hash">
               {isMobile
                 ? truncateString(receipt?.transaction_hash)
@@ -465,7 +465,7 @@ export function Transaction() {
           </SectionBox>
 
           {(!!tx?.sender_address || !!tx?.nonce) && (
-            <SectionBox title="Sender" variant="upper-half">
+            <SectionBox title="Sender">
               {!!tx?.sender_address && (
                 <SectionBoxEntry title="Address">
                   <AddressDisplay value={tx?.sender_address} />
@@ -480,7 +480,7 @@ export function Transaction() {
             </SectionBox>
           )}
 
-          <SectionBox title="Resource Bounds" variant="upper-half">
+          <SectionBox title="Resource Bounds">
             <SectionBoxEntry title="L1 Gas Prices" bold={false}>
               <table className="w-full">
                 <tbody>
@@ -557,7 +557,7 @@ export function Transaction() {
 
           {tx?.fee_data_availability_mode ||
           tx?.nonce_data_availability_mode ? (
-            <SectionBox title="DA Mode" variant="upper-half">
+            <SectionBox title="DA Mode">
               <table className="w-full">
                 <tbody>
                   {tx?.fee_data_availability_mode ? (
@@ -578,13 +578,9 @@ export function Transaction() {
             </SectionBox>
           ) : null}
 
-          {tx?.tip ? (
-            <SectionBox title="Tip" variant="upper-half">
-              {tx.tip}
-            </SectionBox>
-          ) : null}
+          {tx?.tip ? <SectionBox title="Tip">{tx.tip}</SectionBox> : null}
 
-          <SectionBox title="Actual Fee" variant="upper-half">
+          <SectionBox title="Actual Fee">
             {receipt?.actual_fee?.amount
               ? formatNumber(Number(cairo.felt(receipt?.actual_fee?.amount)))
               : 0}{" "}
