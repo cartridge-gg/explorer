@@ -550,20 +550,28 @@ export function Transaction() {
             </SectionBoxEntry>
           </SectionBox>
 
-          <SectionBox title="DA Mode" variant="upper-half">
-            <table className="w-full">
-              <tbody>
-                <tr>
-                  <th className="w-1/3">Fee</th>
-                  <td>{tx?.fee_data_availability_mode}</td>
-                </tr>
-                <tr>
-                  <th className="w-1/3">Nonce</th>
-                  <td>{tx?.nonce_data_availability_mode}</td>
-                </tr>
-              </tbody>
-            </table>
-          </SectionBox>
+          {tx?.fee_data_availability_mode ||
+          tx?.nonce_data_availability_mode ? (
+            <SectionBox title="DA Mode" variant="upper-half">
+              <table className="w-full">
+                <tbody>
+                  {tx?.fee_data_availability_mode ? (
+                    <tr>
+                      <th className="w-1/3">Fee</th>
+                      <td>{tx.fee_data_availability_mode}</td>
+                    </tr>
+                  ) : null}
+
+                  {tx?.nonce_data_availability_mode ? (
+                    <tr>
+                      <th className="w-1/3">Nonce</th>
+                      <td>{tx.nonce_data_availability_mode}</td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </SectionBox>
+          ) : null}
 
           {tx?.tip ? (
             <SectionBox title="Tip" variant="upper-half">
