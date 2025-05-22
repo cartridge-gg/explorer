@@ -11,6 +11,30 @@ export function useWorld() {
     model: undefined,
   });
 
+  const { data: deployments } = useQuery({
+    queryKey: ["deployments"],
+    queryFn: async () => {
+      const graffle = Graffle.create().transport({
+        url: "https://api.cartridge.gg/query",
+      });
+      const res = await graffle.gql`
+        query {
+          deployments (where: { serviceID: "torii", status: active }) {
+            edges {
+              node {
+                project
+              }
+            }
+          }
+        }
+      `.send();
+      const deployments = res?.deployments.edges.map(
+        ({ node }) => node.project,
+      );
+      return deployments;
+    },
+  });
+
   const graffle = useMemo(
     () =>
       Graffle.create().transport({
@@ -22,6 +46,7 @@ export function useWorld() {
   const { data: schema } = useQuery({
     queryKey: ["world", form.project, "schema"],
     queryFn: async () => {
+      console.log("fetching schema");
       const res = await graffle.gql`
         ${fullTypeFragment}
 
@@ -68,7 +93,7 @@ export function useWorld() {
 
   useEffect(() => {
     if (!models || form.model) return;
-    setForm({ ...form, model: models[0]?.name });
+    setForm((form) => ({ ...form, model: models[0]?.name }));
   }, [form, models]);
 
   /**
@@ -115,6 +140,7 @@ export function useWorld() {
   });
 
   return {
+    deployments,
     schema,
     models,
     model,
@@ -123,6 +149,7 @@ export function useWorld() {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function resolveFieldType(schema: any, field: any) {
   switch (field.type.kind) {
     case "OBJECT": {
@@ -143,6 +170,7 @@ function resolveFieldType(schema: any, field: any) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function toQuery(fields: any) {
   return fields.reduce((acc, f) => {
     switch (f.type.kind) {
