@@ -16,7 +16,7 @@ export default function AddressDisplay({
 }: AddressDisplayProps) {
   return (
     <Link
-      to={`../contract/${BigInt(value).toString(16)}`}
+      to={`../contract/0x${BigInt(value).toString(16)}`}
       className="hover:underline"
       {...props}
     >
