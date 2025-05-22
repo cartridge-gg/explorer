@@ -1,13 +1,34 @@
-import { useQuery } from "@tanstack/react-query";
+import { truncateString } from "@/shared/utils/string";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { Graffle } from "graffle";
 import { useEffect, useMemo, useState } from "react";
+import { createColumnHelper } from "@tanstack/react-table";
+import { Link } from "react-router-dom";
+import dayjs from "dayjs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@cartridge/ui-next";
+
+const columnHelper = createColumnHelper<{
+  executedAt: string;
+  senderAddress: string;
+  transactionHash: string;
+}>();
 
 export function useWorld() {
   const [form, setForm] = useState<{
     project: string;
     model: string | undefined;
   }>({
-    project: "pistols-mainnet",
+    project: "arcade-dopewars",
     model: undefined,
   });
 
@@ -19,7 +40,9 @@ export function useWorld() {
       });
       const res = await graffle.gql`
         query {
-          deployments (where: { serviceID: "torii", status: active }) {
+          deployments (
+            where: { serviceID: "torii", status: active },
+          ) {
             edges {
               node {
                 project
@@ -28,9 +51,9 @@ export function useWorld() {
           }
         }
       `.send();
-      const deployments = res?.deployments.edges.map(
-        ({ node }) => node.project,
-      );
+      const deployments = res?.deployments.edges
+        .map(({ node }) => node.project)
+        .sort((a: string, b: string) => a.localeCompare(b));
       return deployments;
     },
   });
@@ -46,7 +69,6 @@ export function useWorld() {
   const { data: schema } = useQuery({
     queryKey: ["world", form.project, "schema"],
     queryFn: async () => {
-      console.log("fetching schema");
       const res = await graffle.gql`
         ${fullTypeFragment}
 
@@ -86,7 +108,9 @@ export function useWorld() {
           }
         }
       `.send();
-      return res?.models.edges.map(({ node }) => node);
+      return res?.models.edges
+        .map(({ node }) => node)
+        .sort((a, b) => a.name.localeCompare(b.name));
     },
     enabled: !!schema,
   });
@@ -139,13 +163,121 @@ export function useWorld() {
     enabled: !!schema && !!models && !!form.model,
   });
 
+  const transactions = useInfiniteQuery({
+    queryKey: ["world", form.project, "transactions"],
+    queryFn: async ({ pageParam = undefined }) => {
+      const res = await graffle.gql`
+        query Transactions($after: String) {
+          transactions(first: 60, after: $after) {
+            edges {
+              node {
+                # calldata
+                # createdAt
+                executedAt
+                # id
+                # maxFee
+                # nonce
+                senderAddress
+                # signature
+                transactionHash
+              }
+              cursor
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+          }
+        }
+      `.send({ after: pageParam });
+      return res.transactions;
+    },
+    getNextPageParam: ({ pageInfo }) => pageInfo.endCursor,
+    initialPageParam: undefined,
+  });
+
+  const [txsPagination, setTxsPagination] = useState({
+    pageIndex: 0,
+    pageSize: 20,
+  });
+  const txsData = useMemo(
+    () =>
+      transactions.data?.pages
+        .flatMap(({ edges }) => edges.map(({ node }) => node))
+        .sort((a, b) => Number(b.executedAt) - Number(a.executedAt)) ?? [],
+    [transactions.data],
+  );
+
+  const txs = useReactTable({
+    data: txsData,
+    columns: [
+      columnHelper.accessor("transactionHash", {
+        header: () => "Hash",
+        cell: (info) => (
+          <Link
+            to={`../tx/${info.getValue()}`}
+            className="flex px-4 hover:bg-button-whiteInitialHover hover:underline"
+          >
+            {truncateString(info.getValue())}
+          </Link>
+        ),
+      }),
+      columnHelper.accessor("senderAddress", {
+        header: () => "From",
+        cell: (info) => (
+          <Link
+            to={`../tx/${info.getValue()}`}
+            className="flex px-4 hover:bg-button-whiteInitialHover hover:underline"
+          >
+            {truncateString(info.getValue())}
+          </Link>
+        ),
+      }),
+      columnHelper.accessor("executedAt", {
+        header: () => "Age",
+        cell: (info) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                {dayjs.unix(Number(info.getValue())).fromNow()}
+              </TooltipTrigger>
+              <TooltipContent side="right" className="bg-white">
+                {info.getValue()}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      }),
+    ],
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    state: {
+      pagination: {
+        pageIndex: txsPagination.pageIndex,
+        pageSize: txsPagination.pageSize,
+      },
+    },
+  });
+
+  useEffect(() => {
+    if (txs.getPageCount() - txsPagination.pageIndex < 3) {
+      transactions.fetchNextPage();
+    }
+  }, [txsPagination, transactions, txs]);
+
   return {
+    form,
+    setForm,
     deployments,
     schema,
     models,
     model,
-    form,
-    setForm,
+    txs: {
+      ...txs,
+      fetchNextPage: transactions.fetchNextPage,
+      pagination: txsPagination,
+      setPagination: setTxsPagination,
+    },
   };
 }
 
