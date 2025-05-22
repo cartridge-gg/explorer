@@ -40,6 +40,7 @@ import AddressDisplay from "@/shared/components/AddressDisplay";
 import BlockIdDisplay from "@/shared/components/BlockIdDisplay";
 import { cn } from "@cartridge/ui-next";
 import { useBlock } from "@starknet-react/core";
+import TxType from "./components/TxType";
 
 const DataTabs = ["Calldata", "Events", "Signature", "Storage Diffs"];
 
@@ -425,17 +426,21 @@ export function Transaction() {
         title={`Transaction`}
         subtext={receipt?.finality_status}
         titleRightComponent={
-          <div
-            className={cn(
-              "text-white px-2 h-5 w-[84px] flex items-center justify-center font-bold",
-              receipt
-                ? receipt?.isSuccess()
-                  ? "bg-[#7BA797]"
-                  : "bg-[#C4806D]"
-                : undefined,
-            )}
-          >
-            {receipt?.execution_status}
+          <div className="flex gap-2">
+            {receipt?.type ? <TxType type={receipt?.type} /> : null}
+
+            <div
+              className={cn(
+                "text-white px-2 h-5 w-[84px] flex items-center justify-center font-bold",
+                receipt
+                  ? receipt?.isSuccess()
+                    ? "bg-[#7BA797]"
+                    : "bg-[#C4806D]"
+                  : undefined,
+              )}
+            >
+              {receipt?.execution_status}
+            </div>
           </div>
         }
         subtextRightComponent={
