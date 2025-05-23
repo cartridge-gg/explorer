@@ -182,7 +182,10 @@ export function World() {
                       <tr>
                         {txs.getHeaderGroups().map((headerGroup) =>
                           headerGroup.headers.map((header) => (
-                            <th key={headerGroup.id} className="text-left">
+                            <th
+                              key={`${headerGroup.id}-${header.id}`}
+                              className="text-left"
+                            >
                               {flexRender(
                                 header.column.columnDef.header,
                                 header.getContext(),
