@@ -16,19 +16,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@cartridge/ui-next";
-
-const columnHelper = createColumnHelper<{
-  executedAt: string;
-  senderAddress: string;
-  transactionHash: string;
-}>();
+import { Editor } from "@monaco-editor/react";
 
 export function useWorld() {
   const [form, setForm] = useState<{
     project: string;
     model: string | undefined;
   }>({
-    project: "arcade-dopewars",
+    project: "ryomainnet",
     model: undefined,
   });
   const { data: deployments } = useDeployments();
@@ -39,6 +34,7 @@ export function useWorld() {
     model: form.model,
   });
   const txs = useTransactionTable(form.project);
+  const events = useEventsTable(form.project);
 
   useEffect(() => {
     if (!models || form.model) return;
@@ -53,6 +49,7 @@ export function useWorld() {
     models,
     model,
     txs,
+    events,
   };
 }
 
@@ -271,21 +268,33 @@ function useTransactions(project: string) {
 
 function useTransactionTable(project: string) {
   const txs = useTransactions(project);
-
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 20,
   });
-  const txsData = useMemo(
+  const data = useMemo(
     () =>
       txs.data?.pages
         .flatMap(({ edges }) => edges.map(({ node }) => node))
-        .sort((a, b) => Number(b.executedAt) - Number(a.executedAt)) ?? [],
+        .sort(
+          (a, b) =>
+            new Date(b.executedAt).getTime() - new Date(a.executedAt).getTime(),
+        ) ?? [],
     [txs.data],
   );
 
+  const columnHelper = useMemo(
+    () =>
+      createColumnHelper<{
+        transactionHash: string;
+        executedAt: string;
+        senderAddress: string;
+      }>(),
+    [],
+  );
+
   const table = useReactTable({
-    data: txsData,
+    data,
     columns: [
       columnHelper.accessor("transactionHash", {
         header: () => "Hash",
@@ -315,10 +324,10 @@ function useTransactionTable(project: string) {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                {dayjs.unix(Number(info.getValue())).fromNow()}
+                {dayjs(info.getValue()).fromNow()}
               </TooltipTrigger>
               <TooltipContent side="right" className="bg-white">
-                {info.getValue()}
+                {dayjs(info.getValue()).format("YYYY-MM-DD HH:mm:ss")}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -340,6 +349,162 @@ function useTransactionTable(project: string) {
       txs.fetchNextPage();
     }
   }, [pagination, txs, table]);
+
+  return {
+    ...table,
+    pagination,
+    setPagination,
+  };
+}
+
+function useEvents(project: string) {
+  const torii = useToriiClient(project);
+
+  return useInfiniteQuery({
+    queryKey: ["world", project, "events"],
+    queryFn: async ({ pageParam = undefined }) => {
+      const res = await torii.gql`
+        query Events($after: String) {
+          events(first: 60, after: $after) {
+            edges {
+              node {
+                createdAt
+                data
+                executedAt
+                id
+                keys
+                transactionHash
+              }
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+          }
+        }
+      `.send({ after: pageParam });
+      return res.events;
+    },
+    getNextPageParam: (lastPage) => lastPage?.pageInfo?.endCursor,
+    initialPageParam: undefined,
+  });
+}
+
+function useEventsTable(project: string) {
+  const events = useEvents(project);
+
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 20,
+  });
+  const data = useMemo(
+    () =>
+      events.data?.pages.flatMap(({ edges }) =>
+        edges?.map(({ node }) => node),
+      ) ?? [],
+    [events.data],
+  );
+
+  const columnHelper = useMemo(
+    () =>
+      createColumnHelper<{
+        data: string[];
+        executedAt: string;
+        id: string;
+        keys: string[];
+        transactionHash: string;
+      }>(),
+    [],
+  );
+
+  const table = useReactTable({
+    data,
+    columns: [
+      columnHelper.accessor("id", {
+        header: () => "id",
+        cell: (info) => {
+          const [, txHash, i] = info.getValue().split(":");
+          const index = Number(i);
+          return (
+            <Link
+              to={`../event/${txHash}-${index}`}
+              className="flex px-4 hover:bg-button-whiteInitialHover hover:underline"
+            >
+              {truncateString(txHash)}-{index}
+            </Link>
+          );
+        },
+      }),
+      columnHelper.accessor("data", {
+        header: () => "data",
+        cell: (info) => (
+          <Editor
+            height={200}
+            language="json"
+            options={{
+              readOnly: true,
+              lineNumbers: "off",
+            }}
+            value={JSON.stringify(info.getValue(), null, 2)}
+          />
+        ),
+      }),
+      columnHelper.accessor("keys", {
+        header: () => "keys",
+        cell: (info) => (
+          <Editor
+            height={200}
+            language="json"
+            options={{
+              readOnly: true,
+              lineNumbers: "off",
+            }}
+            value={JSON.stringify(info.getValue(), null, 2)}
+          />
+        ),
+      }),
+      columnHelper.accessor("transactionHash", {
+        header: () => "Hash",
+        cell: (info) => (
+          <Link
+            to={`../tx/${info.getValue()}`}
+            className="flex px-4 hover:bg-button-whiteInitialHover hover:underline"
+          >
+            {truncateString(info.getValue())}
+          </Link>
+        ),
+      }),
+      columnHelper.accessor("executedAt", {
+        header: () => "Age",
+        cell: (info) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                {dayjs(info.getValue()).fromNow()}
+              </TooltipTrigger>
+              <TooltipContent side="right" className="bg-white">
+                {dayjs(info.getValue()).format("YYYY-MM-DD HH:mm:ss")}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      }),
+    ],
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    state: {
+      pagination: {
+        pageIndex: pagination.pageIndex,
+        pageSize: pagination.pageSize,
+      },
+    },
+  });
+
+  useEffect(() => {
+    if (table.getPageCount() - pagination.pageIndex < 3) {
+      events.fetchNextPage();
+    }
+  }, [pagination, events, table]);
 
   return {
     ...table,
@@ -409,8 +574,8 @@ const fullTypeFragment = `
               ofType {
                 kind
                 name
-                ofType {
-                  kind
+              ofType {
+                kind
                   name
                 }
               }

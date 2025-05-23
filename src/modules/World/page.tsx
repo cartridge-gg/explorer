@@ -10,7 +10,7 @@ import {
   SelectContent,
   cn,
 } from "@cartridge/ui-next";
-import { flexRender } from "@tanstack/react-table";
+import { flexRender, Table } from "@tanstack/react-table";
 import PageHeader from "@/shared/components/PageHeader";
 import {
   Breadcrumb,
@@ -28,7 +28,8 @@ const DataTabs = [
 
 export function World() {
   const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
-  const { form, setForm, deployments, schema, models, model, txs } = useWorld();
+  const { form, setForm, deployments, schema, models, model, txs, events } =
+    useWorld();
 
   return (
     <div className="flex flex-col gap-2">
@@ -175,91 +176,9 @@ export function World() {
                 </div>
               );
             case "Transactions":
-              return (
-                <div>
-                  <table className="w-full h-min">
-                    <thead className="uppercase">
-                      <tr>
-                        {txs.getHeaderGroups().map((headerGroup) =>
-                          headerGroup.headers.map((header) => (
-                            <th
-                              key={`${headerGroup.id}-${header.id}`}
-                              className="text-left"
-                            >
-                              {flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                              )}
-                            </th>
-                          )),
-                        )}
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {txs.getRowModel().rows.length ? (
-                        txs.getRowModel().rows.map((row, id) => (
-                          <tr key={id}>
-                            {row.getVisibleCells().map((cell) => (
-                              <td key={cell.id} className="text-left">
-                                {flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext(),
-                                )}
-                              </td>
-                            ))}
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={txs.getAllColumns().length}>
-                            No results found
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-
-                  <div className="mt-2 h-min flex flex-row gap-4 justify-between items-center">
-                    <div>
-                      Showing <strong>{txs.pagination.pageIndex + 1}</strong> of{" "}
-                      <strong>{txs.getPageCount()}</strong> pages
-                    </div>
-
-                    <div className="flex flex-row gap-2">
-                      <button
-                        disabled={txs.pagination.pageIndex === 0}
-                        onClick={() =>
-                          txs.setPagination((prev) => ({
-                            ...prev,
-                            pageIndex: Math.max(0, prev.pageIndex - 1),
-                          }))
-                        }
-                        className="bg-[#4A4A4A] text-white px-2 disabled:opacity-50 uppercase"
-                      >
-                        Previous
-                      </button>
-                      <button
-                        disabled={
-                          txs.pagination.pageIndex === txs.getPageCount() - 1
-                        }
-                        onClick={() => {
-                          txs.setPagination((prev) => ({
-                            ...prev,
-                            pageIndex: Math.min(
-                              txs.getPageCount() - 1,
-                              prev.pageIndex + 1,
-                            ),
-                          }));
-                        }}
-                        className="bg-[#4A4A4A] text-white px-4 py-[3px] disabled:opacity-50 uppercase"
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
+              return <Table table={txs} />;
+            case "Events":
+              return <Table table={events} />;
             default:
               return (
                 <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
@@ -268,6 +187,98 @@ export function World() {
               );
           }
         })()}
+      </div>
+    </div>
+  );
+}
+
+function Table<
+  T extends Table<T> & {
+    pagination: { pageIndex: number; pageSize: number };
+    setPagination: (pagination: {
+      pageIndex: number;
+      pageSize: number;
+    }) => void;
+  },
+>({ table }: { table: T }) {
+  return (
+    <div>
+      <table className="w-full h-min">
+        <thead className="uppercase">
+          <tr>
+            {table.getHeaderGroups().map((headerGroup) =>
+              headerGroup.headers.map((header) => (
+                <th
+                  key={`${headerGroup.id}-${header.id}`}
+                  className="text-left"
+                >
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext(),
+                  )}
+                </th>
+              )),
+            )}
+          </tr>
+        </thead>
+
+        <tbody>
+          {table.getRowModel().rows.length ? (
+            table.getRowModel().rows.map((row, id) => (
+              <tr key={id}>
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="text-left">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={table.getAllColumns().length}>No results found</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      <div className="mt-2 h-min flex flex-row gap-4 justify-between items-center">
+        <div>
+          Showing <strong>{table.pagination.pageIndex + 1}</strong> of{" "}
+          <strong>{table.getPageCount() + 1}</strong> pages
+        </div>
+
+        <div className="flex flex-row gap-2">
+          <button
+            disabled={table.pagination.pageIndex === 0}
+            onClick={() =>
+              table.setPagination((prev) => ({
+                ...prev,
+                pageIndex: Math.max(0, prev.pageIndex - 1),
+              }))
+            }
+            className="bg-[#4A4A4A] text-white px-2 disabled:opacity-50 uppercase"
+          >
+            Previous
+          </button>
+          <button
+            disabled={
+              table.getPageCount() === 0 ||
+              table.pagination.pageIndex === table.getPageCount() - 1
+            }
+            onClick={() => {
+              table.setPagination((prev) => ({
+                ...prev,
+                pageIndex: Math.min(
+                  table.getPageCount() - 1,
+                  prev.pageIndex + 1,
+                ),
+              }));
+            }}
+            className="bg-[#4A4A4A] text-white px-4 py-[3px] disabled:opacity-50 uppercase"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );
