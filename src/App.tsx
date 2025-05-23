@@ -35,7 +35,7 @@ export function App() {
         <Route path="/block/:blockId" element={<Block />} />
         <Route path="/class/:classHash" element={<ClassHash />} />
         <Route path="/contract/:contractAddress" element={<Contract />} />
-        <Route path="/events/:eventId" element={<Event />} />
+        <Route path="/event/:eventId" element={<Event />} />
         <Route path="/json-rpc" element={<JsonRpcPlayground />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
