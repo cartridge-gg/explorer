@@ -13,7 +13,7 @@ import { ClassHash } from "@/modules/ClassHash/page";
 import { JsonRpcPlayground } from "@/modules/JsonRpc/page";
 import { NotFound } from "@/modules/NotFound/page";
 import { cn } from "@cartridge/ui-next";
-
+import { World } from "@/modules/World/page";
 export function App() {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
@@ -37,6 +37,7 @@ export function App() {
         <Route path="/contract/:contractAddress" element={<Contract />} />
         <Route path="/event/:eventId" element={<Event />} />
         <Route path="/json-rpc" element={<JsonRpcPlayground />} />
+        <Route path="/world" element={<World />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

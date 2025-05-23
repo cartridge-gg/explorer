@@ -1,13 +1,13 @@
 import { rpcUrl } from "@/constants/rpc";
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
 import {
+  Breadcrumb,
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumbs";
-import { Breadcrumb } from "@/shared/components/breadcrumbs";
 import PageHeader from "@/shared/components/PageHeader";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
-import { BreadcrumbPage, cn } from "@cartridge/ui-next";
+import { cn } from "@cartridge/ui-next";
 import { useQuery } from "@tanstack/react-query";
 import { PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -222,11 +222,7 @@ export function JsonRpcPlayground() {
         <Breadcrumb>
           <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage className="text-sm">
-              JSON-RPC Playground
-            </BreadcrumbPage>
-          </BreadcrumbItem>
+          <BreadcrumbItem>JSON-RPC Playground</BreadcrumbItem>
         </Breadcrumb>
       </div>
 
