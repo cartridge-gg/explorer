@@ -10,7 +10,7 @@ import {
   SelectContent,
   cn,
 } from "@cartridge/ui-next";
-import { flexRender, Table } from "@tanstack/react-table";
+import { flexRender } from "@tanstack/react-table";
 import PageHeader from "@/shared/components/PageHeader";
 import {
   Breadcrumb,
@@ -24,12 +24,22 @@ const DataTabs = [
   "Model",
   "Transactions",
   "Events",
+  "Event Messages",
 ];
 
 export function World() {
   const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
-  const { form, setForm, deployments, schema, models, model, txs, events } =
-    useWorld();
+  const {
+    form,
+    setForm,
+    deployments,
+    schema,
+    models,
+    model,
+    txs,
+    events,
+    eventMessages,
+  } = useWorld();
 
   return (
     <div className="flex flex-col gap-2">
@@ -179,6 +189,8 @@ export function World() {
               return <Table table={txs} />;
             case "Events":
               return <Table table={events} />;
+            case "Event Messages":
+              return <Table table={eventMessages} />;
             default:
               return (
                 <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">

@@ -35,6 +35,7 @@ export function useWorld() {
   });
   const txs = useTransactionTable(form.project);
   const events = useEventsTable(form.project);
+  const eventMessages = useEventMessagesTable(form.project);
 
   useEffect(() => {
     if (!models || form.model) return;
@@ -50,6 +51,7 @@ export function useWorld() {
     model,
     txs,
     events,
+    eventMessages,
   };
 }
 
@@ -357,6 +359,165 @@ function useTransactionTable(project: string) {
   };
 }
 
+function useEventMessages(project: string) {
+  const torii = useToriiClient(project);
+
+  return useInfiniteQuery({
+    queryKey: ["world", project, "eventMessages"],
+    queryFn: async ({ pageParam = undefined }) => {
+      const res = await torii.gql`
+        query EventMessages($after: String) {
+          eventMessages(first: 60, after: $after) {
+            edges {
+              node {
+                createdAt
+                eventId
+                executedAt
+                id
+                keys
+                models {
+                  __typename
+                  # ... on dopewars_GameCreated {
+        					# 	entity
+        					# 	eventMessage
+                  #   game_id
+                  #   game_mode
+                  #   hustler_id
+                  #   player_id
+                  #   player_name
+                  # }
+                }
+                updatedAt
+              }
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+          }
+        }
+      `.send({ after: pageParam });
+      return res.eventMessages;
+    },
+    getNextPageParam: (lastPage) => lastPage?.pageInfo?.endCursor,
+    initialPageParam: undefined,
+  });
+}
+
+function useEventMessagesTable(project: string) {
+  const events = useEventMessages(project);
+
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 20,
+  });
+  const data = useMemo(
+    () =>
+      events.data?.pages.flatMap(({ edges }) =>
+        edges?.map(({ node }) => node),
+      ) ?? [],
+    [events.data],
+  );
+
+  const columnHelper = useMemo(
+    () =>
+      createColumnHelper<{
+        createdAt: string;
+        eventId: string;
+        executedAt: string;
+        id: string;
+        keys: string[];
+        models: {
+          __typename: string;
+        }[];
+        updatedAt: string;
+      }>(),
+    [],
+  );
+
+  const table = useReactTable({
+    data,
+    columns: [
+      columnHelper.accessor("eventId", {
+        header: () => "id",
+        cell: (info) => {
+          const [, txHash, i] = info.getValue().split(":");
+          const index = Number(i);
+          return (
+            <Link
+              to={`../event/${txHash}-${index}`}
+              className="flex px-4 hover:bg-button-whiteInitialHover hover:underline"
+            >
+              {truncateString(txHash)}-{index}
+            </Link>
+          );
+        },
+      }),
+      columnHelper.accessor("keys", {
+        header: () => "keys",
+        cell: (info) => (
+          <Editor
+            height={200}
+            language="json"
+            options={{
+              readOnly: true,
+              lineNumbers: "off",
+            }}
+            value={JSON.stringify(info.getValue(), null, 2)}
+          />
+        ),
+      }),
+      columnHelper.accessor("models", {
+        header: () => "models",
+        cell: (info) => (
+          <div>
+            {info.getValue().map((m) => (
+              <div>- {m.__typename}</div>
+            ))}
+          </div>
+        ),
+      }),
+      columnHelper.accessor("executedAt", {
+        header: () => "age",
+        cell: (info) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                {dayjs(info.getValue()).fromNow()}
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                className="bg-gray-100 border border-gray-300 rounded-md"
+              >
+                {dayjs(info.getValue()).format("YYYY-MM-DD HH:mm:ss")}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      }),
+    ],
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    state: {
+      pagination: {
+        pageIndex: pagination.pageIndex,
+        pageSize: pagination.pageSize,
+      },
+    },
+  });
+
+  useEffect(() => {
+    if (table.getPageCount() - pagination.pageIndex < 3) {
+      events.fetchNextPage();
+    }
+  }, [pagination, events, table]);
+
+  return {
+    ...table,
+    pagination,
+    setPagination,
+  };
+}
 function useEvents(project: string) {
   const torii = useToriiClient(project);
 
@@ -475,14 +636,17 @@ function useEventsTable(project: string) {
         ),
       }),
       columnHelper.accessor("executedAt", {
-        header: () => "Age",
+        header: () => "age",
         cell: (info) => (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
                 {dayjs(info.getValue()).fromNow()}
               </TooltipTrigger>
-              <TooltipContent side="right" className="bg-white">
+              <TooltipContent
+                side="top"
+                className="bg-gray-100 border border-gray-300 rounded-md"
+              >
                 {dayjs(info.getValue()).format("YYYY-MM-DD HH:mm:ss")}
               </TooltipContent>
             </Tooltip>
