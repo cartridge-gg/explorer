@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react";
 import { Editor } from "@monaco-editor/react";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { useWorld } from "./hooks";
@@ -17,25 +16,17 @@ import {
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumbs";
-import { useLocation, useNavigate } from "react-router-dom";
-import { toHash } from "@/shared/utils/string";
-
-const tabs = [
-  "GraphQL Schema",
-  "Models",
-  "Model",
-  "Transactions",
-  "Events",
-  "Event Messages",
-];
+import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 
 export function World() {
-  const { hash } = useLocation();
-  const selected = useMemo(
-    () => tabs.find((id) => toHash(id) === hash) ?? tabs[0],
-    [hash],
-  );
-  const navigate = useNavigate();
+  const { selected, onTabChange, tabs } = useHashLinkTabs([
+    "GraphQL Schema",
+    "Models",
+    "Model",
+    "Transactions",
+    "Events",
+    "Event Messages",
+  ]);
   const {
     form,
     setForm,
@@ -104,15 +95,8 @@ export function World() {
       <div className="h-full flex-grow grid grid-rows-[min-content_1fr] gap-4">
         <DetailsPageSelector
           selected={selected}
-          onTabSelect={(tab) => {
-            const val = toHash(tab);
-            if (val === hash) return;
-            navigate(val);
-          }}
-          items={tabs.map((tab) => ({
-            name: tab,
-            value: tab,
-          }))}
+          onTabSelect={onTabChange}
+          items={tabs}
         />
 
         {(() => {
