@@ -23,7 +23,7 @@ import {
 import { validateAndParseAddress } from "starknet";
 import { useToast } from "@/shared/components/toast";
 import { NotFound } from "@/modules/NotFound/page";
-const DataTabs = ["Overview", "Deploy"];
+import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 
 const initialData: ContractClassInfo = {
   constructor: {
@@ -43,7 +43,10 @@ const initialData: ContractClassInfo = {
 export function ClassHash() {
   const { classHash } = useParams();
   const { isMobile } = useScreen();
-  const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
+  const { selected, onTabChange, tabs } = useHashLinkTabs([
+    "Overview",
+    "Deploy",
+  ]);
 
   const { data: contractVersion } = useQuery({
     queryKey: ["contractVersion", classHash],
@@ -140,16 +143,13 @@ export function ClassHash() {
 
           <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
             <DetailsPageSelector
-              selected={selectedDataTab}
-              onTabSelect={setSelectedDataTab}
-              items={DataTabs.map((tab) => ({
-                name: tab,
-                value: tab,
-              }))}
+              selected={selected}
+              onTabSelect={onTabChange}
+              items={tabs}
             />
 
             {(() => {
-              switch (selectedDataTab) {
+              switch (selected) {
                 case "Overview":
                   return (
                     <Overview
