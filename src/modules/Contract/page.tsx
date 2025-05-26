@@ -1,7 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
-import { useState } from "react";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Contract as StarknetContract } from "starknet";
 import { BreadcrumbPage } from "@cartridge/ui-next";
@@ -19,15 +18,20 @@ import useBalances from "@/shared/hooks/useBalances";
 import {
   getContractClassInfo,
   ContractClassInfo,
+  isValidAddress,
 } from "@/shared/utils/contract";
 import { Code } from "@/shared/components/contract/Code";
 import { useQuery } from "@tanstack/react-query";
 import { ContractForm } from "@/shared/components/contract/Form";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
+import { Loading } from "@/shared/components/Loading";
+import { NotFound } from "../NotFound/page";
 
 const initialData: Omit<ContractClassInfo, "constructor"> & {
+  classHash?: string;
   contract?: StarknetContract;
 } = {
+  classHash: undefined,
   contract: undefined,
   readFuncs: [],
   writeFuncs: [],
@@ -47,21 +51,22 @@ export function Contract() {
     "Write Contract",
     "Code",
   ]);
-  const [classHash, setClassHash] = useState<string | null>(null);
 
   const {
-    data: { contract, readFuncs, writeFuncs, code },
+    data: { classHash, contract, readFuncs, writeFuncs, code },
+    isLoading,
+    error,
   } = useQuery({
     queryKey: ["contractClass", contractAddress],
     queryFn: async () => {
-      if (!contractAddress) return initialData;
+      if (!contractAddress || !isValidAddress(contractAddress)) {
+        throw new Error("Invalid contract address");
+      }
 
-      // get class hash
-      const classHash = await RPC_PROVIDER.getClassHashAt(contractAddress);
-      setClassHash(classHash);
-
-      // process contract functions
-      const contractClass = await RPC_PROVIDER.getClassAt(contractAddress);
+      const [classHash, contractClass] = await Promise.all([
+        RPC_PROVIDER.getClassHashAt(contractAddress),
+        RPC_PROVIDER.getClassAt(contractAddress),
+      ]);
       const { readFuncs, writeFuncs, code } =
         getContractClassInfo(contractClass);
 
@@ -72,19 +77,28 @@ export function Contract() {
       );
 
       return {
+        classHash,
         contract,
         readFuncs,
         writeFuncs,
         code,
       };
     },
-    enabled: !!contractAddress,
     initialData,
+    retry: false,
   });
 
   const { balances, isStrkLoading, isEthLoading } = useBalances(
     contractAddress ?? "",
   );
+
+  if (isLoading || (!error && (!classHash || !contract))) {
+    return <Loading />;
+  }
+
+  if (error) {
+    return <NotFound />;
+  }
 
   return (
     <div id="contract-details" className="w-full flex-grow gap-8">

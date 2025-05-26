@@ -1,4 +1,4 @@
-import { ContractClassResponse } from "starknet";
+import { ContractClassResponse, validateAndParseAddress } from "starknet";
 import { FunctionAbiWithAst, parseAbi } from "./abi";
 
 export interface ContractClassInfo {
@@ -24,4 +24,13 @@ export function getContractClassInfo(
           : undefined,
     },
   };
+}
+
+export function isValidAddress(address: string): boolean {
+  try {
+    validateAndParseAddress(address);
+    return true;
+  } catch {
+    return false;
+  }
 }

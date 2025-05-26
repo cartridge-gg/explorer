@@ -29,3 +29,7 @@ export function fromCamelCase(str: string) {
 export function toHash(str: string) {
   return "#" + str.replace(" ", "-").toLowerCase();
 }
+
+export function isNumber(str: string): boolean {
+  return !isNaN(str as unknown as number);
+}

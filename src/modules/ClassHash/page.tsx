@@ -13,17 +13,16 @@ import { SectionBox } from "@/shared/components/section/SectionBox";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { useQuery } from "@tanstack/react-query";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
-import { useState, useEffect, useRef } from "react";
 import { Overview } from "./Overview";
 import { Deploy } from "./Deploy";
 import {
   getContractClassInfo,
   ContractClassInfo,
+  isValidAddress,
 } from "@/shared/utils/contract";
-import { validateAndParseAddress } from "starknet";
-import { useToast } from "@/shared/components/toast";
 import { NotFound } from "@/modules/NotFound/page";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
+import { Loading } from "@/shared/components/Loading";
 
 const initialData: ContractClassInfo = {
   constructor: {
@@ -61,44 +60,22 @@ export function ClassHash() {
   } = useQuery({
     queryKey: ["contractClass", classHash],
     queryFn: async () => {
-      if (!classHash) return initialData;
+      if (!classHash || !isValidAddress(classHash)) {
+        throw new Error("Invalid class hash");
+      }
+
       const contractClass = await RPC_PROVIDER.getClassByHash(classHash!);
       return contractClass ? getContractClassInfo(contractClass) : initialData;
     },
-    enabled: !!classHash,
     initialData,
+    retry: false,
   });
 
-  const { toast } = useToast();
+  if (isLoading || (!error && (!contractVersion || !code))) {
+    return <Loading />;
+  }
 
-  const [classHashError, setClassHashError] = useState<Error>();
-  const isFirstRender = useRef(true);
-
-  useEffect(() => {
-    if (!isFirstRender.current) return;
-    isFirstRender.current = false;
-    try {
-      if (!classHash) {
-        throw new Error("Class hash is empty");
-      }
-
-      validateAndParseAddress(classHash);
-    } catch (error) {
-      setClassHashError(error as Error);
-      toast(`Invalid class hash: ${classHash}`, "error");
-    }
-  }, [classHash, toast]);
-
-  useEffect(() => {
-    if (!error) return;
-
-    toast(`Class hash not found: ${classHash}`, "error");
-    setClassHashError(error as Error);
-    // workaround for getting toast multiple times
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [classHash, error]);
-
-  if (classHashError) {
+  if (error) {
     return <NotFound />;
   }
 

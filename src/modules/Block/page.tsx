@@ -2,6 +2,7 @@ import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { formatNumber } from "@/shared/utils/number";
 import {
   formatSnakeCaseToDisplayValue,
+  isNumber,
   truncateString,
 } from "@/shared/utils/string";
 import { useQuery } from "@tanstack/react-query";
@@ -30,6 +31,8 @@ import {
   parseExecutionResources,
 } from "@/shared/utils/rpc_utils";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
+import { isValidAddress } from "@/shared/utils/contract";
+import { Loading } from "@/shared/components/Loading";
 
 interface BlockData {
   block?: Awaited<ReturnType<typeof RPC_PROVIDER.getBlockWithReceipts>>;
@@ -75,6 +78,10 @@ export function Block() {
   } = useQuery({
     queryKey: ["block", blockId],
     queryFn: async () => {
+      if (!blockId || !isNumber(blockId) || !isValidAddress(blockId)) {
+        throw new Error("Invalid block identifier");
+      }
+
       const block = await RPC_PROVIDER.getBlockWithReceipts(blockId);
       const txs = block.transactions.map(({ transaction, receipt }, id) => ({
         id,
@@ -120,19 +127,15 @@ export function Block() {
         blockComputeData,
       };
     },
-    enabled: typeof blockId !== "undefined",
     initialData,
+    retry: false,
   });
 
-  if (isLoading || (!block && !error)) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center animate-pulse">
-        <div className="text-sm text-gray-500">Loading...</div>
-      </div>
-    );
+  if (isLoading || (!error && !block)) {
+    return <Loading />;
   }
 
-  if (!block) {
+  if (error) {
     return <NotFound />;
   }
 
