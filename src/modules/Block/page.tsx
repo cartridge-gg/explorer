@@ -78,6 +78,10 @@ export function Block() {
   } = useQuery({
     queryKey: ["block", blockId],
     queryFn: async () => {
+      if (!blockId || !isNumber(blockId) || !isValidAddress(blockId)) {
+        throw new Error("Invalid block identifier");
+      }
+
       const block = await RPC_PROVIDER.getBlockWithReceipts(blockId);
       const txs = block.transactions.map(({ transaction, receipt }, id) => ({
         id,
@@ -123,19 +127,15 @@ export function Block() {
         blockComputeData,
       };
     },
-    enabled: typeof blockId !== "undefined",
     initialData,
+    retry: false,
   });
-
-  if (blockId === undefined || !isNumber(blockId) || !isValidAddress(blockId)) {
-    return <NotFound />;
-  }
 
   if (isLoading || (!error && !block)) {
     return <Loading />;
   }
 
-  if (!block) {
+  if (error) {
     return <NotFound />;
   }
 

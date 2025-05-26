@@ -60,18 +60,16 @@ export function ClassHash() {
   } = useQuery({
     queryKey: ["contractClass", classHash],
     queryFn: async () => {
-      if (!classHash) throw new Error("Class hash is empty");
+      if (!classHash || !isValidAddress(classHash)) {
+        throw new Error("Invalid class hash");
+      }
 
       const contractClass = await RPC_PROVIDER.getClassByHash(classHash!);
       return contractClass ? getContractClassInfo(contractClass) : initialData;
     },
-    enabled: !!classHash,
     initialData,
+    retry: false,
   });
-
-  if (classHash === undefined || !isValidAddress(classHash)) {
-    return <NotFound />;
-  }
 
   if (isLoading || (!error && (!contractVersion || !code))) {
     return <Loading />;

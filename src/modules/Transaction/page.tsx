@@ -100,17 +100,21 @@ export function Transaction() {
   }>({
     queryKey: ["transaction", "calldata", txHash],
     queryFn: async () => {
+      if (!txHash || !isValidAddress(txHash)) {
+        throw new Error("Invalid transaction hash");
+      }
+
       const tx = await RPC_PROVIDER.getTransaction(txHash || "");
       return {
         tx,
         calldata: "calldata" in tx ? decodeCalldata(tx.calldata) : [],
       };
     },
-    enabled: typeof txHash === "string",
     initialData: {
       tx: undefined,
       calldata: [],
     },
+    retry: false,
   });
 
   const {
@@ -415,15 +419,11 @@ export function Transaction() {
     },
   });
 
-  if (txHash === undefined || !isValidAddress(txHash)) {
-    return <NotFound />;
-  }
-
   if (isLoading || (!error && !tx)) {
     return <Loading />;
   }
 
-  if (!tx) {
+  if (error) {
     return <NotFound />;
   }
 
