@@ -41,8 +41,7 @@ import BlockIdDisplay from "@/shared/components/BlockIdDisplay";
 import { cn } from "@cartridge/ui-next";
 import { useBlock } from "@starknet-react/core";
 import TxType from "./components/TxType";
-
-const DataTabs = ["Calldata", "Events", "Signature", "Storage Diffs"];
+import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 
 interface ParsedEvent {
   transaction_hash: string;
@@ -65,7 +64,6 @@ interface StorageDiffData {
 }
 
 const eventColumnHelper = createColumnHelper<EventData>();
-
 const storageDiffColumnHelper = createColumnHelper<StorageDiffData>();
 
 export function Transaction() {
@@ -73,7 +71,12 @@ export function Transaction() {
   const { txHash } = useParams<{ txHash: string }>();
   const { isMobile } = useScreen();
 
-  const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
+  const { selected, onTabChange, tabs } = useHashLinkTabs([
+    "Calldata",
+    "Events",
+    "Signature",
+    "Storage Diffs",
+  ]);
 
   const [eventsPagination, setEventsPagination] = useState({
     pageIndex: 0,
@@ -663,17 +666,14 @@ export function Transaction() {
 
         <div className="bg-white h-full flex-grow grid grid-rows-[min-content_1fr]">
           <DetailsPageSelector
-            selected={DataTabs[0]}
-            onTabSelect={setSelectedDataTab}
-            items={DataTabs.map((tab) => ({
-              name: tab,
-              value: tab,
-            }))}
+            selected={selected}
+            onTabSelect={onTabChange}
+            items={tabs}
           />
 
           <div className="flex-grow flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray overflow-auto">
             {(() => {
-              switch (selectedDataTab) {
+              switch (selected) {
                 case "Calldata":
                   return <CalldataDisplay calldata={calldata} />;
                 case "Events":
@@ -687,7 +687,9 @@ export function Transaction() {
                     </div>
                   );
                 case "Signature":
-                  return <SignatureDisplay signature={tx?.signature} />;
+                  return tx?.signature ? (
+                    <SignatureDisplay signature={tx.signature} />
+                  ) : null;
                 case "Storage Diffs":
                   return (
                     <div className="h-full">

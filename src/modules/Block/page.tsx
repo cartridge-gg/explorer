@@ -5,7 +5,6 @@ import {
   truncateString,
 } from "@/shared/utils/string";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
@@ -21,7 +20,7 @@ import { SectionBoxEntry } from "@/shared/components/section";
 import { TxList } from "./TxList";
 import { EventList } from "./EventList";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
-import BlockNavigation from "./BlockNavigation";
+import { BlockNavigation } from "./BlockNavigation";
 import AddressDisplay from "@/shared/components/AddressDisplay";
 import { TransactionTableData, EventTableData } from "@/types/types";
 import { NotFound } from "../NotFound/page";
@@ -30,8 +29,7 @@ import {
   initExecutions,
   parseExecutionResources,
 } from "@/shared/utils/rpc_utils";
-
-const DataTabs = ["Transactions", "Events", "Messages", "State Updates"];
+import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 
 interface BlockData {
   block?: Awaited<ReturnType<typeof RPC_PROVIDER.getBlockWithReceipts>>;
@@ -63,7 +61,12 @@ const initialData: BlockData = {
 export function Block() {
   const { isMobile } = useScreen();
   const { blockId } = useParams<{ blockId: string }>();
-  const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
+  const { selected, onTabChange, tabs } = useHashLinkTabs([
+    "Transactions",
+    "Events",
+    "Messages",
+    "State Updates",
+  ]);
 
   const {
     data: { block, txs, events, executions, blockComputeData },
@@ -320,25 +323,25 @@ export function Block() {
 
         <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
           <DetailsPageSelector
-            selected={DataTabs[0]}
-            onTabSelect={setSelectedDataTab}
-            items={DataTabs.map((tab) => ({
-              name: tab,
-              value: tab,
-            }))}
+            selected={selected}
+            onTabSelect={onTabChange}
+            items={tabs}
           />
 
           <div className="bg-white flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray">
             <div className="w-full h-full">
-              {selectedDataTab === "Transactions" ? (
-                <TxList transactions={txs} />
-              ) : selectedDataTab === "Events" ? (
-                <EventList events={events} />
-              ) : (
-                <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
-                  <span className="text-[#D0D0D0]">No data found</span>
-                </div>
-              )}
+              {(() => {
+                switch (selected) {
+                  case "Transactions":
+                    return <TxList transactions={txs} />;
+                  case "Events":
+                    return <EventList events={events} />;
+                  default:
+                    <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
+                      <span className="text-[#D0D0D0]">No data found</span>
+                    </div>;
+                }
+              })()}
             </div>
           </div>
         </div>

@@ -23,8 +23,7 @@ import {
 import { Code } from "@/shared/components/contract/Code";
 import { useQuery } from "@tanstack/react-query";
 import { ContractForm } from "@/shared/components/contract/Form";
-
-const DataTabs = ["Read Contract", "Write Contract", "Code"];
+import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 
 const initialData: Omit<ContractClassInfo, "constructor"> & {
   contract?: StarknetContract;
@@ -43,7 +42,11 @@ export function Contract() {
     contractAddress: string;
   }>();
   const { isMobile } = useScreen();
-  const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
+  const { selected, onTabChange, tabs } = useHashLinkTabs([
+    "Read Contract",
+    "Write Contract",
+    "Code",
+  ]);
   const [classHash, setClassHash] = useState<string | null>(null);
 
   const {
@@ -153,12 +156,9 @@ export function Contract() {
 
         <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
           <DetailsPageSelector
-            selected={DataTabs[0]}
-            onTabSelect={setSelectedDataTab}
-            items={DataTabs.map((tab) => ({
-              name: tab,
-              value: tab,
-            }))}
+            selected={selected}
+            onTabSelect={onTabChange}
+            items={tabs}
           />
 
           <div className="bg-white flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray overflow-auto">
@@ -168,7 +168,7 @@ export function Contract() {
                   return null;
                 }
 
-                switch (selectedDataTab) {
+                switch (selected) {
                   case "Read Contract":
                     return (
                       <ContractForm functions={readFuncs} contract={contract} />

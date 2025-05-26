@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Editor } from "@monaco-editor/react";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { useWorld } from "./hooks";
@@ -17,18 +16,17 @@ import {
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumbs";
-
-const DataTabs = [
-  "GraphQL Schema",
-  "Models",
-  "Model",
-  "Transactions",
-  "Events",
-  "Event Messages",
-];
+import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 
 export function World() {
-  const [selectedDataTab, setSelectedDataTab] = useState(DataTabs[0]);
+  const { selected, onTabChange, tabs } = useHashLinkTabs([
+    "GraphQL Schema",
+    "Models",
+    "Model",
+    "Transactions",
+    "Events",
+    "Event Messages",
+  ]);
   const {
     form,
     setForm,
@@ -96,16 +94,13 @@ export function World() {
 
       <div className="h-full flex-grow grid grid-rows-[min-content_1fr] gap-4">
         <DetailsPageSelector
-          selected={selectedDataTab}
-          onTabSelect={setSelectedDataTab}
-          items={DataTabs.map((tab) => ({
-            name: tab,
-            value: tab,
-          }))}
+          selected={selected}
+          onTabSelect={onTabChange}
+          items={tabs}
         />
 
         {(() => {
-          switch (selectedDataTab) {
+          switch (selected) {
             case "GraphQL Schema":
               return (
                 <Editor
