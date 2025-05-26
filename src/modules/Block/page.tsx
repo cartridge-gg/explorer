@@ -20,7 +20,7 @@ import { SectionBoxEntry } from "@/shared/components/section";
 import { TxList } from "./TxList";
 import { EventList } from "./EventList";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
-import BlockNavigation from "./BlockNavigation";
+import { BlockNavigation } from "./BlockNavigation";
 import AddressDisplay from "@/shared/components/AddressDisplay";
 import { TransactionTableData, EventTableData } from "@/types/types";
 import { NotFound } from "../NotFound/page";

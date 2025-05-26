@@ -12,9 +12,9 @@ export function useHashLinkTabs(tabs: string[]) {
   const navigate = useNavigate();
 
   const onTabChange = (tab: string) => {
-    const val = toHash(tab);
-    if (val === hash) return;
-    navigate(val);
+    const newHash = toHash(tab);
+    if (newHash === hash) return;
+    navigate({ pathname: ".", hash: newHash });
   };
   const items = useMemo(
     () =>
