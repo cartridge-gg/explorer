@@ -32,6 +32,7 @@ import {
 } from "@/shared/utils/rpc_utils";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 import { isValidAddress } from "@/shared/utils/contract";
+import { Loading } from "@/shared/components/Loading";
 
 interface BlockData {
   block?: Awaited<ReturnType<typeof RPC_PROVIDER.getBlockWithReceipts>>;
@@ -131,11 +132,7 @@ export function Block() {
   }
 
   if (isLoading || (!error && !block)) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center animate-pulse">
-        <div className="text-sm text-gray-500">Loading...</div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (!block) {

@@ -42,6 +42,9 @@ import { cn } from "@cartridge/ui-next";
 import { useBlock } from "@starknet-react/core";
 import TxType from "./components/TxType";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
+import { isValidAddress } from "@/shared/utils/contract";
+import { NotFound } from "../NotFound/page";
+import { Loading } from "@/shared/components/Loading";
 
 interface ParsedEvent {
   transaction_hash: string;
@@ -89,6 +92,8 @@ export function Transaction() {
 
   const {
     data: { tx, calldata },
+    isLoading,
+    error,
   } = useQuery<{
     tx?: Awaited<ReturnType<typeof RPC_PROVIDER.getTransaction>>;
     calldata: { contract: string; selector: string; args: string[] }[];
@@ -409,6 +414,18 @@ export function Transaction() {
       },
     },
   });
+
+  if (txHash === undefined || !isValidAddress(txHash)) {
+    return <NotFound />;
+  }
+
+  if (isLoading || (!error && !tx)) {
+    return <Loading />;
+  }
+
+  if (!tx) {
+    return <NotFound />;
+  }
 
   return (
     <div id="tx-details" className="w-full flex-grow gap-8">
