@@ -25,3 +25,7 @@ export function fromCamelCase(str: string) {
   const [first, ...rest] = str.replace(/([A-Z])/g, " $1");
   return [first.toUpperCase(), ...rest].join("");
 }
+
+export function toHash(str: string) {
+  return "#" + str.replace(" ", "-").toLowerCase();
+}
