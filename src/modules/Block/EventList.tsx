@@ -8,7 +8,7 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Link } from "react-router-dom";
 
 interface EventListProps {
@@ -60,12 +60,14 @@ export function EventList({ events }: EventListProps) {
               {table
                 .getHeaderGroups()
                 .map((headerGroup) =>
-                  headerGroup.headers.map((header) =>
-                    flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    ),
-                  ),
+                  headerGroup.headers.map((header) => (
+                    <Fragment key={`${headerGroup.id}-${header.id}`}>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                    </Fragment>
+                  )),
                 )}
             </tr>
           </thead>
@@ -123,8 +125,11 @@ export function EventList({ events }: EventListProps) {
 
         <div className="mt-2 h-min flex flex-row gap-4 justify-between items-center">
           <div>
-            Showing <strong>{pagination.pageIndex + 1}</strong> of{" "}
-            <strong>{table.getPageCount()}</strong> pages
+            Showing{" "}
+            <strong>
+              {pagination.pageIndex === 0 ? 0 : pagination.pageIndex + 1}
+            </strong>{" "}
+            of <strong>{table.getPageCount()}</strong> pages
           </div>
 
           <div className="flex flex-row gap-2">
