@@ -1,12 +1,8 @@
-import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { formatNumber } from "@/shared/utils/number";
 import {
   formatSnakeCaseToDisplayValue,
-  isNumber,
   truncateString,
 } from "@/shared/utils/string";
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
 import { useScreen } from "@/shared/hooks/useScreen";
@@ -23,119 +19,30 @@ import { EventList } from "./EventList";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { BlockNavigation } from "./BlockNavigation";
 import AddressDisplay from "@/shared/components/AddressDisplay";
-import { TransactionTableData, EventTableData } from "@/types/types";
 import { NotFound } from "../NotFound/page";
-import {
-  initBlockComputeData,
-  initExecutions,
-  parseExecutionResources,
-} from "@/shared/utils/rpc_utils";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
-import { isValidAddress } from "@/shared/utils/contract";
 import { Loading } from "@/shared/components/Loading";
-
-interface BlockData {
-  block?: Awaited<ReturnType<typeof RPC_PROVIDER.getBlockWithReceipts>>;
-  txs: TransactionTableData[];
-  events: EventTableData[];
-  executions: {
-    ecdsa: number;
-    keccak: number;
-    bitwise: number;
-    pedersen: number;
-    poseidon: number;
-    range_check: number;
-    segment_arena: number;
-  };
-  blockComputeData: {
-    gas: number;
-    steps: number;
-    data_gas: number;
-  };
-}
-
-const initialData: BlockData = {
-  txs: [],
-  events: [],
-  executions: initExecutions,
-  blockComputeData: initBlockComputeData,
-};
+import { useBlock } from "./hooks";
 
 export function Block() {
   const { isMobile } = useScreen();
-  const { blockId } = useParams<{ blockId: string }>();
   const { selected, onTabChange, tabs } = useHashLinkTabs([
     "Transactions",
     "Events",
     "Messages",
     "State Updates",
   ]);
-
   const {
-    data: { block, txs, events, executions, blockComputeData },
+    data: { blockId, block, txs, events, executions, blockComputeData },
     isLoading,
     error,
-  } = useQuery({
-    queryKey: ["block", blockId],
-    queryFn: async () => {
-      if (!blockId || !isNumber(blockId) || !isValidAddress(blockId)) {
-        throw new Error("Invalid block identifier");
-      }
-
-      const block = await RPC_PROVIDER.getBlockWithReceipts(blockId);
-      const txs = block.transactions.map(({ transaction, receipt }, id) => ({
-        id,
-        type: transaction.type,
-        hash: receipt.transaction_hash,
-        status: receipt.execution_status,
-      }));
-      const events = block.transactions.flatMap(({ receipt }) =>
-        receipt.events.map((e, id) => ({
-          id,
-          txn_hash: receipt.transaction_hash,
-          from: e.from_address,
-          // Add required field based on EventTableData interface
-          age: "",
-        })),
-      );
-      const { executions, blockComputeData } = block.transactions.reduce(
-        (acc, { receipt }) => {
-          const r = parseExecutionResources(receipt.execution_resources);
-          acc.executions.ecdsa += r.executions.ecdsa;
-          acc.executions.keccak += r.executions.keccak;
-          acc.executions.bitwise += r.executions.bitwise;
-          acc.executions.pedersen += r.executions.pedersen;
-          acc.executions.poseidon += r.executions.poseidon;
-          acc.executions.range_check += r.executions.range_check;
-          acc.executions.segment_arena += r.executions.segment_arena;
-          acc.blockComputeData.gas += r.blockComputeData.gas;
-          acc.blockComputeData.data_gas += r.blockComputeData.data_gas;
-          acc.blockComputeData.steps += r.blockComputeData.steps;
-          return acc;
-        },
-        {
-          executions: initialData.executions,
-          blockComputeData: initialData.blockComputeData,
-        },
-      );
-
-      return {
-        block,
-        txs,
-        events,
-        executions,
-        blockComputeData,
-      };
-    },
-    initialData,
-    retry: false,
-  });
+  } = useBlock();
 
   if (isLoading || (!error && !block)) {
     return <Loading />;
   }
 
-  if (error) {
+  if (error || !block) {
     return <NotFound />;
   }
 

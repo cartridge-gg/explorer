@@ -6,7 +6,7 @@ export interface FunctionResult<T = unknown> {
 }
 
 // Display Types
-export type DisplayFormatTypes = "decimal" | "hex" | "string";
+export type DisplayFormatTypes = "dec" | "hex" | "string";
 
 // Event Types
 export interface EventDataItem {
