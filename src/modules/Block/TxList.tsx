@@ -13,7 +13,7 @@ import { TransactionTableData } from "@/types/types";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { useWindowDimensions } from "@/shared/hooks/useWindow";
-import { cn } from "@cartridge/ui-next";
+import { cn } from "@cartridge/ui/utils";
 import { useNavigate } from "react-router-dom";
 
 interface TxListProps {

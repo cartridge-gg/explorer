@@ -1,44 +1,14 @@
+@import "@cartridge/ui/themes/default.css";
+@import "@cartridge/ui/themes/dark.css";
+@import "@cartridge/ui/themes/fonts.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  background-color: #fff;
-  background-image: url("/dotgrid.svg");
-  font-family: "Space Mono", monospace;
-  font-size: 11px;
-  color: theme("colors.primary");
-}
-
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-  border: 1px solid theme("colors.borderGray");
-}
-
-th,
-td {
-  text-align: center;
-  font-weight: normal;
-  padding-left: 8px;
-  padding-right: 8px;
-  border: 1px solid theme("colors.borderGray");
-}
-
-th {
-  background-color: #f3f3f3;
-}
-
-thead th {
-  font-weight: bold;
-}
-
-::selection {
-  color: white;
-  background-color: theme("colors.highlight.primary");
-}
-
-.page-header-title::selection {
-  color: theme("colors.highlight.primary");
-  background-color: white;
+@layer base {
+  html,
+  body {
+    @apply bg-background text-foreground ring-foreground text-base;
+  }
 }

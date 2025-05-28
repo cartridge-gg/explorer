@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Connector, useConnect } from "@starknet-react/core";
 import { connectorIconToSrc } from "@/shared/utils/image";
-import { cn } from "@cartridge/ui-next";
+import { cn } from "@cartridge/ui/utils";
 import { ModalTitle, Modal } from "./Modal";
 
 interface WalletConnectModalProps {

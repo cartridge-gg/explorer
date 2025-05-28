@@ -4,7 +4,7 @@ import {
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumbs";
-import { BreadcrumbPage } from "@cartridge/ui-next";
+import { BreadcrumbPage } from "@cartridge/ui";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import PageHeader from "@/shared/components/PageHeader";

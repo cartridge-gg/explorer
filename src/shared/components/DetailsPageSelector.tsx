@@ -1,4 +1,4 @@
-import { cn } from "@cartridge/ui-next";
+import { cn } from "@cartridge/ui/utils";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { Selector, SelectorItem, SelectorProps } from "./Selector";
 

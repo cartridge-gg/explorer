@@ -15,7 +15,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { Editor } from "@monaco-editor/react";
 
 export function useWorld() {
