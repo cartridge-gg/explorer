@@ -1,10 +1,10 @@
 import {
-  cn,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { Editor, Monaco } from "@monaco-editor/react";
 import { InfoIcon } from "lucide-react";
 import { editor } from "monaco-editor";

@@ -7,8 +7,8 @@ import {
   SelectTrigger,
   SelectItem,
   SelectContent,
-  cn,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { flexRender } from "@tanstack/react-table";
 import PageHeader from "@/shared/components/PageHeader";
 import {

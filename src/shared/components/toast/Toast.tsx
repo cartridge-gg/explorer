@@ -1,5 +1,5 @@
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import { cn } from "@cartridge/ui-next";
+import { cn } from "@cartridge/ui/utils";
 import * as icons from "lucide-react";
 
 export type ToastVariant = "success" | "error" | "info" | "warning";

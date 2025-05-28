@@ -1,5 +1,5 @@
 import { useBlockNumber } from "@/shared/hooks/useBlockNumber";
-import { cn } from "@cartridge/ui-next";
+import { cn } from "@cartridge/ui/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 

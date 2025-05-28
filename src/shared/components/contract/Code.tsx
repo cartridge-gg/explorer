@@ -1,5 +1,5 @@
 import ToggleButton from "@/shared/components/ToggleButton";
-import { CheckIcon, CopyIcon } from "@cartridge/ui-next";
+import { CheckIcon, CopyIcon } from "@cartridge/ui";
 import { Editor } from "@monaco-editor/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 

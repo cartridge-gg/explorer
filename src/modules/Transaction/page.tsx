@@ -38,7 +38,7 @@ import dayjs from "dayjs";
 import SignatureDisplay from "./components/SignatureDisplay";
 import AddressDisplay from "@/shared/components/AddressDisplay";
 import BlockIdDisplay from "@/shared/components/BlockIdDisplay";
-import { cn } from "@cartridge/ui-next";
+import { cn } from "@cartridge/ui/utils";
 import { useBlock } from "@starknet-react/core";
 import TxType from "./components/TxType";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
