@@ -11,7 +11,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#262626",
+        // primary: "#262626",
         borderGray: "#D0D0D0",
         starknet: {
           primary: "#FF4F0A",

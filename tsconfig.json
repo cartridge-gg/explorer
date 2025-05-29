@@ -23,7 +23,7 @@
     "noEmit": false,
     "allowJs": false,
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": ["./src/*"]
     }
   }
 }

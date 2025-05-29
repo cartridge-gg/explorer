@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@cartridge/connector": "^0.7.13",
-    "@cartridge/presets": "github:cartridge-gg/presets#2373780", 
+    "@cartridge/presets": "github:cartridge-gg/presets#2373780",
     "@cartridge/ui": "link:@cartridge/ui",
     "@cartridge/utils": "^0.7.13",
     "@monaco-editor/loader": "^1.5.0",

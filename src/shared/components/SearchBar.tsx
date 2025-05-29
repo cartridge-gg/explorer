@@ -226,7 +226,8 @@ export function SearchBar() {
 
   return (
     <div
-      className={cn("min-w-[200px] w-full h-[42px] flex relative border border-background-500 items-center justify-between shadow",
+      className={cn(
+        "min-w-[200px] w-full h-[42px] flex relative border border-background-500 items-center justify-between shadow",
         isDropdownOpen && result ? "border-b-0" : undefined,
       )}
     >
@@ -252,44 +253,42 @@ export function SearchBar() {
         <SearchIcon />
       </div>
 
-      {
-        isDropdownOpen ? (
-          <div className="search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full">
-            <div
-              // hack for doing custom spacing for the dashed line
-              style={{
-                backgroundImage:
-                  "linear-gradient(to right, var(--background-100) 50%, var(--background-400) 0%)",
-                backgroundPosition: "top",
-                backgroundSize: "15px 1px",
-                backgroundRepeat: "repeat-x",
-              }}
-              className="flex flex-col gap-2 px-[15px] py-[10px] border border-background-500 border-t-0 shadow-md"
-            >
-              {result ? (
-                <div
-                  ref={dropdownResultRef}
-                  tabIndex={0}
-                  onKeyDown={handleKeyDown}
-                  onClick={handleResultClick}
-                  className={cn(
-                    "flex flex-row hover:bg-background-200 cursor-pointer items-center gap-2 justify-between w-full px-2 py-1 outline-none",
-                    isResultFocused && "bg-background-200"
-                  )}
-                >
-                  <span className="font-bold uppercase">{result.type}</span>
+      {isDropdownOpen ? (
+        <div className="bg-background search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full">
+          <div
+            // hack for doing custom spacing for the dashed line
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, var(--background) 50%, var(--background-400) 0%)",
+              backgroundPosition: "top",
+              backgroundSize: "15px 1px",
+              backgroundRepeat: "repeat-x",
+            }}
+            className="flex flex-col gap-2 px-[15px] py-[10px] border border-background-500 border-t-0 shadow-md"
+          >
+            {result ? (
+              <div
+                ref={dropdownResultRef}
+                tabIndex={0}
+                onKeyDown={handleKeyDown}
+                onClick={handleResultClick}
+                className={cn(
+                  "flex flex-row hover:bg-background-400 cursor-pointer items-center gap-2 justify-between w-full px-2 py-1 outline-none",
+                  isResultFocused && "bg-background-400",
+                )}
+              >
+                <span className="font-bold uppercase">{result.type}</span>
 
-                  <span>{truncateString(result.value, isMobile ? 10 : 25)}</span>
-                </div>
-              ) : (
-                <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-foreground-100">
-                  <div>No results found</div>
-                </div>
-              )}
-            </div>
+                <span>{truncateString(result.value, isMobile ? 10 : 25)}</span>
+              </div>
+            ) : (
+              <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-foreground-100">
+                <div>No results found</div>
+              </div>
+            )}
           </div>
-        ) : null
-      }
-    </div >
+        </div>
+      ) : null}
+    </div>
   );
 }

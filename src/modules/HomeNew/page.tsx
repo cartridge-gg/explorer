@@ -20,7 +20,12 @@ export function Home() {
             Explorer
           </div>
 
-          {chainId && <Network chainId={chainId.id} tooltipTriggerClassName="bg-background-300 hover:bg-background-200" />}
+          {chainId && (
+            <Network
+              chainId={chainId.id}
+              tooltipTriggerClassName="bg-background-300 hover:bg-background-200"
+            />
+          )}
         </div>
 
         <SearchBar />

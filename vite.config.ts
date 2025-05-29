@@ -35,7 +35,7 @@ export default defineConfig({
       "@utils": path.resolve(__dirname, "./src/utils"),
       "@modules": path.resolve(__dirname, "./src/modules"),
       "@constants": path.resolve(__dirname, "./src/constants"),
-      "react": path.resolve(__dirname, "./node_modules/react"),
+      react: path.resolve(__dirname, "./node_modules/react"),
     },
   },
   define: {

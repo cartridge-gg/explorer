@@ -1,5 +1,4 @@
 import { SearchBar } from "@/shared/components/SearchBar";
-import ChainDisplay from "../ChainDisplay";
 import AccountDisplay from "../AccountDisplay";
 
 export function Header() {
@@ -11,7 +10,6 @@ export function Header() {
 
       <div className="flex gap-[7px]">
         <AccountDisplay />
-        <ChainDisplay />
       </div>
     </div>
   );
