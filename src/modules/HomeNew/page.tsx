@@ -1,18 +1,12 @@
 import { SearchBar } from "@/shared/components/SearchBar";
-import ChainDisplay from "@/shared/components/ChainDisplay";
 import AccountDisplay from "@/shared/components/AccountDisplay";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { Link } from "react-router-dom";
-
-// const POLLING_INTERVAL = 3000; // 3 seconds
+import { Network } from "@cartridge/ui";
+import useChain from "@/shared/hooks/useChain";
 
 export function Home() {
-  // // Fetch the latest block number
-  // const { data: latestBlockNumber } = useQuery({
-  //   queryKey: QUERY_KEYS.getBlockNumber,
-  //   queryFn: () => RPC_PROVIDER.getBlockNumber(),
-  //   refetchInterval: POLLING_INTERVAL,
-  // });
+  const { id: chainId } = useChain();
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">
@@ -20,13 +14,13 @@ export function Home() {
         <AccountDisplay className="h-full" />
       </div>
 
-      <div className="flex flex-col gap-2 p-1 bg-white w-[520px]">
+      <div className="flex flex-col gap-2 p-1 w-[520px]">
         <div className="flex gap-2 w-full uppercase text-sm font-bold">
-          <div className="h-[25px] px-3 py-1 bg-primary flex-1 text-white flex items-center">
+          <div className="h-[25px] px-3 py-1 flex-1 flex items-center bg-background-300">
             Explorer
           </div>
 
-          <ChainDisplay />
+          {chainId && <Network chainId={chainId.id} tooltipTriggerClassName="bg-background-300 hover:bg-background-200" />}
         </div>
 
         <SearchBar />
@@ -55,9 +49,9 @@ function ChainInfoContainer() {
 
 function ChainInfoItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="homepage-chain-info-item border border-borderGray h-[20px] bg-white flex items-center">
+    <div className="homepage-chain-info-item border border-background-500 h-[20px] flex items-center">
       <span className="font-bold px-2">{label}</span>
-      <span className="border-l border-l-borderGray px-2">{value}</span>
+      <span className="border-l border-background-500 px-2">{value}</span>
     </div>
   );
 }

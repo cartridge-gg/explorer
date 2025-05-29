@@ -76,9 +76,8 @@ export default function AccountDisplay(props: HTMLAttributes<HTMLDivElement>) {
     }
   };
 
-  const classes = `relative bg-white hover:bg-primary hover:text-white hover:border-primary aspect-square sm:aspect-auto sm:w-[122px] border border-borderGray font-bold flex px-0 sm:px-3 py-1 gap-3 items-center justify-center sm:justify-between cursor-pointer ${
-    props.className || ""
-  } ${status === "connected" ? "" : "uppercase"} `;
+  const classes = `relative bg-white hover:bg-primary hover:text-white hover:border-primary aspect-square sm:aspect-auto sm:w-[122px] border border-borderGray font-bold flex px-0 sm:px-3 py-1 gap-3 items-center justify-center sm:justify-between cursor-pointer ${props.className || ""
+    } ${status === "connected" ? "" : "uppercase"} `;
 
   return (
     <>
