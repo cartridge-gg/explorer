@@ -14,6 +14,7 @@ import { JsonRpcPlayground } from "@/modules/JsonRpc/page";
 import { NotFound } from "@/modules/NotFound/page";
 import { cn } from "@cartridge/ui/utils";
 import { World } from "@/modules/World/page";
+import { SonnerToaster } from "@cartridge/ui";
 
 export function App() {
   const location = useLocation();
@@ -41,6 +42,7 @@ export function App() {
         <Route path="/world" element={<World />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <SonnerToaster />
     </div>
   );
 }
