@@ -36,6 +36,7 @@ export default defineConfig({
       "@modules": path.resolve(__dirname, "./src/modules"),
       "@constants": path.resolve(__dirname, "./src/constants"),
       react: path.resolve(__dirname, "./node_modules/react"),
+      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
     },
   },
   define: {

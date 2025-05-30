@@ -1,18 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
 import { Connector, useConnect } from "@starknet-react/core";
 import { connectorIconToSrc } from "@/shared/utils/image";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  Spinner,
+  WalletIcon,
+} from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { ModalTitle, Modal } from "./Modal";
+import { useScreen } from "@/shared/hooks/useScreen";
 
-interface WalletConnectModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export function WalletConnectModal({
-  isOpen,
-  onClose,
-}: WalletConnectModalProps) {
+export function ConnectButton() {
+  const { isMobile } = useScreen();
   const { connectAsync, connectors } = useConnect();
   const [connecting, setConnecting] = useState<string | null>(null);
 
@@ -22,7 +26,6 @@ export function WalletConnectModal({
         setConnecting(connector.id);
         await connectAsync({ connector });
         localStorage.setItem("lastUsedConnector", connector.id);
-        onClose();
       } catch (error) {
         console.error("Connection error:", error);
         localStorage.removeItem("lastUsedConnector");
@@ -30,7 +33,7 @@ export function WalletConnectModal({
         setConnecting(null);
       }
     },
-    [connectAsync, onClose],
+    [connectAsync],
   );
 
   useEffect(() => {
@@ -47,9 +50,23 @@ export function WalletConnectModal({
   }, [connectors]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalTitle title="Connect" />
-      <div className="w-[380px] max-w-2xl max-h-[50vh]">
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          className="border-primary text-primary gap-3 text-md h-12 w-12 p-0 sm:p-4 sm:w-auto hover:bg-transparent hover:text-primary-200 hover:border-primary-200 justify-center sm:justify-between"
+          size={isMobile ? "icon" : "default"}
+        >
+          <WalletIcon variant="solid" />
+          <span className="hidden sm:block">connect</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-[90%] sm:max-w-[400px] pt-20 border-2 border-background-500">
+        <DialogHeader className="gap-2">
+          <DialogTitle className="uppercase">Connect</DialogTitle>
+          <DialogDescription>Connect your wallet to continue</DialogDescription>
+        </DialogHeader>
+
         <div>
           {connectors
             .sort((a, b) => {
@@ -63,28 +80,26 @@ export function WalletConnectModal({
                 onClick={() => onConnect(connector)}
                 disabled={!!connecting}
                 className={cn(
-                  "mt-[-1px] flex items-center justify-between w-full p-3 border hover:bg-[#EEEEEE] transition-colors",
+                  "mt-[-1px] flex items-center justify-between w-full p-3 border hover:bg-background-300 disabled:hover:bg-background disabled:cursor-not-allowed transition-colors",
                   connecting === connector.id
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300",
+                    ? "border-background-300"
+                    : "border-background-300 hover:border-gray-400",
                 )}
               >
-                <div className="w-full flex items-center justify-between">
+                <div className="w-full flex items-center">
                   <img
                     src={connectorIconToSrc(connector.icon)}
                     alt={`${connector.name} logo`}
-                    className="w-6 h-6 mr-3"
+                    className="size-6 mr-3"
                   />
                   <span className="font-medium">{connector.name}</span>
                 </div>
 
-                {connecting === connector.id && (
-                  <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                )}
+                {connecting === connector.id && <Spinner size="lg" />}
               </button>
             ))}
         </div>
-      </div>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 }

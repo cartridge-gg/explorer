@@ -29,9 +29,6 @@ export default {
         // `slightly large` as it sits between lg and xl
         sl: "1196px",
       },
-      fontFamily: {
-        sans: ["Space Mono", "monospace"],
-      },
       fontSize: {
         xs: "9px",
         sm: "10px",
