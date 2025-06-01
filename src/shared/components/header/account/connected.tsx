@@ -17,6 +17,7 @@ import {
   TrashIcon,
   ArrowIcon,
   TableHeader,
+  Skeleton,
 } from "@cartridge/ui";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import { useQuery } from "@tanstack/react-query";
@@ -35,11 +36,9 @@ export function Connected() {
   const { clearCalls, removeCall } = useCallCartDispatch();
   const [selected, setSelected] = useState<{ i: number; call: Call }>();
 
-  const { data: username } = useQuery({
+  const username = useQuery({
     queryKey: ["username", address],
-    queryFn: () => {
-      return (connector as ControllerConnector)?.controller.username();
-    },
+    queryFn: () => (connector as ControllerConnector)?.controller.username(),
     enabled: !!connector && "controller" in connector,
   });
 
@@ -101,7 +100,11 @@ export function Connected() {
           )}
           <img src={icon} alt="controller" className="size-6" />
           <span className="hidden sm:block">
-            {username ?? truncateString(address ?? "", 3)}
+            {username.isLoading ? (
+              <Skeleton className="h-4 w-20" />
+            ) : (
+              (username.data ?? truncateString(address ?? "", 3))
+            )}
           </span>
         </Button>
       </DialogTrigger>

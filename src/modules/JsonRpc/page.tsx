@@ -16,7 +16,7 @@ import { PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fromCamelCase } from "@/shared/utils/string";
 import { OpenRPC, Method } from "./open-rpc";
-import { ParamForm } from "@/shared/form";
+import { ParamForm } from "@/shared/components/form";
 import { useLocation, useNavigate } from "react-router-dom";
 
 interface FormState {

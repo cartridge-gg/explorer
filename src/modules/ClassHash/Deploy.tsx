@@ -8,7 +8,7 @@ import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { DeployContractResponse } from "starknet";
-import { ParamForm } from "@/shared/form";
+import { ParamForm } from "@/shared/components/form";
 
 export function Deploy({
   classHash,
