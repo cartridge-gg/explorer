@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  Skeleton,
   Spinner,
   WalletIcon,
 } from "@cartridge/ui";
@@ -19,6 +20,7 @@ export function ConnectButton() {
   const { isMobile } = useScreen();
   const { connectAsync, connectors } = useConnect();
   const [connecting, setConnecting] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const onConnect = useCallback(
     async (connector: Connector) => {
@@ -38,16 +40,21 @@ export function ConnectButton() {
 
   useEffect(() => {
     const lastUsedConnector = localStorage.getItem("lastUsedConnector");
-    if (!lastUsedConnector) {
-      return;
+    if (lastUsedConnector) {
+      const connector = connectors.find((c) => c.id === lastUsedConnector);
+      if (connector) {
+        onConnect(connector).then(() => setIsLoading(false));
+      } else {
+        setIsLoading(false);
+      }
+    } else {
+      setIsLoading(false);
     }
-    const connector = connectors.find((c) => c.id === lastUsedConnector);
-    if (!connector) {
-      return;
-    }
-    onConnect(connector);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectors]);
+  }, [connectors, onConnect]);
+
+  if (isLoading) {
+    return <Skeleton className="h-12 w-48" />;
+  }
 
   return (
     <Dialog>

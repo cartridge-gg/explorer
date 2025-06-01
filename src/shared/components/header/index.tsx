@@ -1,7 +1,7 @@
 import { SearchBar } from "@/shared/components/SearchBar";
 import { Account } from "./account";
 import { useLocation } from "react-router-dom";
-import { Network, Separator } from "@cartridge/ui";
+import { Network, Separator, Skeleton } from "@cartridge/ui";
 import useChain from "@/shared/hooks/useChain";
 
 export function Header() {
@@ -14,12 +14,16 @@ export function Header() {
       <div className="w-[467px]">{!isHome && <SearchBar />}</div>
 
       <div className="flex items-center gap-4">
-        {!isHome && chainId && (
+        {!isHome && (
           <>
-            <Network
-              chainId={chainId.id}
-              tooltipTriggerClassName="bg-background-300 hover:bg-background-200 h-12 text-md"
-            />
+            {chainId ? (
+              <Network
+                chainId={chainId.id}
+                tooltipTriggerClassName="bg-background-300 hover:bg-background-200 h-12 text-md"
+              />
+            ) : (
+              <Skeleton className="h-12 w-40" />
+            )}
 
             <Separator
               orientation="vertical"
