@@ -2,12 +2,16 @@ import { cartridgeTWPreset } from "@cartridge/ui/preset";
 
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./index.html",
+    "./src/**/*.{ts,tsx}",
+    "./node_modules/@cartridge/ui/dist/**/*.{js,jsx}",
+  ],
   presets: [cartridgeTWPreset],
   theme: {
     extend: {
       colors: {
-        primary: "#262626",
+        // primary: "#262626",
         borderGray: "#D0D0D0",
         starknet: {
           primary: "#FF4F0A",
@@ -24,9 +28,6 @@ export default {
       screens: {
         // `slightly large` as it sits between lg and xl
         sl: "1196px",
-      },
-      fontFamily: {
-        sans: ["Space Mono", "monospace"],
       },
       fontSize: {
         xs: "9px",
