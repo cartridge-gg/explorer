@@ -10,7 +10,7 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { flexRender } from "@tanstack/react-table";
-import PageHeader from "@/shared/components/PageHeader";
+import { PageHeader } from "@/shared/components/PageHeader";
 import {
   Breadcrumb,
   BreadcrumbItem,

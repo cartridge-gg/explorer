@@ -11,7 +11,7 @@ import {
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumbs";
-import PageHeader from "@/shared/components/PageHeader";
+import { PageHeader } from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 import { TxList } from "./TxList";

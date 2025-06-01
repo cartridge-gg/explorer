@@ -11,7 +11,7 @@ import {
 } from "@/shared/components/breadcrumbs";
 
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
-import PageHeader from "@/shared/components/PageHeader";
+import { PageHeader } from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";

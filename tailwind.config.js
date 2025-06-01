@@ -10,21 +10,6 @@ export default {
   presets: [cartridgeTWPreset],
   theme: {
     extend: {
-      colors: {
-        // primary: "#262626",
-        borderGray: "#D0D0D0",
-        starknet: {
-          primary: "#FF4F0A",
-          secondary: "#29296E",
-        },
-        highlight: {
-          primary: "#262626",
-          secondary: "white",
-        },
-        button: {
-          whiteInitialHover: "#f3f4f6",
-        },
-      },
       screens: {
         // `slightly large` as it sits between lg and xl
         sl: "1196px",
@@ -38,12 +23,11 @@ export default {
       },
       borderRadius: {
         xs: "2px",
-        sm: "3px",
-        DEFAULT: "4px",
-        md: "4px",
-        lg: "6px",
+        sm: "4px",
+        DEFAULT: "6px",
+        md: "6px",
+        lg: "8px",
       },
     },
   },
-  plugins: [],
 };

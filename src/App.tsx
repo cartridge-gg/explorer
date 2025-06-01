@@ -2,7 +2,7 @@ import "./index.css";
 
 import { Routes, Route, useLocation } from "react-router-dom";
 import { Header } from "@/shared/components/header";
-import { Home } from "@/modules/HomeNew/page";
+import { Home } from "@/modules/Home/page";
 import { Transaction } from "@/modules/Transaction/page";
 import { Block } from "@/modules/Block/page";
 import { BlockList } from "@/modules/BlockList/page";

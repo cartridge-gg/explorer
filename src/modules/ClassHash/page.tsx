@@ -7,7 +7,7 @@ import {
 import { BreadcrumbPage } from "@cartridge/ui";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
-import PageHeader from "@/shared/components/PageHeader";
+import { PageHeader } from "@/shared/components/PageHeader";
 import { SectionBoxEntry } from "@/shared/components/section";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";

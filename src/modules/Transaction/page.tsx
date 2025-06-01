@@ -31,7 +31,7 @@ import {
 } from "@/shared/components/breadcrumbs";
 import { DataTable } from "@/shared/components/dataTable";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
-import PageHeader from "@/shared/components/PageHeader";
+import { PageHeader } from "@/shared/components/PageHeader";
 import { SectionBoxEntry } from "@/shared/components/section";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import dayjs from "dayjs";
@@ -256,7 +256,7 @@ export function Transaction() {
             className="flex border-0 pr-4 justify-start cursor-pointer text-left"
             onClick={() => navigate(`../event/${info.getValue().toString()}`)}
           >
-            <span className="whitespace-nowrap hover:text-blue-400 transition-all">
+            <span className="whitespace-nowrap hover:transition-all">
               {truncateString(info.getValue())}
             </span>
           </div>
@@ -304,7 +304,7 @@ export function Transaction() {
         cell: (info) => (
           <div
             onClick={() => navigate(`../block/${info.getValue().toString()}`)}
-            className="w-1 text-right border-0 cursor-pointer hover:text-blue-400 transition-all"
+            className="w-1 text-right border-0 cursor-pointer transition-all"
           >
             <span>{info.getValue()}</span>
           </div>
@@ -451,7 +451,7 @@ export function Transaction() {
 
             <div
               className={cn(
-                "text-white px-2 h-5 w-[84px] flex items-center justify-center font-bold",
+                "px-2 h-5 w-[84px] flex items-center justify-center font-bold",
                 receipt
                   ? receipt?.isSuccess()
                     ? "bg-[#7BA797]"
@@ -464,7 +464,7 @@ export function Transaction() {
           </div>
         }
         subtextRightComponent={
-          <div className="text-[#5D5D5D]">
+          <div>
             {dayjs.unix(block?.timestamp).format("MMM D YYYY HH:mm:ss")}{" "}
           </div>
         }
@@ -642,7 +642,7 @@ export function Transaction() {
             <table className="w-full border-collapse">
               <thead>
                 <tr>
-                  <th colSpan={4} className="p-1 bg-gray-100 border">
+                  <th colSpan={4} className="p-1 border">
                     BUILTINS COUNTER
                   </th>
                 </tr>
@@ -681,7 +681,7 @@ export function Transaction() {
           </SectionBox>
         </div>
 
-        <div className="bg-white h-full flex-grow grid grid-rows-[min-content_1fr]">
+        <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
           <DetailsPageSelector
             selected={selected}
             onTabSelect={onTabChange}
