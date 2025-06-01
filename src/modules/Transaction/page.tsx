@@ -9,9 +9,12 @@ import { cairo } from "starknet";
 import CalldataDisplay from "./components/CalldataDisplay";
 import {
   Breadcrumb,
-  BreadcrumbSeparator,
   BreadcrumbItem,
-} from "@/shared/components/breadcrumbs";
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+  Skeleton,
+} from "@cartridge/ui";
 import { DataTable } from "@/shared/components/dataTable";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { PageHeader } from "@/shared/components/PageHeader";
@@ -22,7 +25,7 @@ import SignatureDisplay from "./components/SignatureDisplay";
 import AddressDisplay from "@/shared/components/AddressDisplay";
 import BlockIdDisplay from "@/shared/components/BlockIdDisplay";
 import { cn } from "@cartridge/ui/utils";
-import TxType from "./components/TxType";
+import { TxType } from "./components/TxType";
 import { NotFound } from "../NotFound/page";
 import { Loading } from "@/shared/components/Loading";
 import { useTransaction } from "./hooks";
@@ -61,30 +64,34 @@ export function Transaction() {
   }
 
   return (
-    <div id="tx-details" className="w-full flex-grow gap-8">
-      <div className="mb-2">
-        <Breadcrumb>
-          <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
+    <div id="tx-details" className="w-full flex flex-col gap-4">
+      <Breadcrumb>
+        <BreadcrumbList className="font-bold">
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem to="../txns">Transactions</BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="../txns">Transactions</BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             {isMobile && txHash ? truncateString(txHash) : txHash}
           </BreadcrumbItem>
-        </Breadcrumb>
-      </div>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <PageHeader
         className="mb-6"
         title={`Transaction`}
-        subtext={receipt?.finality_status}
+        subtext={receipt?.finality_status ?? <Skeleton className="h-4 w-20" />}
         titleRightComponent={
           <div className="flex gap-2">
             {receipt?.type ? <TxType type={receipt?.type} /> : null}
 
             <div
               className={cn(
-                "px-2 h-5 w-[84px] flex items-center justify-center font-bold",
+                "px-2 h-5 w-[84px] flex items-center justify-center font-bold rounded-xs",
                 receipt
                   ? receipt?.isSuccess()
                     ? "bg-[#7BA797]"
@@ -98,7 +105,11 @@ export function Transaction() {
         }
         subtextRightComponent={
           <div>
-            {dayjs.unix(block?.timestamp).format("MMM D YYYY HH:mm:ss")}{" "}
+            {block ? (
+              dayjs.unix(block.timestamp).format("MMM D YYYY HH:mm:ss")
+            ) : (
+              <Skeleton className="h-4 w-20" />
+            )}
           </div>
         }
       />

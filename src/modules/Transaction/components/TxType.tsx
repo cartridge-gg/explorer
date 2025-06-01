@@ -2,7 +2,7 @@ export interface TxTypeProps {
   type: string;
 }
 
-export default function TxType({ type }: TxTypeProps) {
+export function TxType({ type }: TxTypeProps) {
   const upperType = type.toUpperCase();
 
   let color = "";
@@ -26,7 +26,7 @@ export default function TxType({ type }: TxTypeProps) {
 
   return (
     <div
-      className="px-2 h-5 flex items-center justify-center font-bold"
+      className="px-2 h-5 flex items-center justify-center font-bold rounded-xs"
       style={{
         color: color || "white",
         border: `1px solid ${color || "var(--borderGray)"}`,
