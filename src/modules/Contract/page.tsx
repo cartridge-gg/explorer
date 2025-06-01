@@ -3,15 +3,16 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Contract as StarknetContract } from "starknet";
-import { BreadcrumbPage } from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/shared/components/breadcrumbs";
-
+} from "@cartridge/ui";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
-import PageHeader from "@/shared/components/PageHeader";
+import { PageHeader } from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";
@@ -101,22 +102,26 @@ export function Contract() {
   }
 
   return (
-    <div id="contract-details" className="w-full flex-grow gap-8">
-      <div className="mb-2">
-        <Breadcrumb>
-          <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>Contracts</BreadcrumbItem>
+    <div id="contract-details" className="w-full flex flex-col gap-4">
+      <Breadcrumb>
+        <BreadcrumbList className="font-bold">
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className=" text-sm">
+            <BreadcrumbLink href="../contracts">Contracts</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="font-bold">
               {isMobile && contractAddress
                 ? truncateString(contractAddress)
                 : contractAddress}
             </BreadcrumbPage>
           </BreadcrumbItem>
-        </Breadcrumb>
-      </div>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <PageHeader className="mb-6" title="Contract" />
 

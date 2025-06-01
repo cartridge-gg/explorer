@@ -13,7 +13,7 @@ import {
 import { cn } from "@cartridge/ui/utils";
 import { Input, SearchIcon } from "@cartridge/ui";
 
-export function SearchBar() {
+export function SearchBar({ className }: { className?: string }) {
   const navigate = useNavigate();
   const { isMobile } = useScreen();
 
@@ -227,8 +227,9 @@ export function SearchBar() {
   return (
     <div
       className={cn(
-        "min-w-[200px] w-full h-[42px] flex relative border border-background-500 items-center justify-between shadow",
+        "min-w-[200px] w-full h-[42px] flex relative border border-background-500 items-center justify-between shadow rounded",
         isDropdownOpen && result ? "border-b-0" : undefined,
+        className,
       )}
     >
       <Input

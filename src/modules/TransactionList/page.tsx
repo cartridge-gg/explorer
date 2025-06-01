@@ -12,6 +12,21 @@ import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { getPaginatedBlockNumbers } from "@/shared/utils/rpc_utils";
 import { truncateString } from "@/shared/utils/string";
 import { useScreen } from "@/shared/hooks/useScreen";
+import { PageHeader } from "@/shared/components/PageHeader";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@cartridge/ui";
 
 const ROWS_TO_RENDER = 20;
 const BLOCKS_BATCH_SIZE = 5; // Number of blocks to fetch at once
@@ -127,19 +142,30 @@ export function TransactionList() {
   });
 
   return (
-    <div className=" text-white px-2 py-4 rounded-lg">
-      <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
-        <h1 className="text-white">Transactions List</h1>
-      </div>
+    <div className="px-2 py-4 rounded-lg flex flex-col gap-4">
+      <Breadcrumb>
+        <BreadcrumbList className="font-bold">
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="font-bold">Transactions</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      <PageHeader title="Transactions List" />
+
       <div className="overflow-x-auto md:w-full">
-        <table className="w-full mt-2 table-auto border-collapse border-t border-b border-[#8E8E8E] border-l-4 border-r">
-          <thead>
+        <Table className="w-full mt-2 table-auto border-collapse border-t border-b border-l-4 border-r">
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="">
+              <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <th
+                  <TableHead
                     key={header.id}
-                    className="p-2 text-black font-bold text-left text-sm"
+                    className="p-2 font-bold text-left text-sm"
                   >
                     {header.isPlaceholder
                       ? null
@@ -147,27 +173,27 @@ export function TransactionList() {
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
-                  </th>
+                  </TableHead>
                 ))}
-              </tr>
+              </TableRow>
             ))}
-          </thead>
-          <tbody>
+          </TableHeader>
+          <TableBody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="  text-black">
+              <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
-                  <td
+                  <TableCell
                     key={cell.id}
                     onClick={() => navigate(`../tx/${cell.row.original.hash}`)}
                     className="p-2 text-sm"
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
+                  </TableCell>
                 ))}
-              </tr>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       <div className="flex justify-center mt-4 gap-4">

@@ -1,3 +1,4 @@
+import { cn } from "@cartridge/ui";
 import React from "react";
 
 interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -7,7 +8,7 @@ interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   subtextRightComponent?: React.ReactNode;
 }
 
-export default function PageHeader({
+export function PageHeader({
   title,
   subtext,
   titleRightComponent,
@@ -16,16 +17,19 @@ export default function PageHeader({
 }: PageHeaderProps) {
   return (
     <div className="overflow-clip" {...props}>
-      <div className="px-4 w-full justify-between bg-primary h-[40px] flex items-center">
-        <h1 className="page-header-title text-white uppercase text-lg">
-          {title}
-        </h1>
+      <div
+        className={cn(
+          "px-4 w-full justify-between bg-background-400 h-[40px] flex items-center",
+          subtext ? "rounded-t border-b border-background-500" : "rounded",
+        )}
+      >
+        <h1 className="capitalize text-lg font-bold">{title}</h1>
         {titleRightComponent ? titleRightComponent : null}
       </div>
 
       {subtext && (
-        <div className="px-4 w-full justify-between bg-[#F1F1F1] border border-borderGray border-t-0 h-[25px] flex items-center capitalize">
-          <div className="text-sm text-[#4A4A4A]">{subtext}</div>
+        <div className="bg-background-400 text-foreground-200 px-4 w-full justify-between h-[25px] flex items-center rounded-b">
+          <div className="text-sm">{subtext}</div>
           {subtextRightComponent ? subtextRightComponent : null}
         </div>
       )}
