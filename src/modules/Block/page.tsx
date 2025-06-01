@@ -8,9 +8,12 @@ import { cairo } from "starknet";
 import { useScreen } from "@/shared/hooks/useScreen";
 import {
   Breadcrumb,
+  BreadcrumbList,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbSeparator,
-} from "@/shared/components/breadcrumbs";
+  BreadcrumbPage,
+} from "@cartridge/ui";
 import { PageHeader } from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
@@ -48,13 +51,21 @@ export function Block() {
 
   return (
     <div id="block-details" className="w-full flex-grow gap-8">
-      <div className="flex justify-between mb-2">
-        <Breadcrumb className="flex items-center">
-          <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem to="../blocks">Blocks</BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>{blockId}</BreadcrumbItem>
+      <div className="flex justify-between">
+        <Breadcrumb>
+          <BreadcrumbList className="font-bold">
+            <BreadcrumbItem>
+              <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="../blocks">Blocks</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="font-bold">{blockId}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
         </Breadcrumb>
 
         <BlockNavigation currentBlockNumber={block.block_number} />

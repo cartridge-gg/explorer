@@ -12,6 +12,7 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
   Skeleton,
 } from "@cartridge/ui";
@@ -76,7 +77,9 @@ export function Transaction() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            {isMobile && txHash ? truncateString(txHash) : txHash}
+            <BreadcrumbPage className="font-bold">
+              {isMobile && txHash ? truncateString(txHash) : txHash}
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

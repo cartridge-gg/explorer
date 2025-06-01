@@ -20,6 +20,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
 } from "@cartridge/ui";
 
 const ROWS_TO_RENDER = 20;
@@ -136,8 +142,21 @@ export function TransactionList() {
   });
 
   return (
-    <div className="px-2 py-4 rounded-lg">
+    <div className="px-2 py-4 rounded-lg flex flex-col gap-4">
+      <Breadcrumb>
+        <BreadcrumbList className="font-bold">
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="font-bold">Transactions</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       <PageHeader title="Transactions List" />
+
       <div className="overflow-x-auto md:w-full">
         <Table className="w-full mt-2 table-auto border-collapse border-t border-b border-l-4 border-r">
           <TableHeader>

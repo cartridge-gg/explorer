@@ -7,15 +7,16 @@ import {
   SelectTrigger,
   SelectItem,
   SelectContent,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbSeparator,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbLink,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { flexRender } from "@tanstack/react-table";
 import { PageHeader } from "@/shared/components/PageHeader";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbSeparator,
-} from "@/shared/components/breadcrumbs";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 
 export function World() {
@@ -40,11 +41,17 @@ export function World() {
   } = useWorld();
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
       <Breadcrumb>
-        <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>World</BreadcrumbItem>
+        <BreadcrumbList className="font-bold">
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="font-bold">World</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
       </Breadcrumb>
 
       <PageHeader className="mb-6" title={`World (${form.project})`} />

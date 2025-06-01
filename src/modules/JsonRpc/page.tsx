@@ -1,12 +1,15 @@
 import { rpcUrl } from "@/constants/rpc";
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
+import { PageHeader } from "@/shared/components/PageHeader";
+import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/shared/components/breadcrumbs";
-import { PageHeader } from "@/shared/components/PageHeader";
-import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
+} from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useQuery } from "@tanstack/react-query";
 import { PlayIcon } from "lucide-react";
@@ -217,14 +220,20 @@ export function JsonRpcPlayground() {
   }, [hash, methods, onMethodChange]);
 
   return (
-    <div id="json-playground" className="w-full gap-8">
-      <div className="mb-2">
-        <Breadcrumb>
-          <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
+    <div id="json-playground" className="w-full flex flex-col gap-4">
+      <Breadcrumb>
+        <BreadcrumbList className="font-bold">
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>JSON-RPC Playground</BreadcrumbItem>
-        </Breadcrumb>
-      </div>
+          <BreadcrumbItem>
+            <BreadcrumbPage className="font-bold">
+              JSON-RPC Playground
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <PageHeader
         className="mb-6"

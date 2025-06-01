@@ -2,9 +2,11 @@ import { truncateString } from "@/shared/utils/string";
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/shared/components/breadcrumbs";
-import { BreadcrumbPage } from "@cartridge/ui";
+} from "@cartridge/ui";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { PageHeader } from "@/shared/components/PageHeader";
@@ -80,17 +82,21 @@ export function ClassHash() {
   }
 
   return (
-    <div id="class-details" className="w-full flex-grow">
-      <Breadcrumb className="mb-2">
-        <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>Class</BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbPage className="text-sm">
-            {isMobile && classHash ? truncateString(classHash) : classHash}
-          </BreadcrumbPage>
-        </BreadcrumbItem>
+    <div id="class-details" className="w-full flex flex-col gap-4">
+      <Breadcrumb>
+        <BreadcrumbList className="font-bold">
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>Explorer</BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="font-bold">
+              {isMobile && classHash ? truncateString(classHash) : classHash}
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
       </Breadcrumb>
 
       <PageHeader className="mb-6" title="Class" />

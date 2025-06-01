@@ -4,17 +4,20 @@ import dayjs from "dayjs";
 import { useState } from "react";
 import { convertValue } from "@/shared/utils/rpc_utils";
 import { DisplayFormatTypes } from "@/types/types";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbSeparator,
-} from "@/shared/components/breadcrumbs";
 import { PageHeader } from "@/shared/components/PageHeader";
 import { SectionBox } from "@/shared/components/section/SectionBox";
 import { SectionBoxEntry } from "@/shared/components/section";
 import { useEvent } from "./hooks";
 import { Loading } from "@/shared/components/Loading";
 import { NotFound } from "../NotFound/page";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@cartridge/ui";
 
 const DisplayFormat = ["hex", "dec", "string"] as const;
 
@@ -41,15 +44,20 @@ export function Event() {
 
   return (
     <div className="w-full flex-grow gap-8">
-      <Breadcrumb className="mb-3">
-        <BreadcrumbSeparator />
-        <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>Events</BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          {isMobile && eventId ? truncateString(eventId) : eventId}
-        </BreadcrumbItem>
+      <Breadcrumb>
+        <BreadcrumbList className="font-bold">
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>Events</BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="font-bold">
+              {isMobile && eventId ? truncateString(eventId) : eventId}
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
       </Breadcrumb>
 
       <PageHeader
