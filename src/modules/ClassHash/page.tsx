@@ -10,8 +10,6 @@ import {
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { PageHeader } from "@/shared/components/PageHeader";
-import { SectionBoxEntry } from "@/shared/components/section";
-import { SectionBox } from "@/shared/components/section/SectionBox";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { useQuery } from "@tanstack/react-query";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
@@ -25,6 +23,7 @@ import {
 import { NotFound } from "@/modules/NotFound/page";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 import { Loading } from "@/shared/components/Loading";
+import { Card, CardContent, CardLabel } from "@/shared/components/card";
 
 const initialData: ContractClassInfo = {
   constructor: {
@@ -99,7 +98,7 @@ export function ClassHash() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader className="mb-6" title="Class" />
+      <PageHeader title="Class" />
 
       {isLoading ? (
         <div className="h-40 flex items-center justify-center text-xs border border-borderGray animate-pulse">
@@ -109,19 +108,28 @@ export function ClassHash() {
         <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
           {/* Contract Info Section */}
           <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
-            <SectionBox>
-              <SectionBoxEntry title="Class Hash">
-                {isMobile && classHash ? truncateString(classHash) : classHash}
-              </SectionBoxEntry>
+            <Card>
+              <CardContent>
+                <div className="flex justify-between gap-2">
+                  <CardLabel>Class Hash</CardLabel>
+                  <div>
+                    {isMobile && classHash
+                      ? truncateString(classHash)
+                      : classHash}
+                  </div>
+                </div>
 
-              <SectionBoxEntry title="Compiler Version">
-                v{contractVersion?.compiler}
-              </SectionBoxEntry>
+                <div className="flex justify-between gap-2">
+                  <CardLabel>Compiler Version</CardLabel>
+                  <div>v{contractVersion?.compiler}</div>
+                </div>
 
-              <SectionBoxEntry title="Cairo Version">
-                v{contractVersion?.cairo}
-              </SectionBoxEntry>
-            </SectionBox>
+                <div className="flex justify-between gap-2">
+                  <CardLabel>Cairo Version</CardLabel>
+                  <div>v{contractVersion?.cairo}</div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">

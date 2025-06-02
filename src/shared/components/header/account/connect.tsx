@@ -68,7 +68,7 @@ export function ConnectButton() {
           <span className="hidden sm:block">connect</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[90%] sm:max-w-[400px] pt-20 border-2 border-background-500">
+      <DialogContent className="max-w-[90%] sm:max-w-[400px] pt-20 border-2 border-background-200">
         <DialogHeader className="gap-2">
           <DialogTitle className="uppercase">Connect</DialogTitle>
           <DialogDescription>Connect your wallet to continue</DialogDescription>
@@ -89,8 +89,8 @@ export function ConnectButton() {
                 className={cn(
                   "mt-[-1px] flex items-center justify-between w-full p-3 border hover:bg-background-300 disabled:hover:bg-background disabled:cursor-not-allowed transition-colors",
                   connecting === connector.id
-                    ? "border-background-300"
-                    : "border-background-300 hover:border-gray-400",
+                    ? "border-background-200"
+                    : "border-background-200 hover:border-background-300",
                 )}
               >
                 <div className="w-full flex items-center">

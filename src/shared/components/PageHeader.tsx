@@ -16,19 +16,22 @@ export function PageHeader({
   ...props
 }: PageHeaderProps) {
   return (
-    <div className="overflow-clip" {...props}>
+    <div
+      className="overflow-clip border border-background-200 rounded"
+      {...props}
+    >
       <div
         className={cn(
-          "px-4 w-full justify-between bg-background-400 h-[40px] flex items-center",
-          subtext ? "rounded-t border-b border-background-500" : "rounded",
+          "px-4 w-full justify-between h-[40px] flex items-center",
+          !!subtext && "border-b border-background-200",
         )}
       >
-        <h1 className="capitalize text-lg font-bold">{title}</h1>
+        <h1 className="capitalize font-bold">{title}</h1>
         {titleRightComponent ? titleRightComponent : null}
       </div>
 
       {subtext && (
-        <div className="bg-background-400 text-foreground-200 px-4 w-full justify-between h-[25px] flex items-center rounded-b">
+        <div className="text-foreground-200 px-4 w-full justify-between h-[25px] flex items-center rounded-b">
           <div className="text-sm">{subtext}</div>
           {subtextRightComponent ? subtextRightComponent : null}
         </div>

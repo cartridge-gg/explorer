@@ -10,11 +10,10 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
+  CoinsIcon,
 } from "@cartridge/ui";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { PageHeader } from "@/shared/components/PageHeader";
-import { SectionBox } from "@/shared/components/section/SectionBox";
-import { SectionBoxEntry } from "@/shared/components/section";
 import useBalances from "@/shared/hooks/useBalances";
 import {
   getContractClassInfo,
@@ -27,6 +26,15 @@ import { ContractForm } from "@/shared/components/contract/Form";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 import { Loading } from "@/shared/components/Loading";
 import { NotFound } from "../NotFound/page";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardIcon,
+  CardLabel,
+  CardSeparator,
+  CardTitle,
+} from "@/shared/components/card";
 
 const initialData: Omit<ContractClassInfo, "constructor"> & {
   classHash?: string;
@@ -102,7 +110,7 @@ export function Contract() {
   }
 
   return (
-    <div id="contract-details" className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-4">
       <Breadcrumb>
         <BreadcrumbList className="font-bold">
           <BreadcrumbItem>
@@ -123,54 +131,68 @@ export function Contract() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader className="mb-6" title="Contract" />
+      <PageHeader title="Contract" />
 
       <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
         {/* Contract Info Section */}
         <div className="sl:w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
-          <SectionBox>
-            <SectionBoxEntry title="Address">
-              {isMobile && contractAddress
-                ? truncateString(contractAddress)
-                : contractAddress}
-            </SectionBoxEntry>
+          <Card>
+            <CardContent>
+              <div className="flex justify-between gap-2">
+                <CardLabel>Address</CardLabel>
+                <div>
+                  {isMobile && contractAddress
+                    ? truncateString(contractAddress)
+                    : contractAddress}
+                </div>
+              </div>
 
-            <SectionBoxEntry title="Class Hash">
-              <Link to={`../class/${classHash}`} className="hover:underline">
-                {isMobile && classHash ? truncateString(classHash) : classHash}
-              </Link>
-            </SectionBoxEntry>
-          </SectionBox>
+              <div className="flex justify-between gap-2">
+                <CardLabel>Class Hash</CardLabel>
+                <div>
+                  <Link
+                    to={`../class/${classHash}`}
+                    className="hover:underline"
+                  >
+                    {isMobile && classHash
+                      ? truncateString(classHash)
+                      : classHash}
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
 
-          <SectionBox title="Balances">
-            <table className="w-full">
-              <tbody>
-                <tr>
-                  <th className="text-left w-[53px] bg-white font-bold">
-                    STRK
-                  </th>
-                  <td className="text-left">
-                    {isStrkLoading
-                      ? "0.00"
-                      : balances.strk !== undefined
-                        ? (Number(balances.strk) / 10 ** 18).toString()
-                        : "N/A"}
-                  </td>
-                </tr>
+            <CardSeparator />
 
-                <tr>
-                  <th className="text-left bg-white font-bold">ETH</th>
-                  <td className="text-left">
-                    {isEthLoading
-                      ? "0.00"
-                      : balances.eth !== undefined
-                        ? (Number(balances.eth) / 10 ** 18).toString()
-                        : "N/A"}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </SectionBox>
+            <CardHeader>
+              <CardIcon icon={<CoinsIcon variant="solid" />} />
+              <CardTitle>Balances</CardTitle>
+            </CardHeader>
+
+            <CardContent>
+              <div className="flex justify-between gap-2">
+                <CardLabel>STRK</CardLabel>
+                <div>
+                  {isStrkLoading
+                    ? "0.00"
+                    : balances.strk !== undefined
+                      ? (Number(balances.strk) / 10 ** 18).toString()
+                      : "N/A"}
+                </div>
+              </div>
+
+              <div className="flex justify-between gap-2">
+                <CardLabel>ETH</CardLabel>
+                <div>
+                  {isEthLoading
+                    ? "0.00"
+                    : balances.eth !== undefined
+                      ? (Number(balances.eth) / 10 ** 18).toString()
+                      : "N/A"}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">

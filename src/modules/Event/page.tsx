@@ -5,8 +5,6 @@ import { useState } from "react";
 import { convertValue } from "@/shared/utils/rpc_utils";
 import { DisplayFormatTypes } from "@/types/types";
 import { PageHeader } from "@/shared/components/PageHeader";
-import { SectionBox } from "@/shared/components/section/SectionBox";
-import { SectionBoxEntry } from "@/shared/components/section";
 import { useEvent } from "./hooks";
 import { Loading } from "@/shared/components/Loading";
 import { NotFound } from "../NotFound/page";
@@ -18,6 +16,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@cartridge/ui";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardLabel,
+  CardSeparator,
+  CardTitle,
+} from "@/shared/components/card";
 
 const DisplayFormat = ["hex", "dec", "string"] as const;
 
@@ -61,8 +67,7 @@ export function Event() {
       </Breadcrumb>
 
       <PageHeader
-        className="mb-6"
-        title={`Event Details`}
+        title="Event Details"
         subtext={isMobile && eventId ? truncateString(eventId) : eventId}
         subtextRightComponent={
           <div className="text-[#5D5D5D]">
@@ -73,58 +78,78 @@ export function Event() {
 
       <div className="flex flex-col sl:flex-row gap-4">
         <div className="flex w-full sl:w-[35%] sl:min-w-[35%] sl:max-w-[35%] flex-col gap-4 sl:overflow-y-auto">
-          <SectionBox>
-            <SectionBoxEntry title="Transaction Hash">
-              {isMobile && txHash ? truncateString(txHash) : txHash}
-            </SectionBoxEntry>
-
-            <SectionBoxEntry title="From Address">
-              {isMobile && event?.from_address
-                ? truncateString(event.from_address)
-                : event?.from_address}
-            </SectionBoxEntry>
-
-            <SectionBoxEntry title="Block Number">
-              {receipt?.block_number}
-            </SectionBoxEntry>
-
-            <SectionBoxEntry title="Timestamp">
-              {block?.timestamp
-                ? `${block.timestamp} (${dayjs
-                    .unix(block.timestamp || 0)
-                    .format("MMM D YYYY HH:mm:ss")})`
-                : "Loading..."}
-            </SectionBoxEntry>
-          </SectionBox>
-
-          <SectionBox title="Event Details">
-            <SectionBoxEntry title="Keys">
-              <div className="flex flex-col gap-2">
-                {event?.keys?.length > 1 ? (
-                  event.keys.map(
-                    (key: string, index: number) =>
-                      index !== 0 && (
-                        <p key={index}>
-                          {isMobile ? truncateString(key) : key}
-                        </p>
-                      ),
-                  )
-                ) : (
-                  <p>No data found</p>
-                )}
+          <Card>
+            <CardContent>
+              <div className="flex justify-between gap-2">
+                <CardLabel>Transaction Hash</CardLabel>
+                <div>
+                  {isMobile && txHash ? truncateString(txHash) : txHash}
+                </div>
               </div>
-            </SectionBoxEntry>
 
-            <SectionBoxEntry title="Data">
-              <div className="flex flex-col gap-2 overflow-hidden">
-                {event?.data?.map((data: string, index: number) => (
-                  <p key={index} className="break-all">
-                    {isMobile ? truncateString(data) : data}
-                  </p>
-                ))}
+              <div className="flex justify-between gap-2">
+                <CardLabel>From Address</CardLabel>
+                <div>
+                  {isMobile && event?.from_address
+                    ? truncateString(event.from_address)
+                    : event?.from_address}
+                </div>
               </div>
-            </SectionBoxEntry>
-          </SectionBox>
+
+              <div className="flex justify-between gap-2">
+                <CardLabel>Block Number</CardLabel>
+                <div>{receipt?.block_number}</div>
+              </div>
+
+              <div className="flex justify-between gap-2">
+                <CardLabel>Timestamp</CardLabel>
+                <div>
+                  {block?.timestamp
+                    ? `${block.timestamp} (${dayjs
+                        .unix(block.timestamp || 0)
+                        .format("MMM D YYYY HH:mm:ss")})`
+                    : "Loading..."}
+                </div>
+              </div>
+            </CardContent>
+
+            <CardSeparator />
+
+            <CardHeader>
+              <CardTitle>Event Details</CardTitle>
+            </CardHeader>
+
+            <CardContent>
+              <div className="flex justify-between gap-2">
+                <CardLabel>Keys</CardLabel>
+                <div>
+                  {event?.keys?.length > 1 ? (
+                    event.keys.map(
+                      (key: string, index: number) =>
+                        index !== 0 && (
+                          <p key={index}>
+                            {isMobile ? truncateString(key) : key}
+                          </p>
+                        ),
+                    )
+                  ) : (
+                    <p>No data found</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-between gap-2">
+                <CardLabel>Data</CardLabel>
+                <div className="flex flex-col gap-2 overflow-hidden">
+                  {event?.data?.map((data: string, index: number) => (
+                    <p key={index} className="break-all">
+                      {isMobile ? truncateString(data) : data}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="flex flex-col w-full gap-2 sl:overflow-y-auto">

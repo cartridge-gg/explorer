@@ -18,7 +18,7 @@ import AddIcon from "@/shared/icons/Add";
 import { cn } from "@cartridge/ui/utils";
 import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
 import { useToast } from "@/shared/components/toast";
-import { ParamForm } from "@/shared/form";
+import { ParamForm } from "@/shared/components/form";
 
 export interface ContractFormProps {
   contract?: Contract;

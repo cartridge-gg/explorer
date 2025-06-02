@@ -131,6 +131,7 @@ export function useEvent() {
         eventKeys,
       };
     },
+    retry: false,
   });
   return {
     data: {
