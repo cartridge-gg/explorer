@@ -13,10 +13,19 @@ import {
   BreadcrumbLink,
   BreadcrumbSeparator,
   BreadcrumbPage,
+  GasIcon,
+  BoltIcon,
 } from "@cartridge/ui";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardIcon,
+  CardLabel,
+  CardSeparator,
+} from "@/shared/components/card";
 import { PageHeader } from "@/shared/components/PageHeader";
-import { SectionBox } from "@/shared/components/section/SectionBox";
-import { SectionBoxEntry } from "@/shared/components/section";
 import { TxList } from "./TxList";
 import { EventList } from "./EventList";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
@@ -50,8 +59,8 @@ export function Block() {
   }
 
   return (
-    <div id="block-details" className="w-full flex-grow gap-8">
-      <div className="flex justify-between">
+    <div className="w-full flex flex-col gap-8">
+      <div className="flex justify-between w-full">
         <Breadcrumb>
           <BreadcrumbList className="font-bold">
             <BreadcrumbItem>
@@ -72,7 +81,6 @@ export function Block() {
       </div>
 
       <PageHeader
-        className="mb-6"
         title={`Block #${block.block_number}`}
         subtext={block.status}
         subtextRightComponent={
@@ -86,26 +94,46 @@ export function Block() {
 
       <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-4">
         <div className="sl:w-[468px] sl:min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
-          <SectionBox>
-            <SectionBoxEntry title="Hash">
-              {isMobile ? truncateString(block.block_hash) : block.block_hash}
-            </SectionBoxEntry>
+          <Card>
+            <CardContent>
+              <div className="flex justify-between gap-2">
+                <CardLabel>Hash</CardLabel>
+                <div>
+                  {isMobile
+                    ? truncateString(block.block_hash)
+                    : block.block_hash}
+                </div>
+              </div>
+              <div className="flex justify-between gap-2">
+                <CardLabel>Number</CardLabel>
+                <div>{block.block_number}</div>
+              </div>{" "}
+            </CardContent>
 
-            <SectionBoxEntry title="Number">
-              {block.block_number}
-            </SectionBoxEntry>
+            <CardSeparator />
 
-            <SectionBoxEntry title="State root">
-              {isMobile ? truncateString(block.new_root) : block.new_root}
-            </SectionBoxEntry>
+            <CardContent>
+              <div className="flex justify-between">
+                <CardLabel>State root</CardLabel>
+                <div>
+                  {isMobile ? truncateString(block.new_root) : block.new_root}
+                </div>
+              </div>
 
-            <SectionBoxEntry title="Sequencer address">
-              <AddressDisplay value={block.sequencer_address} />
-            </SectionBoxEntry>
-          </SectionBox>
+              <div className="flex justify-between">
+                <CardLabel>Sequencer address</CardLabel>
+                <AddressDisplay value={block.sequencer_address} />
+              </div>
+            </CardContent>
 
-          <SectionBox title="Gas Prices">
-            <SectionBoxEntry title="L1 Gas Prices" bold={false}>
+            <CardSeparator />
+
+            <CardHeader>
+              <CardIcon icon={<GasIcon />} />
+              <CardTitle>gas prices</CardTitle>
+            </CardHeader>
+
+            <CardContent>
               <table className="w-full">
                 <tbody>
                   <tr>
@@ -132,9 +160,7 @@ export function Block() {
                   </tr>
                 </tbody>
               </table>
-            </SectionBoxEntry>
 
-            <SectionBoxEntry title="L1 Data Gas Prices" bold={false}>
               <table className="w-full">
                 <tbody>
                   <tr>
@@ -165,81 +191,88 @@ export function Block() {
                   </tr>
                 </tbody>
               </table>
-            </SectionBoxEntry>
-          </SectionBox>
+            </CardContent>
 
-          <SectionBox title="Execution Resources">
-            <table className="w-full mb-1">
-              <thead>
-                <tr>
-                  <th colSpan={2}>GAS</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th className="w-[90px]">L1 GAS</th>
-                  <td>{formatNumber(blockComputeData.gas)}</td>
-                </tr>
-                <tr>
-                  <th className="w-min">L1 DA GAS</th>
-                  <td>{formatNumber(blockComputeData.data_gas)}</td>
-                </tr>
-              </tbody>
-            </table>
+            <CardSeparator />
 
-            <table className="w-full mb-1">
-              <thead>
-                <tr>
-                  <th>STEPS</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>{formatNumber(blockComputeData.steps)}</td>
-                </tr>
-              </tbody>
-            </table>
+            <CardHeader>
+              <CardIcon icon={<BoltIcon variant="solid" />} />
+              <CardTitle>Execution Resources</CardTitle>
+            </CardHeader>
 
-            <table className="w-full border-collapse">
-              <thead>
-                <tr>
-                  <th colSpan={4} className="p-1 bg-gray-100 border">
-                    BUILTINS COUNTER
-                  </th>
-                </tr>
-              </thead>
+            <CardContent>
+              <table className="w-full mb-1">
+                <thead>
+                  <tr>
+                    <th colSpan={2}>GAS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th className="w-[90px]">L1 GAS</th>
+                    <td>{formatNumber(blockComputeData.gas)}</td>
+                  </tr>
+                  <tr>
+                    <th className="w-min">L1 DA GAS</th>
+                    <td>{formatNumber(blockComputeData.data_gas)}</td>
+                  </tr>
+                </tbody>
+              </table>
 
-              <tbody className="text-center">
-                {Object.entries(executions).map(
-                  ([key, value], index, array) => {
-                    const heading = formatSnakeCaseToDisplayValue(key);
-                    return index % 2 === 0 ? (
-                      <tr key={index} className="w-full">
-                        <th className="w-[111px]">{heading}</th>
-                        <td>{formatNumber(value)}</td>
+              <table className="w-full mb-1">
+                <thead>
+                  <tr>
+                    <th>STEPS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{formatNumber(blockComputeData.steps)}</td>
+                  </tr>
+                </tbody>
+              </table>
 
-                        {array[index + 1] ? (
-                          <>
-                            <th className="w-[111px]">
-                              {formatSnakeCaseToDisplayValue(
-                                array[index + 1][0],
-                              )}
-                            </th>
-                            <td>{formatNumber(array[index + 1][1])}</td>
-                          </>
-                        ) : (
-                          <>
-                            <th className="w-[111px]"></th>
-                            <td></td>
-                          </>
-                        )}
-                      </tr>
-                    ) : null;
-                  },
-                )}
-              </tbody>
-            </table>
-          </SectionBox>
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th colSpan={4} className="p-1 bg-gray-100 border">
+                      BUILTINS COUNTER
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody className="text-center">
+                  {Object.entries(executions).map(
+                    ([key, value], index, array) => {
+                      const heading = formatSnakeCaseToDisplayValue(key);
+                      return index % 2 === 0 ? (
+                        <tr key={index} className="w-full">
+                          <th className="w-[111px]">{heading}</th>
+                          <td>{formatNumber(value)}</td>
+
+                          {array[index + 1] ? (
+                            <>
+                              <th className="w-[111px]">
+                                {formatSnakeCaseToDisplayValue(
+                                  array[index + 1][0],
+                                )}
+                              </th>
+                              <td>{formatNumber(array[index + 1][1])}</td>
+                            </>
+                          ) : (
+                            <>
+                              <th className="w-[111px]"></th>
+                              <td></td>
+                            </>
+                          )}
+                        </tr>
+                      ) : null;
+                    },
+                  )}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">

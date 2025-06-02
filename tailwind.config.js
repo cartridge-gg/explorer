@@ -15,11 +15,11 @@ export default {
         sl: "1196px",
       },
       fontSize: {
-        xs: "9px",
-        sm: "10px",
-        base: "11px",
-        md: "13px",
-        lg: "13px",
+        xs: "10px",
+        sm: "12px",
+        base: "14px",
+        md: "16px",
+        lg: "18px",
       },
       borderRadius: {
         xs: "2px",
