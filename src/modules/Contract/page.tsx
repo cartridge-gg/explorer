@@ -4,6 +4,7 @@ import { truncateString } from "@/shared/utils/string";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Contract as StarknetContract } from "starknet";
 import {
+  BookIcon,
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -11,8 +12,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
   CoinsIcon,
+  PencilIcon,
+  CodeIcon,
 } from "@cartridge/ui";
-import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { PageHeader } from "@/shared/components/PageHeader";
 import useBalances from "@/shared/hooks/useBalances";
 import {
@@ -35,6 +37,12 @@ import {
   CardSeparator,
   CardTitle,
 } from "@/shared/components/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/tabs";
 
 const initialData: Omit<ContractClassInfo, "constructor"> & {
   classHash?: string;
@@ -55,11 +63,7 @@ export function Contract() {
     contractAddress: string;
   }>();
   const { isMobile } = useScreen();
-  const { selected, onTabChange, tabs } = useHashLinkTabs([
-    "Read Contract",
-    "Write Contract",
-    "Code",
-  ]);
+  const { onTabChange } = useHashLinkTabs();
 
   const {
     data: { classHash, contract, readFuncs, writeFuncs, code },
@@ -196,43 +200,36 @@ export function Contract() {
         </div>
 
         <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-          <DetailsPageSelector
-            selected={selected}
-            onTabSelect={onTabChange}
-            items={tabs}
-          />
+          {contract && (
+            <Tabs defaultValue="read" onValueChange={onTabChange}>
+              <TabsList>
+                <TabsTrigger value="read">
+                  <BookIcon variant="solid" />
+                  <div>Read Contract</div>
+                </TabsTrigger>
+                <TabsTrigger value="write">
+                  <PencilIcon variant="solid" />
+                  <div>Write Contract</div>
+                </TabsTrigger>
+                <TabsTrigger value="code">
+                  <CodeIcon variant="solid" />
+                  <div>Code</div>
+                </TabsTrigger>
+              </TabsList>
 
-          <div className="bg-white flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray overflow-auto">
-            <div className="w-full h-full overflow-auto">
-              {(() => {
-                if (!contract) {
-                  return null;
-                }
+              <TabsContent value="read">
+                <ContractForm functions={readFuncs} contract={contract} />
+              </TabsContent>
 
-                switch (selected) {
-                  case "Read Contract":
-                    return (
-                      <ContractForm functions={readFuncs} contract={contract} />
-                    );
-                  case "Write Contract":
-                    return (
-                      <ContractForm
-                        functions={writeFuncs}
-                        contract={contract}
-                      />
-                    );
-                  case "Code":
-                    return <Code abi={code.abi} sierra={code.sierra} />;
-                  default:
-                    return (
-                      <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
-                        <span className="text-[#D0D0D0]">No data found</span>
-                      </div>
-                    );
-                }
-              })()}
-            </div>
-          </div>
+              <TabsContent value="write">
+                <ContractForm functions={writeFuncs} contract={contract} />
+              </TabsContent>
+
+              <TabsContent value="code">
+                <Code abi={code.abi} sierra={code.sierra} />
+              </TabsContent>
+            </Tabs>
+          )}
         </div>
       </div>
     </div>

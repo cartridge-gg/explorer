@@ -15,6 +15,8 @@ import {
   BreadcrumbPage,
   GasIcon,
   BoltIcon,
+  StackDiamondIcon,
+  BellIcon,
 } from "@cartridge/ui";
 import {
   Card,
@@ -28,22 +30,22 @@ import {
 import { PageHeader } from "@/shared/components/PageHeader";
 import { TxList } from "./TxList";
 import { EventList } from "./EventList";
-import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { BlockNavigation } from "./BlockNavigation";
 import AddressDisplay from "@/shared/components/AddressDisplay";
 import { NotFound } from "../NotFound/page";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 import { Loading } from "@/shared/components/Loading";
 import { useBlock } from "./hooks";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/shared/components/tabs";
 
 export function Block() {
   const { isMobile } = useScreen();
-  const { selected, onTabChange, tabs } = useHashLinkTabs([
-    "Transactions",
-    "Events",
-    "Messages",
-    "State Updates",
-  ]);
+  const { onTabChange } = useHashLinkTabs();
   const {
     data: { blockId, block, txs, events, executions, blockComputeData },
     isLoading,
@@ -259,28 +261,29 @@ export function Block() {
         </div>
 
         <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-          <DetailsPageSelector
-            selected={selected}
-            onTabSelect={onTabChange}
-            items={tabs}
-          />
+          <Tabs defaultValue="transactions" onValueChange={onTabChange}>
+            <TabsList>
+              <TabsTrigger value="transactions">
+                <StackDiamondIcon variant="solid" />
+                <div>Transactions</div>
+              </TabsTrigger>
+              <TabsTrigger value="events">
+                <BellIcon variant="solid" />
+                <div>Events</div>
+              </TabsTrigger>
+            </TabsList>
 
-          <div className="bg-white flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray">
-            <div className="w-full h-full">
-              {(() => {
-                switch (selected) {
-                  case "Transactions":
-                    return <TxList transactions={txs} />;
-                  case "Events":
-                    return <EventList events={events} />;
-                  default:
-                    <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
-                      <span className="text-[#D0D0D0]">No data found</span>
-                    </div>;
-                }
-              })()}
-            </div>
-          </div>
+            <Card>
+              <CardContent>
+                <TabsContent value="transactions">
+                  <TxList transactions={txs} />
+                </TabsContent>
+                <TabsContent value="events">
+                  <EventList events={events} />
+                </TabsContent>
+              </CardContent>
+            </Card>
+          </Tabs>
         </div>
       </div>
     </div>
