@@ -6,13 +6,14 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
+  InfoIcon,
+  PlusIcon,
 } from "@cartridge/ui";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { PageHeader } from "@/shared/components/PageHeader";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { useQuery } from "@tanstack/react-query";
-import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { Overview } from "./Overview";
 import { Deploy } from "./Deploy";
 import {
@@ -24,6 +25,12 @@ import { NotFound } from "@/modules/NotFound/page";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 import { Loading } from "@/shared/components/Loading";
 import { Card, CardContent, CardLabel } from "@/shared/components/card";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/shared/components/tabs";
 
 const initialData: ContractClassInfo = {
   constructor: {
@@ -43,10 +50,7 @@ const initialData: ContractClassInfo = {
 export function ClassHash() {
   const { classHash } = useParams();
   const { isMobile } = useScreen();
-  const { selected, onTabChange, tabs } = useHashLinkTabs([
-    "Overview",
-    "Deploy",
-  ]);
+  const { onTabChange } = useHashLinkTabs();
 
   const { data: contractVersion } = useQuery({
     queryKey: ["contractVersion", classHash],
@@ -88,7 +92,7 @@ export function ClassHash() {
             <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>Explorer</BreadcrumbItem>
+          <BreadcrumbItem>Class</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbPage className="font-bold">
@@ -100,70 +104,59 @@ export function ClassHash() {
 
       <PageHeader title="Class" />
 
-      {isLoading ? (
-        <div className="h-40 flex items-center justify-center text-xs border border-borderGray animate-pulse">
-          <span className="text-[#D0D0D0]">Loading...</span>
+      <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
+        <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
+          <Card>
+            <CardContent>
+              <div className="flex justify-between gap-2">
+                <CardLabel>Class Hash</CardLabel>
+                <div>
+                  {isMobile && classHash
+                    ? truncateString(classHash)
+                    : classHash}
+                </div>
+              </div>
+
+              <div className="flex justify-between gap-2">
+                <CardLabel>Compiler Version</CardLabel>
+                <div>v{contractVersion?.compiler}</div>
+              </div>
+
+              <div className="flex justify-between gap-2">
+                <CardLabel>Cairo Version</CardLabel>
+                <div>v{contractVersion?.cairo}</div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      ) : (
-        <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
-          {/* Contract Info Section */}
-          <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
-            <Card>
-              <CardContent>
-                <div className="flex justify-between gap-2">
-                  <CardLabel>Class Hash</CardLabel>
-                  <div>
-                    {isMobile && classHash
-                      ? truncateString(classHash)
-                      : classHash}
-                  </div>
-                </div>
 
-                <div className="flex justify-between gap-2">
-                  <CardLabel>Compiler Version</CardLabel>
-                  <div>v{contractVersion?.compiler}</div>
-                </div>
+        <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+          <Tabs defaultValue="overview" onValueChange={onTabChange}>
+            <TabsList>
+              <TabsTrigger value="overview">
+                <InfoIcon />
+                <div>Overview</div>
+              </TabsTrigger>
+              <TabsTrigger value="deploy">
+                <PlusIcon variant="solid" />
+                <div>Deploy</div>
+              </TabsTrigger>
+            </TabsList>
 
-                <div className="flex justify-between gap-2">
-                  <CardLabel>Cairo Version</CardLabel>
-                  <div>v{contractVersion?.cairo}</div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            <TabsContent value="overview">
+              <Overview
+                readFuncs={readFuncs}
+                writeFuncs={writeFuncs}
+                code={code}
+              />
+            </TabsContent>
 
-          <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-            <DetailsPageSelector
-              selected={selected}
-              onTabSelect={onTabChange}
-              items={tabs}
-            />
-
-            {(() => {
-              switch (selected) {
-                case "Overview":
-                  return (
-                    <Overview
-                      readFuncs={readFuncs}
-                      writeFuncs={writeFuncs}
-                      code={code}
-                    />
-                  );
-                case "Deploy":
-                  return (
-                    <Deploy classHash={classHash!} constructor={constructor} />
-                  );
-                default:
-                  return (
-                    <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
-                      <span className="text-[#D0D0D0]">No data found</span>
-                    </div>
-                  );
-              }
-            })()}
-          </div>
+            <TabsContent value="deploy">
+              <Deploy classHash={classHash!} constructor={constructor} />
+            </TabsContent>
+          </Tabs>
         </div>
-      )}
+      </div>
     </div>
   );
 }

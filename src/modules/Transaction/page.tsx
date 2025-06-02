@@ -18,6 +18,10 @@ import {
   CoinsIcon,
   GasIcon,
   Skeleton,
+  CodeIcon,
+  PencilIcon,
+  BellIcon,
+  StackOvalIcon,
 } from "@cartridge/ui";
 import {
   Card,
@@ -29,7 +33,6 @@ import {
   CardSeparator,
 } from "@/shared/components/card";
 import { DataTable } from "@/shared/components/dataTable";
-import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { PageHeader } from "@/shared/components/PageHeader";
 import dayjs from "dayjs";
 import SignatureDisplay from "./components/SignatureDisplay";
@@ -41,14 +44,15 @@ import { NotFound } from "../NotFound/page";
 import { Loading } from "@/shared/components/Loading";
 import { useTransaction } from "./hooks";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/shared/components/tabs";
 
 export function Transaction() {
-  const { selected, onTabChange, tabs } = useHashLinkTabs([
-    "Calldata",
-    "Events",
-    "Signature",
-    "Storage Diffs",
-  ]);
+  const { onTabChange } = useHashLinkTabs();
   const { txHash } = useParams<{ txHash: string }>();
   const {
     isLoading,
@@ -373,44 +377,57 @@ export function Transaction() {
         </div>
 
         <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-          <DetailsPageSelector
-            selected={selected}
-            onTabSelect={onTabChange}
-            items={tabs}
-          />
+          <Tabs
+            defaultValue="calldata"
+            onValueChange={onTabChange}
+            className="h-full"
+          >
+            <TabsList>
+              <TabsTrigger value="calldata">
+                <CodeIcon variant="solid" />
+                <div>Calldata</div>
+              </TabsTrigger>
+              <TabsTrigger value="events">
+                <BellIcon variant="solid" />
+                <div>Events</div>
+              </TabsTrigger>
+              <TabsTrigger value="signature">
+                <PencilIcon variant="solid" />
+                <div>Signature</div>
+              </TabsTrigger>
+              <TabsTrigger value="storage-diffs">
+                <StackOvalIcon variant="solid" />
+                <div>Storage Diffs</div>
+              </TabsTrigger>
+            </TabsList>
 
-          <div className="flex-grow flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray overflow-auto">
-            {(() => {
-              switch (selected) {
-                case "Calldata":
-                  return <CalldataDisplay calldata={calldata} />;
-                case "Events":
-                  return (
-                    <div className="h-full">
-                      <DataTable
-                        table={events.table}
-                        pagination={events.pagination}
-                        setPagination={events.setPagination}
-                      />
-                    </div>
-                  );
-                case "Signature":
-                  return tx?.signature ? (
+            <Card className="h-full flex flex-1">
+              <CardContent>
+                <TabsContent value="calldata">
+                  <CalldataDisplay calldata={calldata} />
+                </TabsContent>
+                <TabsContent value="events">
+                  <DataTable
+                    table={events.table}
+                    pagination={events.pagination}
+                    setPagination={events.setPagination}
+                  />
+                </TabsContent>
+                <TabsContent value="signature">
+                  {!!tx?.signature && (
                     <SignatureDisplay signature={tx.signature} />
-                  ) : null;
-                case "Storage Diffs":
-                  return (
-                    <div className="h-full">
-                      <DataTable
-                        table={storageDiff.table}
-                        pagination={storageDiff.pagination}
-                        setPagination={storageDiff.setPagination}
-                      />
-                    </div>
-                  );
-              }
-            })()}
-          </div>
+                  )}
+                </TabsContent>
+                <TabsContent value="storage-diffs">
+                  <DataTable
+                    table={storageDiff.table}
+                    pagination={storageDiff.pagination}
+                    setPagination={storageDiff.setPagination}
+                  />
+                </TabsContent>
+              </CardContent>
+            </Card>
+          </Tabs>
         </div>
       </div>
     </div>
