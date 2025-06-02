@@ -8,19 +8,29 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { cairo } from "starknet";
 import CalldataDisplay from "./components/CalldataDisplay";
 import {
+  BoltIcon,
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
+  CoinsIcon,
+  GasIcon,
   Skeleton,
 } from "@cartridge/ui";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardIcon,
+  CardLabel,
+  CardSeparator,
+} from "@/shared/components/card";
 import { DataTable } from "@/shared/components/dataTable";
 import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { PageHeader } from "@/shared/components/PageHeader";
-import { SectionBoxEntry } from "@/shared/components/section";
-import { SectionBox } from "@/shared/components/section/SectionBox";
 import dayjs from "dayjs";
 import SignatureDisplay from "./components/SignatureDisplay";
 import AddressDisplay from "@/shared/components/AddressDisplay";
@@ -119,36 +129,48 @@ export function Transaction() {
 
       <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-4">
         <div className="sl:w-[468px] sl:min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
-          <SectionBox>
-            <SectionBoxEntry title="Hash">
-              {isMobile
-                ? truncateString(receipt?.transaction_hash)
-                : receipt?.transaction_hash}
-            </SectionBoxEntry>
+          <Card>
+            <CardContent>
+              <div className="flex justify-between gap-2">
+                <CardLabel>Hash</CardLabel>
+                <div>
+                  {isMobile
+                    ? truncateString(receipt?.transaction_hash)
+                    : receipt?.transaction_hash}
+                </div>
+              </div>
+              <div className="flex justify-between gap-2">
+                <CardLabel>Block</CardLabel>
+                <BlockIdDisplay value={receipt?.block_number} />
+              </div>
+            </CardContent>
 
-            <SectionBoxEntry title="Block">
-              <BlockIdDisplay value={receipt?.block_number} />
-            </SectionBoxEntry>
-          </SectionBox>
+            {(!!tx?.sender_address || !!tx?.nonce) && (
+              <CardContent>
+                {!!tx?.sender_address && (
+                  <div className="flex justify-between gap-2">
+                    <CardLabel>Sender</CardLabel>
+                    <AddressDisplay value={tx?.sender_address} />
+                  </div>
+                )}
+                {!!tx?.nonce && (
+                  <div className="flex justify-between gap-2">
+                    <CardLabel>Nonce</CardLabel>
+                    <div>{Number(tx?.nonce)}</div>
+                  </div>
+                )}
+              </CardContent>
+            )}
 
-          {(!!tx?.sender_address || !!tx?.nonce) && (
-            <SectionBox title="Sender">
-              {!!tx?.sender_address && (
-                <SectionBoxEntry title="Address">
-                  <AddressDisplay value={tx?.sender_address} />
-                </SectionBoxEntry>
-              )}
+            <CardSeparator />
 
-              {!!tx?.nonce && (
-                <SectionBoxEntry title="Nonce">
-                  {Number(tx?.nonce)}
-                </SectionBoxEntry>
-              )}
-            </SectionBox>
-          )}
+            <CardHeader>
+              <CardIcon icon={<GasIcon />} />
+              <CardTitle>Resource Bounds</CardTitle>
+            </CardHeader>
 
-          <SectionBox title="Resource Bounds">
-            <SectionBoxEntry title="L1 Gas Prices" bold={false}>
+            <CardContent>
+              <CardLabel>L1 Gas Prices</CardLabel>
               <table className="w-full">
                 <tbody>
                   <tr>
@@ -183,8 +205,8 @@ export function Transaction() {
                   </tr>
                 </tbody>
               </table>
-            </SectionBoxEntry>
-            <SectionBoxEntry title="L2 Gas Prices" bold={false}>
+
+              <CardLabel>L2 Gas Prices</CardLabel>
               <table className="w-full">
                 <tbody>
                   <tr>
@@ -219,113 +241,135 @@ export function Transaction() {
                   </tr>
                 </tbody>
               </table>
-            </SectionBoxEntry>
-          </SectionBox>
+            </CardContent>
 
-          {tx?.fee_data_availability_mode ||
-          tx?.nonce_data_availability_mode ? (
-            <SectionBox title="DA Mode">
-              <table className="w-full">
-                <tbody>
-                  {tx?.fee_data_availability_mode ? (
-                    <tr>
-                      <th className="w-1/3">Fee</th>
-                      <td>{tx.fee_data_availability_mode}</td>
-                    </tr>
-                  ) : null}
+            <CardSeparator />
 
-                  {tx?.nonce_data_availability_mode ? (
-                    <tr>
-                      <th className="w-1/3">Nonce</th>
-                      <td>{tx.nonce_data_availability_mode}</td>
-                    </tr>
-                  ) : null}
+            <CardContent>
+              <div className="flex justify-between">
+                <CardLabel>Actual Fee</CardLabel>
+                <div>
+                  {receipt?.actual_fee?.amount
+                    ? formatNumber(
+                        Number(cairo.felt(receipt?.actual_fee?.amount)),
+                      )
+                    : 0}{" "}
+                  {receipt?.actual_fee?.unit}
+                </div>
+              </div>
+            </CardContent>
+
+            {!!(
+              tx?.fee_data_availability_mode ?? tx?.nonce_data_availability_mode
+            ) && (
+              <>
+                <CardSeparator />
+
+                <CardHeader>
+                  <CardIcon icon={<BoltIcon variant="solid" />} />
+                  <CardTitle>DA Mode</CardTitle>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="flex justify-between">
+                    <CardLabel>Fee</CardLabel>
+                    <div>{tx.fee_data_availability_mode}</div>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <CardLabel>Nonce</CardLabel>
+                    <div>{tx.nonce_data_availability_mode}</div>
+                  </div>
+                </CardContent>
+              </>
+            )}
+
+            {!!tx?.tip && (
+              <>
+                <CardSeparator />
+
+                <CardHeader>
+                  <CardIcon icon={<CoinsIcon variant="solid" />} />
+                  <CardTitle>Tip</CardTitle>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="flex justify-between">
+                    <CardLabel>Tip</CardLabel>
+                    <div>{tx.tip}</div>
+                  </div>
+                </CardContent>
+              </>
+            )}
+
+            <CardSeparator />
+
+            <CardHeader>
+              <CardIcon icon={<BoltIcon variant="solid" />} />
+              <CardTitle>Execution Resources</CardTitle>
+            </CardHeader>
+
+            <CardContent>
+              <div className="flex justify-between">
+                <CardLabel>L1 Gas</CardLabel>
+                <div>{formatNumber(blockComputeData.gas)}</div>
+              </div>
+
+              <div className="flex justify-between">
+                <CardLabel>L1 DA Gas</CardLabel>
+                <div>{formatNumber(blockComputeData.data_gas)}</div>
+              </div>
+
+              <CardSeparator />
+
+              <div className="flex justify-between">
+                <CardLabel>Steps</CardLabel>
+                <div>{formatNumber(blockComputeData.steps)}</div>
+              </div>
+
+              <CardSeparator />
+
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th colSpan={4} className="p-1 border">
+                      BUILTINS COUNTER
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody className="text-center">
+                  {Object.entries(executions).map(
+                    ([key, value], index, array) => {
+                      const heading = formatSnakeCaseToDisplayValue(key);
+                      return index % 2 === 0 ? (
+                        <tr key={index} className="w-full">
+                          <th className="w-[111px]">{heading}</th>
+                          <td>{formatNumber(value)}</td>
+
+                          {array[index + 1] ? (
+                            <>
+                              <th className="w-[111px]">
+                                {formatSnakeCaseToDisplayValue(
+                                  array[index + 1][0],
+                                )}
+                              </th>
+                              <td>{formatNumber(array[index + 1][1])}</td>
+                            </>
+                          ) : (
+                            <>
+                              <th className="w-[111px]"></th>
+                              <td></td>
+                            </>
+                          )}
+                        </tr>
+                      ) : null;
+                    },
+                  )}
                 </tbody>
               </table>
-            </SectionBox>
-          ) : null}
-
-          {tx?.tip ? <SectionBox title="Tip">{tx.tip}</SectionBox> : null}
-
-          <SectionBox title="Actual Fee">
-            {receipt?.actual_fee?.amount
-              ? formatNumber(Number(cairo.felt(receipt?.actual_fee?.amount)))
-              : 0}{" "}
-            {receipt?.actual_fee?.unit}
-          </SectionBox>
-
-          <SectionBox title="Execution Resources" variant="full">
-            <table className="w-full mb-1">
-              <thead>
-                <tr>
-                  <th colSpan={2}>GAS</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th className="w-[90px]">L1 GAS</th>
-                  <td>{formatNumber(blockComputeData.gas)}</td>
-                </tr>
-                <tr>
-                  <th className="w-min">L1 DA GAS</th>
-                  <td>{formatNumber(blockComputeData.data_gas)}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <table className="w-full mb-1">
-              <thead>
-                <tr>
-                  <th>STEPS</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>{formatNumber(blockComputeData.steps)}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <table className="w-full border-collapse">
-              <thead>
-                <tr>
-                  <th colSpan={4} className="p-1 border">
-                    BUILTINS COUNTER
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody className="text-center">
-                {Object.entries(executions).map(
-                  ([key, value], index, array) => {
-                    const heading = formatSnakeCaseToDisplayValue(key);
-                    return index % 2 === 0 ? (
-                      <tr key={index} className="w-full">
-                        <th className="w-[111px]">{heading}</th>
-                        <td>{formatNumber(value)}</td>
-
-                        {array[index + 1] ? (
-                          <>
-                            <th className="w-[111px]">
-                              {formatSnakeCaseToDisplayValue(
-                                array[index + 1][0],
-                              )}
-                            </th>
-                            <td>{formatNumber(array[index + 1][1])}</td>
-                          </>
-                        ) : (
-                          <>
-                            <th className="w-[111px]"></th>
-                            <td></td>
-                          </>
-                        )}
-                      </tr>
-                    ) : null;
-                  },
-                )}
-              </tbody>
-            </table>
-          </SectionBox>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">

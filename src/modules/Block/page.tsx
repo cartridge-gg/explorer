@@ -134,6 +134,7 @@ export function Block() {
             </CardHeader>
 
             <CardContent>
+              <CardLabel>L1 Gas Prices</CardLabel>
               <table className="w-full">
                 <tbody>
                   <tr>
@@ -161,6 +162,7 @@ export function Block() {
                 </tbody>
               </table>
 
+              <CardLabel>L1 Data Gas Prices</CardLabel>
               <table className="w-full">
                 <tbody>
                   <tr>
@@ -201,46 +203,27 @@ export function Block() {
             </CardHeader>
 
             <CardContent>
-              <table className="w-full mb-1">
-                <thead>
-                  <tr>
-                    <th colSpan={2}>GAS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th className="w-[90px]">L1 GAS</th>
-                    <td>{formatNumber(blockComputeData.gas)}</td>
-                  </tr>
-                  <tr>
-                    <th className="w-min">L1 DA GAS</th>
-                    <td>{formatNumber(blockComputeData.data_gas)}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="flex justify-between">
+                <CardLabel>L1 Gas</CardLabel>
+                <div>{formatNumber(blockComputeData.gas)}</div>
+              </div>
 
-              <table className="w-full mb-1">
-                <thead>
-                  <tr>
-                    <th>STEPS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{formatNumber(blockComputeData.steps)}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="flex justify-between">
+                <CardLabel>L1 DA Gas</CardLabel>
+                <div>{formatNumber(blockComputeData.data_gas)}</div>
+              </div>
 
+              <CardSeparator />
+
+              <div className="flex justify-between">
+                <CardLabel>Steps</CardLabel>
+                <div>{formatNumber(blockComputeData.steps)}</div>
+              </div>
+
+              <CardSeparator />
+
+              <CardLabel>Builtins Counter</CardLabel>
               <table className="w-full border-collapse">
-                <thead>
-                  <tr>
-                    <th colSpan={4} className="p-1 bg-gray-100 border">
-                      BUILTINS COUNTER
-                    </th>
-                  </tr>
-                </thead>
-
                 <tbody className="text-center">
                   {Object.entries(executions).map(
                     ([key, value], index, array) => {
