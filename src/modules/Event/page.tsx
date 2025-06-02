@@ -15,7 +15,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@cartridge/ui";
+} from "@/shared/components/breadcrumb";
 import {
   Card,
   CardContent,
@@ -51,7 +51,7 @@ export function Event() {
   return (
     <div className="w-full flex-grow gap-8">
       <Breadcrumb>
-        <BreadcrumbList className="font-bold">
+        <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
           </BreadcrumbItem>
@@ -59,7 +59,7 @@ export function Event() {
           <BreadcrumbItem>Events</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="font-bold">
+            <BreadcrumbPage>
               {isMobile && eventId ? truncateString(eventId) : eventId}
             </BreadcrumbPage>
           </BreadcrumbItem>

@@ -2,6 +2,7 @@ import { rpcUrl } from "@/constants/rpc";
 import { Accordion, AccordionItem } from "@/shared/components/accordion";
 import { PageHeader } from "@/shared/components/PageHeader";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
+import { cn, Button, Input } from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,10 +10,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-  Button,
-  Input,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+} from "@/shared/components/breadcrumb";
 import { useQuery } from "@tanstack/react-query";
 import { PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -238,10 +236,7 @@ export function JsonRpcPlayground() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader
-        className="mb-6"
-        title={`JSON-RPC Playground (${specVersion})`}
-      />
+      <PageHeader title={`JSON-RPC Playground (${specVersion})`} />
 
       <div className="flex flex-col sl:flex-row sl:h-[76vh] w-full gap-4">
         <Card className="flex flex-col flex-1 md:flex-row justify-stretch border overflow-hidden py-5 px-4 gap-4">

@@ -6,14 +6,16 @@ import {
   SelectTrigger,
   SelectItem,
   SelectContent,
+  cn,
+} from "@cartridge/ui";
+import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbSeparator,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbLink,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+} from "@/shared/components/breadcrumb";
 import { flexRender } from "@tanstack/react-table";
 import { PageHeader } from "@/shared/components/PageHeader";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
@@ -41,13 +43,13 @@ export function World() {
   return (
     <div className="flex flex-col gap-4">
       <Breadcrumb>
-        <BreadcrumbList className="font-bold">
+        <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="font-bold">World</BreadcrumbPage>
+            <BreadcrumbPage>World</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

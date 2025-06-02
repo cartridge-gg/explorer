@@ -12,6 +12,15 @@ import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { getPaginatedBlockNumbers } from "@/shared/utils/rpc_utils";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/shared/components/breadcrumb";
+import { PageHeader } from "@/shared/components/PageHeader";
 
 const ROWS_TO_RENDER = 20;
 
@@ -99,10 +108,20 @@ export function BlockList() {
   });
 
   return (
-    <div className="text-white px-2 py-4 rounded-lg ">
-      <div className="flex flex-row justify-between items-center uppercase bg-[#4A4A4A] px-4 py-2">
-        <h1 className="text-white">Blocks List</h1>
-      </div>
+    <div className="flex flex-col gap-2">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Blocks</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <PageHeader title="Blocks List" />
+
       <div className="overflow-x-auto md:w-full">
         <table className="w-full mt-2 table-auto border-collapse border-spacing-12 border-t border-b border-[#8E8E8E] border-l-4 border-r">
           <thead>

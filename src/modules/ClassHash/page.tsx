@@ -1,4 +1,5 @@
 import { truncateString } from "@/shared/utils/string";
+import { InfoIcon, PlusIcon } from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -6,9 +7,14 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-  InfoIcon,
-  PlusIcon,
-} from "@cartridge/ui";
+} from "@/shared/components/breadcrumb";
+import { Card, CardContent, CardLabel } from "@/shared/components/card";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/shared/components/tabs";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { PageHeader } from "@/shared/components/PageHeader";
@@ -24,13 +30,6 @@ import {
 import { NotFound } from "@/modules/NotFound/page";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 import { Loading } from "@/shared/components/Loading";
-import { Card, CardContent, CardLabel } from "@/shared/components/card";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/shared/components/tabs";
 
 const initialData: ContractClassInfo = {
   constructor: {
@@ -85,9 +84,9 @@ export function ClassHash() {
   }
 
   return (
-    <div id="class-details" className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-4">
       <Breadcrumb>
-        <BreadcrumbList className="font-bold">
+        <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
           </BreadcrumbItem>
@@ -95,7 +94,7 @@ export function ClassHash() {
           <BreadcrumbItem>Class</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="font-bold">
+            <BreadcrumbPage>
               {isMobile && classHash ? truncateString(classHash) : classHash}
             </BreadcrumbPage>
           </BreadcrumbItem>

@@ -1,6 +1,6 @@
 import React from "react";
 import { Table as TableType, flexRender } from "@tanstack/react-table";
-import { cn } from "@cartridge/ui/utils";
+import { cn } from "@cartridge/ui";
 
 const Table = React.forwardRef<
   HTMLTableElement,

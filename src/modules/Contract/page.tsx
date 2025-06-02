@@ -3,18 +3,7 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { Contract as StarknetContract } from "starknet";
-import {
-  BookIcon,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  CoinsIcon,
-  PencilIcon,
-  CodeIcon,
-} from "@cartridge/ui";
+import { BookIcon, CoinsIcon, PencilIcon, CodeIcon } from "@cartridge/ui";
 import { PageHeader } from "@/shared/components/PageHeader";
 import useBalances from "@/shared/hooks/useBalances";
 import {
@@ -43,6 +32,14 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/components/tabs";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/shared/components/breadcrumb";
 
 const initialData: Omit<ContractClassInfo, "constructor"> & {
   classHash?: string;
@@ -116,17 +113,15 @@ export function Contract() {
   return (
     <div className="w-full flex flex-col gap-4">
       <Breadcrumb>
-        <BreadcrumbList className="font-bold">
+        <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink href="../contracts">Contracts</BreadcrumbLink>
-          </BreadcrumbItem>
+          <BreadcrumbItem>Contracts</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="font-bold">
+            <BreadcrumbPage>
               {isMobile && contractAddress
                 ? truncateString(contractAddress)
                 : contractAddress}

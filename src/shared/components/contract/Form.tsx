@@ -15,7 +15,7 @@ import {
 import { useAccount } from "@starknet-react/core";
 import { Link } from "react-router-dom";
 import AddIcon from "@/shared/icons/Add";
-import { cn } from "@cartridge/ui/utils";
+import { cn } from "@cartridge/ui";
 import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
 import { useToast } from "@/shared/components/toast";
 import { ParamForm } from "@/shared/components/form";

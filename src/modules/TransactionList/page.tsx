@@ -20,13 +20,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+} from "@cartridge/ui";
+import {
   Breadcrumb,
   BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbSeparator,
   BreadcrumbPage,
-} from "@cartridge/ui";
+} from "@/shared/components/breadcrumb";
 
 const ROWS_TO_RENDER = 20;
 const BLOCKS_BATCH_SIZE = 5; // Number of blocks to fetch at once
@@ -144,13 +146,13 @@ export function TransactionList() {
   return (
     <div className="px-2 py-4 rounded-lg flex flex-col gap-4">
       <Breadcrumb>
-        <BreadcrumbList className="font-bold">
+        <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="font-bold">Transactions</BreadcrumbPage>
+            <BreadcrumbPage>Transactions</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

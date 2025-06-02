@@ -12,9 +12,8 @@ import { Event } from "@/modules/Event/page";
 import { ClassHash } from "@/modules/ClassHash/page";
 import { JsonRpcPlayground } from "@/modules/JsonRpc/page";
 import { NotFound } from "@/modules/NotFound/page";
-import { cn } from "@cartridge/ui/utils";
 import { World } from "@/modules/World/page";
-import { SonnerToaster } from "@cartridge/ui";
+import { cn, SonnerToaster } from "@cartridge/ui";
 
 export function App() {
   const location = useLocation();

@@ -6,18 +6,7 @@ import {
 import dayjs from "dayjs";
 import { cairo } from "starknet";
 import { useScreen } from "@/shared/hooks/useScreen";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage,
-  GasIcon,
-  BoltIcon,
-  StackDiamondIcon,
-  BellIcon,
-} from "@cartridge/ui";
+import { GasIcon, BoltIcon, StackDiamondIcon, BellIcon } from "@cartridge/ui";
 import {
   Card,
   CardHeader,
@@ -27,6 +16,14 @@ import {
   CardLabel,
   CardSeparator,
 } from "@/shared/components/card";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/shared/components/breadcrumb";
 import { PageHeader } from "@/shared/components/PageHeader";
 import { TxList } from "./TxList";
 import { EventList } from "./EventList";
@@ -61,10 +58,10 @@ export function Block() {
   }
 
   return (
-    <div className="w-full flex flex-col gap-8">
+    <div className="w-full flex flex-col gap-4">
       <div className="flex justify-between w-full">
         <Breadcrumb>
-          <BreadcrumbList className="font-bold">
+          <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
             </BreadcrumbItem>
@@ -74,7 +71,7 @@ export function Block() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="font-bold">{blockId}</BreadcrumbPage>
+              <BreadcrumbPage>{blockId}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

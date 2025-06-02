@@ -1,6 +1,6 @@
 import React, { PropsWithChildren } from "react";
 import { AccordionCollapseIcon, AccordionExpandIcon } from "./icons";
-import { cn } from "@cartridge/ui/utils";
+import { cn } from "@cartridge/ui";
 
 export function Accordion({ children }: PropsWithChildren) {
   return (

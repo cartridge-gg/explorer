@@ -10,8 +10,7 @@ import {
   AddressByUsernameQuery,
   AddressByUsernameQueryVariables,
 } from "@cartridge/utils/api/cartridge";
-import { cn } from "@cartridge/ui/utils";
-import { Input, SearchIcon } from "@cartridge/ui";
+import { cn, Input, SearchIcon } from "@cartridge/ui";
 
 export function SearchBar({ className }: { className?: string }) {
   const navigate = useNavigate();

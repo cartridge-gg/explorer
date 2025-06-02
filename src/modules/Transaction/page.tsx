@@ -8,13 +8,8 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { cairo } from "starknet";
 import CalldataDisplay from "./components/CalldataDisplay";
 import {
+  cn,
   BoltIcon,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
   CoinsIcon,
   GasIcon,
   Skeleton,
@@ -38,7 +33,6 @@ import dayjs from "dayjs";
 import SignatureDisplay from "./components/SignatureDisplay";
 import AddressDisplay from "@/shared/components/AddressDisplay";
 import BlockIdDisplay from "@/shared/components/BlockIdDisplay";
-import { cn } from "@cartridge/ui/utils";
 import { TxType } from "./components/TxType";
 import { NotFound } from "../NotFound/page";
 import { Loading } from "@/shared/components/Loading";
@@ -50,6 +44,14 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@/shared/components/tabs";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/shared/components/breadcrumb";
 
 export function Transaction() {
   const { onTabChange } = useHashLinkTabs();
@@ -79,9 +81,9 @@ export function Transaction() {
   }
 
   return (
-    <div id="tx-details" className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-4">
       <Breadcrumb>
-        <BreadcrumbList className="font-bold">
+        <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
           </BreadcrumbItem>
@@ -91,7 +93,7 @@ export function Transaction() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="font-bold">
+            <BreadcrumbPage>
               {isMobile && txHash ? truncateString(txHash) : txHash}
             </BreadcrumbPage>
           </BreadcrumbItem>

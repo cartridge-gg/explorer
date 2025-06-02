@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Connector, useConnect } from "@starknet-react/core";
 import { connectorIconToSrc } from "@/shared/utils/image";
-import { Button, Skeleton, Spinner, WalletIcon } from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+import { cn, Button, Skeleton, Spinner, WalletIcon } from "@cartridge/ui";
 import { useScreen } from "@/shared/hooks/useScreen";
 import {
   Dialog,

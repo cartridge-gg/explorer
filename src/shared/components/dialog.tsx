@@ -10,9 +10,8 @@ export {
 import React from "react";
 import { forwardRef, ElementRef, ComponentPropsWithoutRef } from "react";
 import { TimesIcon } from "@cartridge/ui";
-import { DialogPortal, DialogOverlay } from "@cartridge/ui";
+import { cn, DialogPortal, DialogOverlay } from "@cartridge/ui";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { cn } from "@cartridge/ui/utils";
 
 export const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
