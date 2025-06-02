@@ -4,11 +4,6 @@ import { useCallCart, useCallCartDispatch } from "@/store/ShoppingCartProvider";
 import ControllerConnector from "@cartridge/connector/controller";
 import {
   Button,
-  Dialog,
-  DialogTitle,
-  DialogHeader,
-  DialogContent,
-  DialogTrigger,
   Table,
   TableRow,
   TableBody,
@@ -24,6 +19,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Call } from "starknet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/shared/components/dialog";
 
 export function Connected() {
   const { isMobile } = useScreen();
@@ -109,7 +111,7 @@ export function Connected() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-[90%] sm:max-w-[400px] min-h-[464px] max-h-[70%] pt-20 border-2 border-background-200 flex flex-col gap-8 overflow-y-auto">
+      <DialogContent>
         <Button
           variant="outline"
           className="absolute border-destructive text-destructive hover:bg-transparent hover:text-destructive hover:border-destructive hover:opacity-80 top-3 right-3"
@@ -120,7 +122,7 @@ export function Connected() {
         {execution.data ? (
           <>
             <DialogHeader>
-              <DialogTitle className="uppercase">Execution Success</DialogTitle>
+              <DialogTitle>Execution Success</DialogTitle>
             </DialogHeader>
 
             <div className="flex flex-col gap-4">
@@ -149,7 +151,7 @@ export function Connected() {
         ) : execution.error ? (
           <>
             <DialogHeader>
-              <DialogTitle className="uppercase">Execution Failed</DialogTitle>
+              <DialogTitle>Execution Failed</DialogTitle>
             </DialogHeader>
 
             <div className="flex flex-col gap-4">
@@ -169,9 +171,7 @@ export function Connected() {
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle className="uppercase">
-                Calls ({state.calls.length})
-              </DialogTitle>
+              <DialogTitle>calls ( {state.calls.length} )</DialogTitle>
             </DialogHeader>
 
             {selected ? (

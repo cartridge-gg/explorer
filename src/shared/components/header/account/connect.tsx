@@ -1,20 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { Connector, useConnect } from "@starknet-react/core";
 import { connectorIconToSrc } from "@/shared/utils/image";
+import { Button, Skeleton, Spinner, WalletIcon } from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
+import { useScreen } from "@/shared/hooks/useScreen";
 import {
-  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  Skeleton,
-  Spinner,
-  WalletIcon,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
-import { useScreen } from "@/shared/hooks/useScreen";
+} from "@/shared/components/dialog";
 
 export function ConnectButton() {
   const { isMobile } = useScreen();
@@ -68,9 +65,9 @@ export function ConnectButton() {
           <span className="hidden sm:block">connect</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[90%] sm:max-w-[400px] pt-20 border-2 border-background-200">
-        <DialogHeader className="gap-2">
-          <DialogTitle className="uppercase">Connect</DialogTitle>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Connect</DialogTitle>
           <DialogDescription>Connect your wallet to continue</DialogDescription>
         </DialogHeader>
 
