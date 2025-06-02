@@ -2,7 +2,7 @@ import { SearchBar } from "@/shared/components/SearchBar";
 import { Header } from "@/shared/components/header";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { Link } from "react-router-dom";
-import { Network } from "@cartridge/ui";
+import { Network, Skeleton } from "@cartridge/ui";
 import useChain from "@/shared/hooks/useChain";
 
 export function Home() {
@@ -19,11 +19,13 @@ export function Home() {
             Explorer
           </div>
 
-          {chainId && (
+          {chainId ? (
             <Network
               chainId={chainId.id}
-              tooltipTriggerClassName="bg-background-200 hover:bg-background-300 rounded-none rounded-tr"
+              tooltipTriggerClassName="w-40 bg-background-200 hover:bg-background-300 rounded-none rounded-tr"
             />
+          ) : (
+            <Skeleton className="w-40 h-10 rounded-none rounded-tr" />
           )}
         </div>
 
