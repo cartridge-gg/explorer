@@ -227,7 +227,7 @@ export function SearchBar({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "min-w-[200px] w-full h-[42px] flex relative border border-background-500 items-center justify-between shadow rounded",
+        "min-w-[200px] w-full h-[42px] flex relative border border-background-200 items-center justify-between shadow rounded",
         isDropdownOpen && result ? "border-b-0" : undefined,
         className,
       )}
@@ -265,7 +265,7 @@ export function SearchBar({ className }: { className?: string }) {
               backgroundSize: "15px 1px",
               backgroundRepeat: "repeat-x",
             }}
-            className="flex flex-col gap-2 px-[15px] py-[10px] border border-background-500 border-t-0 shadow-md"
+            className="flex flex-col gap-2 px-[15px] py-[10px] border border-background-200 border-t-0 shadow-md"
           >
             {result ? (
               <div

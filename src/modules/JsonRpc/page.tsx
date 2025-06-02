@@ -9,6 +9,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
+  Button,
+  Input,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -18,6 +20,7 @@ import { fromCamelCase } from "@/shared/utils/string";
 import { OpenRPC, Method } from "./open-rpc";
 import { ParamForm } from "@/shared/components/form";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Card } from "@/shared/components/card";
 
 interface FormState {
   inputs: { name: string; value: string }[];
@@ -241,16 +244,15 @@ export function JsonRpcPlayground() {
       />
 
       <div className="flex flex-col sl:flex-row sl:h-[76vh] w-full gap-4">
-        <div className="flex flex-col flex-1 md:flex-row justify-stretch border border-borderGray overflow-hidden py-5 px-4 gap-4 bg-white">
+        <Card className="flex flex-col flex-1 md:flex-row justify-stretch border overflow-hidden py-5 px-4 gap-4">
           <div className="min-w-[250px] flex flex-col gap-[6px] sl:overflow-y-auto">
-            <input
-              className="bg-white border border-borderGray px-4 py-2 text-base rounded-none search-input relative focus:outline-none focus:ring-0"
+            <Input
               placeholder="Search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
 
-            <div className="max-h-[30vh] sl:max-h-none overflow-y-auto border-b border-borderGray">
+            <div className="max-h-[30vh] sl:max-h-none overflow-y-auto border-b">
               <Accordion>
                 <AccordionItem
                   open
@@ -264,8 +266,8 @@ export function JsonRpcPlayground() {
                         className={cn(
                           "py-1 px-3",
                           method.name === selected?.name
-                            ? "bg-[#DBDBDB]"
-                            : "bg-[#F3F3F3] cursor-pointer",
+                            ? "bg-background-200"
+                            : "bg-background-100 cursor-pointer",
                         )}
                         key={method.name}
                         onClick={() => onMethodChange(method)}
@@ -299,22 +301,18 @@ export function JsonRpcPlayground() {
               onSubmit={onExecute}
             />
           </div>
-        </div>
+        </Card>
 
-        <div className="w-full flex-1 flex flex-col gap-2 border border-borderGray py-5 px-4 bg-white lg:max-w-[800px]">
-          <button
+        <Card className="w-full flex-1 flex flex-col gap-2 py-5 px-4 lg:max-w-[800px]">
+          <Button
             onClick={onExecute}
-            className="bg-black text-white px-2 py-1 text-sm self-end flex items-center gap-3 uppercase font-bold hover:bg-opacity-80"
+            variant="secondary"
+            className="self-end w-40"
+            isLoading={form[selected?.name ?? ""]?.loading}
           >
-            {form[selected?.name ?? ""]?.loading ? (
-              "Executing..."
-            ) : (
-              <>
-                Execute
-                <PlayIcon className="size-2 fill-white" />
-              </>
-            )}
-          </button>
+            Execute
+            <PlayIcon className="size-2 fill-white" />
+          </Button>
 
           <div className="w-full overflow-auto">
             <Accordion>
@@ -334,7 +332,7 @@ export function JsonRpcPlayground() {
               </AccordionItem>
             </Accordion>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

@@ -17,13 +17,13 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <div
-      className="overflow-clip border border-background-500 rounded"
+      className="overflow-clip border border-background-200 rounded"
       {...props}
     >
       <div
         className={cn(
           "px-4 w-full justify-between h-[40px] flex items-center",
-          !!subtext && "border-b border-background-500",
+          !!subtext && "border-b border-background-200",
         )}
       >
         <h1 className="capitalize font-bold">{title}</h1>

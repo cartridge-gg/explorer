@@ -109,7 +109,7 @@ export function Connected() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-[90%] sm:max-w-[400px] min-h-[464px] max-h-[70%] pt-20 border-2 border-background-500 flex flex-col gap-8 overflow-y-auto">
+      <DialogContent className="max-w-[90%] sm:max-w-[400px] min-h-[464px] max-h-[70%] pt-20 border-2 border-background-200 flex flex-col gap-8 overflow-y-auto">
         <Button
           variant="outline"
           className="absolute border-destructive text-destructive hover:bg-transparent hover:text-destructive hover:border-destructive hover:opacity-80 top-3 right-3"
@@ -196,10 +196,10 @@ export function Connected() {
                         <Table>
                           <TableHeader>
                             <TableRow className="border-b last:border-b-0">
-                              <TableHead className="border border-background-500 text-center w-[40px]">
+                              <TableHead className="border border-background-200 text-center w-[40px]">
                                 #
                               </TableHead>
-                              <TableHead className="border border-background-500">
+                              <TableHead className="border border-background-200">
                                 Value
                               </TableHead>
                             </TableRow>
@@ -211,10 +211,10 @@ export function Connected() {
                                 key={i}
                                 className="border-b last:border-b-0"
                               >
-                                <TableCell className="border border-background-500 text-center">
+                                <TableCell className="border border-background-200 text-center">
                                   {i}
                                 </TableCell>
-                                <TableCell className="border border-background-500">
+                                <TableCell className="border border-background-200">
                                   {data}
                                 </TableCell>
                               </TableRow>
@@ -261,13 +261,13 @@ export function Connected() {
                         className="cursor-pointer hover:bg-background-300"
                         onClick={() => setSelected({ i: i, call })}
                       >
-                        <TableCell className="border border-background-500 text-center w-[40px]">
+                        <TableCell className="border border-background-200 text-center w-[40px]">
                           {i + 1}
                         </TableCell>
-                        <TableCell className="border border-background-500 w-[100px]">
+                        <TableCell className="border border-background-200 w-[100px]">
                           {truncateString(call.contractAddress, 3)}
                         </TableCell>
-                        <TableCell className="border border-background-500">
+                        <TableCell className="border border-background-200">
                           {call.entrypoint}
                         </TableCell>
                       </TableRow>

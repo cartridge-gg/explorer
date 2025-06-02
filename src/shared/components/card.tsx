@@ -79,7 +79,7 @@ export const CardLabel = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "text-foreground-400 font-semibold tracking-wide capitalize",
+      "text-foreground-400 font-semibold tracking-wide capitalize text-nowrap",
       className,
     )}
     {...props}
