@@ -1,4 +1,9 @@
-import { Accordion, AccordionItem } from "@/shared/components/accordion";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/shared/components/accordion";
 import FeltDisplay from "@/shared/components/FeltDisplay";
 import FeltDisplayAsToggle, {
   FeltDisplayVariants,
@@ -66,26 +71,33 @@ export function ContractForm({ contract, functions }: ContractFormProps) {
   }
 
   return (
-    <Accordion>
+    <Accordion type="single" collapsible>
       {functions.map((f, i) => (
         <AccordionItem
           key={i}
-          titleClassName="h-[45px] z-10"
-          title={
+          value={f.name}
+          className={
+            !contract
+              ? "first:rounded-t-none last:rounded-b-none border-x-0"
+              : undefined
+          }
+          disabled={!contract && !f.inputs.length}
+        >
+          <AccordionTrigger hideIcon={!contract && !f.inputs.length}>
             <div className="flex flex-row items-center gap-2">
               <span className="font-bold">fn</span>
               <span className="italic">{f.name}</span>
               <span>({f.inputs.map((arg) => arg.name).join(", ")})</span>
             </div>
-          }
-          disabled={!contract && !f.inputs.length}
-        >
-          <FunctionForm
-            item={f}
-            contract={contract}
-            state={form[f.name] || initFormState}
-            onUpdate={(update) => onUpdate(f.name, update)}
-          />
+          </AccordionTrigger>
+          <AccordionContent>
+            <FunctionForm
+              item={f}
+              contract={contract}
+              state={form[f.name] || initFormState}
+              onUpdate={(update) => onUpdate(f.name, update)}
+            />
+          </AccordionContent>
         </AccordionItem>
       ))}
     </Accordion>
