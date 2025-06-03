@@ -1,6 +1,6 @@
 import ToggleButton from "@/shared/components/ToggleButton";
 import { CheckIcon, CopyIcon } from "@cartridge/ui";
-import { Editor } from "@monaco-editor/react";
+import { Editor } from "@/shared/components/editor";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export type CodeProps = {

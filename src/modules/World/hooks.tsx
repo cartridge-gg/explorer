@@ -16,7 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@cartridge/ui";
-import { Editor } from "@monaco-editor/react";
+import { Editor } from "@/shared/components/editor";
 
 export function useWorld() {
   const [form, setForm] = useState<{
