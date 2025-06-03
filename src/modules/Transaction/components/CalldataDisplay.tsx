@@ -9,7 +9,12 @@ import { ArrowRightIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { STALE_TIME } from "@/constants/rpc";
 import { CACHE_TIME } from "@/constants/rpc";
-import { Accordion, AccordionItem } from "@/shared/components/accordion";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/shared/components/accordion";
 import FeltList from "@/shared/components/FeltList";
 import FeltDisplayAsToggle, {
   FeltDisplayVariants,
@@ -75,6 +80,7 @@ const ValueRenderer = ({
 export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
   const queryClient = useQueryClient();
   const [decodedCalldata, setDecodedCalldata] = useState<DecodedCalldata[]>([]);
+  console.log(decodedCalldata);
 
   const [selectedTab, setSelectedTab] = useState<
     (typeof CalldataEncodingVariants)[number]
@@ -213,9 +219,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
   }, [fetchAndDecodeCalldata]);
 
   if (!calldata || calldata.length === 0) {
-    return (
-      <div className="text-center text-gray-500">No calldata available</div>
-    );
+    return <div className="text-center">No calldata available</div>;
   }
 
   return (
@@ -231,89 +235,85 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
 
       <div className="overflow-auto">
         {selectedTab === "decoded" ? (
-          <Accordion>
-            {decodedCalldata.map((item, idx) => (
-              <AccordionItem
-                key={idx}
-                titleClassName="h-[45px]"
-                title={
+          <Accordion type="single" collapsible>
+            {decodedCalldata.map((item, i) => (
+              <AccordionItem key={i} value={item.selector}>
+                <AccordionTrigger>
                   <div className="flex flex-row items-center gap-2">
-                    <span className="">
-                      <AddressDisplay
-                        alwaysTruncate={true}
-                        truncateLength={3}
-                        value={item.contract}
-                      />
-                    </span>
-                    <span>
-                      <ArrowRightIcon className="w-3 h-3" />
-                    </span>
+                    <AddressDisplay
+                      alwaysTruncate={true}
+                      truncateLength={3}
+                      value={item.contract}
+                    />
+                    <ArrowRightIcon className="w-3 h-3" />
                     <span className="font-bold">fn</span>
                     <span className="italic">{item.function_name}</span>
                     <span>({item.params.map((arg) => arg).join(", ")})</span>
                   </div>
-                }
-              >
-                <div className="flex gap-3 justify-between mb-3">
-                  <CalldataEncodingToggle
-                    displayAs={decodedRawMap[item.selector]}
-                    onChange={(value) =>
-                      setDecodedRawMap((prev) => ({
-                        ...prev,
-                        [item.selector]: value,
-                      }))
-                    }
-                  />
+                </AccordionTrigger>
 
-                  {decodedRawMap[item.selector] === "decoded" && (
-                    <FeltDisplayAsToggle
-                      displayAs={convertValueTabMap[item.selector]}
-                      onChange={(format) => {
-                        setConvertValueTabMap((prev) => ({
+                <AccordionContent className="p-3">
+                  <div className="flex gap-3 justify-between mb-3">
+                    <CalldataEncodingToggle
+                      displayAs={decodedRawMap[item.selector]}
+                      onChange={(value) =>
+                        setDecodedRawMap((prev) => ({
                           ...prev,
-                          [item.selector]: format as Exclude<
-                            FeltDisplayVariants,
-                            "string"
-                          >,
-                        }));
-                      }}
+                          [item.selector]: value,
+                        }))
+                      }
                     />
-                  )}
-                </div>
 
-                <div className="bg-white border overflow-auto">
-                  {decodedRawMap[item.selector] === "decoded" ? (
-                    <table className="overflow-x w-full">
-                      <tbody>
-                        {item.data.map((arg, rowIndex, array) => (
-                          <tr
-                            key={rowIndex}
-                            className={`${
-                              rowIndex !== array.length - 1 ? "border-b" : ""
-                            }`}
-                          >
-                            <td className="px-2 py-1 text-left align-top">
-                              <span className="font-bold">{arg.name}</span>
-                            </td>
+                    {decodedRawMap[item.selector] === "decoded" && (
+                      <FeltDisplayAsToggle
+                        displayAs={convertValueTabMap[item.selector]}
+                        onChange={(format) => {
+                          setConvertValueTabMap((prev) => ({
+                            ...prev,
+                            [item.selector]: format as Exclude<
+                              FeltDisplayVariants,
+                              "string"
+                            >,
+                          }));
+                        }}
+                      />
+                    )}
+                  </div>
 
-                            <td className="px-2 py-1 text-left align-top ">
-                              <span className="text-gray-500">{arg.type}</span>
-                            </td>
+                  <div className="border overflow-auto">
+                    {decodedRawMap[item.selector] === "decoded" ? (
+                      <table className="overflow-x w-full">
+                        <tbody>
+                          {item.data.map((arg, rowIndex, array) => (
+                            <tr
+                              key={rowIndex}
+                              className={`${
+                                rowIndex !== array.length - 1 ? "border-b" : ""
+                              }`}
+                            >
+                              <td className="px-2 py-1 text-left align-top">
+                                <span className="font-bold">{arg.name}</span>
+                              </td>
 
-                            <td className="px-2 py-1 text-left overflow-x-auto">
-                              <ValueRenderer
-                                value={arg.value}
-                                type={convertValueTabMap[item.selector]}
-                              />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <FeltList list={item.raw_args} displayAs="hex" />
-                  )}
-                </div>
+                              <td className="px-2 py-1 text-left align-top ">
+                                <span>{arg.type}</span>
+                              </td>
+
+                              <td className="px-2 py-1 text-left overflow-x-auto">
+                                <ValueRenderer
+                                  value={arg.value}
+                                  type={convertValueTabMap[item.selector]}
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <FeltList list={item.raw_args} displayAs="hex" />
+                    )}
+                  </div>
+                </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>

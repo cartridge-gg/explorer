@@ -1,5 +1,4 @@
 import { rpcUrl } from "@/constants/rpc";
-import { Accordion, AccordionItem } from "@/shared/components/accordion";
 import { PageHeader } from "@/shared/components/PageHeader";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { cn, Button, Input } from "@cartridge/ui";
@@ -11,6 +10,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumb";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/shared/components/accordion";
 import { useQuery } from "@tanstack/react-query";
 import { PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -247,15 +252,13 @@ export function JsonRpcPlayground() {
               onChange={(e) => setSearch(e.target.value)}
             />
 
-            <div className="max-h-[30vh] sl:max-h-none overflow-y-auto border-b">
-              <Accordion>
-                <AccordionItem
-                  open
-                  title="Starknet"
-                  titleClassName="uppercase font-bold"
-                  contentClassName="p-0 overflow-y-scroll"
-                >
-                  <div>
+            <div className="max-h-[30vh] sl:max-h-none overflow-y-auto">
+              <Accordion type="single" collapsible defaultValue="starknet">
+                <AccordionItem value="starknet">
+                  <AccordionTrigger parentClassName="[&[data-state=open]]:border-b">
+                    Starknet
+                  </AccordionTrigger>
+                  <AccordionContent>
                     {methods?.map((method) => (
                       <div
                         className={cn(
@@ -270,7 +273,7 @@ export function JsonRpcPlayground() {
                         {method.name.replace("starknet_", "")}
                       </div>
                     ))}
-                  </div>
+                  </AccordionContent>
                 </AccordionItem>
               </Accordion>
             </div>
@@ -310,20 +313,26 @@ export function JsonRpcPlayground() {
           </Button>
 
           <div className="w-full overflow-auto">
-            <Accordion>
-              <AccordionItem title="request" titleClassName="uppercase" open>
-                <div className="w-full overflow-x-auto">
+            <Accordion type="multiple" defaultValue={["request", "response"]}>
+              <AccordionItem value="request">
+                <AccordionTrigger parentClassName="[&[data-state=open]>div]:text-foreground-200 [&[data-state=open]]:border-b">
+                  Request
+                </AccordionTrigger>
+                <AccordionContent className="min-h-80 overflow-x-auto p-3">
                   <code>
                     <pre>{requestJSON}</pre>
                   </code>
-                </div>
+                </AccordionContent>
               </AccordionItem>
-              <AccordionItem title="response" titleClassName="uppercase" open>
-                <div className="min-h-80 overflow-x-auto">
+              <AccordionItem value="response">
+                <AccordionTrigger parentClassName="[&[data-state=open]>div]:text-foreground-200 [&[data-state=open]]:border-b">
+                  Response
+                </AccordionTrigger>
+                <AccordionContent className="min-h-80 overflow-x-auto p-3">
                   <code>
                     <pre>{responseJSON}</pre>
                   </code>
-                </div>
+                </AccordionContent>
               </AccordionItem>
             </Accordion>
           </div>
