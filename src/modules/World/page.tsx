@@ -1,4 +1,4 @@
-import { Editor } from "@monaco-editor/react";
+import { Editor } from "@/shared/components/editor";
 import { useWorld } from "./hooks";
 import {
   Select,
@@ -7,6 +7,7 @@ import {
   SelectItem,
   SelectContent,
   cn,
+  Input,
 } from "@cartridge/ui";
 import {
   Breadcrumb,
@@ -85,7 +86,7 @@ export function World() {
             </SelectContent>
           </Select>
         ) : (
-          <input
+          <Input
             className="border border-gray-300 rounded-md p-2"
             value={form.project}
             onChange={(e) =>

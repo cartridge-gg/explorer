@@ -253,7 +253,7 @@ export function JsonRpcPlayground() {
             />
 
             <div className="max-h-[30vh] sl:max-h-none overflow-y-auto">
-              <Accordion type="single" collapsible defaultValue="starknet">
+              <Accordion defaultValue="starknet">
                 <AccordionItem value="starknet">
                   <AccordionTrigger parentClassName="[&[data-state=open]]:border-b">
                     Starknet

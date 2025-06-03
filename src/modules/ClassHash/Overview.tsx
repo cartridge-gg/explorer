@@ -23,12 +23,7 @@ export function Overview({
 }) {
   return (
     <div className="bg-white flex flex-col gap-1 mt-[6px] overflow-auto">
-      <Accordion
-        type="single"
-        collapsible
-        defaultValue="code"
-        className="flex flex-col gap-2"
-      >
+      <Accordion defaultValue="code" className="flex flex-col gap-2">
         <AccordionItem value="read" className="border rounded">
           <AccordionTrigger>
             <BookIcon variant="solid" />

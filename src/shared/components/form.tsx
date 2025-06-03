@@ -1,17 +1,19 @@
 import {
   cn,
+  Input,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@cartridge/ui";
-import { Editor, Monaco } from "@monaco-editor/react";
+import { Monaco } from "@monaco-editor/react";
 import { InfoIcon } from "lucide-react";
 import { editor } from "monaco-editor";
 import { useCallback } from "react";
 import { JsonSchema } from "json-schema-library";
 import { isPrimitive } from "@/shared/utils/json-schema";
 import { TypeNode } from "@/shared/utils/abi";
+import { Editor } from "@/shared/components/editor";
 
 export function ParamForm({
   params,
@@ -35,10 +37,10 @@ export function ParamForm({
   if (params.length === 0) return null;
 
   return (
-    <table className="w-full bg-white overflow-x-auto max-h-[200px]">
+    <table className="w-full overflow-x-auto max-h-[200px]">
       <tbody>
         {params.map((p, i) => (
-          <tr key={i} className={i === params.length - 1 ? "border-b" : ""}>
+          <tr key={i} className={"group"}>
             <td className="px-2 py-1 text-left align-top w-[90px] italic">
               <div className="flex items-center gap-2">
                 <span>{p.name}</span>
@@ -62,10 +64,10 @@ export function ParamForm({
 
             <td className="text-left align-top p-0">
               {isPrimitive(p.schema) ? (
-                <input
+                <Input
                   type="text"
                   className={cn(
-                    "px-2 py-1 text-left w-full",
+                    "px-2 py-1 text-left w-full rounded-none group-first:rounded-t group-last:rounded-b",
                     disabled && "cursor-not-allowed",
                   )}
                   value={p.value}
@@ -85,6 +87,7 @@ export function ParamForm({
                   id={p.id}
                   name={p.name}
                   schema={p.schema}
+                  className="group-first:rounded-t group-last:rounded-b"
                   value={p.value}
                   onChange={(value) => onChange(i, value ?? "")}
                   onSubmit={(value) => onSubmit?.(i, value ?? "")}
@@ -107,6 +110,7 @@ function ParamEditor({
   onChange,
   onSubmit,
   readOnly = false,
+  className,
 }: {
   id?: string;
   name: string;
@@ -115,6 +119,7 @@ function ParamEditor({
   onChange: (value?: string) => void;
   onSubmit?: (value: string) => void;
   readOnly?: boolean;
+  className?: string;
 }) {
   const onMount = useCallback(
     (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
@@ -122,19 +127,7 @@ function ParamEditor({
       const model =
         monaco.editor.getModel(uri) ??
         monaco.editor.createModel(value, "json", uri);
-
       editor.setModel(model);
-      if (onSubmit) {
-        editor.addAction({
-          id: "submit",
-          label: "Submit",
-          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-          run: () => {
-            onSubmit(value);
-          },
-        });
-      }
-
       monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
         validate: true,
         schemas: [
@@ -147,38 +140,52 @@ function ParamEditor({
           },
         ],
       });
+      if (onSubmit) {
+        editor.addAction({
+          id: "submit",
+          label: "Submit",
+          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+          run: () => {
+            onSubmit(value);
+          },
+        });
+      }
     },
-    [id, name, schema, value, onSubmit],
+    [id, name, value, onSubmit, schema],
   );
 
   return (
-    <Editor
-      height={200}
-      language="json"
-      onMount={onMount}
-      onChange={onChange}
-      options={{
-        readOnly,
-        lineNumbers: "off",
-        cursorStyle: "line",
-        automaticLayout: true,
-        roundedSelection: false,
-        selectOnLineNumbers: true,
-        snippetSuggestions: "inline",
-        suggestOnTriggerCharacters: true,
-        scrollbar: {
-          arrowSize: 10,
-          useShadows: false,
-          vertical: "visible",
-          horizontal: "visible",
-          verticalHasArrows: true,
-          horizontalHasArrows: true,
-          verticalScrollbarSize: 17,
-          horizontalScrollbarSize: 17,
-          alwaysConsumeMouseWheel: false,
-        },
-      }}
-      value={value}
-    />
+    <div className={cn("overflow-hidden", className)}>
+      <Editor
+        height={200}
+        language="json"
+        onMount={onMount}
+        onChange={onChange}
+        className={className}
+        theme="cartridge-dark"
+        options={{
+          readOnly,
+          lineNumbers: "off",
+          cursorStyle: "line",
+          automaticLayout: true,
+          roundedSelection: false,
+          selectOnLineNumbers: true,
+          snippetSuggestions: "inline",
+          suggestOnTriggerCharacters: true,
+          scrollbar: {
+            arrowSize: 10,
+            useShadows: false,
+            vertical: "visible",
+            horizontal: "visible",
+            verticalHasArrows: true,
+            horizontalHasArrows: true,
+            verticalScrollbarSize: 17,
+            horizontalScrollbarSize: 17,
+            alwaysConsumeMouseWheel: false,
+          },
+        }}
+        value={value}
+      />
+    </div>
   );
 }

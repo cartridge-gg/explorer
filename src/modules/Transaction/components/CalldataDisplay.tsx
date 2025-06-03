@@ -235,7 +235,7 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
 
       <div className="overflow-auto">
         {selectedTab === "decoded" ? (
-          <Accordion type="single" collapsible>
+          <Accordion>
             {decodedCalldata.map((item, i) => (
               <AccordionItem key={i} value={item.selector}>
                 <AccordionTrigger>

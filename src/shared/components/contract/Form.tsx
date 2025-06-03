@@ -20,7 +20,7 @@ import {
 import { useAccount } from "@starknet-react/core";
 import { Link } from "react-router-dom";
 import AddIcon from "@/shared/icons/Add";
-import { cn } from "@cartridge/ui";
+import { Button } from "@cartridge/ui";
 import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
 import { useToast } from "@/shared/components/toast";
 import { ParamForm } from "@/shared/components/form";
@@ -71,7 +71,7 @@ export function ContractForm({ contract, functions }: ContractFormProps) {
   }
 
   return (
-    <Accordion type="single" collapsible>
+    <Accordion>
       {functions.map((f, i) => (
         <AccordionItem
           key={i}
@@ -90,7 +90,7 @@ export function ContractForm({ contract, functions }: ContractFormProps) {
               <span>({f.inputs.map((arg) => arg.name).join(", ")})</span>
             </div>
           </AccordionTrigger>
-          <AccordionContent>
+          <AccordionContent className="p-4">
             <FunctionForm
               item={f}
               contract={contract}
@@ -212,59 +212,38 @@ function FunctionForm({
     <div className="flex flex-col gap-[10px] items-end">
       {!!contract &&
         (isRead ? (
-          <button
-            disabled={state.loading}
+          <Button
+            variant="secondary"
+            isLoading={state.loading}
             onClick={onCallOrExecute}
-            className={`px-3 py-[2px] text-sm uppercase font-bold w-fit  ${
-              state.loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-primary hover:bg-[#6E6E6E]"
-            } text-white`}
           >
-            {state.loading ? "Calling..." : "Call"}
-          </button>
+            call
+          </Button>
         ) : (
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="secondary"
+              size="icon"
               onClick={onAddToCart}
               disabled={!account}
-              className={cn(
-                `bg-white w-[19px] h-[19px] flex items-center justify-center border`,
-                !account
-                  ? "border-gray-300 text-gray-300 cursor-not-allowed"
-                  : "border-borderGray hover:border-0 hover:bg-primary hover:text-white cursor-pointer",
-              )}
-              title={
-                !account ? "Please connect your wallet first" : "Add to cart"
-              }
             >
               <AddIcon />
-            </button>
+            </Button>
 
-            <button
+            <Button
+              variant="secondary"
               disabled={!account || state.loading}
               onClick={onCallOrExecute}
-              className={`px-3 py-[2px] text-sm uppercase font-bold w-fit text-white ${
-                !account || state.loading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-primary hover:bg-[#6E6E6E]"
-              }`}
-              title={
-                !account
-                  ? "Please connect your wallet first"
-                  : state.loading
-                    ? "Transaction in progress"
-                    : ""
-              }
             >
               {state.loading ? "Executing..." : "Execute"}
-            </button>
+            </Button>
           </div>
         ))}
 
       <ParamForm
         params={f.inputs.map((input, i) => ({
           ...input,
+          id: `${f.name}-${input.name}`,
           value:
             i < state.inputs.length
               ? state.inputs[i]?.value
