@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
@@ -40,6 +40,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumb";
+import { Hash } from "@/shared/components/hash";
 
 const initialData: Omit<ContractClassInfo, "constructor"> & {
   classHash?: string;
@@ -139,25 +140,12 @@ export function Contract() {
             <CardContent>
               <div className="flex justify-between gap-2">
                 <CardLabel>Address</CardLabel>
-                <div>
-                  {isMobile && contractAddress
-                    ? truncateString(contractAddress)
-                    : contractAddress}
-                </div>
+                <Hash value={contractAddress} />
               </div>
 
               <div className="flex justify-between gap-2">
                 <CardLabel>Class Hash</CardLabel>
-                <div>
-                  <Link
-                    to={`../class/${classHash}`}
-                    className="hover:underline"
-                  >
-                    {isMobile && classHash
-                      ? truncateString(classHash)
-                      : classHash}
-                  </Link>
-                </div>
+                <Hash value={classHash} to={`../class/${classHash}`} />
               </div>
             </CardContent>
 
