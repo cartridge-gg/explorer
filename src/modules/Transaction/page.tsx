@@ -17,6 +17,7 @@ import {
   PencilIcon,
   BellIcon,
   StackOvalIcon,
+  Badge,
 } from "@cartridge/ui";
 import {
   Card,
@@ -144,7 +145,13 @@ export function Transaction() {
               </div>
               <div className="flex justify-between gap-2">
                 <CardLabel>Block</CardLabel>
-                <BlockIdDisplay value={receipt?.block_number} />
+                <div className="flex items-center">
+                  <Badge className="p-2"># {receipt?.block_number}</Badge>
+                  <Hash
+                    value={receipt?.block_hash}
+                    to={`../block/${receipt?.block_hash}`}
+                  />
+                </div>
               </div>
             </CardContent>
 
