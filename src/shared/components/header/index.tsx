@@ -1,17 +1,38 @@
 import { SearchBar } from "@/shared/components/SearchBar";
 import { Account } from "./account";
 import { useLocation } from "react-router-dom";
-import { Network, Separator, Skeleton } from "@cartridge/ui";
+import { Button, DotsIcon, Network, Separator, Skeleton } from "@cartridge/ui";
 import useChain from "@/shared/hooks/useChain";
+import { useScreen } from "@/shared/hooks/useScreen";
+import { useState } from "react";
+import { Sheet, SheetContent, SheetTrigger } from "@/shared/components/sheet";
 
 export function Header() {
   const location = useLocation();
   const isHome = location.pathname === "/";
   const { id: chainId } = useChain();
+  const { isMobile } = useScreen();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="w-full flex items-center justify-between gap-2">
-      <div className="w-[467px]">{!isHome && <SearchBar />}</div>
+      <div className="w-[467px]">
+        {!isHome &&
+          (!isMobile ? (
+            <SearchBar />
+          ) : (
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="icon" size="icon">
+                  <DotsIcon className="rotate-90" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left">
+                <SearchBar onNavigate={() => setIsOpen(false)} />{" "}
+              </SheetContent>
+            </Sheet>
+          ))}
+      </div>
 
       <div className="flex items-center gap-4">
         {!isHome && (

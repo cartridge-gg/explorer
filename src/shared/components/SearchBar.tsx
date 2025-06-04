@@ -12,7 +12,13 @@ import {
 } from "@cartridge/utils/api/cartridge";
 import { cn, Input, SearchIcon } from "@cartridge/ui";
 
-export function SearchBar({ className }: { className?: string }) {
+export function SearchBar({
+  className,
+  onNavigate,
+}: {
+  className?: string;
+  onNavigate?: () => void;
+}) {
   const navigate = useNavigate();
   const { isMobile } = useScreen();
 
@@ -192,7 +198,8 @@ export function SearchBar({ className }: { className?: string }) {
     }
 
     setIsDropdownOpen(false);
-  }, [navigate, result]);
+    onNavigate?.();
+  }, [navigate, result, onNavigate]);
 
   const handleSearchIconClick = () => {
     if (inputRef.current?.value) {
