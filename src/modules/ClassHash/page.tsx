@@ -30,6 +30,7 @@ import {
 import { NotFound } from "@/modules/NotFound/page";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 import { Loading } from "@/shared/components/Loading";
+import { Hash } from "@/shared/components/hash";
 
 const initialData: ContractClassInfo = {
   constructor: {
@@ -75,7 +76,7 @@ export function ClassHash() {
     retry: false,
   });
 
-  if (isLoading || (!error && (!contractVersion || !code))) {
+  if (isLoading || (!error && (!contractVersion || !code || !classHash))) {
     return <Loading />;
   }
 
@@ -109,11 +110,7 @@ export function ClassHash() {
             <CardContent>
               <div className="flex justify-between gap-2">
                 <CardLabel>Class Hash</CardLabel>
-                <div>
-                  {isMobile && classHash
-                    ? truncateString(classHash)
-                    : classHash}
-                </div>
+                <Hash value={classHash} />
               </div>
 
               <div className="flex justify-between gap-2">

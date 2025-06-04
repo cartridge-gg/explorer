@@ -31,8 +31,6 @@ import { DataTable } from "@/shared/components/dataTable";
 import { PageHeader } from "@/shared/components/PageHeader";
 import dayjs from "dayjs";
 import SignatureDisplay from "./components/SignatureDisplay";
-import AddressDisplay from "@/shared/components/AddressDisplay";
-import BlockIdDisplay from "@/shared/components/BlockIdDisplay";
 import { TxType } from "./components/TxType";
 import { NotFound } from "../NotFound/page";
 import { Loading } from "@/shared/components/Loading";
@@ -52,6 +50,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/shared/components/breadcrumb";
+import { Hash } from "@/shared/components/hash";
 
 export function Transaction() {
   const { onTabChange } = useHashLinkTabs();
@@ -140,9 +139,7 @@ export function Transaction() {
               <div className="flex justify-between gap-2">
                 <CardLabel>Hash</CardLabel>
                 <div>
-                  {isMobile
-                    ? truncateString(receipt?.transaction_hash)
-                    : receipt?.transaction_hash}
+                  <Hash value={receipt?.transaction_hash} />
                 </div>
               </div>
               <div className="flex justify-between gap-2">
@@ -156,7 +153,10 @@ export function Transaction() {
                 {!!tx?.sender_address && (
                   <div className="flex justify-between gap-2">
                     <CardLabel>Sender</CardLabel>
-                    <AddressDisplay value={tx?.sender_address} />
+                    <Hash
+                      value={tx?.sender_address}
+                      to={`../contract/${tx?.sender_address}`}
+                    />
                   </div>
                 )}
                 {!!tx?.nonce && (

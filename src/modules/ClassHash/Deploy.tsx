@@ -9,6 +9,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { DeployContractResponse } from "starknet";
 import { ParamForm } from "@/shared/components/form";
+import { Card, CardContent } from "@/shared/components/card";
 
 export function Deploy({
   classHash,
@@ -88,28 +89,32 @@ export function Deploy({
   }, [account, classHash, form, toast, initialInputs]);
 
   return (
-    <div className="bg-white flex flex-col gap-3 mt-[6px] px-[15px] py-[17px] border border-borderGray overflow-auto">
-      {!account && (
-        <div className="text-sm text-red-500">
-          Please connect your account to deploy a contract
-        </div>
-      )}
+    <div className="bg-white flex flex-col gap-3 overflow-auto">
+      <Card>
+        <CardContent>
+          {!account && (
+            <div className="text-sm text-red-500">
+              Please connect your account to deploy a contract
+            </div>
+          )}
 
-      <ParamForm
-        params={constructor.inputs.map((input, i) => ({
-          ...input,
-          value: form.inputs[i]!.value,
-        }))}
-        onChange={onInputChange}
-        disabled={!account || isDeploying}
-      />
-      <button
-        className="bg-primary text-white px-4 py-2 self-start hover:bg-primary/80 disabled:bg-primary/50"
-        onClick={onDeploy}
-        disabled={!account || isDeploying}
-      >
-        {isDeploying ? "Deploying..." : "Deploy"}
-      </button>
+          <ParamForm
+            params={constructor.inputs.map((input, i) => ({
+              ...input,
+              value: form.inputs[i]!.value,
+            }))}
+            onChange={onInputChange}
+            disabled={!account || isDeploying}
+          />
+          <button
+            className="bg-primary text-white px-4 py-2 self-start hover:bg-primary/80 disabled:bg-primary/50"
+            onClick={onDeploy}
+            disabled={!account || isDeploying}
+          >
+            {isDeploying ? "Deploying..." : "Deploy"}
+          </button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,11 +1,7 @@
 import { formatNumber } from "@/shared/utils/number";
-import {
-  formatSnakeCaseToDisplayValue,
-  truncateString,
-} from "@/shared/utils/string";
+import { formatSnakeCaseToDisplayValue } from "@/shared/utils/string";
 import dayjs from "dayjs";
 import { cairo } from "starknet";
-import { useScreen } from "@/shared/hooks/useScreen";
 import { GasIcon, BoltIcon, StackDiamondIcon, BellIcon } from "@cartridge/ui";
 import {
   Card,
@@ -28,7 +24,6 @@ import { PageHeader } from "@/shared/components/PageHeader";
 import { TxList } from "./TxList";
 import { EventList } from "./EventList";
 import { BlockNavigation } from "./BlockNavigation";
-import AddressDisplay from "@/shared/components/AddressDisplay";
 import { NotFound } from "../NotFound/page";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 import { Loading } from "@/shared/components/Loading";
@@ -39,9 +34,9 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@/shared/components/tabs";
+import { Hash } from "@/shared/components/hash";
 
 export function Block() {
-  const { isMobile } = useScreen();
   const { onTabChange } = useHashLinkTabs();
   const {
     data: { blockId, block, txs, events, executions, blockComputeData },
@@ -97,16 +92,8 @@ export function Block() {
             <CardContent>
               <div className="flex justify-between gap-2">
                 <CardLabel>Hash</CardLabel>
-                <div>
-                  {isMobile
-                    ? truncateString(block.block_hash)
-                    : block.block_hash}
-                </div>
+                <Hash value={block.block_hash} />
               </div>
-              <div className="flex justify-between gap-2">
-                <CardLabel>Number</CardLabel>
-                <div>{block.block_number}</div>
-              </div>{" "}
             </CardContent>
 
             <CardSeparator />
@@ -114,14 +101,15 @@ export function Block() {
             <CardContent>
               <div className="flex justify-between">
                 <CardLabel>State root</CardLabel>
-                <div>
-                  {isMobile ? truncateString(block.new_root) : block.new_root}
-                </div>
+                <Hash value={block.new_root} />
               </div>
 
               <div className="flex justify-between">
                 <CardLabel>Sequencer address</CardLabel>
-                <AddressDisplay value={block.sequencer_address} />
+                <Hash
+                  value={block.sequencer_address}
+                  to={`../contract/${block.sequencer_address}`}
+                />
               </div>
             </CardContent>
 

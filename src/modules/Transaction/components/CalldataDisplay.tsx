@@ -22,7 +22,7 @@ import FeltDisplayAsToggle, {
 import CalldataEncodingToggle, {
   CalldataEncodingVariants,
 } from "@/shared/components/DecodeRawToggle";
-import AddressDisplay from "@/shared/components/AddressDisplay";
+import { Hash } from "@/shared/components/hash";
 
 // const TxTypesTabs = ["Decoded", "Raw"] as const;
 
@@ -80,7 +80,6 @@ const ValueRenderer = ({
 export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
   const queryClient = useQueryClient();
   const [decodedCalldata, setDecodedCalldata] = useState<DecodedCalldata[]>([]);
-  console.log(decodedCalldata);
 
   const [selectedTab, setSelectedTab] = useState<
     (typeof CalldataEncodingVariants)[number]
@@ -240,10 +239,9 @@ export default function CalldataDisplay({ calldata }: CalldataDisplayProps) {
               <AccordionItem key={i} value={item.selector}>
                 <AccordionTrigger>
                   <div className="flex flex-row items-center gap-2">
-                    <AddressDisplay
-                      alwaysTruncate={true}
-                      truncateLength={3}
+                    <Hash
                       value={item.contract}
+                      to={`../contract/${item.contract}`}
                     />
                     <ArrowRightIcon className="w-3 h-3" />
                     <span className="font-bold">fn</span>
