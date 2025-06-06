@@ -5,7 +5,7 @@ import {
   PageHeaderRight,
 } from "@/shared/components/PageHeader";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
-import { cn, Button, Input, TerminalIcon, Badge } from "@cartridge/ui";
+import { cn, Button, Input, TerminalIcon } from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -28,6 +28,7 @@ import { OpenRPC, Method } from "./open-rpc";
 import { ParamForm } from "@/shared/components/form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card } from "@/shared/components/card";
+import { Badge } from "@/shared/components/badge";
 
 interface FormState {
   inputs: { name: string; value: string }[];

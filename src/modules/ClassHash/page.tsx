@@ -1,5 +1,5 @@
 import { truncateString } from "@/shared/utils/string";
-import { Badge, InfoIcon, PlusIcon, ScrollIcon, Skeleton } from "@cartridge/ui";
+import { InfoIcon, PlusIcon, ScrollIcon, Skeleton } from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -35,6 +35,7 @@ import { NotFound } from "@/modules/NotFound/page";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 import { Loading } from "@/shared/components/Loading";
 import { Hash } from "@/shared/components/hash";
+import { Badge } from "@/shared/components/badge";
 
 const initialData: ContractClassInfo = {
   constructor: {
