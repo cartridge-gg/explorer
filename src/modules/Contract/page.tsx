@@ -190,9 +190,9 @@ export function Contract() {
             </Card>
           </div>
 
-          <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-            {contract && (
-              <Tabs defaultValue="read" onValueChange={onTabChange}>
+          <Card className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+            <Tabs defaultValue="read" onValueChange={onTabChange}>
+              <CardContent>
                 <TabsList>
                   <TabsTrigger value="read">
                     <BookIcon variant="solid" />
@@ -207,7 +207,10 @@ export function Contract() {
                     <div>Code</div>
                   </TabsTrigger>
                 </TabsList>
+              </CardContent>
+              <CardSeparator />
 
+              <CardContent>
                 <TabsContent value="read">
                   <ContractForm functions={readFuncs} contract={contract} />
                 </TabsContent>
@@ -219,9 +222,9 @@ export function Contract() {
                 <TabsContent value="code">
                   <Code abi={code.abi} sierra={code.sierra} />
                 </TabsContent>
-              </Tabs>
-            )}
-          </div>
+              </CardContent>
+            </Tabs>
+          </Card>
         </div>
       )}
     </div>

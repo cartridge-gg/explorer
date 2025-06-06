@@ -11,10 +11,10 @@ import {
 import TxTypeToggle from "./TxTypeToggle";
 import { TransactionTableData } from "@/types/types";
 import { useScreen } from "@/shared/hooks/useScreen";
-import { truncateString } from "@/shared/utils/string";
 import { useWindowDimensions } from "@/shared/hooks/useWindow";
 import { cn } from "@cartridge/ui";
 import { useNavigate } from "react-router-dom";
+import { Hash } from "@/shared/components/hash";
 
 interface TxListProps {
   transactions: TransactionTableData[];
@@ -36,11 +36,7 @@ export function TxList({ transactions }: TxListProps) {
       columnHelper.accessor("hash", {
         header: () => <th className="px-4 text-left">Hash</th>,
         cell: (info) => (
-          <>
-            {isMobile
-              ? truncateString(info.renderValue(), 4)
-              : info.renderValue()}
-          </>
+          <Hash value={info.renderValue()} to={`../tx/${info.renderValue()}`} />
         ),
         filterFn: (row, columnId, filterValue) => {
           const rowValue: string = row.getValue(columnId);

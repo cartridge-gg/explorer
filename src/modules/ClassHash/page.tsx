@@ -8,7 +8,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumb";
-import { Card, CardContent, CardLabel } from "@/shared/components/card";
+import {
+  Card,
+  CardContent,
+  CardLabel,
+  CardSeparator,
+} from "@/shared/components/card";
 import {
   Tabs,
   TabsList,
@@ -126,7 +131,7 @@ export function ClassHash() {
         <NotFound />
       ) : (
         <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
-          <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
+          <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-auto">
             <Card>
               <CardContent>
                 <div className="flex justify-between gap-2">
@@ -137,32 +142,38 @@ export function ClassHash() {
             </Card>
           </div>
 
-          <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+          <Card className="h-full flex-grow grid grid-rows-[min-content_1fr]">
             <Tabs defaultValue="overview" onValueChange={onTabChange}>
-              <TabsList>
-                <TabsTrigger value="overview">
-                  <InfoIcon />
-                  <div>Overview</div>
-                </TabsTrigger>
-                <TabsTrigger value="deploy">
-                  <PlusIcon variant="solid" />
-                  <div>Deploy</div>
-                </TabsTrigger>
-              </TabsList>
+              <CardContent>
+                <TabsList>
+                  <TabsTrigger value="overview">
+                    <InfoIcon />
+                    <div>Overview</div>
+                  </TabsTrigger>
+                  <TabsTrigger value="deploy">
+                    <PlusIcon variant="solid" />
+                    <div>Deploy</div>
+                  </TabsTrigger>
+                </TabsList>
+              </CardContent>
 
-              <TabsContent value="overview">
-                <Overview
-                  readFuncs={readFuncs}
-                  writeFuncs={writeFuncs}
-                  code={code}
-                />
-              </TabsContent>
+              <CardSeparator />
 
-              <TabsContent value="deploy">
-                <Deploy classHash={classHash!} constructor={constructor} />
-              </TabsContent>
+              <CardContent>
+                <TabsContent value="overview">
+                  <Overview
+                    readFuncs={readFuncs}
+                    writeFuncs={writeFuncs}
+                    code={code}
+                  />
+                </TabsContent>
+
+                <TabsContent value="deploy">
+                  <Deploy classHash={classHash!} constructor={constructor} />
+                </TabsContent>
+              </CardContent>
             </Tabs>
-          </div>
+          </Card>
         </div>
       )}
     </div>
