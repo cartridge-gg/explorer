@@ -1,5 +1,5 @@
 import { truncateString } from "@/shared/utils/string";
-import { InfoIcon, PlusIcon } from "@cartridge/ui";
+import { Badge, InfoIcon, PlusIcon, ScrollIcon, Skeleton } from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -17,7 +17,11 @@ import {
 } from "@/shared/components/tabs";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
-import { PageHeader } from "@/shared/components/PageHeader";
+import {
+  PageHeader,
+  PageHeaderRight,
+  PageHeaderTitle,
+} from "@/shared/components/PageHeader";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { useQuery } from "@tanstack/react-query";
 import { Overview } from "./Overview";
@@ -102,7 +106,26 @@ export function ClassHash() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader title="Class" />
+      <PageHeader>
+        <PageHeaderTitle>
+          <ScrollIcon variant="solid" />
+          <div>Class</div>
+        </PageHeaderTitle>
+
+        <PageHeaderRight className="px-2 gap-2">
+          {contractVersion ? (
+            <>
+              <Badge>Compiler v{contractVersion?.compiler}</Badge>
+              <Badge>Cairo v{contractVersion?.cairo}</Badge>
+            </>
+          ) : (
+            <>
+              <Skeleton className="rounded-sm h-6 w-8" />
+              <Skeleton className="rounded-sm h-6 w-8" />
+            </>
+          )}
+        </PageHeaderRight>
+      </PageHeader>
 
       <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
         <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
@@ -111,16 +134,6 @@ export function ClassHash() {
               <div className="flex justify-between gap-2">
                 <CardLabel>Class Hash</CardLabel>
                 <Hash value={classHash} />
-              </div>
-
-              <div className="flex justify-between gap-2">
-                <CardLabel>Compiler Version</CardLabel>
-                <div>v{contractVersion?.compiler}</div>
-              </div>
-
-              <div className="flex justify-between gap-2">
-                <CardLabel>Cairo Version</CardLabel>
-                <div>v{contractVersion?.cairo}</div>
               </div>
             </CardContent>
           </Card>

@@ -8,6 +8,7 @@ import {
   SelectContent,
   cn,
   Input,
+  GlobeIcon,
 } from "@cartridge/ui";
 import {
   Breadcrumb,
@@ -18,7 +19,7 @@ import {
   BreadcrumbLink,
 } from "@/shared/components/breadcrumb";
 import { flexRender } from "@tanstack/react-table";
-import { PageHeader } from "@/shared/components/PageHeader";
+import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 import {
   Tabs,
@@ -55,7 +56,13 @@ export function World() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader className="mb-6" title={`World (${form.project})`} />
+      <PageHeader>
+        <PageHeaderTitle>
+          <GlobeIcon variant="solid" />
+          <div>World ({form.project})</div>
+        </PageHeaderTitle>
+      </PageHeader>
+
       <div className="flex items-center gap-2">
         Project:{" "}
         {deployments ? (

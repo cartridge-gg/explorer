@@ -1,7 +1,11 @@
 import { rpcUrl } from "@/constants/rpc";
-import { PageHeader } from "@/shared/components/PageHeader";
+import {
+  PageHeader,
+  PageHeaderTitle,
+  PageHeaderRight,
+} from "@/shared/components/PageHeader";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
-import { cn, Button, Input } from "@cartridge/ui";
+import { cn, Button, Input, TerminalIcon, Badge } from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -241,7 +245,15 @@ export function JsonRpcPlayground() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader title={`JSON-RPC Playground (${specVersion})`} />
+      <PageHeader>
+        <PageHeaderTitle>
+          <TerminalIcon variant="solid" />
+          <div>JSON-RPC Playground</div>
+        </PageHeaderTitle>
+        <PageHeaderRight className="px-2 gap-2">
+          <Badge>v{specVersion}</Badge>
+        </PageHeaderRight>
+      </PageHeader>
 
       <div className="flex flex-col sl:flex-row sl:h-[76vh] w-full gap-4">
         <Card className="flex flex-col flex-1 md:flex-row justify-stretch border overflow-hidden py-5 px-4 gap-4">

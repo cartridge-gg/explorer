@@ -8,16 +8,15 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { cairo } from "starknet";
 import CalldataDisplay from "./components/CalldataDisplay";
 import {
-  cn,
   BoltIcon,
   CoinsIcon,
   GasIcon,
-  Skeleton,
   CodeIcon,
   PencilIcon,
   BellIcon,
   StackOvalIcon,
-  Badge,
+  ListIcon,
+  Skeleton,
 } from "@cartridge/ui";
 import {
   Card,
@@ -28,11 +27,14 @@ import {
   CardLabel,
   CardSeparator,
 } from "@/shared/components/card";
+import { Badge } from "@/shared/components/badge";
 import { DataTable } from "@/shared/components/dataTable";
-import { PageHeader } from "@/shared/components/PageHeader";
-import dayjs from "dayjs";
+import {
+  PageHeader,
+  PageHeaderRight,
+  PageHeaderTitle,
+} from "@/shared/components/PageHeader";
 import SignatureDisplay from "./components/SignatureDisplay";
-import { TxType } from "./components/TxType";
 import { NotFound } from "../NotFound/page";
 import { Loading } from "@/shared/components/Loading";
 import { useTransaction } from "./hooks";
@@ -63,7 +65,7 @@ export function Transaction() {
       tx,
       receipt,
       calldata,
-      block,
+      // block,
       blockComputeData,
       executions,
       events,
@@ -100,11 +102,27 @@ export function Transaction() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader
-        className="mb-6"
-        title={`Transaction`}
-        subtext={receipt?.finality_status ?? <Skeleton className="h-4 w-20" />}
-        titleRightComponent={
+      <PageHeader>
+        <PageHeaderTitle>
+          <ListIcon variant="solid" />
+          <div>Transaction</div>
+        </PageHeaderTitle>
+
+        <PageHeaderRight className="px-2 gap-2">
+          {tx ? (
+            <>
+              <Badge>{tx?.type.toLowerCase()}</Badge>
+              <Badge>v{Number(tx.version)}</Badge>
+            </>
+          ) : (
+            <>
+              <Skeleton className="rounded-sm h-6 w-14" />
+              <Skeleton className="rounded-sm h-6 w-8" />
+            </>
+          )}
+        </PageHeaderRight>
+      </PageHeader>
+      {/* </PageHeader>
           <div className="flex gap-2">
             {receipt?.type ? <TxType type={receipt?.type} /> : null}
 
@@ -131,7 +149,7 @@ export function Transaction() {
             )}
           </div>
         }
-      />
+      /> */}
 
       <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-4">
         <div className="sl:w-[468px] sl:min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">

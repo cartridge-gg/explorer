@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { useState } from "react";
 import { convertValue } from "@/shared/utils/rpc_utils";
 import { DisplayFormatTypes } from "@/types/types";
-import { PageHeader } from "@/shared/components/PageHeader";
+import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { useEvent } from "./hooks";
 import { Loading } from "@/shared/components/Loading";
 import { NotFound } from "../NotFound/page";
@@ -24,6 +24,7 @@ import {
   CardSeparator,
   CardTitle,
 } from "@/shared/components/card";
+import { PulseIcon } from "@cartridge/ui";
 
 const DisplayFormat = ["hex", "dec", "string"] as const;
 
@@ -66,15 +67,12 @@ export function Event() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader
-        title="Event Details"
-        subtext={isMobile && eventId ? truncateString(eventId) : eventId}
-        subtextRightComponent={
-          <div className="text-[#5D5D5D]">
-            {dayjs.unix(block?.timestamp).format("MMM D YYYY HH:mm:ss")}{" "}
-          </div>
-        }
-      />
+      <PageHeader>
+        <PageHeaderTitle>
+          <PulseIcon variant="solid" />
+          <div>Event Details</div>
+        </PageHeaderTitle>
+      </PageHeader>
 
       <div className="flex flex-col sl:flex-row gap-4">
         <div className="flex w-full sl:w-[35%] sl:min-w-[35%] sl:max-w-[35%] flex-col gap-4 sl:overflow-y-auto">

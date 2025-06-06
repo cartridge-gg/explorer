@@ -20,7 +20,8 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/shared/components/breadcrumb";
-import { PageHeader } from "@/shared/components/PageHeader";
+import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
+import { StackDiamondIcon } from "@cartridge/ui";
 
 const ROWS_TO_RENDER = 20;
 
@@ -120,7 +121,13 @@ export function BlockList() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <PageHeader title="Blocks List" />
+
+      <PageHeader>
+        <PageHeaderTitle>
+          <StackDiamondIcon variant="solid" />
+          <div>Blocks List</div>
+        </PageHeaderTitle>
+      </PageHeader>
 
       <div className="overflow-x-auto md:w-full">
         <table className="w-full mt-2 table-auto border-collapse border-spacing-12 border-t border-b border-[#8E8E8E] border-l-4 border-r">

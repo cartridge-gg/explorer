@@ -1,41 +1,61 @@
+import { Card, CardContent } from "@/shared/components/card";
 import { cn } from "@cartridge/ui";
-import React from "react";
-
-interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  title: string;
-  subtext?: React.ReactNode;
-  titleRightComponent?: React.ReactNode;
-  subtextRightComponent?: React.ReactNode;
-}
+import { ReactNode } from "react";
 
 export function PageHeader({
-  title,
-  subtext,
-  titleRightComponent,
-  subtextRightComponent,
-  ...props
-}: PageHeaderProps) {
+  children,
+  className,
+  containerClassName,
+}: {
+  children: ReactNode;
+  className?: string;
+  containerClassName?: string;
+}) {
+  return (
+    <Card
+      className={cn(
+        "w-full rounded-xl rounded-b-none relative h-10 p-0",
+        containerClassName,
+      )}
+    >
+      <CardContent
+        className={cn("h-full flex flex-row items-center", className)}
+      >
+        {children}
+      </CardContent>
+    </Card>
+  );
+}
+
+export function PageHeaderTitle({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <div
-      className="overflow-clip border border-background-200 rounded"
-      {...props}
-    >
-      <div
-        className={cn(
-          "px-4 w-full justify-between h-[40px] flex items-center",
-          !!subtext && "border-b border-background-200",
-        )}
-      >
-        <h1 className="capitalize font-bold">{title}</h1>
-        {titleRightComponent ? titleRightComponent : null}
-      </div>
-
-      {subtext && (
-        <div className="text-foreground-200 px-4 w-full justify-between h-[25px] flex items-center rounded-b">
-          <div className="text-sm">{subtext}</div>
-          {subtextRightComponent ? subtextRightComponent : null}
-        </div>
+      className={cn(
+        "flex items-center gap-3 text-foreground font-medium",
+        className,
       )}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function PageHeaderRight({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex items-center absolute right-0", className)}>
+      {children}
     </div>
   );
 }

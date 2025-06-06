@@ -1,8 +1,14 @@
 import { formatNumber } from "@/shared/utils/number";
 import { formatSnakeCaseToDisplayValue } from "@/shared/utils/string";
-import dayjs from "dayjs";
 import { cairo } from "starknet";
-import { GasIcon, BoltIcon, StackDiamondIcon, BellIcon } from "@cartridge/ui";
+import {
+  GasIcon,
+  BoltIcon,
+  StackDiamondIcon,
+  BellIcon,
+  ArrowIcon,
+  cn,
+} from "@cartridge/ui";
 import {
   Card,
   CardHeader,
@@ -20,10 +26,13 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/shared/components/breadcrumb";
-import { PageHeader } from "@/shared/components/PageHeader";
+import {
+  PageHeader,
+  PageHeaderRight,
+  PageHeaderTitle,
+} from "@/shared/components/PageHeader";
 import { TxList } from "./TxList";
 import { EventList } from "./EventList";
-import { BlockNavigation } from "./BlockNavigation";
 import { NotFound } from "../NotFound/page";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 import { Loading } from "@/shared/components/Loading";
@@ -35,6 +44,8 @@ import {
   TabsContent,
 } from "@/shared/components/tabs";
 import { Hash } from "@/shared/components/hash";
+import { Link, useLocation } from "react-router-dom";
+import { useBlockNumber } from "@/shared/hooks/useBlockNumber";
 
 export function Block() {
   const { onTabChange } = useHashLinkTabs();
@@ -43,6 +54,12 @@ export function Block() {
     isLoading,
     error,
   } = useBlock();
+  const { blockNumber: latestBlockNumber } = useBlockNumber();
+  const { hash } = useLocation();
+
+  const isLatestBlock =
+    latestBlockNumber !== undefined &&
+    block?.block_number >= Number(latestBlockNumber);
 
   if (isLoading || (!error && !block)) {
     return <Loading />;
@@ -53,38 +70,58 @@ export function Block() {
   }
 
   return (
-    <div className="w-full flex flex-col gap-4">
-      <div className="flex justify-between w-full">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink href="../blocks">Blocks</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{blockId}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+    <div className="w-full flex flex-col gap-2">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="../blocks">Blocks</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{blockId}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-        <BlockNavigation currentBlockNumber={block.block_number} />
-      </div>
+      <PageHeader>
+        <PageHeaderTitle>
+          <StackDiamondIcon variant="solid" />
+          <div>Block {block.block_number}</div>
+        </PageHeaderTitle>
 
-      <PageHeader
-        title={`Block #${block.block_number}`}
-        subtext={block.status}
-        subtextRightComponent={
-          <div className="text-[#5D5D5D]">
-            {block.timestamp
-              ? dayjs.unix(block.timestamp).format("MMM D YYYY HH:mm:ss")
-              : ""}
-          </div>
-        }
-      />
+        <PageHeaderRight>
+          <Link
+            className={cn(
+              "bg-background border-l border-background-200 text-foreground size-10 flex items-center justify-center cursor-pointer hover:bg-background-200",
+              block.block_number === 0 &&
+                "cursor-not-allowed pointer-events-none text-foreground-300",
+            )}
+            to={{
+              pathname: `../block/${block.block_number - 1}`,
+              hash,
+            }}
+          >
+            <ArrowIcon variant="left" />
+          </Link>
+          <Link
+            className={cn(
+              "bg-background border-l border-background-200 text-foreground size-10 flex items-center justify-center hover:bg-background-200",
+              isLatestBlock &&
+                "cursor-not-allowed pointer-events-none text-foreground-300",
+            )}
+            to={{
+              pathname: `../block/${block.block_number + 1}`,
+              hash,
+            }}
+          >
+            <ArrowIcon variant="right" />
+          </Link>
+        </PageHeaderRight>
+      </PageHeader>
 
       <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-4">
         <div className="sl:w-[468px] sl:min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">

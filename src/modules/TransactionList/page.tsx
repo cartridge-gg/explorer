@@ -12,7 +12,7 @@ import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { getPaginatedBlockNumbers } from "@/shared/utils/rpc_utils";
 import { truncateString } from "@/shared/utils/string";
 import { useScreen } from "@/shared/hooks/useScreen";
-import { PageHeader } from "@/shared/components/PageHeader";
+import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import {
   Table,
   TableBody,
@@ -20,6 +20,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  ListIcon,
 } from "@cartridge/ui";
 import {
   Breadcrumb,
@@ -157,7 +158,12 @@ export function TransactionList() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader title="Transactions List" />
+      <PageHeader>
+        <PageHeaderTitle>
+          <ListIcon variant="solid" />
+          <div>Transactions List</div>
+        </PageHeaderTitle>
+      </PageHeader>
 
       <div className="overflow-x-auto md:w-full">
         <Table className="w-full mt-2 table-auto border-collapse border-t border-b border-l-4 border-r">
