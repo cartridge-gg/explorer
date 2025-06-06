@@ -1,7 +1,7 @@
 import { useNetwork } from "@starknet-react/core";
-import { cn } from "@cartridge/ui";
+import { cn, useMediaQuery } from "@cartridge/ui";
 import { Chain } from "@starknet-react/chains";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { addAddressPadding } from "starknet";
 import { toast } from "sonner";
 import React from "react";
@@ -18,11 +18,21 @@ export const Network = React.forwardRef<
   React.ButtonHTMLAttributes<HTMLButtonElement>
 >(({ className, ...props }, ref) => {
   const { chain } = useNetwork();
+  const isMobile = useMediaQuery("(max-width: 640px)");
+  const [isPressed, setIsPressed] = useState(false);
 
   const onCopy = useCallback(() => {
     navigator.clipboard.writeText(addAddressPadding(chain.id));
     toast.success("Address copied");
-  }, [chain.id]);
+
+    // Only trigger animation on mobile/touch devices
+    if (isMobile) {
+      setIsPressed(true);
+      setTimeout(() => setIsPressed(false), 200);
+    }
+  }, [chain.id, isMobile]);
+
+  const color = ChainColors[chain.network.toLowerCase()] || "#9C9C9C";
 
   return (
     <button
@@ -37,11 +47,12 @@ export const Network = React.forwardRef<
     >
       <span
         className={cn(
-          "size-[8px] aspect-square rounded-full m-[6px] self-center",
+          "size-[8px] aspect-square rounded-full m-[6px] self-center transition-all duration-200 ease-in-out",
         )}
         style={{
-          backgroundColor:
-            ChainColors[chain.network.toLowerCase()] || "#9C9C9C",
+          backgroundColor: isPressed
+            ? "rgb(var(--background-100))" // Match button background
+            : color,
         }}
       />
       <span className="hidden sm:block text-foreground-200 group-hover:text-foreground-100 overflow-hidden text-center overflow-ellipsis whitespace-nowrap text-sm font-medium px-[4px] capitalize font-sans tracking-normal">
