@@ -29,7 +29,7 @@ export const Network = React.forwardRef<
       type="button"
       onClick={onCopy}
       className={cn(
-        "p-[10px] min-w-[112px] gap-0.5 rounded-sm bg-background-100 hover:bg-background-150 flex items-center justify-start group",
+        "p-[10px] w-[40px] sm:w-[112px] gap-0.5 rounded-sm bg-background-100 hover:bg-background-150 flex items-center justify-start group",
         className,
       )}
       ref={ref}
@@ -44,7 +44,7 @@ export const Network = React.forwardRef<
             ChainColors[chain.network.toLowerCase()] || "#9C9C9C",
         }}
       />
-      <span className="text-foreground-200 group-hover:text-foreground-100 overflow-hidden text-center overflow-ellipsis whitespace-nowrap text-sm font-medium px-[4px] capitalize font-sans tracking-normal">
+      <span className="hidden sm:block text-foreground-200 group-hover:text-foreground-100 overflow-hidden text-center overflow-ellipsis whitespace-nowrap text-sm font-medium px-[4px] capitalize font-sans tracking-normal">
         {chain.network}
       </span>
     </button>
