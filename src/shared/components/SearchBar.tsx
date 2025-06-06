@@ -1,6 +1,5 @@
 import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { useScreen } from "@/shared/hooks/useScreen";
-import SearchTool from "@/shared/icons/SearchTool";
 import { truncateString } from "@/shared/utils/string";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState, useRef } from "react";
@@ -11,8 +10,15 @@ import {
   AddressByUsernameQuery,
   AddressByUsernameQueryVariables,
 } from "@cartridge/utils/api/cartridge";
+import { cn, Input, SearchIcon } from "@cartridge/ui";
 
-export function SearchBar() {
+export function SearchBar({
+  className,
+  onNavigate,
+}: {
+  className?: string;
+  onNavigate?: () => void;
+}) {
   const navigate = useNavigate();
   const { isMobile } = useScreen();
 
@@ -192,7 +198,8 @@ export function SearchBar() {
     }
 
     setIsDropdownOpen(false);
-  }, [navigate, result]);
+    onNavigate?.();
+  }, [navigate, result, onNavigate]);
 
   const handleSearchIconClick = () => {
     if (inputRef.current?.value) {
@@ -225,14 +232,16 @@ export function SearchBar() {
 
   return (
     <div
-      id="home-search-bar"
-      className={`bg-white min-w-[200px] w-full h-[42px] flex relative border border-borderGray items-center shadow ${
-        isDropdownOpen && result ? "border-b-0" : ""
-      }`}
+      className={cn(
+        "min-w-[200px] w-full h-[42px] flex relative border border-background-200 items-center justify-between shadow rounded",
+        isDropdownOpen && result ? "border-b-0" : undefined,
+        className,
+      )}
     >
-      <input
+      <Input
         ref={inputRef}
-        className="text-base search-input relative w-full h-full focus:outline-none focus:ring-0 py-2 pl-[15px]"
+        containerClassName="w-full flex-1 pl-4"
+        className="bg-background border-none focus-visible:bg-background caret-foreground"
         placeholder="Search blocks, transactions, contracts"
         onChange={(e) => {
           handleSearch(e.target.value);
@@ -248,21 +257,21 @@ export function SearchBar() {
         className="cursor-pointer flex items-center px-[15px] h-full"
         onClick={handleSearchIconClick}
       >
-        <SearchTool />
+        <SearchIcon />
       </div>
 
       {isDropdownOpen ? (
-        <div className="search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full">
+        <div className="bg-background search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full">
           <div
             // hack for doing custom spacing for the dashed line
             style={{
               backgroundImage:
-                "linear-gradient(to right, white 50%, #D0D0D0 0%)",
+                "linear-gradient(to right, var(--background) 50%, var(--background-400) 0%)",
               backgroundPosition: "top",
               backgroundSize: "15px 1px",
               backgroundRepeat: "repeat-x",
             }}
-            className="flex flex-col gap-2 bg-white px-[15px] py-[10px] border border-borderGray border-t-0 shadow-md"
+            className="flex flex-col gap-2 px-[15px] py-[10px] border border-background-200 border-t-0 shadow-md"
           >
             {result ? (
               <div
@@ -270,16 +279,17 @@ export function SearchBar() {
                 tabIndex={0}
                 onKeyDown={handleKeyDown}
                 onClick={handleResultClick}
-                className={`flex flex-row hover:bg-gray-100 cursor-pointer items-center gap-2 justify-between w-full px-2 py-1 outline-none ${
-                  isResultFocused ? "bg-gray-100" : ""
-                }`}
+                className={cn(
+                  "flex flex-row hover:bg-background-400 cursor-pointer items-center gap-2 justify-between w-full px-2 py-1 outline-none",
+                  isResultFocused && "bg-background-400",
+                )}
               >
                 <span className="font-bold uppercase">{result.type}</span>
 
                 <span>{truncateString(result.value, isMobile ? 10 : 25)}</span>
               </div>
             ) : (
-              <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-borderGray">
+              <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-foreground-100">
                 <div>No results found</div>
               </div>
             )}

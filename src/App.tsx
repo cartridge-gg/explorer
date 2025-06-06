@@ -1,8 +1,8 @@
-import "./App.css";
+import "./index.css";
 
 import { Routes, Route, useLocation } from "react-router-dom";
 import { Header } from "@/shared/components/header";
-import { Home } from "@/modules/HomeNew/page";
+import { Home } from "@/modules/Home/page";
 import { Transaction } from "@/modules/Transaction/page";
 import { Block } from "@/modules/Block/page";
 import { BlockList } from "@/modules/BlockList/page";
@@ -12,8 +12,9 @@ import { Event } from "@/modules/Event/page";
 import { ClassHash } from "@/modules/ClassHash/page";
 import { JsonRpcPlayground } from "@/modules/JsonRpc/page";
 import { NotFound } from "@/modules/NotFound/page";
-import { cn } from "@cartridge/ui-next";
 import { World } from "@/modules/World/page";
+import { cn } from "@cartridge/ui";
+
 export function App() {
   const location = useLocation();
   const isHomePage = location.pathname === "/";

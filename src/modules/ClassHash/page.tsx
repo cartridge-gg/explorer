@@ -1,18 +1,34 @@
 import { truncateString } from "@/shared/utils/string";
+import { InfoIcon, PlusIcon, ScrollIcon, Skeleton } from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/shared/components/breadcrumbs";
-import { BreadcrumbPage } from "@cartridge/ui-next";
+} from "@/shared/components/breadcrumb";
+import {
+  Card,
+  CardContent,
+  CardLabel,
+  CardSeparator,
+} from "@/shared/components/card";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/shared/components/tabs";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
-import PageHeader from "@/shared/components/PageHeader";
-import { SectionBoxEntry } from "@/shared/components/section";
-import { SectionBox } from "@/shared/components/section/SectionBox";
+import {
+  PageHeader,
+  PageHeaderRight,
+  PageHeaderTitle,
+} from "@/shared/components/PageHeader";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { useQuery } from "@tanstack/react-query";
-import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
 import { Overview } from "./Overview";
 import { Deploy } from "./Deploy";
 import {
@@ -23,6 +39,8 @@ import {
 import { NotFound } from "@/modules/NotFound/page";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 import { Loading } from "@/shared/components/Loading";
+import { Hash } from "@/shared/components/hash";
+import { Badge } from "@/shared/components/badge";
 
 const initialData: ContractClassInfo = {
   constructor: {
@@ -42,10 +60,7 @@ const initialData: ContractClassInfo = {
 export function ClassHash() {
   const { classHash } = useParams();
   const { isMobile } = useScreen();
-  const { selected, onTabChange, tabs } = useHashLinkTabs([
-    "Overview",
-    "Deploy",
-  ]);
+  const { onTabChange } = useHashLinkTabs();
 
   const { data: contractVersion } = useQuery({
     queryKey: ["contractVersion", classHash],
@@ -71,83 +86,94 @@ export function ClassHash() {
     retry: false,
   });
 
-  if (isLoading || (!error && (!contractVersion || !code))) {
-    return <Loading />;
-  }
-
-  if (error) {
-    return <NotFound />;
-  }
-
   return (
-    <div id="class-details" className="w-full flex-grow">
-      <Breadcrumb className="mb-2">
-        <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>Class</BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbPage className="text-sm">
-            {isMobile && classHash ? truncateString(classHash) : classHash}
-          </BreadcrumbPage>
-        </BreadcrumbItem>
+    <div className="w-full flex flex-col gap-4">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>Class</BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>
+              {isMobile && classHash ? truncateString(classHash) : classHash}
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader className="mb-6" title="Class" />
+      <PageHeader>
+        <PageHeaderTitle>
+          <ScrollIcon variant="solid" />
+          <div>Class</div>
+        </PageHeaderTitle>
 
-      {isLoading ? (
-        <div className="h-40 flex items-center justify-center text-xs border border-borderGray animate-pulse">
-          <span className="text-[#D0D0D0]">Loading...</span>
-        </div>
+        <PageHeaderRight className="px-2 gap-2">
+          {contractVersion ? (
+            <>
+              <Badge>Compiler v{contractVersion?.compiler}</Badge>
+              <Badge>Cairo v{contractVersion?.cairo}</Badge>
+            </>
+          ) : (
+            <>
+              <Skeleton className="rounded-sm h-6 w-8" />
+              <Skeleton className="rounded-sm h-6 w-8" />
+            </>
+          )}
+        </PageHeaderRight>
+      </PageHeader>
+
+      {isLoading || (!error && (!contractVersion || !code || !classHash)) ? (
+        <Loading />
+      ) : error ? (
+        <NotFound />
       ) : (
         <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
-          {/* Contract Info Section */}
-          <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
-            <SectionBox>
-              <SectionBoxEntry title="Class Hash">
-                {isMobile && classHash ? truncateString(classHash) : classHash}
-              </SectionBoxEntry>
-
-              <SectionBoxEntry title="Compiler Version">
-                v{contractVersion?.compiler}
-              </SectionBoxEntry>
-
-              <SectionBoxEntry title="Cairo Version">
-                v{contractVersion?.cairo}
-              </SectionBoxEntry>
-            </SectionBox>
+          <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-auto">
+            <Card>
+              <CardContent>
+                <div className="flex justify-between gap-2">
+                  <CardLabel>Class Hash</CardLabel>
+                  <Hash value={classHash} />
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-            <DetailsPageSelector
-              selected={selected}
-              onTabSelect={onTabChange}
-              items={tabs}
-            />
+          <Card className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+            <Tabs defaultValue="overview" onValueChange={onTabChange}>
+              <CardContent>
+                <TabsList>
+                  <TabsTrigger value="overview">
+                    <InfoIcon />
+                    <div>Overview</div>
+                  </TabsTrigger>
+                  <TabsTrigger value="deploy">
+                    <PlusIcon variant="solid" />
+                    <div>Deploy</div>
+                  </TabsTrigger>
+                </TabsList>
+              </CardContent>
 
-            {(() => {
-              switch (selected) {
-                case "Overview":
-                  return (
-                    <Overview
-                      readFuncs={readFuncs}
-                      writeFuncs={writeFuncs}
-                      code={code}
-                    />
-                  );
-                case "Deploy":
-                  return (
-                    <Deploy classHash={classHash!} constructor={constructor} />
-                  );
-                default:
-                  return (
-                    <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
-                      <span className="text-[#D0D0D0]">No data found</span>
-                    </div>
-                  );
-              }
-            })()}
-          </div>
+              <CardSeparator />
+
+              <CardContent>
+                <TabsContent value="overview">
+                  <Overview
+                    readFuncs={readFuncs}
+                    writeFuncs={writeFuncs}
+                    code={code}
+                  />
+                </TabsContent>
+
+                <TabsContent value="deploy">
+                  <Deploy classHash={classHash!} constructor={constructor} />
+                </TabsContent>
+              </CardContent>
+            </Tabs>
+          </Card>
         </div>
       )}
     </div>

@@ -33,3 +33,5 @@ dist/
 # Added by cargo
 
 **/*/target
+
+*storybook.log

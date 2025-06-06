@@ -1,17 +1,59 @@
 import { SearchBar } from "@/shared/components/SearchBar";
-import ChainDisplay from "../ChainDisplay";
-import AccountDisplay from "../AccountDisplay";
+import { Account } from "./account";
+import { useLocation } from "react-router-dom";
+import { Button, DotsIcon, Network, Separator, Skeleton } from "@cartridge/ui";
+import useChain from "@/shared/hooks/useChain";
+import { useScreen } from "@/shared/hooks/useScreen";
+import { useState } from "react";
+import { Sheet, SheetContent, SheetTrigger } from "@/shared/components/sheet";
 
 export function Header() {
+  const location = useLocation();
+  const isHome = location.pathname === "/";
+  const { id: chainId } = useChain();
+  const { isMobile } = useScreen();
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="flex justify-between gap-2">
+    <div className="w-full flex items-center justify-between gap-2">
       <div className="w-[467px]">
-        <SearchBar />
+        {!isHome &&
+          (!isMobile ? (
+            <SearchBar />
+          ) : (
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="icon" size="icon">
+                  <DotsIcon className="rotate-90" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left">
+                <SearchBar onNavigate={() => setIsOpen(false)} />{" "}
+              </SheetContent>
+            </Sheet>
+          ))}
       </div>
 
-      <div className="flex gap-[7px]">
-        <AccountDisplay />
-        <ChainDisplay />
+      <div className="flex items-center gap-4">
+        {!isHome && (
+          <>
+            {chainId ? (
+              <Network
+                chainId={chainId.id}
+                tooltipTriggerClassName="bg-background-300 hover:bg-background-200 h-12 text-md"
+              />
+            ) : (
+              <Skeleton className="h-12 w-40" />
+            )}
+
+            <Separator
+              orientation="vertical"
+              className="bg-background-400 w-1 h-8"
+            />
+          </>
+        )}
+
+        <Account />
       </div>
     </div>
   );

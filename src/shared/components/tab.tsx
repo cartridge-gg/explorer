@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cva, VariantProps } from "class-variance-authority";
-import { cn } from "@cartridge/ui-next";
+import { cn } from "@cartridge/ui";
 
 const initialTabsContext: TabsContextValue = { variant: "primary", size: "md" };
 
