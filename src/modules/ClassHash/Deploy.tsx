@@ -3,13 +3,13 @@ import {
   FunctionInputWithValue,
   toCalldata,
 } from "@/shared/utils/abi";
-import { useToast } from "@/shared/components/toast";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { DeployContractResponse } from "starknet";
 import { ParamForm } from "@/shared/components/form";
 import { Card, CardContent } from "@/shared/components/card";
+import { toast } from "sonner";
 
 export function Deploy({
   classHash,
@@ -18,7 +18,6 @@ export function Deploy({
   classHash: string;
   constructor: FunctionAbiWithAst;
 }) {
-  const { toast } = useToast();
   const { account } = useAccount();
   const initialInputs = useMemo(
     () =>
@@ -65,7 +64,7 @@ export function Deploy({
         result,
       }));
 
-      toast(
+      toast.success(
         <div>
           Contract{" "}
           <Link
@@ -79,14 +78,13 @@ export function Deploy({
             {result.transaction_hash}
           </Link>
         </div>,
-        "success",
       );
     } catch (error) {
-      toast(`Failed to deploy contract: ${error}`, "error");
+      toast.error(`Failed to deploy contract: ${error}`);
     } finally {
       setIsDeploying(false);
     }
-  }, [account, classHash, form, toast, initialInputs]);
+  }, [account, classHash, form, initialInputs]);
 
   return (
     <div className="bg-white flex flex-col gap-3 overflow-auto">

@@ -22,8 +22,8 @@ import { Link } from "react-router-dom";
 import AddIcon from "@/shared/icons/Add";
 import { Button } from "@cartridge/ui";
 import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
-import { useToast } from "@/shared/components/toast";
 import { ParamForm } from "@/shared/components/form";
+import { toast } from "sonner";
 
 export interface ContractFormProps {
   contract?: Contract;
@@ -182,7 +182,6 @@ function FunctionForm({
     [state, onUpdate],
   );
 
-  const { toast } = useToast();
   const { addCall } = useCallCartDispatch();
 
   const onAddToCart = useCallback(() => {
@@ -205,8 +204,8 @@ function FunctionForm({
       entrypoint: f.name,
       contractAddress: contract.address,
     });
-    toast(`Function call added: ${f.name}`, "success");
-  }, [toast, contract, f, state.inputs, addCall, account, isRead]);
+    toast.success(`Function call added: ${f.name}`);
+  }, [contract, f, state.inputs, addCall, account, isRead]);
 
   return (
     <div className="flex flex-col gap-[10px] items-end">
