@@ -41,13 +41,8 @@ export function Header() {
             {chainId ? (
               <Network />
             ) : (
-              // <Network
-              //   chainId={chainId.id}
-              //   tooltipTriggerClassName="bg-background-300 hover:bg-background-200 h-12 text-md"
-              // />
-              <Skeleton className="h-12 w-40" />
+              <Skeleton className="size-[40px] sm:w-[112px]" />
             )}
-
             <Separator
               orientation="vertical"
               className="bg-background-400 w-1 h-8"
