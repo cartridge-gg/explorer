@@ -2,7 +2,7 @@ import { useNetwork } from "@starknet-react/core";
 import { cn, useMediaQuery } from "@cartridge/ui";
 import { Chain } from "@starknet-react/chains";
 import { useCallback } from "react";
-import { addAddressPadding } from "starknet";
+import { getChecksumAddress } from "starknet";
 import { toast } from "sonner";
 import React from "react";
 
@@ -21,9 +21,11 @@ export const Network = React.forwardRef<
   const isMobile = useMediaQuery("(max-width: 640px)");
 
   const onCopy = useCallback(() => {
-    navigator.clipboard.writeText(addAddressPadding(chain.id));
+    navigator.clipboard.writeText(getChecksumAddress(chain.id));
     toast.success("Address copied");
   }, [chain.id]);
+
+  if (!chain) return null;
 
   const color =
     ChainColors[chain.network.toLowerCase()] || ChainColors["localhost"];
