@@ -1,7 +1,10 @@
 import { useNetwork } from "@starknet-react/core";
 import { cn } from "@cartridge/ui";
 import { Chain } from "@starknet-react/chains";
-import { useEffect } from "react";
+import { useCallback } from "react";
+import { addAddressPadding } from "starknet";
+import { toast } from "sonner";
+import React from "react";
 
 const ChainColors: Record<Chain["network"], string> = {
   mainnet: "#FF4264",
@@ -10,15 +13,28 @@ const ChainColors: Record<Chain["network"], string> = {
   localhost: "#9C9C9C",
 };
 
-export const Network = () => {
+export const Network = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement>
+>(({ className, ...props }, ref) => {
   const { chain } = useNetwork();
 
-  useEffect(() => {
-    console.log("chain: ", chain);
-  }, [chain]);
+  const onCopy = useCallback(() => {
+    navigator.clipboard.writeText(addAddressPadding(chain.id));
+    toast.success("Address copied");
+  }, [chain.id]);
 
   return (
-    <button className="p-[10px] min-w-[112px] gap-0.5 rounded-sm bg-background-100 hover:bg-background-150 flex items-center justify-start group">
+    <button
+      type="button"
+      onClick={onCopy}
+      className={cn(
+        "p-[10px] min-w-[112px] gap-0.5 rounded-sm bg-background-100 hover:bg-background-150 flex items-center justify-start group",
+        className,
+      )}
+      ref={ref}
+      {...props}
+    >
       <span
         className={cn(
           "size-[8px] aspect-square rounded-full m-[6px] self-center",
@@ -33,4 +49,6 @@ export const Network = () => {
       </span>
     </button>
   );
-};
+});
+
+Network.displayName = "Network";

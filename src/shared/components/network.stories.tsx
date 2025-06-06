@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Network } from "./network";
-import { jsonRpcProvider, StarknetConfig } from "@starknet-react/core";
+import { publicProvider, StarknetConfig } from "@starknet-react/core";
 import { sepolia, mainnet, Chain } from "@starknet-react/chains";
 import { constants, num, shortString } from "starknet";
 import { STRK_CONTRACT_ADDRESS } from "@cartridge/utils";
@@ -19,12 +19,6 @@ const StarknetProvider = ({
   children: React.ReactNode;
   chainID: bigint;
 }) => {
-  const providers = jsonRpcProvider({
-    rpc: () => ({
-      nodeUrl: import.meta.env.VITE_RPC_URL as string,
-    }),
-  });
-
   const slotChain: Chain = {
     id: num.toBigInt(shortString.encodeShortString("WP_SLOT")),
     network: "Slot",
@@ -71,7 +65,7 @@ const StarknetProvider = ({
     <StarknetConfig
       chains={starknetConfigChains}
       defaultChainId={chainID}
-      provider={providers}
+      provider={publicProvider()}
     >
       {children}
     </StarknetConfig>
