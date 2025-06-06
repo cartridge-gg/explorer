@@ -109,14 +109,6 @@ export function Contract() {
     contractAddress ?? "",
   );
 
-  if (isLoading || (!error && (!classHash || !contract))) {
-    return <Loading />;
-  }
-
-  if (error) {
-    return <NotFound />;
-  }
-
   return (
     <div className="w-full flex flex-col gap-4">
       <Breadcrumb>
@@ -144,88 +136,94 @@ export function Contract() {
         </PageHeaderTitle>
       </PageHeader>
 
-      <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
-        {/* Contract Info Section */}
-        <div className="sl:w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
-          <Card>
-            <CardContent>
-              <div className="flex justify-between gap-2">
-                <CardLabel>Address</CardLabel>
-                <Hash value={contractAddress} />
-              </div>
-
-              <div className="flex justify-between gap-2">
-                <CardLabel>Class Hash</CardLabel>
-                <Hash value={classHash} to={`../class/${classHash}`} />
-              </div>
-            </CardContent>
-
-            <CardSeparator />
-
-            <CardHeader>
-              <CardIcon icon={<CoinsIcon variant="solid" />} />
-              <CardTitle>Balances</CardTitle>
-            </CardHeader>
-
-            <CardContent>
-              <div className="flex justify-between gap-2">
-                <CardLabel>STRK</CardLabel>
-                <div>
-                  {isStrkLoading
-                    ? "0.00"
-                    : balances.strk !== undefined
-                      ? (Number(balances.strk) / 10 ** 18).toString()
-                      : "N/A"}
+      {isLoading || (!error && (!classHash || !contract)) ? (
+        <Loading />
+      ) : error ? (
+        <NotFound />
+      ) : (
+        <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
+          {/* Contract Info Section */}
+          <div className="sl:w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
+            <Card>
+              <CardContent>
+                <div className="flex justify-between gap-2">
+                  <CardLabel>Address</CardLabel>
+                  <Hash value={contractAddress} />
                 </div>
-              </div>
 
-              <div className="flex justify-between gap-2">
-                <CardLabel>ETH</CardLabel>
-                <div>
-                  {isEthLoading
-                    ? "0.00"
-                    : balances.eth !== undefined
-                      ? (Number(balances.eth) / 10 ** 18).toString()
-                      : "N/A"}
+                <div className="flex justify-between gap-2">
+                  <CardLabel>Class Hash</CardLabel>
+                  <Hash value={classHash} to={`../class/${classHash}`} />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+
+              <CardSeparator />
+
+              <CardHeader>
+                <CardIcon icon={<CoinsIcon variant="solid" />} />
+                <CardTitle>Balances</CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                <div className="flex justify-between gap-2">
+                  <CardLabel>STRK</CardLabel>
+                  <div>
+                    {isStrkLoading
+                      ? "0.00"
+                      : balances.strk !== undefined
+                        ? (Number(balances.strk) / 10 ** 18).toString()
+                        : "N/A"}
+                  </div>
+                </div>
+
+                <div className="flex justify-between gap-2">
+                  <CardLabel>ETH</CardLabel>
+                  <div>
+                    {isEthLoading
+                      ? "0.00"
+                      : balances.eth !== undefined
+                        ? (Number(balances.eth) / 10 ** 18).toString()
+                        : "N/A"}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+            {contract && (
+              <Tabs defaultValue="read" onValueChange={onTabChange}>
+                <TabsList>
+                  <TabsTrigger value="read">
+                    <BookIcon variant="solid" />
+                    <div>Read Contract</div>
+                  </TabsTrigger>
+                  <TabsTrigger value="write">
+                    <PencilIcon variant="solid" />
+                    <div>Write Contract</div>
+                  </TabsTrigger>
+                  <TabsTrigger value="code">
+                    <CodeIcon variant="solid" />
+                    <div>Code</div>
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="read">
+                  <ContractForm functions={readFuncs} contract={contract} />
+                </TabsContent>
+
+                <TabsContent value="write">
+                  <ContractForm functions={writeFuncs} contract={contract} />
+                </TabsContent>
+
+                <TabsContent value="code">
+                  <Code abi={code.abi} sierra={code.sierra} />
+                </TabsContent>
+              </Tabs>
+            )}
+          </div>
         </div>
-
-        <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-          {contract && (
-            <Tabs defaultValue="read" onValueChange={onTabChange}>
-              <TabsList>
-                <TabsTrigger value="read">
-                  <BookIcon variant="solid" />
-                  <div>Read Contract</div>
-                </TabsTrigger>
-                <TabsTrigger value="write">
-                  <PencilIcon variant="solid" />
-                  <div>Write Contract</div>
-                </TabsTrigger>
-                <TabsTrigger value="code">
-                  <CodeIcon variant="solid" />
-                  <div>Code</div>
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="read">
-                <ContractForm functions={readFuncs} contract={contract} />
-              </TabsContent>
-
-              <TabsContent value="write">
-                <ContractForm functions={writeFuncs} contract={contract} />
-              </TabsContent>
-
-              <TabsContent value="code">
-                <Code abi={code.abi} sierra={code.sierra} />
-              </TabsContent>
-            </Tabs>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

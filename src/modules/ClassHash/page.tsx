@@ -80,14 +80,6 @@ export function ClassHash() {
     retry: false,
   });
 
-  if (isLoading || (!error && (!contractVersion || !code || !classHash))) {
-    return <Loading />;
-  }
-
-  if (error) {
-    return <NotFound />;
-  }
-
   return (
     <div className="w-full flex flex-col gap-4">
       <Breadcrumb>
@@ -127,45 +119,51 @@ export function ClassHash() {
         </PageHeaderRight>
       </PageHeader>
 
-      <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
-        <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
-          <Card>
-            <CardContent>
-              <div className="flex justify-between gap-2">
-                <CardLabel>Class Hash</CardLabel>
-                <Hash value={classHash} />
-              </div>
-            </CardContent>
-          </Card>
+      {isLoading || (!error && (!contractVersion || !code || !classHash)) ? (
+        <Loading />
+      ) : error ? (
+        <NotFound />
+      ) : (
+        <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
+          <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
+            <Card>
+              <CardContent>
+                <div className="flex justify-between gap-2">
+                  <CardLabel>Class Hash</CardLabel>
+                  <Hash value={classHash} />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+            <Tabs defaultValue="overview" onValueChange={onTabChange}>
+              <TabsList>
+                <TabsTrigger value="overview">
+                  <InfoIcon />
+                  <div>Overview</div>
+                </TabsTrigger>
+                <TabsTrigger value="deploy">
+                  <PlusIcon variant="solid" />
+                  <div>Deploy</div>
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="overview">
+                <Overview
+                  readFuncs={readFuncs}
+                  writeFuncs={writeFuncs}
+                  code={code}
+                />
+              </TabsContent>
+
+              <TabsContent value="deploy">
+                <Deploy classHash={classHash!} constructor={constructor} />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
-
-        <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-          <Tabs defaultValue="overview" onValueChange={onTabChange}>
-            <TabsList>
-              <TabsTrigger value="overview">
-                <InfoIcon />
-                <div>Overview</div>
-              </TabsTrigger>
-              <TabsTrigger value="deploy">
-                <PlusIcon variant="solid" />
-                <div>Deploy</div>
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview">
-              <Overview
-                readFuncs={readFuncs}
-                writeFuncs={writeFuncs}
-                code={code}
-              />
-            </TabsContent>
-
-            <TabsContent value="deploy">
-              <Deploy classHash={classHash!} constructor={constructor} />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
