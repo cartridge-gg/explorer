@@ -59,7 +59,33 @@ const StarknetProvider = ({
     },
   };
 
-  const starknetConfigChains = [mainnet, sepolia, slotChain, localChain];
+  const unknownChain: Chain = {
+    id: num.toBigInt(shortString.encodeShortString("langchain")),
+    network: "langchain",
+    name: "Langchain",
+    rpcUrls: {
+      default: {
+        http: ["https://example.com"],
+      },
+      public: {
+        http: ["https://example.com"],
+      },
+    },
+    nativeCurrency: {
+      name: "Starknet",
+      symbol: "STRK",
+      decimals: 18,
+      address: STRK_CONTRACT_ADDRESS as `0x${string}`,
+    },
+  };
+
+  const starknetConfigChains = [
+    mainnet,
+    sepolia,
+    slotChain,
+    localChain,
+    unknownChain,
+  ];
 
   return (
     <StarknetConfig
@@ -119,6 +145,16 @@ export const Localhost: Story = {
   render: () => (
     <StarknetProvider
       chainID={num.toBigInt(shortString.encodeShortString("LOCALHOST"))}
+    >
+      <Network />
+    </StarknetProvider>
+  ),
+};
+
+export const Unknown: Story = {
+  render: () => (
+    <StarknetProvider
+      chainID={num.toBigInt(shortString.encodeShortString("langchain"))}
     >
       <Network />
     </StarknetProvider>

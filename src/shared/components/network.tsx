@@ -21,9 +21,11 @@ export const Network = React.forwardRef<
   const isMobile = useMediaQuery("(max-width: 640px)");
 
   const onCopy = useCallback(() => {
+    if (!chain) return;
+
     navigator.clipboard.writeText(getChecksumAddress(chain.id));
     toast.success("Address copied");
-  }, [chain.id]);
+  }, [chain]);
 
   if (!chain) return null;
 
