@@ -1,10 +1,11 @@
 import { useNetwork } from "@starknet-react/core";
-import { cn, useMediaQuery } from "@cartridge/ui";
+import { cn } from "@cartridge/ui";
 import { Chain } from "@starknet-react/chains";
 import { useCallback } from "react";
 import { getChecksumAddress } from "starknet";
 import { toast } from "sonner";
 import React from "react";
+import { useScreen } from "@/shared/hooks/useScreen";
 
 const ChainColors: Record<Chain["network"], string> = {
   mainnet: "bg-[#FF4264]",
@@ -18,7 +19,7 @@ export const Network = React.forwardRef<
   React.ButtonHTMLAttributes<HTMLButtonElement>
 >(({ className, ...props }, ref) => {
   const { chain } = useNetwork();
-  const isMobile = useMediaQuery("(max-width: 640px)");
+  const { isMobile } = useScreen();
 
   const onCopy = useCallback(() => {
     if (!chain) return;
