@@ -13,19 +13,19 @@ import {
 import { cn, CommandShortcut, Input, SearchIcon } from "@cartridge/ui";
 import { isMac } from "@/constants/device";
 import { useDebounce } from "../hooks/useDebounce";
+import React from "react";
 
-export function SearchBar({
-  className,
-  onNavigate,
-}: {
-  className?: string;
-  onNavigate?: () => void;
-}) {
+export const SearchBar = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & {
+    onNavigate?: () => void;
+  }
+>(({ className, onNavigate, ...props }, ref) => {
   const navigate = useNavigate();
   const { isMobile } = useScreen();
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownResultRef = useRef<HTMLDivElement>(null);
+  const dropdownResultRef = useRef<HTMLButtonElement>(null);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -246,6 +246,7 @@ export function SearchBar({
 
   return (
     <div
+      ref={ref}
       className={cn(
         "min-w-[280px] w-full py-[10px] px-[12px] flex gap-[8px] relative border border-background-200 items-center rounded-sm bg-spacer-100",
         isDropdownOpen && result && !isLoading
@@ -253,10 +254,16 @@ export function SearchBar({
           : undefined,
         className,
       )}
+      {...props}
     >
       {/* Search Icon */}
       <div onClick={() => inputRef.current?.focus()} className="cursor-text">
-        <SearchIcon className="text-foreground-100 !w-[20px] !h-[20px]" />
+        <SearchIcon
+          className={cn(
+            "!w-[20px] !h-[20px]",
+            isInputFocused ? "text-foreground-100" : "text-foreground-400",
+          )}
+        />
       </div>
 
       {/* Search Input */}
@@ -291,7 +298,12 @@ export function SearchBar({
       )}
 
       {isDropdownOpen ? (
-        <div className="bg-spacer-100 search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full">
+        <div
+          className={cn(
+            "bg-spacer-100 search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full",
+            isResultFocused && "cursor-pointer",
+          )}
+        >
           <div className="border-t border-dashed border-background-200">
             <div className="flex flex-col gap-2 p-[10px] border border-background-200 border-t-0 rounded-b-sm">
               {isLoading ? (
@@ -299,7 +311,7 @@ export function SearchBar({
                   <div>Searching...</div>
                 </div>
               ) : result ? (
-                <div
+                <button
                   ref={dropdownResultRef}
                   tabIndex={0}
                   onKeyDown={handleKeyDown}
@@ -318,7 +330,7 @@ export function SearchBar({
                   <span className="text-[13px]/[16px] font-normal font-mono text-foreground-400">
                     {truncateString(result.value, isMobile ? 10 : 25)}
                   </span>
-                </div>
+                </button>
               ) : (
                 <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-foreground-100">
                   <div>No results found</div>
@@ -330,4 +342,6 @@ export function SearchBar({
       ) : null}
     </div>
   );
-}
+});
+
+SearchBar.displayName = "Searchbar";
