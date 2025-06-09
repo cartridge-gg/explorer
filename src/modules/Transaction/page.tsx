@@ -11,12 +11,11 @@ import {
   BoltIcon,
   CoinsIcon,
   GasIcon,
-  CodeIcon,
-  PencilIcon,
-  BellIcon,
   StackOvalIcon,
   ListIcon,
   Skeleton,
+  PulseIcon,
+  PencilIcon,
 } from "@cartridge/ui";
 import {
   Card,
@@ -54,6 +53,8 @@ import {
   BreadcrumbPage,
 } from "@/shared/components/breadcrumb";
 import { Hash } from "@/shared/components/hash";
+import dayjs from "dayjs";
+import { useMemo } from "react";
 
 export function Transaction() {
   const { onTabChange } = useHashLinkTabs();
@@ -65,7 +66,7 @@ export function Transaction() {
       tx,
       receipt,
       calldata,
-      // block,
+      block,
       blockComputeData,
       executions,
       events,
@@ -73,6 +74,21 @@ export function Transaction() {
     },
   } = useTransaction({ txHash });
   const { isMobile } = useScreen();
+  const finalityStatus = useMemo(() => {
+    if (!receipt) return;
+    switch (receipt.finality_status) {
+      case "PENDING":
+        return "Pending";
+      case "ACCEPTED_ON_L1":
+        return "Accepted on L1";
+      case "ACCEPTED_ON_L2":
+        return "Accepted on L2";
+      case "REJECTED":
+        return "Rejected";
+      default:
+        return "Pending";
+    }
+  }, [receipt]);
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -118,34 +134,6 @@ export function Transaction() {
           )}
         </PageHeaderRight>
       </PageHeader>
-      {/* </PageHeader>
-          <div className="flex gap-2">
-            {receipt?.type ? <TxType type={receipt?.type} /> : null}
-
-            <div
-              className={cn(
-                "px-2 h-5 w-[84px] flex items-center justify-center font-bold rounded-xs",
-                receipt
-                  ? receipt?.isSuccess()
-                    ? "bg-[#7BA797]"
-                    : "bg-[#C4806D]"
-                  : undefined,
-              )}
-            >
-              {receipt?.execution_status}
-            </div>
-          </div>
-        }
-        subtextRightComponent={
-          <div>
-            {block ? (
-              dayjs.unix(block.timestamp).format("MMM D YYYY HH:mm:ss")
-            ) : (
-              <Skeleton className="h-4 w-20" />
-            )}
-          </div>
-        }
-      /> */}
 
       {isLoading || (!error && !tx) ? (
         <Loading />
@@ -154,6 +142,32 @@ export function Transaction() {
       ) : (
         <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-4">
           <div className="sl:w-[468px] sl:min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
+            <Card>
+              <CardContent className="flex-row justify-between">
+                <div className="flex flex-col gap-2">
+                  <CardLabel>Status</CardLabel>
+                  {block ? (
+                    <div className="font-bold">{finalityStatus}</div>
+                  ) : (
+                    <Skeleton className="h-4 w-28" />
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2 w-44">
+                  <CardLabel>Timestamp</CardLabel>
+                  {block ? (
+                    <div className="font-bold">
+                      {dayjs
+                        .unix(block?.timestamp)
+                        .format("MMM D YYYY HH:mm:ss")}
+                    </div>
+                  ) : (
+                    <Skeleton className="h-4 w-full" />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardContent>
                 <div className="flex justify-between gap-2">
@@ -407,59 +421,60 @@ export function Transaction() {
             </Card>
           </div>
 
-          <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+          <Card className="h-full flex-grow grid grid-rows-[min-content_1fr]">
             <Tabs
               defaultValue="calldata"
               onValueChange={onTabChange}
               className="h-full"
             >
-              <TabsList>
-                <TabsTrigger value="calldata">
-                  <CodeIcon variant="solid" />
-                  <div>Calldata</div>
-                </TabsTrigger>
-                <TabsTrigger value="events">
-                  <BellIcon variant="solid" />
-                  <div>Events</div>
-                </TabsTrigger>
-                <TabsTrigger value="signature">
-                  <PencilIcon variant="solid" />
-                  <div>Signature</div>
-                </TabsTrigger>
-                <TabsTrigger value="storage-diffs">
-                  <StackOvalIcon variant="solid" />
-                  <div>Storage Diffs</div>
-                </TabsTrigger>
-              </TabsList>
+              <CardContent>
+                <TabsList>
+                  <TabsTrigger value="calldata">
+                    <ListIcon variant="solid" />
+                    <div>Calldata</div>
+                  </TabsTrigger>
+                  <TabsTrigger value="signature">
+                    <PencilIcon variant="solid" />
+                    <div>Signature</div>
+                  </TabsTrigger>
+                  <TabsTrigger value="events">
+                    <PulseIcon variant="solid" />
+                    <div>Events</div>
+                  </TabsTrigger>
+                  <TabsTrigger value="storage-diffs">
+                    <StackOvalIcon variant="solid" />
+                    <div>Storage Diffs</div>
+                  </TabsTrigger>
+                </TabsList>
+              </CardContent>
+              <CardSeparator />
 
-              <Card className="h-full flex flex-1">
-                <CardContent>
-                  <TabsContent value="calldata">
-                    <CalldataDisplay calldata={calldata} />
-                  </TabsContent>
-                  <TabsContent value="events">
-                    <DataTable
-                      table={events.table}
-                      pagination={events.pagination}
-                      setPagination={events.setPagination}
-                    />
-                  </TabsContent>
-                  <TabsContent value="signature">
-                    {!!tx?.signature && (
-                      <SignatureDisplay signature={tx.signature} />
-                    )}
-                  </TabsContent>
-                  <TabsContent value="storage-diffs">
-                    <DataTable
-                      table={storageDiff.table}
-                      pagination={storageDiff.pagination}
-                      setPagination={storageDiff.setPagination}
-                    />
-                  </TabsContent>
-                </CardContent>
-              </Card>
+              <CardContent>
+                <TabsContent value="calldata">
+                  <CalldataDisplay calldata={calldata} />
+                </TabsContent>
+                <TabsContent value="signature">
+                  {!!tx?.signature && (
+                    <SignatureDisplay signature={tx.signature} />
+                  )}
+                </TabsContent>
+                <TabsContent value="events">
+                  <DataTable
+                    table={events.table}
+                    pagination={events.pagination}
+                    setPagination={events.setPagination}
+                  />
+                </TabsContent>
+                <TabsContent value="storage-diffs">
+                  <DataTable
+                    table={storageDiff.table}
+                    pagination={storageDiff.pagination}
+                    setPagination={storageDiff.setPagination}
+                  />
+                </TabsContent>
+              </CardContent>
             </Tabs>
-          </div>
+          </Card>
         </div>
       )}
     </div>

@@ -5,10 +5,11 @@ import {
   GasIcon,
   BoltIcon,
   StackDiamondIcon,
-  BellIcon,
   ArrowIcon,
   cn,
   Skeleton,
+  ListIcon,
+  PulseIcon,
 } from "@cartridge/ui";
 import {
   Card,
@@ -126,26 +127,25 @@ export function Block() {
       ) : error || !block ? (
         <NotFound />
       ) : (
-        <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-4">
+        <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-2">
           <div className="sl:w-[468px] sl:min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
             <Card>
               <CardContent>
-                <div className="flex justify-between gap-2">
+                <div className="flex items-center justify-between">
                   <CardLabel>Hash</CardLabel>
                   <Hash value={block.block_hash} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <CardLabel>State root</CardLabel>
+                  <Hash value={block.new_root} />
                 </div>
               </CardContent>
 
               <CardSeparator />
 
               <CardContent>
-                <div className="flex justify-between">
-                  <CardLabel>State root</CardLabel>
-                  <Hash value={block.new_root} />
-                </div>
-
-                <div className="flex justify-between">
-                  <CardLabel>Sequencer address</CardLabel>
+                <div className="flex items-center justify-between">
+                  <CardLabel>Sequencer</CardLabel>
                   <Hash
                     value={block.sequencer_address}
                     to={`../contract/${block.sequencer_address}`}
@@ -293,31 +293,31 @@ export function Block() {
             </Card>
           </div>
 
-          <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+          <Card className="h-full flex-grow grid grid-rows-[min-content_1fr]">
             <Tabs defaultValue="transactions" onValueChange={onTabChange}>
-              <TabsList>
-                <TabsTrigger value="transactions">
-                  <StackDiamondIcon variant="solid" />
-                  <div>Transactions</div>
-                </TabsTrigger>
-                <TabsTrigger value="events">
-                  <BellIcon variant="solid" />
-                  <div>Events</div>
-                </TabsTrigger>
-              </TabsList>
-
-              <Card>
-                <CardContent>
-                  <TabsContent value="transactions">
-                    <TxList transactions={txs} />
-                  </TabsContent>
-                  <TabsContent value="events">
-                    <EventList events={events} />
-                  </TabsContent>
-                </CardContent>
-              </Card>
+              <CardContent>
+                <TabsList>
+                  <TabsTrigger value="transactions">
+                    <ListIcon variant="solid" />
+                    <div>Transactions</div>
+                  </TabsTrigger>
+                  <TabsTrigger value="events">
+                    <PulseIcon variant="solid" />
+                    <div>Events</div>
+                  </TabsTrigger>
+                </TabsList>
+              </CardContent>
+              <CardSeparator />
+              <CardContent>
+                <TabsContent value="transactions">
+                  <TxList transactions={txs} />
+                </TabsContent>
+                <TabsContent value="events">
+                  <EventList events={events} />
+                </TabsContent>
+              </CardContent>
             </Tabs>
-          </div>
+          </Card>
         </div>
       )}
     </div>
