@@ -1,6 +1,6 @@
 import { useNetwork } from "@starknet-react/core";
 import { cn } from "@cartridge/ui";
-import { Chain } from "@starknet-react/chains";
+import type { Chain } from "@starknet-react/chains";
 import { useCallback, useMemo } from "react";
 import { getChecksumAddress } from "starknet";
 import { toast } from "sonner";
@@ -28,17 +28,19 @@ export const Network = React.forwardRef<
     toast.success("Chain ID copied");
   }, [chain]);
 
+  const isSlot = useMemo(() => {
+    return chain.network.toLowerCase().startsWith("slot-");
+  }, [chain]);
+
   const color = useMemo(() => {
     if (!chain) return;
-
-    const isSlot = chain.network.toLowerCase().startsWith("slot-");
 
     if (isSlot) {
       return ChainColors["slot"];
     }
 
     return ChainColors[chain.network.toLowerCase()] || ChainColors["other"];
-  }, [chain]);
+  }, [chain, isSlot]);
 
   const isUnknownChain = useMemo(() => {
     return color === ChainColors["other"];

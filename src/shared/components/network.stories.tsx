@@ -1,15 +1,39 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Network } from "./network";
 import { publicProvider, StarknetConfig } from "@starknet-react/core";
-import { sepolia, mainnet, Chain, getSlotChain } from "@starknet-react/chains";
+import { sepolia, mainnet, Chain } from "@starknet-react/chains";
 import { constants, num, shortString } from "starknet";
-import { STRK_CONTRACT_ADDRESS } from "@cartridge/utils";
+import { ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS } from "@cartridge/utils";
 
 const meta = {
   tags: ["autodocs"],
   title: "Network Button",
   component: Network,
 } satisfies Meta<typeof Network>;
+
+// temp getSlotChain impl
+const getSlotChain = (slotName: string) => {
+  return {
+    id: num.toBigInt(shortString.encodeShortString(slotName)),
+    network: "slot",
+    name: slotName,
+    rpcUrls: {
+      default: {
+        http: [],
+      },
+      public: {
+        http: [`https://api.cartridge.gg/x/${slotName}/katana`],
+      },
+    },
+    nativeCurrency: {
+      address: ETH_CONTRACT_ADDRESS as `0x${string}`,
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+    },
+    testnet: true,
+  } as const satisfies Chain;
+};
 
 // minimal setup for starknet provider to simulate different networks
 const StarknetProvider = ({
@@ -90,9 +114,7 @@ export const ShortSlotName: Story = {
 
 export const LongSlotName: Story = {
   render: () => {
-    const slotChain: Chain = getSlotChain(
-      shortString.encodeShortString("WP_JOKERSOFNEONALPHA"),
-    );
+    const slotChain: Chain = getSlotChain("WP_JOKERSOFNEONALPHA");
 
     return (
       <StarknetProvider
