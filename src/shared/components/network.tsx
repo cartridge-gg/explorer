@@ -34,10 +34,6 @@ export const Network = React.forwardRef<
     return ChainColors[chain.network.toLowerCase()] || ChainColors["other"];
   }, [chain]);
 
-  const isUnknownChain = useMemo(() => {
-    return color === ChainColors["other"];
-  }, [color]);
-
   if (!chain) return null;
 
   return (
