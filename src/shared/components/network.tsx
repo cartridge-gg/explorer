@@ -28,19 +28,11 @@ export const Network = React.forwardRef<
     toast.success("Chain ID copied");
   }, [chain]);
 
-  const isSlot = useMemo(() => {
-    return chain.network.toLowerCase().startsWith("slot-");
-  }, [chain]);
-
   const color = useMemo(() => {
     if (!chain) return;
 
-    if (isSlot) {
-      return ChainColors["slot"];
-    }
-
     return ChainColors[chain.network.toLowerCase()] || ChainColors["other"];
-  }, [chain, isSlot]);
+  }, [chain]);
 
   const isUnknownChain = useMemo(() => {
     return color === ChainColors["other"];
