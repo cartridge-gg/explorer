@@ -1,11 +1,12 @@
 import { SearchBar } from "@/shared/components/SearchBar";
 import { Account } from "./account";
 import { useLocation } from "react-router-dom";
-import { Button, DotsIcon, Network, Separator, Skeleton } from "@cartridge/ui";
+import { Button, DotsIcon, Separator, Skeleton } from "@cartridge/ui";
 import useChain from "@/shared/hooks/useChain";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/shared/components/sheet";
+import { Network } from "../network";
 
 export function Header() {
   const location = useLocation();
@@ -38,14 +39,10 @@ export function Header() {
         {!isHome && (
           <>
             {chainId ? (
-              <Network
-                chainId={chainId.id}
-                tooltipTriggerClassName="bg-background-300 hover:bg-background-200 h-12 text-md"
-              />
+              <Network />
             ) : (
-              <Skeleton className="h-12 w-40" />
+              <Skeleton className="size-[40px] sm:w-[112px]" />
             )}
-
             <Separator
               orientation="vertical"
               className="bg-background-400 w-1 h-8"
