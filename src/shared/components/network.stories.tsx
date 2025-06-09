@@ -95,24 +95,7 @@ export const Sepolia: Story = {
   ),
 };
 
-export const ShortSlotName: Story = {
-  render: () => {
-    const slotChain: Chain = getSlotChain(
-      shortString.encodeShortString("WP_SLOT"),
-    );
-
-    return (
-      <StarknetProvider
-        externalChains={[slotChain]}
-        defaultChainID={slotChain.id}
-      >
-        <Network />
-      </StarknetProvider>
-    );
-  },
-};
-
-export const LongSlotName: Story = {
+export const Slot: Story = {
   render: () => {
     const slotChain: Chain = getSlotChain("WP_JOKERSOFNEONALPHA");
 
@@ -135,7 +118,39 @@ export const Other: Story = {
       name: "Localhost",
       rpcUrls: {
         default: {
+          http: [],
+        },
+        public: {
           http: ["http://localhost:8001/x/slot/katana"],
+        },
+      },
+      nativeCurrency: {
+        name: "Starknet",
+        symbol: "STRK",
+        decimals: 18,
+        address: STRK_CONTRACT_ADDRESS as `0x${string}`,
+      },
+    };
+    return (
+      <StarknetProvider
+        externalChains={[unknownChain]}
+        defaultChainID={unknownChain.id}
+      >
+        <Network />
+      </StarknetProvider>
+    );
+  },
+};
+
+export const LongName: Story = {
+  render: () => {
+    const unknownChain: Chain = {
+      id: num.toBigInt(shortString.encodeShortString("LONG_CHAIN_NAME")),
+      network: "longchainname",
+      name: "Long Chain Name",
+      rpcUrls: {
+        default: {
+          http: [],
         },
         public: {
           http: ["http://localhost:8001/x/slot/katana"],
