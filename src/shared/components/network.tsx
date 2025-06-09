@@ -58,12 +58,7 @@ export const Network = React.forwardRef<
           color,
         )}
       />
-      <span
-        className={cn(
-          "hidden sm:block text-foreground-200 group-hover:text-foreground-100 overflow-hidden text-center overflow-ellipsis whitespace-nowrap text-[14px]/[20px] font-medium px-[4px]",
-          isUnknownChain ? "normal-case" : "capitalize",
-        )}
-      >
+      <span className="hidden sm:block text-foreground-200 group-hover:text-foreground-100 overflow-hidden text-center overflow-ellipsis whitespace-nowrap text-[14px]/[20px] font-medium px-[4px] capitalize">
         {chain.network}
       </span>
     </button>
