@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Network } from "./network";
 import { publicProvider, StarknetConfig } from "@starknet-react/core";
-import { sepolia, mainnet, Chain } from "@starknet-react/chains";
+import { sepolia, mainnet, Chain, getSlotChain } from "@starknet-react/chains";
 import { constants, num, shortString } from "starknet";
 import { STRK_CONTRACT_ADDRESS } from "@cartridge/utils";
 
@@ -14,83 +14,23 @@ const meta = {
 // minimal setup for starknet provider to simulate different networks
 const StarknetProvider = ({
   children,
-  chainID,
+  defaultChainID,
+  externalChains,
 }: {
   children: React.ReactNode;
-  chainID: bigint;
+  defaultChainID: bigint;
+  externalChains?: Chain[];
 }) => {
-  const slotChain: Chain = {
-    id: num.toBigInt(shortString.encodeShortString("WP_SLOT")),
-    network: "Slot",
-    name: "Slot",
-    rpcUrls: {
-      default: {
-        http: ["https://api.cartridge.gg/x/slot/katana"],
-      },
-      public: {
-        http: ["https://api.cartridge.gg/x/slot/katana"],
-      },
-    },
-    nativeCurrency: {
-      name: "Starknet",
-      symbol: "STRK",
-      decimals: 18,
-      address: STRK_CONTRACT_ADDRESS as `0x${string}`,
-    },
-  };
+  const defaultChains: Chain[] = [mainnet, sepolia];
 
-  const localChain: Chain = {
-    id: num.toBigInt(shortString.encodeShortString("LOCALHOST")),
-    network: "localhost",
-    name: "Localhost",
-    rpcUrls: {
-      default: {
-        http: ["http://localhost:8001/x/slot/katana"],
-      },
-      public: {
-        http: ["http://localhost:8001/x/slot/katana"],
-      },
-    },
-    nativeCurrency: {
-      name: "Starknet",
-      symbol: "STRK",
-      decimals: 18,
-      address: STRK_CONTRACT_ADDRESS as `0x${string}`,
-    },
-  };
-
-  const unknownChain: Chain = {
-    id: num.toBigInt(shortString.encodeShortString("langchain")),
-    network: "langchain",
-    name: "Langchain",
-    rpcUrls: {
-      default: {
-        http: ["https://example.com"],
-      },
-      public: {
-        http: ["https://example.com"],
-      },
-    },
-    nativeCurrency: {
-      name: "Starknet",
-      symbol: "STRK",
-      decimals: 18,
-      address: STRK_CONTRACT_ADDRESS as `0x${string}`,
-    },
-  };
-
-  const starknetConfigChains = [
-    mainnet,
-    sepolia,
-    slotChain,
-    localChain,
-    unknownChain,
-  ];
+  if (externalChains) {
+    defaultChains.push(...externalChains);
+  }
 
   return (
     <StarknetConfig
-      chains={starknetConfigChains}
-      defaultChainId={chainID}
+      chains={defaultChains}
+      defaultChainId={defaultChainID}
       provider={publicProvider()}
     >
       {children}
@@ -108,7 +48,7 @@ export const Default: Story = {
         ? mainnet.id
         : sepolia.id;
     return (
-      <StarknetProvider chainID={currentChainID}>
+      <StarknetProvider defaultChainID={currentChainID}>
         <Network />
       </StarknetProvider>
     );
@@ -117,7 +57,7 @@ export const Default: Story = {
 
 export const Mainnet: Story = {
   render: () => (
-    <StarknetProvider chainID={mainnet.id}>
+    <StarknetProvider defaultChainID={mainnet.id}>
       <Network />
     </StarknetProvider>
   ),
@@ -125,38 +65,74 @@ export const Mainnet: Story = {
 
 export const Sepolia: Story = {
   render: () => (
-    <StarknetProvider chainID={sepolia.id}>
+    <StarknetProvider defaultChainID={sepolia.id}>
       <Network />
     </StarknetProvider>
   ),
 };
 
-export const Slot: Story = {
-  render: () => (
-    <StarknetProvider
-      chainID={num.toBigInt(shortString.encodeShortString("WP_SLOT"))}
-    >
-      <Network />
-    </StarknetProvider>
-  ),
+export const ShortSlotName: Story = {
+  render: () => {
+    const slotChain: Chain = getSlotChain(
+      shortString.encodeShortString("WP_SLOT"),
+    );
+
+    return (
+      <StarknetProvider
+        externalChains={[slotChain]}
+        defaultChainID={slotChain.id}
+      >
+        <Network />
+      </StarknetProvider>
+    );
+  },
 };
 
-export const Localhost: Story = {
-  render: () => (
-    <StarknetProvider
-      chainID={num.toBigInt(shortString.encodeShortString("LOCALHOST"))}
-    >
-      <Network />
-    </StarknetProvider>
-  ),
+export const LongSlotName: Story = {
+  render: () => {
+    const slotChain: Chain = getSlotChain(
+      shortString.encodeShortString("WP_JOKERSOFNEONALPHA"),
+    );
+
+    return (
+      <StarknetProvider
+        externalChains={[slotChain]}
+        defaultChainID={slotChain.id}
+      >
+        <Network />
+      </StarknetProvider>
+    );
+  },
 };
 
-export const Unknown: Story = {
-  render: () => (
-    <StarknetProvider
-      chainID={num.toBigInt(shortString.encodeShortString("langchain"))}
-    >
-      <Network />
-    </StarknetProvider>
-  ),
+export const Other: Story = {
+  render: () => {
+    const unknownChain: Chain = {
+      id: num.toBigInt(shortString.encodeShortString("LOCALHOST")),
+      network: "localhost",
+      name: "Localhost",
+      rpcUrls: {
+        default: {
+          http: ["http://localhost:8001/x/slot/katana"],
+        },
+        public: {
+          http: ["http://localhost:8001/x/slot/katana"],
+        },
+      },
+      nativeCurrency: {
+        name: "Starknet",
+        symbol: "STRK",
+        decimals: 18,
+        address: STRK_CONTRACT_ADDRESS as `0x${string}`,
+      },
+    };
+    return (
+      <StarknetProvider
+        externalChains={[unknownChain]}
+        defaultChainID={unknownChain.id}
+      >
+        <Network />
+      </StarknetProvider>
+    );
+  },
 };

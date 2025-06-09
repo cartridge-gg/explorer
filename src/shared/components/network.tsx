@@ -1,7 +1,7 @@
 import { useNetwork } from "@starknet-react/core";
 import { cn } from "@cartridge/ui";
 import { Chain } from "@starknet-react/chains";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { getChecksumAddress } from "starknet";
 import { toast } from "sonner";
 import React from "react";
@@ -11,7 +11,7 @@ const ChainColors: Record<Chain["network"], string> = {
   mainnet: "bg-[#FF4264]",
   sepolia: "bg-[#6DE27C]",
   slot: "bg-[#FBCB4A]",
-  localhost: "bg-[#9C9C9C]",
+  other: "bg-[#9C9C9C]",
 };
 
 export const Network = React.forwardRef<
@@ -25,13 +25,26 @@ export const Network = React.forwardRef<
     if (!chain) return;
 
     navigator.clipboard.writeText(getChecksumAddress(chain.id));
-    toast.success("Address copied");
+    toast.success("Chain ID copied");
   }, [chain]);
 
-  if (!chain) return null;
+  const color = useMemo(() => {
+    if (!chain) return;
 
-  const color =
-    ChainColors[chain.network.toLowerCase()] || ChainColors["localhost"];
+    const isSlot = chain.network.toLowerCase().startsWith("slot-");
+
+    if (isSlot) {
+      return ChainColors["slot"];
+    }
+
+    return ChainColors[chain.network.toLowerCase()] || ChainColors["other"];
+  }, [chain]);
+
+  const isUnknownChain = useMemo(() => {
+    return color === ChainColors["other"];
+  }, [color]);
+
+  if (!chain) return null;
 
   return (
     <button
@@ -51,7 +64,12 @@ export const Network = React.forwardRef<
           color,
         )}
       />
-      <span className="hidden sm:block text-foreground-200 group-hover:text-foreground-100 overflow-hidden text-center overflow-ellipsis whitespace-nowrap text-sm font-medium px-[4px] capitalize font-sans tracking-normal">
+      <span
+        className={cn(
+          "hidden sm:block text-foreground-200 group-hover:text-foreground-100 overflow-hidden text-center overflow-ellipsis whitespace-nowrap text-[14px]/[20px] font-medium px-[4px]",
+          isUnknownChain ? "normal-case" : "capitalize",
+        )}
+      >
         {chain.network}
       </span>
     </button>
