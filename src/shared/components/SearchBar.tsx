@@ -36,6 +36,8 @@ export function SearchBar({
     { type: "tx" | "block" | "contract" | "class"; value: string } | undefined
   >();
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const queryClient = useQueryClient();
 
   // Handle Cmd+K / Ctrl+K keyboard shortcut to focus search
@@ -165,6 +167,7 @@ export function SearchBar({
 
   const handleSearch = useDebounce((value: string) => {
     if (!value || value.length === 0) return;
+    setIsLoading(true);
     // assuming that there will be no hash collision (very unlikely to collide)
     performSearch(value).then((promises) => {
       if (promises.length > 1) {
@@ -192,6 +195,7 @@ export function SearchBar({
           setResult(undefined);
         }
       }
+      setIsLoading(false);
     });
   }, 500);
 
@@ -243,8 +247,10 @@ export function SearchBar({
   return (
     <div
       className={cn(
-        "min-w-[280px] w-full py-[10px] px-[12px] flex gap-[8px] relative border border-background-200 items-center shadow rounded-sm bg-spacer-100",
-        isDropdownOpen && result ? "border-b-0 rounded-b-none" : undefined,
+        "min-w-[280px] w-full py-[10px] px-[12px] flex gap-[8px] relative border border-background-200 items-center rounded-sm bg-spacer-100",
+        isDropdownOpen && result && !isLoading
+          ? "border-b-0 rounded-b-none"
+          : undefined,
         className,
       )}
     >
@@ -258,7 +264,7 @@ export function SearchBar({
         ref={inputRef}
         name="search"
         containerClassName="flex-1"
-        className="bg-spacer-100 border-none focus-visible:bg-spacer-100 caret-foreground search-input"
+        className="bg-spacer-100 border-none focus-visible:bg-spacer-100 caret-foreground search-input h-auto text-[14px]/[20px] placeholder:text-[14px]/[20px] px-0 font-sans"
         placeholder="Search"
         onChange={(e) => {
           handleSearch(e.target.value);
@@ -286,37 +292,39 @@ export function SearchBar({
 
       {isDropdownOpen ? (
         <div className="bg-spacer-100 search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full">
-          <div
-            // hack for doing custom spacing for the dashed line
-            style={{
-              backgroundImage:
-                "linear-gradient(to right, var(--background) 50%, var(--background-400) 0%)",
-              backgroundPosition: "top",
-              backgroundSize: "15px 1px",
-              backgroundRepeat: "repeat-x",
-            }}
-            className="flex flex-col gap-2 px-[15px] py-[10px] border border-background-200 border-t-0 shadow-md"
-          >
-            {result ? (
-              <div
-                ref={dropdownResultRef}
-                tabIndex={0}
-                onKeyDown={handleKeyDown}
-                onClick={handleResultClick}
-                className={cn(
-                  "flex flex-row hover:bg-background-400 cursor-pointer items-center gap-2 justify-between w-full px-2 py-1 outline-none",
-                  isResultFocused && "bg-background-400",
-                )}
-              >
-                <span className="font-bold uppercase">{result.type}</span>
+          <div className="border-t border-dashed border-background-200">
+            <div className="flex flex-col gap-2 p-[10px] border border-background-200 border-t-0 rounded-b-sm">
+              {isLoading ? (
+                <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-foreground-100">
+                  <div>Searching...</div>
+                </div>
+              ) : result ? (
+                <div
+                  ref={dropdownResultRef}
+                  tabIndex={0}
+                  onKeyDown={handleKeyDown}
+                  onClick={handleResultClick}
+                  className={cn(
+                    "flex flex-row hover:bg-background-200 cursor-pointer items-center justify-between w-full px-[8px] py-[9px] outline-none rounded-sm h-[35px]",
+                    isResultFocused && "bg-background-200",
+                  )}
+                >
+                  <div className="bg-background-200 rounded-[3px] py-[2px] px-[8px] flex items-center justify-center">
+                    <span className="capitalize text-[#A8A8A8] text-[12px]/[16px] font-semibold tracking-[0.24px]">
+                      {result.type}
+                    </span>
+                  </div>
 
-                <span>{truncateString(result.value, isMobile ? 10 : 25)}</span>
-              </div>
-            ) : (
-              <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-foreground-100">
-                <div>No results found</div>
-              </div>
-            )}
+                  <span className="text-[13px]/[16px] font-normal font-mono text-foreground-400">
+                    {truncateString(result.value, isMobile ? 10 : 25)}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-foreground-100">
+                  <div>No results found</div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       ) : null}
