@@ -185,7 +185,9 @@ export const SearchBar = React.forwardRef<
         }
 
         if (isBlock || isTx || isContract || isClass) {
-          setIsResultFocused(true);
+          if (!isMobile) {
+            setIsResultFocused(true);
+          }
         }
       } else {
         const [address] = promises;
@@ -248,7 +250,7 @@ export const SearchBar = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "min-w-[280px] w-full py-[10px] px-[12px] flex gap-[8px] relative border border-background-200 items-center rounded-sm bg-spacer-100",
+        "min-w-[280px] w-full py-[7px] md:py-[10px] px-[10px] md:px-[12px] flex gap-[8px] relative border border-background-200 items-center rounded-sm bg-background-100 md:bg-spacer-100  shadow-[0px_4px_8px_0px_rgba(0,0,0,0.25)] md:shadow-none",
         isDropdownOpen && result && !isLoading
           ? "border-b-0 rounded-b-none"
           : undefined,
@@ -271,7 +273,7 @@ export const SearchBar = React.forwardRef<
         ref={inputRef}
         name="search"
         containerClassName="flex-1"
-        className="bg-spacer-100 border-none focus-visible:bg-spacer-100 caret-foreground search-input h-auto text-[14px]/[20px] placeholder:text-[14px]/[20px] px-0 font-sans"
+        className="bg-background-100 focus-visible:bg-background-100 md:bg-spacer-100 md:focus-visible:bg-spacer-100  border-none caret-foreground search-input h-auto text-[14px]/[20px] placeholder:text-[14px]/[20px] px-0 font-mono rounded-none"
         placeholder="Search"
         onChange={(e) => {
           handleSearch(e.target.value);
@@ -288,7 +290,7 @@ export const SearchBar = React.forwardRef<
       />
 
       {/* Command Shortcut - Only show when input is not focused */}
-      {!isInputFocused && (
+      {!isInputFocused && !isMobile && (
         <CommandShortcut
           className="flex items-center justify-center select-none cursor-text bg-[#262A27] border border-[#27292C] rounded-[3px] px-[8px] text-foreground-100 text-[12px]/[16px] font-semibold tracking-[0.24px] h-[17px] w-[30.768px]"
           onClick={() => inputRef.current?.focus()}
@@ -300,15 +302,17 @@ export const SearchBar = React.forwardRef<
       {isDropdownOpen ? (
         <div
           className={cn(
-            "bg-spacer-100 search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full",
+            "bg-background-100 md:bg-spacer-100 search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full select-none",
             isResultFocused && "cursor-pointer",
           )}
         >
           <div className="border-t border-dashed border-background-200">
-            <div className="flex flex-col gap-2 p-[10px] border border-background-200 border-t-0 rounded-b-sm">
+            <div className="flex flex-col gap-2 p-[10px] border border-background-200 border-t-0 rounded-b-sm h-[55px]">
               {isLoading ? (
-                <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-foreground-100">
-                  <div>Searching...</div>
+                <div className="h-[35px] flex items-center justify-center">
+                  <span className="text-[12px]/[16px] font-normal normal-case text-foreground-400">
+                    Searching...
+                  </span>
                 </div>
               ) : result ? (
                 <button
@@ -332,8 +336,10 @@ export const SearchBar = React.forwardRef<
                   </span>
                 </button>
               ) : (
-                <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-foreground-100">
-                  <div>No results found</div>
+                <div className="h-[35px] flex items-center justify-center">
+                  <span className="text-[12px]/[16px] font-normal normal-case text-foreground-400">
+                    No results found
+                  </span>
                 </div>
               )}
             </div>
