@@ -3,6 +3,7 @@ import {
   ArrowIcon,
   ArrowToLineIcon,
   Button,
+  cn,
   Table,
   TableBody,
   TableCell,
@@ -13,9 +14,10 @@ import {
 
 interface DataTableProps<T> extends React.HTMLAttributes<HTMLDivElement> {
   table: TableType<T>;
+  onRowClick?: (row: T) => void;
 }
 
-export function DataTable<T>({ table }: DataTableProps<T>) {
+export function DataTable<T>({ table, onRowClick }: DataTableProps<T>) {
   return (
     <div className="h-full flex flex-col justify-between">
       <Table className="table-auto flex-1">
@@ -40,7 +42,14 @@ export function DataTable<T>({ table }: DataTableProps<T>) {
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id} className="border-none">
+            <TableRow
+              key={row.id}
+              className={cn(
+                "border-none",
+                onRowClick && "cursor-pointer hover:bg-background-200",
+              )}
+              onClick={() => onRowClick?.(row.original)}
+            >
               {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id} className="p-2 text-sm">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}

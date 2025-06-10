@@ -48,7 +48,7 @@ import {
   TabsContent,
 } from "@/shared/components/tabs";
 import { Hash } from "@/shared/components/hash";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useBlockNumber } from "@/shared/hooks/useBlockNumber";
 import dayjs from "dayjs";
 import { getFinalityStatus } from "@/shared/utils/receipt";
@@ -63,6 +63,7 @@ export function Block() {
   } = useBlock();
   const { blockNumber: latestBlockNumber } = useBlockNumber();
   const { hash } = useLocation();
+  const navigate = useNavigate();
 
   const isLatestBlock =
     latestBlockNumber !== undefined &&
@@ -366,11 +367,19 @@ export function Block() {
                       </SelectContent>
                     </Select>
 
-                    <DataTable table={txs} />
+                    <DataTable
+                      table={txs}
+                      onRowClick={(row) => navigate(`../tx/${row.hash}`)}
+                    />
                   </TabsContent>
 
                   <TabsContent value="events" className="h-full">
-                    <DataTable table={events} />
+                    <DataTable
+                      table={events}
+                      onRowClick={(row) =>
+                        navigate(`../event/${row.txn_hash}-${row.id}`)
+                      }
+                    />
                   </TabsContent>
                 </CardContent>
               </Tabs>
