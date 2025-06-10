@@ -67,7 +67,7 @@ export function Contract() {
     contractAddress: string;
   }>();
   const { isMobile } = useScreen();
-  const { onTabChange } = useHashLinkTabs();
+  const tab = useHashLinkTabs("read");
 
   const {
     data: { classHash, contract, readFuncs, writeFuncs, code },
@@ -191,7 +191,7 @@ export function Contract() {
           </div>
 
           <Card className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-            <Tabs defaultValue="read" onValueChange={onTabChange}>
+            <Tabs value={tab.selected} onValueChange={tab.onChange}>
               <CardContent>
                 <TabsList>
                   <TabsTrigger value="read">

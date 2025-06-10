@@ -27,7 +27,7 @@ import {
   CardSeparator,
 } from "@/shared/components/card";
 import { Badge } from "@/shared/components/badge";
-import { DataTable } from "@/shared/components/dataTable";
+import { DataTable } from "@/shared/components/data-table";
 import {
   PageHeader,
   PageHeaderRight,
@@ -57,7 +57,7 @@ import dayjs from "dayjs";
 import { getFinalityStatus } from "@/shared/utils/receipt";
 
 export function Transaction() {
-  const { onTabChange } = useHashLinkTabs();
+  const tab = useHashLinkTabs("calldata");
   const { txHash } = useParams<{ txHash: string }>();
   const {
     isLoading,
@@ -410,8 +410,8 @@ export function Transaction() {
 
           <Card className="h-full flex-grow grid grid-rows-[min-content_1fr]">
             <Tabs
-              defaultValue="calldata"
-              onValueChange={onTabChange}
+              value={tab.selected}
+              onValueChange={tab.onChange}
               className="h-full"
             >
               <CardContent>
@@ -446,18 +446,10 @@ export function Transaction() {
                   )}
                 </TabsContent>
                 <TabsContent value="events">
-                  <DataTable
-                    table={events.table}
-                    pagination={events.pagination}
-                    setPagination={events.setPagination}
-                  />
+                  <DataTable table={events} />
                 </TabsContent>
                 <TabsContent value="storage-diffs">
-                  <DataTable
-                    table={storageDiff.table}
-                    pagination={storageDiff.pagination}
-                    setPagination={storageDiff.setPagination}
-                  />
+                  <DataTable table={storageDiff} />
                 </TabsContent>
               </CardContent>
             </Tabs>

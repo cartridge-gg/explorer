@@ -83,7 +83,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
   });
 
   const {
-    data: { receipt, events, executions, blockComputeData },
+    data: { receipt, events: eventsData, executions, blockComputeData },
   } = useQuery({
     queryKey: ["transaction-sammary", txHash],
     queryFn: async () => {
@@ -181,7 +181,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     },
   });
 
-  const { data: storageDiff } = useQuery<StorageDiffData[]>({
+  const { data: storageDiffData } = useQuery<StorageDiffData[]>({
     queryKey: ["transaction", txHash, "storageDiff"],
     queryFn: async () => {
       const trace = await RPC_PROVIDER.getTransactionTrace(txHash || "");
@@ -281,16 +281,14 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
 
   // sort events data by id
 
-  const eventsTable = useReactTable({
-    data: events,
+  const events = useReactTable({
+    data: eventsData,
     columns: eventsColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: setEventsPagination,
     state: {
-      pagination: {
-        pageIndex: eventsPagination.pageIndex,
-        pageSize: eventsPagination.pageSize,
-      },
+      pagination: eventsPagination,
     },
   });
 
@@ -371,16 +369,14 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     [navigate],
   );
 
-  const storageDiffTable = useReactTable({
-    data: storageDiff,
+  const storageDiff = useReactTable({
+    data: storageDiffData,
     columns: storageDiffColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: setStorageDiffPagination,
     state: {
-      pagination: {
-        pageIndex: storageDiffPagination.pageIndex,
-        pageSize: storageDiffPagination.pageSize,
-      },
+      pagination: storageDiffPagination,
     },
   });
   return {
@@ -393,16 +389,8 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
       block,
       blockComputeData,
       executions,
-      events: {
-        table: eventsTable,
-        pagination: eventsPagination,
-        setPagination: setEventsPagination,
-      },
-      storageDiff: {
-        table: storageDiffTable,
-        pagination: storageDiffPagination,
-        setPagination: setStorageDiffPagination,
-      },
+      events,
+      storageDiff,
     },
   };
 }
