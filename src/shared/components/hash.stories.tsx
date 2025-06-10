@@ -16,6 +16,12 @@ export const Default: Story = {
   },
 };
 
+export const Skeleton: Story = {
+  args: {
+    value: undefined,
+  },
+};
+
 export const ShortHash: Story = {
   args: {
     value: "0x1",

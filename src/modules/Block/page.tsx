@@ -1,9 +1,7 @@
 import { formatNumber } from "@/shared/utils/number";
-import { formatSnakeCaseToDisplayValue } from "@/shared/utils/string";
 import { cairo } from "starknet";
 import {
   GasIcon,
-  BoltIcon,
   StackDiamondIcon,
   cn,
   Skeleton,
@@ -24,6 +22,7 @@ import {
   CardIcon,
   CardLabel,
   CardSeparator,
+  ExecutionResourcesCard,
 } from "@/shared/components/card";
 import {
   Breadcrumb,
@@ -139,7 +138,7 @@ export function Block() {
                   <div className="flex flex-col gap-2">
                     <CardLabel>Status</CardLabel>
                     {block ? (
-                      <div className="font-bold text-foreground">
+                      <div className="font-semibold">
                         {getFinalityStatus(block.status)}
                       </div>
                     ) : (
@@ -150,7 +149,7 @@ export function Block() {
                   <div className="flex flex-col gap-2 w-44">
                     <CardLabel>Timestamp</CardLabel>
                     {block ? (
-                      <div className="font-bold text-foreground">
+                      <div className="font-semibold">
                         {dayjs
                           .unix(block?.timestamp)
                           .format("MMM D YYYY HH:mm:ss")}
@@ -166,27 +165,15 @@ export function Block() {
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <CardLabel>Hash</CardLabel>
-                    {block ? (
-                      <Hash value={block?.block_hash} />
-                    ) : (
-                      <Skeleton className="h-6 w-40" />
-                    )}
+                    <Hash value={block?.block_hash} />
                   </div>
                   <div className="flex items-center justify-between">
                     <CardLabel>State root</CardLabel>
-                    {block ? (
-                      <Hash value={block?.new_root} />
-                    ) : (
-                      <Skeleton className="h-6 w-40" />
-                    )}
+                    <Hash value={block?.new_root} />
                   </div>
                   <div className="flex items-center justify-between">
                     <CardLabel>Parent hash</CardLabel>
-                    {block ? (
-                      <Hash value={block?.parent_hash} />
-                    ) : (
-                      <Skeleton className="h-6 w-40" />
-                    )}
+                    <Hash value={block?.parent_hash} />
                   </div>
                 </CardContent>
 
@@ -195,14 +182,10 @@ export function Block() {
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <CardLabel>Sequencer</CardLabel>
-                    {block ? (
-                      <Hash
-                        value={block?.sequencer_address}
-                        to={`../contract/${block?.sequencer_address}`}
-                      />
-                    ) : (
-                      <Skeleton className="h-6 w-40" />
-                    )}
+                    <Hash
+                      value={block?.sequencer_address}
+                      to={`../contract/${block?.sequencer_address}`}
+                    />
                   </div>
                 </CardContent>
 
@@ -386,72 +369,10 @@ export function Block() {
             </Card>
           </div>
 
-          <Card className="gap-0 pb-0">
-            <CardHeader className="pb-3 border-b border-background-200">
-              <CardIcon icon={<BoltIcon variant="solid" />} />
-              <CardTitle>Execution resources</CardTitle>
-            </CardHeader>
-
-            <div className="flex flex-col md:flex-row divide-x divide-y divide-background-200 relative">
-              <CardContent className="py-2 min-w-96">
-                <div>
-                  <CardLabel>steps</CardLabel>
-                  {blockComputeData ? (
-                    <div className="font-mono text-foreground font-semibold overflow-auto">
-                      {formatNumber(blockComputeData.steps)}
-                    </div>
-                  ) : (
-                    <Skeleton className="h-6 w-40" />
-                  )}
-                </div>
-              </CardContent>
-
-              <CardContent className="py-2 -top-px -left-px min-w-96">
-                <CardLabel>gas</CardLabel>
-                <div className="flex flex-wrap gap-px">
-                  <div className="bg-background-200 flex flex-col p-2 min-w-40">
-                    <CardLabel>l1</CardLabel>
-                    {blockComputeData ? (
-                      <div className="font-mono text-foreground font-semibold">
-                        {formatNumber(blockComputeData.gas)}
-                      </div>
-                    ) : (
-                      <Skeleton className="h-6 w-40" />
-                    )}
-                  </div>
-                  <div className="bg-background-200 flex flex-col p-2 min-w-40">
-                    <CardLabel>l1 data</CardLabel>
-                    {blockComputeData ? (
-                      <div className="font-mono text-foreground font-semibold">
-                        {formatNumber(blockComputeData.data_gas)}
-                      </div>
-                    ) : (
-                      <Skeleton className="h-6 w-40" />
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-
-              <CardContent className="py-2 flex flex-col gap-2 -top-px -left-px">
-                <CardLabel>builtins counter</CardLabel>
-                <div className="flex flex-wrap gap-px">
-                  {Object.entries(executions ?? {}).map(([key, value]) => (
-                    <div
-                      key={key}
-                      className="bg-background-200 flex flex-col p-2 w-40"
-                    >
-                      <CardLabel>
-                        {formatSnakeCaseToDisplayValue(key)}
-                      </CardLabel>
-                      <div className="font-mono text-foreground font-semibold overflow-auto">
-                        {formatNumber(value)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </div>
-          </Card>
+          <ExecutionResourcesCard
+            blockComputeData={blockComputeData}
+            executions={executions}
+          />
         </div>
       )}
     </div>
