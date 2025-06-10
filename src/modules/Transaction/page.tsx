@@ -54,7 +54,7 @@ import {
 } from "@/shared/components/breadcrumb";
 import { Hash } from "@/shared/components/hash";
 import dayjs from "dayjs";
-import { useMemo } from "react";
+import { getFinalityStatus } from "@/shared/utils/receipt";
 
 export function Transaction() {
   const { onTabChange } = useHashLinkTabs();
@@ -74,21 +74,6 @@ export function Transaction() {
     },
   } = useTransaction({ txHash });
   const { isMobile } = useScreen();
-  const finalityStatus = useMemo(() => {
-    if (!receipt) return;
-    switch (receipt.finality_status) {
-      case "PENDING":
-        return "Pending";
-      case "ACCEPTED_ON_L1":
-        return "Accepted on L1";
-      case "ACCEPTED_ON_L2":
-        return "Accepted on L2";
-      case "REJECTED":
-        return "Rejected";
-      default:
-        return "Pending";
-    }
-  }, [receipt]);
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -147,7 +132,9 @@ export function Transaction() {
                 <div className="flex flex-col gap-2">
                   <CardLabel>Status</CardLabel>
                   {block ? (
-                    <div className="font-bold">{finalityStatus}</div>
+                    <div className="font-bold text-foreground">
+                      {getFinalityStatus(receipt.finality_status)}
+                    </div>
                   ) : (
                     <Skeleton className="h-4 w-28" />
                   )}
@@ -156,7 +143,7 @@ export function Transaction() {
                 <div className="flex flex-col gap-2 w-44">
                   <CardLabel>Timestamp</CardLabel>
                   {block ? (
-                    <div className="font-bold">
+                    <div className="font-bold text-foreground">
                       {dayjs
                         .unix(block?.timestamp)
                         .format("MMM D YYYY HH:mm:ss")}

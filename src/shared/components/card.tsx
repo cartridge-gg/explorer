@@ -47,11 +47,17 @@ CardIcon.displayName = "CardIcon";
 
 export const CardSeparator = React.forwardRef<
   HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
+  React.HTMLAttributes<HTMLHeadingElement> & {
+    variant?: "horizontal" | "vertical";
+  }
+>(({ variant = "horizontal", className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("w-full h-px bg-background-200 my-2", className)}
+    className={cn(
+      "bg-background-200",
+      variant === "horizontal" ? "w-full h-px my-2" : "h-full w-px mx-2",
+      className,
+    )}
     {...props}
   />
 ));
@@ -79,7 +85,7 @@ export const CardLabel = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "text-foreground-400 font-semibold tracking-wide capitalize text-nowrap",
+      "text-foreground-400 font-semibold tracking-wide capitalize text-nowrap text-sm",
       className,
     )}
     {...props}

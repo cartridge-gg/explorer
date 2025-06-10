@@ -14,7 +14,7 @@ export function PageHeader({
   return (
     <Card
       className={cn(
-        "w-full rounded-xl rounded-b-none relative h-10 p-0",
+        "w-full rounded-xl rounded-b-none relative h-[40px] p-0",
         containerClassName,
       )}
     >
