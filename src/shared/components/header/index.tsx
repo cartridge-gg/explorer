@@ -31,7 +31,7 @@ export function Header() {
           ) : (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger>
-                <div className="flex items-center w-10 h-10 bg-background-200 rounded-full justify-center cursor-pointer hover:bg-background-300 transition-all">
+                <div className="flex items-center w-10 h-10 bg-background-100 rounded-[4px] justify-center cursor-pointer hover:bg-background-300 transition-all">
                   <SearchIcon />
                 </div>
               </DialogTrigger>
