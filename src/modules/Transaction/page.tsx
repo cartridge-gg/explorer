@@ -3,7 +3,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { cairo } from "starknet";
-import { Calldata } from "./components/Calldata";
+import { Calldata } from "./calldata";
 import {
   BoltIcon,
   CoinsIcon,
