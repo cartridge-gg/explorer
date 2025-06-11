@@ -184,21 +184,29 @@ export function ClassHash() {
               <div className="flex flex-col gap-2">
                 <CardLabel>Functions</CardLabel>
                 <div className="flex flex-col gap-1">
-                  {filtered.map((f) => (
-                    <div
-                      key={f.name}
-                      className={cn(
-                        "flex items-center justify-between gap-2 rounded-md p-2 border transition-all",
-                        selected.name === f.name
-                          ? "border-primary"
-                          : "border-transparent hover:border-background-300 cursor-pointer ",
-                      )}
-                      onClick={() => setSelected(f)}
-                    >
-                      <div>{f.name}</div>
-                      <Badge>{isReadFunction(f) ? "Read" : "Write"}</Badge>
-                    </div>
-                  ))}
+                  {filtered.length ? (
+                    filtered.map((f) => (
+                      <div
+                        key={f.name}
+                        className={cn(
+                          "flex items-center justify-between gap-2 rounded-md p-2 border transition-all",
+                          selected?.name === f.name
+                            ? "border-primary"
+                            : "border-transparent hover:border-background-300 cursor-pointer ",
+                        )}
+                        onClick={() => setSelected(f)}
+                      >
+                        <div>{f.name}</div>
+                        <Badge>{isReadFunction(f) ? "Read" : "Write"}</Badge>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      {Array.from({ length: 9 }).map((_, i) => (
+                        <Skeleton key={i} className="rounded-sm h-11 w-full" />
+                      ))}
+                    </>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -227,16 +235,20 @@ export function ClassHash() {
                   )}
                   <div className="flex items-center justify-between gap-2">
                     <CardLabel>function</CardLabel>
-                    <div
-                      onClick={() => {
-                        navigator.clipboard.writeText(selected?.name ?? "");
-                        toast.success("Function name is copied to clipboard");
-                      }}
-                      className="flex items-center gap-2 cursor-pointer hover:opacity-80"
-                    >
-                      <div>{selected?.name}</div>
-                      <CopyIcon size="sm" className="text-foreground-400" />
-                    </div>
+                    {selected ? (
+                      <div
+                        onClick={() => {
+                          navigator.clipboard.writeText(selected?.name ?? "");
+                          toast.success("Function name is copied to clipboard");
+                        }}
+                        className="flex items-center gap-2 cursor-pointer hover:opacity-80"
+                      >
+                        <div>{selected?.name}</div>
+                        <CopyIcon size="sm" className="text-foreground-400" />
+                      </div>
+                    ) : (
+                      <Skeleton className="rounded-sm h-6 w-40" />
+                    )}
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <CardLabel>selector</CardLabel>
