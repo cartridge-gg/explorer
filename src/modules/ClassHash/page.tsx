@@ -43,6 +43,7 @@ import { Badge } from "@/shared/components/badge";
 import { FunctionAbiWithAst, isReadFunction } from "@/shared/utils/abi";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 
 const initialData: ContractClassInfo = {
   constructor: {
@@ -107,6 +108,30 @@ export function ClassHash() {
     if (selected) return;
     setSelected(filtered[0]);
   }, [selected, filtered]);
+
+  useKeydownEffect((e) => {
+    if (!filtered.length) return;
+
+    const currentIndex = filtered.findIndex((m) => m.name === selected?.name);
+    if (currentIndex === -1) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+      case "j": {
+        e.preventDefault();
+        const newIndex = Math.min(filtered.length - 1, currentIndex + 1);
+        setSelected(filtered[newIndex]);
+        break;
+      }
+      case "ArrowUp":
+      case "k": {
+        e.preventDefault();
+        const newIndex = Math.max(0, currentIndex - 1);
+        setSelected(filtered[newIndex]);
+        break;
+      }
+    }
+  });
 
   return (
     <div className="w-full flex flex-col gap-2">

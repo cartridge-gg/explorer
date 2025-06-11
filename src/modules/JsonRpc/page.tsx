@@ -29,6 +29,7 @@ import { ParamForm } from "@/shared/components/form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card } from "@/shared/components/card";
 import { Badge } from "@/shared/components/badge";
+import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 
 interface FormState {
   inputs: { name: string; value: string }[];
@@ -189,40 +190,35 @@ export function JsonRpcPlayground() {
     }));
   }, [methods]);
 
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (!methods.length) return;
+  useKeydownEffect((e) => {
+    if (!methods.length) return;
 
-      const currentIndex = methods.findIndex((m) => m.name === selected?.name);
-      if (currentIndex === -1) return;
+    const currentIndex = methods.findIndex((m) => m.name === selected?.name);
+    if (currentIndex === -1) return;
 
-      switch (e.key) {
-        case "ArrowDown":
-        case "j": {
-          e.preventDefault();
-          const newIndex = Math.min(methods.length - 1, currentIndex + 1);
-          onMethodChange(methods[newIndex]);
-          break;
-        }
-        case "ArrowUp":
-        case "k": {
-          e.preventDefault();
-          const newIndex = Math.max(0, currentIndex - 1);
-          onMethodChange(methods[newIndex]);
-          break;
-        }
-        case "Enter": {
-          if (!e.metaKey && !e.ctrlKey) return;
-          e.preventDefault();
-          onExecute();
-          break;
-        }
+    switch (e.key) {
+      case "ArrowDown":
+      case "j": {
+        e.preventDefault();
+        const newIndex = Math.min(methods.length - 1, currentIndex + 1);
+        onMethodChange(methods[newIndex]);
+        break;
+      }
+      case "ArrowUp":
+      case "k": {
+        e.preventDefault();
+        const newIndex = Math.max(0, currentIndex - 1);
+        onMethodChange(methods[newIndex]);
+        break;
+      }
+      case "Enter": {
+        if (!e.metaKey && !e.ctrlKey) return;
+        e.preventDefault();
+        onExecute();
+        break;
       }
     }
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [methods, selected, onMethodChange, onExecute]);
+  });
 
   useEffect(() => {
     const method = methods.find((m) => m.name === hash.replace("#", ""));
