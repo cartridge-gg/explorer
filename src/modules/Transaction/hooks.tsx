@@ -57,11 +57,12 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
   });
 
   const {
-    data: { tx, calldata },
+    data: { tx, calldata, declared },
     isLoading,
     error,
   } = useQuery<{
     tx?: Awaited<ReturnType<typeof RPC_PROVIDER.getTransaction>>;
+    declared?: Awaited<ReturnType<typeof RPC_PROVIDER.getClassByHash>>;
     calldata: { contract: string; selector: string; args: string[] }[];
   }>({
     queryKey: ["transaction", "calldata", txHash],
@@ -70,14 +71,20 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
         throw new Error("Invalid transaction hash");
       }
 
-      const tx = await RPC_PROVIDER.getTransaction(txHash || "");
+      const tx = await RPC_PROVIDER.getTransaction(txHash);
+      const declared =
+        tx.type === "DECLARE"
+          ? await RPC_PROVIDER.getClassByHash(tx.class_hash)
+          : undefined;
       return {
         tx,
+        declared,
         calldata: "calldata" in tx ? decodeCalldata(tx.calldata) : [],
       };
     },
     initialData: {
       tx: undefined,
+      declared: undefined,
       calldata: [],
     },
     retry: false,
@@ -385,6 +392,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     error,
     data: {
       tx,
+      declared,
       receipt,
       calldata,
       block,

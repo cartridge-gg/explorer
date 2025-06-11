@@ -59,7 +59,6 @@ import FeltList from "@/shared/components/FeltList";
 import { Editor } from "@/shared/components/editor";
 
 export function Transaction() {
-  const tab = useHashLinkTabs("calldata");
   const { txHash } = useParams<{ txHash: string }>();
   const {
     error,
@@ -67,6 +66,7 @@ export function Transaction() {
       tx,
       receipt,
       calldata,
+      declared,
       block,
       blockComputeData,
       executions,
@@ -74,6 +74,13 @@ export function Transaction() {
       storageDiff,
     },
   } = useTransaction({ txHash });
+  const tab = useHashLinkTabs(
+    tx?.type === "INVOKE"
+      ? "calldata"
+      : tx?.type === "DECLARE"
+        ? "class"
+        : "signature",
+  );
   const { isMobile } = useScreen();
 
   return (
@@ -249,6 +256,49 @@ export function Transaction() {
                     </div>
                   </div>
 
+                  <CardLabel>L2 execution gas</CardLabel>
+
+                  <div className="flex items-center gap-px">
+                    <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
+                      <CardLabel className="uppercase">Max amount</CardLabel>
+                      <div className="flex items-center justify-between">
+                        <div className="font-mono text-foreground font-semibold">
+                          {formatNumber(
+                            Number(
+                              cairo.felt(
+                                tx?.resource_bounds?.l2_gas?.max_amount ?? 0,
+                              ),
+                            ),
+                          )}
+                        </div>
+                        <Badge className="uppercase bg-background-500">
+                          wei
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
+                      <CardLabel className="uppercase">
+                        Max price / unit
+                      </CardLabel>
+                      <div className="flex items-center justify-between">
+                        <div className="font-mono text-foreground font-semibold">
+                          {formatNumber(
+                            Number(
+                              cairo.felt(
+                                tx?.resource_bounds?.l2_gas
+                                  ?.max_price_per_unit ?? 0,
+                              ),
+                            ),
+                          )}
+                        </div>
+                        <Badge className="uppercase bg-background-500">
+                          fri
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
                   <CardLabel>L1 data gas</CardLabel>
 
                   <div className="flex items-center gap-px">
@@ -348,10 +398,18 @@ export function Transaction() {
               >
                 <CardContent>
                   <TabsList>
-                    <TabsTrigger value="calldata">
-                      <ListIcon variant="solid" />
-                      <div>Calldata</div>
-                    </TabsTrigger>
+                    {tx?.type === "INVOKE" && (
+                      <TabsTrigger value="calldata">
+                        <ListIcon variant="solid" />
+                        <div>Calldata</div>
+                      </TabsTrigger>
+                    )}
+                    {tx?.type === "DECLARE" && (
+                      <TabsTrigger value="class">
+                        <ListIcon variant="solid" />
+                        <div>Class</div>
+                      </TabsTrigger>
+                    )}
                     <TabsTrigger value="signature">
                       <PencilIcon variant="solid" />
                       <div>Signature</div>
@@ -369,9 +427,40 @@ export function Transaction() {
                 <CardSeparator />
 
                 <CardContent>
-                  <TabsContent value="calldata">
-                    <Calldata calldata={calldata} />
-                  </TabsContent>
+                  {tx?.type === "INVOKE" && (
+                    <TabsContent value="calldata">
+                      <Calldata calldata={calldata} />
+                    </TabsContent>
+                  )}
+                  {tx?.type === "DECLARE" && !!declared && (
+                    <TabsContent value="class" className="flex flex-col gap-4">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <CardLabel>Class Hash</CardLabel>
+                          <Hash
+                            value={tx.class_hash}
+                            to={`../class/${tx.class_hash}`}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <CardLabel>Compiled Class Hash</CardLabel>
+                          <Hash value={tx.compiled_class_hash} />
+                        </div>
+                      </div>
+
+                      <Editor
+                        className="min-h-[80vh]"
+                        defaultLanguage="json"
+                        value={JSON.stringify(declared, null, 2)}
+                        options={{
+                          readOnly: true,
+                          scrollbar: {
+                            alwaysConsumeMouseWheel: false,
+                          },
+                        }}
+                      />
+                    </TabsContent>
+                  )}
                   <TabsContent value="signature">
                     <UITabs defaultValue="hex">
                       <UITabsList>
@@ -380,7 +469,7 @@ export function Transaction() {
                       </UITabsList>
                       <UITabsContent value="hex">
                         <Editor
-                          className="min-h-[300px]"
+                          className="min-h-[80vh]"
                           defaultLanguage="json"
                           value={JSON.stringify(tx?.signature ?? [], null, 2)}
                           options={{
