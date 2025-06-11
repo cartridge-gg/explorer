@@ -8,6 +8,7 @@ import {
   FunctionAbi,
   InterfaceAbi,
   uint256,
+  hash,
 } from "starknet";
 
 // TypeNode and related types
@@ -72,6 +73,8 @@ export type FunctionInputWithValue = ArgumentNode & {
 };
 
 export interface FunctionAbiWithAst extends Omit<FunctionAbi, "inputs"> {
+  interface?: string;
+  selector: string;
   inputs: ArgumentNode[];
 }
 
@@ -239,9 +242,9 @@ export function parseAbi(abi: Abi) {
         break;
       }
       case "interface": {
-        (item as InterfaceAbi).items.forEach((item) => {
-          if (item.type !== "function") return;
-          functions.push(parse(item));
+        (item as InterfaceAbi).items.forEach((item2) => {
+          if (item2.type !== "function") return;
+          functions.push({ ...parse(item2), interface: item.name });
         });
         break;
       }
@@ -264,6 +267,7 @@ function parseFunctionCreator(abi: Abi) {
   const [structRegistry, enumRegistry] = buildTypeRegistries(abi);
   return (func: FunctionAbi): FunctionAbiWithAst => ({
     ...func,
+    selector: hash.getSelectorFromName(func.name),
     inputs: func.inputs.map((input) => {
       const type = resolveType(input.type, structRegistry, enumRegistry);
       return {

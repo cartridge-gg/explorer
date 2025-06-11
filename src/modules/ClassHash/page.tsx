@@ -1,5 +1,12 @@
 import { truncateString } from "@/shared/utils/string";
-import { BookIcon, cn, Input, ScrollIcon, Skeleton } from "@cartridge/ui";
+import {
+  BookIcon,
+  cn,
+  CopyIcon,
+  Input,
+  ScrollIcon,
+  Skeleton,
+} from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -35,6 +42,7 @@ import { Hash } from "@/shared/components/hash";
 import { Badge } from "@/shared/components/badge";
 import { FunctionAbiWithAst, isReadFunction } from "@/shared/utils/abi";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 const initialData: ContractClassInfo = {
   constructor: {
@@ -195,10 +203,42 @@ export function ClassHash() {
 
             <div className="w-full h-full flex flex-col justify-start gap-2">
               <div className="flex flex-col gap-2 divide-y divide-background-300 h-full">
-                <div className="p-3">
+                <div className="p-3 flex flex-col gap-2">
+                  {!!selected?.interface && (
+                    <div className="flex items-center justify-between gap-2">
+                      <CardLabel>inteface</CardLabel>
+                      <div
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            selected?.interface ?? "",
+                          );
+                          toast.success(
+                            "Interface name is copied to clipboard",
+                          );
+                        }}
+                        className="flex items-center gap-2 cursor-pointer hover:opacity-80"
+                      >
+                        <div>{selected?.interface}</div>
+                        <CopyIcon size="sm" className="text-foreground-400" />
+                      </div>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between gap-2">
                     <CardLabel>function</CardLabel>
-                    <div>{selected?.name}</div>
+                    <div
+                      onClick={() => {
+                        navigator.clipboard.writeText(selected?.name ?? "");
+                        toast.success("Function name is copied to clipboard");
+                      }}
+                      className="flex items-center gap-2 cursor-pointer hover:opacity-80"
+                    >
+                      <div>{selected?.name}</div>
+                      <CopyIcon size="sm" className="text-foreground-400" />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <CardLabel>selector</CardLabel>
+                    <Hash value={selected?.selector} />
                   </div>
                 </div>
 
