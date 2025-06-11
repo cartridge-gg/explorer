@@ -3,7 +3,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { cairo } from "starknet";
-import CalldataDisplay from "./components/CalldataDisplay";
+import { Calldata } from "./components/Calldata";
 import {
   BoltIcon,
   CoinsIcon,
@@ -365,7 +365,7 @@ export function Transaction() {
 
                 <CardContent>
                   <TabsContent value="calldata">
-                    <CalldataDisplay calldata={calldata} />
+                    <Calldata calldata={calldata} />
                   </TabsContent>
                   <TabsContent value="signature">
                     {!!tx?.signature && (
