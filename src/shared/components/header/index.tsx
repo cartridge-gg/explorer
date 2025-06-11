@@ -1,19 +1,26 @@
 import { SearchBar } from "@/shared/components/SearchBar";
 import { Account } from "./account";
 import { useLocation } from "react-router-dom";
-import { Button, DotsIcon, Separator, Skeleton } from "@cartridge/ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  SearchIcon,
+  Separator,
+  Skeleton,
+} from "@cartridge/ui";
 import useChain from "@/shared/hooks/useChain";
 import { useScreen } from "@/shared/hooks/useScreen";
-import { useState } from "react";
-import { Sheet, SheetContent, SheetTrigger } from "@/shared/components/sheet";
 import { Network } from "../network";
+import { useState } from "react";
 
 export function Header() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const location = useLocation();
   const isHome = location.pathname === "/";
   const { id: chainId } = useChain();
   const { isMobile } = useScreen();
-  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="w-full flex items-center justify-between gap-2">
@@ -22,16 +29,25 @@ export function Header() {
           (!isMobile ? (
             <SearchBar />
           ) : (
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild>
-                <Button variant="icon" size="icon">
-                  <DotsIcon className="rotate-90" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left">
-                <SearchBar onNavigate={() => setIsOpen(false)} />{" "}
-              </SheetContent>
-            </Sheet>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger>
+                <div className="flex items-center w-10 h-10 bg-background-200 rounded-full justify-center cursor-pointer hover:bg-background-300 transition-all">
+                  <SearchIcon />
+                </div>
+              </DialogTrigger>
+              <DialogContent
+                aria-describedby="search bar"
+                className="border-none h-full w-full flex flex-col items-center justify-start pt-[75px] bg-[#000000]/[0.7] backdrop-blur-[3px] gap-8 [&>button]:hidden"
+                onClick={(e) => {
+                  // Close dialog when clicking on the backdrop (not on the search bar)
+                  if (e.target === e.currentTarget) {
+                    setIsDialogOpen(false);
+                  }
+                }}
+              >
+                <SearchBar />
+              </DialogContent>
+            </Dialog>
           ))}
       </div>
 

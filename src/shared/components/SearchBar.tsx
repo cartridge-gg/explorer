@@ -167,7 +167,6 @@ export const SearchBar = React.forwardRef<
 
   const handleSearch = useDebounce((value: string) => {
     if (!value || value.length === 0) return;
-    setIsLoading(true);
     // assuming that there will be no hash collision (very unlikely to collide)
     performSearch(value).then((promises) => {
       if (promises.length > 1) {
@@ -276,6 +275,7 @@ export const SearchBar = React.forwardRef<
         className="bg-background-100 focus-visible:bg-background-100 md:bg-spacer-100 md:focus-visible:bg-spacer-100  border-none caret-foreground search-input h-auto text-[14px]/[20px] placeholder:text-[14px]/[20px] px-0 font-mono rounded-none"
         placeholder="Search"
         onChange={(e) => {
+          setIsLoading(true);
           handleSearch(e.target.value);
           setIsDropdownOpen(!!e.target.value);
         }}
