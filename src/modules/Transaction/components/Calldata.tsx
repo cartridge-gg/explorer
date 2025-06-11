@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, Fragment } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { AbiEntry, CallData, FunctionAbi, hash } from "starknet";
 import { useQueryClient } from "@tanstack/react-query";
@@ -8,6 +8,7 @@ import { Hash } from "@/shared/components/hash";
 import {
   CopyIcon,
   FnIcon,
+  Input,
   Tabs,
   TabsContent,
   TabsList,
@@ -22,6 +23,7 @@ import {
   DialogTrigger,
 } from "@/shared/components/dialog";
 import { toast } from "sonner";
+import { Badge } from "@/shared/components/badge";
 
 interface CalldataDisplayProps {
   calldata: {
@@ -174,10 +176,6 @@ export function Calldata({ calldata }: CalldataDisplayProps) {
     fetchAndDecodeCalldata();
   }, [fetchAndDecodeCalldata]);
 
-  if (!calldata || calldata.length === 0) {
-    return <div className="text-center">No calldata available</div>;
-  }
-
   return (
     <Tabs defaultValue="decoded">
       <TabsList>
@@ -186,96 +184,83 @@ export function Calldata({ calldata }: CalldataDisplayProps) {
       </TabsList>
 
       <TabsContent value="decoded">
-        <Dialog>
-          {decodedCalldata.map((c, i) => (
-            <Fragment key={i}>
-              <DialogTrigger className="w-full bg-background-200 p-2 first:rounded-t last:rounded-b flex items-center gap-4">
+        {decodedCalldata.map((c, i) => (
+          <Dialog key={i}>
+            <DialogTrigger asChild>
+              <div className="w-full bg-background-200 p-2 first:rounded-t last:rounded-b flex items-center gap-4">
                 <Hash value={c.contract} to={`../contract/${c.contract}`} />
                 <div className="flex items-center gap-2 text-foreground-200">
                   <FnIcon className="text-foreground-400" />
                   <span className="font-semibold">{c.function_name}</span>
                   <span>({c.params.map((arg) => arg).join(", ")})</span>
                 </div>
-              </DialogTrigger>
+              </div>
+            </DialogTrigger>
 
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>function calldata overview</DialogTitle>
-                </DialogHeader>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>function calldata overview</DialogTitle>
+              </DialogHeader>
 
-                <div className="flex items-center justify-between gap-2">
-                  <div className="capitalize text-foreground-400 text-sm">
-                    contract
-                  </div>
-                  <Hash value={c.contract} />
+              <div className="flex items-center justify-between gap-2">
+                <div className="capitalize text-foreground-400 text-sm">
+                  contract
                 </div>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="capitalize text-foreground-400 text-sm">
-                    function
-                  </div>
-                  <div
-                    className="flex items-center gap-2 cursor-pointer hover:opacity-80"
-                    onClick={() => {
-                      navigator.clipboard.writeText(c.function_name);
-                      toast.success("Function name copied to clipboard");
+                <Hash value={c.contract} />
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="capitalize text-foreground-400 text-sm">
+                  function
+                </div>
+                <div
+                  className="flex items-center gap-2 cursor-pointer hover:opacity-80"
+                  onClick={() => {
+                    navigator.clipboard.writeText(c.function_name);
+                    toast.success("Function name copied to clipboard");
+                  }}
+                >
+                  <span>{c.function_name}</span>
+                  <CopyIcon size="sm" className="text-foreground-400" />
+                </div>
+              </div>
+
+              <Tabs defaultValue="decoded" className="flex flex-col gap-4">
+                <TabsList className="self-start">
+                  <TabsTrigger value="decoded">Decoded</TabsTrigger>
+                  <TabsTrigger value="raw">Raw</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="decoded" className="flex flex-col gap-4">
+                  {c.data.map((input, i) => (
+                    <div key={i} className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="text-foreground-400 font-semibold">
+                          {input.name}
+                        </div>
+                        <Badge className="lowercase">{input.type}</Badge>
+                      </div>
+                      <Input value={input.value.toString()} disabled />
+                    </div>
+                  ))}
+                </TabsContent>
+
+                <TabsContent value="raw">
+                  <Editor
+                    className="min-h-[300px]"
+                    defaultLanguage="json"
+                    value={JSON.stringify(c.raw_args, null, 2)}
+                    options={{
+                      readOnly: true,
+                      scrollbar: {
+                        alwaysConsumeMouseWheel: false,
+                      },
                     }}
-                  >
-                    <span>{c.function_name}</span>
-                    <CopyIcon size="sm" className="text-foreground-400" />
-                  </div>
-                </div>
-
-                <Tabs defaultValue="decoded">
-                  <TabsList>
-                    <TabsTrigger value="decoded">Decoded</TabsTrigger>
-                    <TabsTrigger value="raw">Raw</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="decoded">
-                    <table className="overflow-x w-full">
-                      <tbody>
-                        {c.data.map((arg, rowIndex, array) => (
-                          <tr
-                            key={rowIndex}
-                            className={`${
-                              rowIndex !== array.length - 1 ? "border-b" : ""
-                            }`}
-                          >
-                            <td className="px-2 py-1 text-left align-top">
-                              <span className="font-bold">{arg.name}</span>
-                            </td>
-
-                            <td className="px-2 py-1 text-left align-top ">
-                              <span>{arg.type}</span>
-                            </td>
-
-                            <td className="px-2 py-1 text-left overflow-x-auto">
-                              <pre>{JSON.stringify(arg.value, null, 2)}</pre>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </TabsContent>
-
-                  <TabsContent value="raw">
-                    <Editor
-                      className="min-h-[300px]"
-                      defaultLanguage="json"
-                      value={JSON.stringify(c.raw_args, null, 2)}
-                      options={{
-                        readOnly: true,
-                        scrollbar: {
-                          alwaysConsumeMouseWheel: false,
-                        },
-                      }}
-                    />
-                  </TabsContent>
-                </Tabs>
-              </DialogContent>
-            </Fragment>
-          ))}
-        </Dialog>
+                  />
+                </TabsContent>
+              </Tabs>
+            </DialogContent>
+          </Dialog>
+        ))}
       </TabsContent>
 
       <TabsContent value="raw">

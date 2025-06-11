@@ -13,6 +13,10 @@ import {
   Skeleton,
   PulseIcon,
   PencilIcon,
+  Tabs as UITabs,
+  TabsList as UITabsList,
+  TabsTrigger as UITabsTrigger,
+  TabsContent as UITabsContent,
 } from "@cartridge/ui";
 import {
   Card,
@@ -31,7 +35,6 @@ import {
   PageHeaderRight,
   PageHeaderTitle,
 } from "@/shared/components/PageHeader";
-import SignatureDisplay from "./components/SignatureDisplay";
 import { NotFound } from "../NotFound/page";
 import { useTransaction } from "./hooks";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
@@ -52,6 +55,8 @@ import {
 import { Hash } from "@/shared/components/hash";
 import dayjs from "dayjs";
 import { getFinalityStatus } from "@/shared/utils/receipt";
+import FeltList from "@/shared/components/FeltList";
+import { Editor } from "@/shared/components/editor";
 
 export function Transaction() {
   const tab = useHashLinkTabs("calldata");
@@ -368,9 +373,32 @@ export function Transaction() {
                     <Calldata calldata={calldata} />
                   </TabsContent>
                   <TabsContent value="signature">
-                    {!!tx?.signature && (
-                      <SignatureDisplay signature={tx.signature} />
-                    )}
+                    <UITabs defaultValue="hex">
+                      <UITabsList>
+                        <UITabsTrigger value="hex">Hex</UITabsTrigger>
+                        <UITabsTrigger value="decoded">Dec</UITabsTrigger>
+                      </UITabsList>
+                      <UITabsContent value="hex">
+                        <Editor
+                          className="min-h-[300px]"
+                          defaultLanguage="json"
+                          value={JSON.stringify(tx?.signature ?? [], null, 2)}
+                          options={{
+                            readOnly: true,
+                            scrollbar: {
+                              alwaysConsumeMouseWheel: false,
+                            },
+                          }}
+                        />
+                      </UITabsContent>
+                      <UITabsContent value="dec">
+                        {tx ? (
+                          <FeltList list={tx?.signature} displayAs="dec" />
+                        ) : (
+                          <Skeleton className="h-4 w-full" />
+                        )}
+                      </UITabsContent>
+                    </UITabs>
                   </TabsContent>
                   <TabsContent value="events">
                     <DataTable table={events} />
