@@ -233,7 +233,7 @@ export function SearchBar({
   return (
     <div
       className={cn(
-        "min-w-[200px] w-full h-[42px] flex relative border border-background-200 items-center justify-between shadow rounded",
+        "bg-input min-w-[200px] w-full h-[42px] flex relative border border-background-200 items-center justify-between shadow rounded",
         isDropdownOpen && result ? "border-b-0" : undefined,
         className,
       )}
@@ -241,7 +241,7 @@ export function SearchBar({
       <Input
         ref={inputRef}
         containerClassName="w-full flex-1 pl-4"
-        className="bg-background border-none focus-visible:bg-background caret-foreground"
+        className="bg-input border-none focus-visible:bg-input caret-foreground"
         placeholder="Search blocks, transactions, contracts"
         onChange={(e) => {
           handleSearch(e.target.value);
