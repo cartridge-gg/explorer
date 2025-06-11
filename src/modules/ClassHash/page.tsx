@@ -94,7 +94,9 @@ export function ClassHash() {
           f.name.toLowerCase().includes(search.toLowerCase()) ||
           f.inputs.some((a) =>
             a.name.toLowerCase().includes(search.toLowerCase()),
-          ),
+          ) ||
+          f.interface?.toLowerCase().includes(search.toLowerCase()) ||
+          f.selector.toLowerCase().includes(search.toLowerCase()),
       ),
     [readFuncs, writeFuncs, search],
   );
