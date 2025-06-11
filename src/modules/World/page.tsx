@@ -29,7 +29,7 @@ import {
 } from "@/shared/components/tabs";
 
 export function World() {
-  const { onTabChange } = useHashLinkTabs();
+  const tab = useHashLinkTabs("graphql-schema");
   const {
     form,
     setForm,
@@ -108,7 +108,7 @@ export function World() {
       </div>
 
       <div className="h-full flex-grow grid grid-rows-[min-content_1fr] gap-4">
-        <Tabs defaultValue="graphql-schema" onValueChange={onTabChange}>
+        <Tabs value={tab.selected} onValueChange={tab.onChange}>
           <TabsList>
             <TabsTrigger value="graphql-schema">GraphQL Schema</TabsTrigger>
             <TabsTrigger value="models">Models</TabsTrigger>

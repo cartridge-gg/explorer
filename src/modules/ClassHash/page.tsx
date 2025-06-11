@@ -60,7 +60,7 @@ const initialData: ContractClassInfo = {
 export function ClassHash() {
   const { classHash } = useParams();
   const { isMobile } = useScreen();
-  const { onTabChange } = useHashLinkTabs();
+  const tab = useHashLinkTabs("overview");
 
   const { data: contractVersion } = useQuery({
     queryKey: ["contractVersion", classHash],
@@ -143,7 +143,7 @@ export function ClassHash() {
           </div>
 
           <Card className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-            <Tabs defaultValue="overview" onValueChange={onTabChange}>
+            <Tabs value={tab.selected} onValueChange={tab.onChange}>
               <CardContent>
                 <TabsList>
                   <TabsTrigger value="overview">

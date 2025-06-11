@@ -35,6 +35,7 @@ export function Event() {
     error,
   } = useEvent();
   const { isMobile } = useScreen();
+  console.log(error);
 
   const [formats, setFormats] = useState<{
     keys: DisplayFormatTypes;

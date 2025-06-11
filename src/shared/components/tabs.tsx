@@ -1,8 +1,18 @@
-export { Tabs } from "@cartridge/ui";
-
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cn } from "@cartridge/ui";
+
+export const Tabs = ({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof TabsPrimitive.Tabs>) => {
+  return (
+    <TabsPrimitive.Tabs
+      className={cn("flex flex-col h-full", className)}
+      {...props}
+    />
+  );
+};
 
 export const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,

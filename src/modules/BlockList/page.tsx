@@ -1,17 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   createColumnHelper,
   getCoreRowModel,
   useReactTable,
-  flexRender,
+  getPaginationRowModel,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { getPaginatedBlockNumbers } from "@/shared/utils/rpc_utils";
-import { useScreen } from "@/shared/hooks/useScreen";
-import { truncateString } from "@/shared/utils/string";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -22,18 +21,20 @@ import {
 } from "@/shared/components/breadcrumb";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { StackDiamondIcon } from "@cartridge/ui";
-
-const ROWS_TO_RENDER = 20;
+import { DataTable } from "@/shared/components/data-table";
+import { Card, CardContent } from "@/shared/components/card";
+import { getFinalityStatus } from "@/shared/utils/receipt";
+import { Hash } from "@/shared/components/hash";
 
 const columnHelper = createColumnHelper();
 
 export function BlockList() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [isFetching, setIsFetching] = useState(false);
-  const { isMobile } = useScreen();
-
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 20,
+  });
   const { data: latestBlockNumber } = useQuery({
     queryKey: [QUERY_KEYS.getBlockNumber],
     queryFn: () => RPC_PROVIDER.getBlockNumber(),
@@ -42,7 +43,6 @@ export function BlockList() {
   const fetchBlocks = useMutation({
     mutationFn: async (blockNumbers: number[]) => {
       try {
-        setIsFetching(true);
         const blockDataPromises = blockNumbers.map((blockNumber) =>
           RPC_PROVIDER.getBlockWithTxs(blockNumber),
         );
@@ -50,8 +50,6 @@ export function BlockList() {
       } catch (error) {
         console.error("Error fetching blocks:", error);
         return [];
-      } finally {
-        setIsFetching(false);
       }
     },
     onSuccess: (blocks) => {
@@ -70,42 +68,55 @@ export function BlockList() {
     if (!latestBlockNumber) return;
 
     const blockNumbers = getPaginatedBlockNumbers(
-      latestBlockNumber - currentPage * ROWS_TO_RENDER,
-      ROWS_TO_RENDER,
+      latestBlockNumber - pagination.pageIndex * pagination.pageSize,
+      pagination.pageSize,
     );
 
     fetchBlocks.mutate(blockNumbers);
-  }, [latestBlockNumber, currentPage]);
+  }, [
+    latestBlockNumber,
+    pagination.pageIndex,
+    pagination.pageSize,
+    fetchBlocks,
+  ]);
 
-  const columns = [
-    columnHelper.accessor("status", {
-      header: "Status",
-      cell: (info) => <span>{info.getValue()}</span>,
-    }),
-    columnHelper.accessor("number", {
-      header: "Block Number",
-      cell: (info) => info.renderValue(),
-    }),
-    columnHelper.accessor("hash", {
-      header: "Block Hash",
-      cell: (info) => (
-        <div className="overflow-hidden ">
-          {isMobile ? truncateString(info.renderValue()) : info.renderValue()}
-        </div>
-      ),
-    }),
-    columnHelper.accessor("age", {
-      header: "Age",
-      cell: (info) => {
-        return dayjs.unix(info.getValue()).fromNow();
-      },
-    }),
-  ];
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("status", {
+        header: "Status",
+        cell: (info) => getFinalityStatus(info.renderValue()),
+      }),
+      columnHelper.accessor("number", {
+        header: "Block Number",
+        cell: (info) => info.renderValue(),
+      }),
+      columnHelper.accessor("hash", {
+        header: "Block Hash",
+        cell: (info) => <Hash value={info.renderValue()} />,
+      }),
+      columnHelper.accessor("age", {
+        header: "Age",
+        cell: (info) => {
+          return dayjs.unix(info.getValue()).fromNow();
+        },
+      }),
+    ],
+    [],
+  );
 
   const table = useReactTable({
-    data,
+    data: data.slice(
+      pagination.pageIndex * pagination.pageSize,
+      (pagination.pageIndex + 1) * pagination.pageSize,
+    ),
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onPaginationChange: setPagination,
+    initialState: {
+      pagination,
+    },
   });
 
   return (
@@ -129,63 +140,14 @@ export function BlockList() {
         </PageHeaderTitle>
       </PageHeader>
 
-      <div className="overflow-x-auto md:w-full">
-        <table className="w-full mt-2 table-auto border-collapse border-spacing-12 border-t border-b border-[#8E8E8E] border-l-4 border-r">
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="">
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="px-2 text-sm text-left whitespace-nowrap text-black font-bold"
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr
-                key={row.id}
-                className="hover:bg-button-whiteInitialHover cursor-pointer"
-                onClick={() => navigate(`../block/${row.original.hash}`)}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <td
-                    key={cell.id}
-                    className="w-1 p-2 text-sm whitespace-nowrap text-black"
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex justify-center mt-4 gap-4">
-        <button
-          disabled={currentPage === 0}
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
-          className="px-4 py-2 bg-gray-700 disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <button
-          onClick={() => setCurrentPage((prev) => prev + 1)}
-          className="px-4 py-2 bg-gray-700 disabled:opacity-50"
-        >
-          {isFetching ? "Loading..." : "Next"}
-        </button>
-      </div>
+      <Card>
+        <CardContent>
+          <DataTable
+            table={table}
+            onRowClick={(row) => navigate(`../block/${row.hash}`)}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

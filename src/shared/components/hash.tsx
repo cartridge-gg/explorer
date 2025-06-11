@@ -4,6 +4,7 @@ import {
   CopyIcon,
   DotsIcon,
   ExternalIcon,
+  Skeleton,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -18,14 +19,18 @@ export function Hash({
   length = 4,
   to,
 }: {
-  value: string;
+  value: string | undefined;
   length?: number;
   to?: string;
 }) {
-  const [first, last] = truncateString(value, length).split("...");
+  const [first, last] = truncateString(value ?? "", length).split("...");
   const navigate = useNavigate();
 
   const onCopy = useCallback(() => {
+    if (!value) {
+      return;
+    }
+
     navigator.clipboard.writeText(value);
     toast.success("Address copied to clipboard");
   }, [value]);
@@ -38,24 +43,38 @@ export function Hash({
     navigate(to);
   }, [to, navigate]);
 
+  if (!value) {
+    return <Skeleton className="h-6 w-40" />;
+  }
+
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger
           onClick={to ? onNavigate : onCopy}
-          className="flex items-center gap-1 font-mono font-bold text-foreground-300 hover:text-foreground-400 cursor-pointer p-2 transition-all"
+          className="flex items-center gap-1 font-mono font-bold text-foreground hover:text-foreground-200 cursor-pointer transition-all"
         >
           <div className="flex items-center gap-1 border-b border-transparent px-2">
             <span>{first}</span>
             {!!last?.length && (
               <>
-                <DotsIcon />
+                <DotsIcon className="text-foreground-300 hover:text-foreground-400" />
                 <span>{last}</span>
               </>
             )}
           </div>
 
-          {to ? <ExternalIcon size="sm" /> : <CopyIcon size="sm" />}
+          {to ? (
+            <ExternalIcon
+              size="sm"
+              className="text-foreground-300 hover:text-foreground-400"
+            />
+          ) : (
+            <CopyIcon
+              size="sm"
+              className="text-foreground-300 hover:text-foreground-400"
+            />
+          )}
         </TooltipTrigger>
 
         <TooltipContent
