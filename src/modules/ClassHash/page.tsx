@@ -1,5 +1,12 @@
 import { truncateString } from "@/shared/utils/string";
-import { InfoIcon, PlusIcon, ScrollIcon, Skeleton } from "@cartridge/ui";
+import {
+  BookIcon,
+  cn,
+  CopyIcon,
+  Input,
+  ScrollIcon,
+  Skeleton,
+} from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,16 +17,12 @@ import {
 } from "@/shared/components/breadcrumb";
 import {
   Card,
+  CardHeader,
+  CardTitle,
+  CardSeparator,
   CardContent,
   CardLabel,
-  CardSeparator,
 } from "@/shared/components/card";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/shared/components/tabs";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import {
@@ -29,18 +32,19 @@ import {
 } from "@/shared/components/PageHeader";
 import { RPC_PROVIDER } from "@/services/starknet_provider_config";
 import { useQuery } from "@tanstack/react-query";
-import { Overview } from "./Overview";
-import { Deploy } from "./Deploy";
 import {
   getContractClassInfo,
   ContractClassInfo,
   isValidAddress,
 } from "@/shared/utils/contract";
 import { NotFound } from "@/modules/NotFound/page";
-import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
-import { Loading } from "@/shared/components/Loading";
 import { Hash } from "@/shared/components/hash";
 import { Badge } from "@/shared/components/badge";
+import { FunctionAbiWithAst, isReadFunction } from "@/shared/utils/abi";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
+import { CodeCard } from "@/shared/components/contract/Code";
 
 const initialData: ContractClassInfo = {
   constructor: {
@@ -60,7 +64,6 @@ const initialData: ContractClassInfo = {
 export function ClassHash() {
   const { classHash } = useParams();
   const { isMobile } = useScreen();
-  const tab = useHashLinkTabs("overview");
 
   const { data: contractVersion } = useQuery({
     queryKey: ["contractVersion", classHash],
@@ -69,8 +72,7 @@ export function ClassHash() {
   });
 
   const {
-    data: { constructor, readFuncs, writeFuncs, code },
-    isLoading,
+    data: { readFuncs, writeFuncs, code },
     error,
   } = useQuery({
     queryKey: ["contractClass", classHash],
@@ -86,8 +88,54 @@ export function ClassHash() {
     retry: false,
   });
 
+  const [search, setSearch] = useState("");
+  const filtered = useMemo(
+    () =>
+      [...readFuncs, ...writeFuncs].filter(
+        (f) =>
+          f.name.toLowerCase().includes(search.toLowerCase()) ||
+          f.inputs.some((a) =>
+            a.name.toLowerCase().includes(search.toLowerCase()),
+          ) ||
+          f.interface?.toLowerCase().includes(search.toLowerCase()) ||
+          f.selector.toLowerCase().includes(search.toLowerCase()),
+      ),
+    [readFuncs, writeFuncs, search],
+  );
+  const [selected, setSelected] = useState<FunctionAbiWithAst>(
+    () => filtered[0],
+  );
+  useEffect(() => {
+    if (selected) return;
+    setSelected(filtered[0]);
+  }, [selected, filtered]);
+
+  useKeydownEffect((e) => {
+    if (!filtered.length) return;
+
+    const currentIndex = filtered.findIndex((m) => m.name === selected?.name);
+    if (currentIndex === -1) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+      case "j": {
+        e.preventDefault();
+        const newIndex = Math.min(filtered.length - 1, currentIndex + 1);
+        setSelected(filtered[newIndex]);
+        break;
+      }
+      case "ArrowUp":
+      case "k": {
+        e.preventDefault();
+        const newIndex = Math.max(0, currentIndex - 1);
+        setSelected(filtered[newIndex]);
+        break;
+      }
+    }
+  });
+
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-2">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -125,55 +173,142 @@ export function ClassHash() {
         </PageHeaderRight>
       </PageHeader>
 
-      {isLoading || (!error && (!contractVersion || !code || !classHash)) ? (
-        <Loading />
-      ) : error ? (
+      <Card>
+        <CardContent>
+          <div className="flex justify-between gap-2">
+            <CardLabel>Class Hash</CardLabel>
+            <Hash value={classHash} />
+          </div>
+        </CardContent>
+      </Card>
+
+      {error ? (
         <NotFound />
       ) : (
-        <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
-          <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-auto">
-            <Card>
-              <CardContent>
-                <div className="flex justify-between gap-2">
-                  <CardLabel>Class Hash</CardLabel>
-                  <Hash value={classHash} />
+        <div className="flex flex-col gap-2">
+          <Card className="gap-0 pb-0">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookIcon variant="solid" />
+                <div>ABI</div>
+              </CardTitle>
+            </CardHeader>
+
+            <CardSeparator className="mb-0" />
+
+            <div className="flex items-center flex-col md:flex-row gap-2 divide-y md:divide-y-0 md:divide-x divide-background-300">
+              <CardContent className="w-full md:w-[400px] flex flex-col justify-start gap-2 p-4">
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Function name / selector / interface"
+                  className="bg-input focus-visible:bg-input caret-foreground"
+                />
+                <div className="flex flex-col gap-2">
+                  <CardLabel>Functions</CardLabel>
+                  <div className="flex flex-col gap-1">
+                    {filtered.length ? (
+                      filtered.map((f) => (
+                        <div
+                          key={f.name}
+                          className={cn(
+                            "flex items-center justify-between gap-2 rounded-md p-2 border transition-all",
+                            selected?.name === f.name
+                              ? "border-primary"
+                              : "border-transparent hover:border-background-300 cursor-pointer ",
+                          )}
+                          onClick={() => setSelected(f)}
+                        >
+                          <div>{f.name}</div>
+                          <Badge>{isReadFunction(f) ? "Read" : "Write"}</Badge>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        {Array.from({ length: 9 }).map((_, i) => (
+                          <Skeleton
+                            key={i}
+                            className="rounded-sm h-11 w-full"
+                          />
+                        ))}
+                      </>
+                    )}
+                  </div>
                 </div>
               </CardContent>
-            </Card>
-          </div>
 
-          <Card className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-            <Tabs value={tab.selected} onValueChange={tab.onChange}>
-              <CardContent>
-                <TabsList>
-                  <TabsTrigger value="overview">
-                    <InfoIcon />
-                    <div>Overview</div>
-                  </TabsTrigger>
-                  <TabsTrigger value="deploy">
-                    <PlusIcon variant="solid" />
-                    <div>Deploy</div>
-                  </TabsTrigger>
-                </TabsList>
-              </CardContent>
+              <div className="w-full h-full flex flex-col justify-start gap-2">
+                <div className="flex flex-col gap-2 divide-y divide-background-300 h-full">
+                  <div className="p-3 flex flex-col gap-2">
+                    {!!selected?.interface && (
+                      <div className="flex items-center justify-between gap-2">
+                        <CardLabel>inteface</CardLabel>
+                        <div
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              selected?.interface ?? "",
+                            );
+                            toast.success(
+                              "Interface name is copied to clipboard",
+                            );
+                          }}
+                          className="flex items-center gap-2 cursor-pointer hover:opacity-80 overflow-x-auto"
+                        >
+                          <div>{selected?.interface}</div>
+                          <CopyIcon size="sm" className="text-foreground-400" />
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between gap-2">
+                      <CardLabel>function</CardLabel>
+                      {selected ? (
+                        <div
+                          onClick={() => {
+                            navigator.clipboard.writeText(selected?.name ?? "");
+                            toast.success(
+                              "Function name is copied to clipboard",
+                            );
+                          }}
+                          className="flex items-center gap-2 cursor-pointer hover:opacity-80"
+                        >
+                          <div>{selected?.name}</div>
+                          <CopyIcon size="sm" className="text-foreground-400" />
+                        </div>
+                      ) : (
+                        <Skeleton className="rounded-sm h-6 w-40" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <CardLabel>selector</CardLabel>
+                      <Hash value={selected?.selector} />
+                    </div>
+                  </div>
 
-              <CardSeparator />
-
-              <CardContent>
-                <TabsContent value="overview">
-                  <Overview
-                    readFuncs={readFuncs}
-                    writeFuncs={writeFuncs}
-                    code={code}
-                  />
-                </TabsContent>
-
-                <TabsContent value="deploy">
-                  <Deploy classHash={classHash!} constructor={constructor} />
-                </TabsContent>
-              </CardContent>
-            </Tabs>
+                  <div className="h-full p-3">
+                    {selected?.inputs.length ? (
+                      selected?.inputs.map((input) => (
+                        <div key={input.name} className="flex flex-col gap-2">
+                          <CardLabel className="lowercase">
+                            {input.name}
+                          </CardLabel>
+                          <Input
+                            value={input.type.name}
+                            disabled
+                            className="bg-input focus-visible:bg-input"
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-foreground-300">
+                        No inputs
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           </Card>
+          <CodeCard {...code} />
         </div>
       )}
     </div>

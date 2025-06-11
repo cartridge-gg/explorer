@@ -10,6 +10,9 @@ export default {
   presets: [cartridgeTWPreset],
   theme: {
     extend: {
+      colors: {
+        input: "#0f1410",
+      },
       screens: {
         // `slightly large` as it sits between lg and xl
         sl: "1196px",
