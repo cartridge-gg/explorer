@@ -23,7 +23,7 @@ export function Header() {
   const { isMobile } = useScreen();
 
   return (
-    <div className="w-full flex items-center justify-between gap-2">
+    <div className="w-full flex items-center justify-between gap-2 mb-[20px]">
       <div className="w-[467px]">
         {!isHome &&
           (!isMobile ? (

@@ -250,9 +250,7 @@ export const SearchBar = React.forwardRef<
       ref={ref}
       className={cn(
         "min-w-[280px] w-full py-[7px] md:py-[10px] px-[10px] md:px-[12px] flex gap-[8px] relative border border-background-200 items-center rounded-sm bg-background-100 md:bg-spacer-100  shadow-[0px_4px_8px_0px_rgba(0,0,0,0.25)] md:shadow-none",
-        isDropdownOpen && result && !isLoading
-          ? "border-b-0 rounded-b-none"
-          : undefined,
+        isDropdownOpen && "border-b-0 rounded-b-none",
         className,
       )}
       {...props}
@@ -299,53 +297,54 @@ export const SearchBar = React.forwardRef<
         </CommandShortcut>
       )}
 
-      {isDropdownOpen ? (
-        <div
-          className={cn(
-            "bg-background-100 md:bg-spacer-100 search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full select-none",
-            isResultFocused && "cursor-pointer",
-          )}
-        >
-          <div className="border-t border-dashed border-background-200">
-            <div className="flex flex-col gap-2 p-[10px] border border-background-200 border-t-0 rounded-b-sm h-[55px]">
-              {isLoading ? (
-                <div className="h-[35px] flex items-center justify-center">
-                  <span className="text-[12px]/[16px] font-normal normal-case text-foreground-400">
-                    Searching...
+      {/* {isDropdownOpen ? ( */}
+      <div
+        className={cn(
+          "bg-background-100 md:bg-spacer-100 search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full select-none",
+          isResultFocused && "cursor-pointer",
+          isDropdownOpen ? "block" : "hidden",
+        )}
+      >
+        <div className="border-t border-dashed border-background-200">
+          <div className="flex flex-col gap-2 p-[10px] border border-background-200 border-t-0 rounded-b-sm h-[55px]">
+            {isLoading ? (
+              <div className="h-[35px] flex items-center justify-center">
+                <span className="text-[12px]/[16px] font-normal normal-case text-foreground-400">
+                  Searching...
+                </span>
+              </div>
+            ) : result ? (
+              <button
+                ref={dropdownResultRef}
+                tabIndex={0}
+                onKeyDown={handleKeyDown}
+                onClick={handleResultClick}
+                className={cn(
+                  "flex flex-row hover:bg-background-200 cursor-pointer items-center justify-between w-full px-[8px] py-[9px] outline-none rounded-sm h-[35px]",
+                  isResultFocused && "bg-background-200",
+                )}
+              >
+                <div className="bg-background-200 rounded-[3px] py-[2px] px-[8px] flex items-center justify-center">
+                  <span className="capitalize text-[#A8A8A8] text-[12px]/[16px] font-semibold tracking-[0.24px]">
+                    {result.type}
                   </span>
                 </div>
-              ) : result ? (
-                <button
-                  ref={dropdownResultRef}
-                  tabIndex={0}
-                  onKeyDown={handleKeyDown}
-                  onClick={handleResultClick}
-                  className={cn(
-                    "flex flex-row hover:bg-background-200 cursor-pointer items-center justify-between w-full px-[8px] py-[9px] outline-none rounded-sm h-[35px]",
-                    isResultFocused && "bg-background-200",
-                  )}
-                >
-                  <div className="bg-background-200 rounded-[3px] py-[2px] px-[8px] flex items-center justify-center">
-                    <span className="capitalize text-[#A8A8A8] text-[12px]/[16px] font-semibold tracking-[0.24px]">
-                      {result.type}
-                    </span>
-                  </div>
 
-                  <span className="text-[13px]/[16px] font-normal font-mono text-foreground-400">
-                    {truncateString(result.value, isMobile ? 10 : 25)}
-                  </span>
-                </button>
-              ) : (
-                <div className="h-[35px] flex items-center justify-center">
-                  <span className="text-[12px]/[16px] font-normal normal-case text-foreground-400">
-                    No results found
-                  </span>
-                </div>
-              )}
-            </div>
+                <span className="text-[13px]/[16px] font-normal font-mono text-foreground-400">
+                  {truncateString(result.value, isMobile ? 10 : 25)}
+                </span>
+              </button>
+            ) : (
+              <div className="h-[35px] flex items-center justify-center">
+                <span className="text-[12px]/[16px] font-normal normal-case text-foreground-400">
+                  No results found
+                </span>
+              </div>
+            )}
           </div>
         </div>
-      ) : null}
+      </div>
+      {/* ) : null} */}
     </div>
   );
 });
