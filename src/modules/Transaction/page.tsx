@@ -217,7 +217,7 @@ export function Transaction() {
 
                   <div className="flex items-center gap-px">
                     <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
-                      <CardLabel className="uppercase">Max amount</CardLabel>
+                      <CardLabel>Max amount</CardLabel>
                       <div className="flex items-center justify-between">
                         <div className="font-mono text-foreground font-semibold">
                           {formatNumber(
@@ -235,9 +235,7 @@ export function Transaction() {
                     </div>
 
                     <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
-                      <CardLabel className="uppercase">
-                        Max price / unit
-                      </CardLabel>
+                      <CardLabel>Max price / unit</CardLabel>
                       <div className="flex items-center justify-between">
                         <div className="font-mono text-foreground font-semibold">
                           {formatNumber(
@@ -260,7 +258,7 @@ export function Transaction() {
 
                   <div className="flex items-center gap-px">
                     <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
-                      <CardLabel className="uppercase">Max amount</CardLabel>
+                      <CardLabel>Max amount</CardLabel>
                       <div className="flex items-center justify-between">
                         <div className="font-mono text-foreground font-semibold">
                           {formatNumber(
@@ -278,9 +276,7 @@ export function Transaction() {
                     </div>
 
                     <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
-                      <CardLabel className="uppercase">
-                        Max price / unit
-                      </CardLabel>
+                      <CardLabel>Max price / unit</CardLabel>
                       <div className="flex items-center justify-between">
                         <div className="font-mono text-foreground font-semibold">
                           {formatNumber(
@@ -303,7 +299,7 @@ export function Transaction() {
 
                   <div className="flex items-center gap-px">
                     <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
-                      <CardLabel className="uppercase">Max amount</CardLabel>
+                      <CardLabel>Max amount</CardLabel>
                       <div className="flex items-center justify-between">
                         <div className="font-mono text-foreground font-semibold">
                           {formatNumber(
@@ -322,9 +318,7 @@ export function Transaction() {
                     </div>
 
                     <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
-                      <CardLabel className="uppercase">
-                        Max price / unit
-                      </CardLabel>
+                      <CardLabel>Max price / unit</CardLabel>
                       <div className="flex items-center justify-between">
                         <div className="font-mono text-foreground font-semibold">
                           {formatNumber(
