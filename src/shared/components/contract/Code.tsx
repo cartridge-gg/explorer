@@ -28,7 +28,9 @@ export function CodeCard({ abi, sierra }: CodeProps) {
   const [selected, setSelected] = useState("abi");
 
   const onCopy = useCallback(() => {
-    navigator.clipboard.writeText(selected === "abi" ? abi : sierra);
+    const code = selected === "abi" ? abi : sierra;
+    if (!code) return;
+    navigator.clipboard.writeText(code);
     toast.success("Copied to clipboard");
   }, [abi, sierra, selected]);
 

@@ -196,15 +196,15 @@ export function ClassHash() {
 
             <CardSeparator className="mb-0" />
 
-            <div className="flex items-center flex-col md:flex-row gap-2 divide-y md:divide-y-0 md:divide-x divide-background-300">
-              <CardContent className="w-full md:w-[400px] flex flex-col justify-start gap-2 p-4">
+            <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] gap-2 divide-y md:divide-y-0 md:divide-x divide-background-300">
+              <CardContent className="flex flex-col justify-start gap-2 p-4">
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Function name / selector / interface"
                   className="bg-input focus-visible:bg-input caret-foreground"
                 />
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 overflow-y-auto max-h-[40vh]">
                   <CardLabel>Functions</CardLabel>
                   <div className="flex flex-col gap-1">
                     {filtered.length ? (
@@ -219,7 +219,7 @@ export function ClassHash() {
                           )}
                           onClick={() => setSelected(f)}
                         >
-                          <div>{f.name}</div>
+                          <div className="truncate">{f.name}</div>
                           <Badge>{isReadFunction(f) ? "Read" : "Write"}</Badge>
                         </div>
                       ))
