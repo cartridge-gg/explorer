@@ -1,8 +1,8 @@
-import { QUERY_KEYS, RPC_PROVIDER } from "@/services/rpc";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
-import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState, useRef } from "react";
+
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchDataCreator } from "@cartridge/utils";
 import {
@@ -22,9 +22,7 @@ export function SearchBar({
   const navigate = useNavigate();
   const { isMobile } = useScreen();
 
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownResultRef = useRef<HTMLDivElement>(null);
-
+  const [inputValue, setInputValue] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   // State to track visual focus on the result
   const [isResultFocused, setIsResultFocused] = useState(false);
@@ -32,8 +30,6 @@ export function SearchBar({
   const [result, setResult] = useState<
     { type: "tx" | "block" | "contract" | "class"; value: string } | undefined
   >();
-
-  const queryClient = useQueryClient();
 
   // on clicking outside of dropdown, close it
   useEffect(() => {
@@ -57,127 +53,65 @@ export function SearchBar({
     };
   }, []);
 
-  const performSearch = useCallback(
-    (input: string) => {
-      try {
-        BigInt(input);
-        const blockWithTxsPromise = queryClient
-          .fetchQuery({
-            queryKey: [QUERY_KEYS.getBlockWithTxs, input],
-            queryFn: () => RPC_PROVIDER.getBlockWithTxs(input),
-          })
-          .then(() => true)
-          .catch((error) => {
-            console.error("Error fetching block with txs:", error);
-            return false;
-          });
+  const handleSearch = useCallback((value: string) => {
+    if (!value || value.length === 0) return;
 
-        const transactionPromise = queryClient
-          .fetchQuery({
-            queryKey: [QUERY_KEYS.getTransaction, input],
-            queryFn: () => RPC_PROVIDER.getTransaction(input),
-          })
-          .then(() => true)
-          .catch((error) => {
-            console.error("Error fetching transaction:", error);
-            return false;
-          });
+    // Check if input is a valid BigInt (hex or numeric)
+    try {
+      BigInt(value);
+      // For numeric/hex inputs, check multiple RPC methods
+      Promise.allSettled([
+        RPC_PROVIDER.getBlockWithTxs(value),
+        RPC_PROVIDER.getTransaction(value),
+        RPC_PROVIDER.getClassHashAt(value),
+        RPC_PROVIDER.getClass(value),
+      ]).then((results) => {
+        const [isBlock, isTx, isContract, isClass] = results.map(
+          (result) => result.status === "fulfilled",
+        );
 
-        const classHashPromise = queryClient
-          .fetchQuery({
-            queryKey: [QUERY_KEYS.getClassHashAt, input],
-            queryFn: () => RPC_PROVIDER.getClassHashAt(input),
-          })
-          .then(() => true)
-          .catch((error) => {
-            console.error("Error fetching class hash:", error);
-            return false;
-          });
-
-        const classPromise = queryClient
-          .fetchQuery({
-            queryKey: [QUERY_KEYS.getClassAt, input],
-            queryFn: () => RPC_PROVIDER.getClass(input),
-          })
-          .then(() => true)
-          .catch((error) => {
-            console.error("Error fetching class:", error);
-            return false;
-          });
-
-        return Promise.all([
-          blockWithTxsPromise,
-          transactionPromise,
-          classHashPromise,
-          classPromise,
-        ]);
-      } catch {
-        const controllerPromise = queryClient
-          .fetchQuery({
-            queryKey: [QUERY_KEYS.getController, input],
-            queryFn: async () => {
-              const fetchData = fetchDataCreator(
-                `${import.meta.env.VITE_CARTRIDGE_API_URL ?? "https://api.cartridge.gg"}/query`,
-              );
-              try {
-                const res = await fetchData<
-                  AddressByUsernameQuery,
-                  AddressByUsernameQueryVariables
-                >(AddressByUsernameDocument, {
-                  username: input,
-                });
-                return res.account?.controllers?.edges?.[0]?.node?.address;
-              } catch (error) {
-                console.error("Error fetching account:", error);
-                return;
-              }
-            },
-          })
-          .catch((error) => {
-            console.error("Error fetching account:", error);
-            return false;
-          });
-
-        return Promise.all([controllerPromise]);
-      }
-    },
-    [queryClient],
-  );
-
-  const handleSearch = useCallback(
-    (value: string) => {
-      if (!value || value.length === 0) return;
-      // assuming that there will be no hash collision (very unlikely to collide)
-      performSearch(value).then((promises) => {
-        if (promises.length > 1) {
-          const [isBlock, isTx, isContract, isClass] = promises;
-          if (isBlock) {
-            setResult({ type: "block", value });
-          } else if (isTx) {
-            setResult({ type: "tx", value });
-          } else if (isContract) {
-            setResult({ type: "contract", value });
-          } else if (isClass) {
-            setResult({ type: "class", value });
-          } else {
-            setResult(undefined);
-          }
-
-          if (isBlock || isTx || isContract || isClass) {
-            setIsResultFocused(true);
-          }
+        if (isBlock) {
+          setResult({ type: "block", value });
+        } else if (isTx) {
+          setResult({ type: "tx", value });
+        } else if (isContract) {
+          setResult({ type: "contract", value });
+        } else if (isClass) {
+          setResult({ type: "class", value });
         } else {
-          const [address] = promises;
-          if (address) {
-            setResult({ type: "contract", value: address as string });
-          } else {
-            setResult(undefined);
-          }
+          setResult(undefined);
+        }
+
+        if (isBlock || isTx || isContract || isClass) {
+          setIsResultFocused(true);
         }
       });
-    },
-    [performSearch],
-  );
+    } catch {
+      // For non-numeric inputs, check username/controller
+      (async () => {
+        const fetchData = fetchDataCreator(
+          `${import.meta.env.VITE_CARTRIDGE_API_URL ?? "https://api.cartridge.gg"}/query`,
+        );
+        try {
+          const res = await fetchData<
+            AddressByUsernameQuery,
+            AddressByUsernameQueryVariables
+          >(AddressByUsernameDocument, {
+            username: value,
+          });
+          const address = res.account?.controllers?.edges?.[0]?.node?.address;
+          if (address) {
+            setResult({ type: "contract", value: address });
+          } else {
+            setResult(undefined);
+          }
+        } catch (error) {
+          console.error("Error fetching account:", error);
+          setResult(undefined);
+        }
+      })();
+    }
+  }, []);
 
   const handleResultClick = useCallback(() => {
     switch (result?.type) {
@@ -197,20 +131,27 @@ export function SearchBar({
         break;
     }
 
+    // Reset the search state
+    setResult(undefined);
     setIsDropdownOpen(false);
+    setIsResultFocused(false);
+
+    // Clear the input field
+    setInputValue("");
+
     onNavigate?.();
   }, [navigate, result, onNavigate]);
 
   const handleSearchIconClick = () => {
-    if (inputRef.current?.value) {
-      handleSearch(inputRef.current.value);
+    if (inputValue) {
+      handleSearch(inputValue);
     }
   };
 
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && result) {
-      if (isResultFocused || e.currentTarget === dropdownResultRef.current) {
+      if (isResultFocused) {
         handleResultClick();
       }
     } else if (e.key === "Escape") {
@@ -239,11 +180,12 @@ export function SearchBar({
       )}
     >
       <Input
-        ref={inputRef}
+        value={inputValue}
         containerClassName="w-full flex-1 pl-4"
-        className="bg-input border-none focus-visible:bg-input caret-foreground"
+        className="bg-input border-none focus-visible:bg-input caret-foreground search-input"
         placeholder="Search blocks, transactions, contracts"
         onChange={(e) => {
+          setInputValue(e.target.value);
           handleSearch(e.target.value);
           setIsDropdownOpen(!!e.target.value);
         }}
@@ -275,7 +217,6 @@ export function SearchBar({
           >
             {result ? (
               <div
-                ref={dropdownResultRef}
                 tabIndex={0}
                 onKeyDown={handleKeyDown}
                 onClick={handleResultClick}

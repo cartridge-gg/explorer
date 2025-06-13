@@ -54,10 +54,6 @@ export function rpcUrl(): string {
 
 export const CHAIN_ID = window.CHAIN_ID ?? import.meta.env.VITE_CHAIN_ID;
 
-// Cache constants
-export const CACHE_TIME = 1000 * 60 * 60 * 24; // 24 hours
-export const STALE_TIME = 1000 * 60 * 30; // 30 minutes
-
 declare global {
   interface Window {
     RPC_URL?: string;
@@ -69,64 +65,57 @@ const baseRpcProvider = new RpcProvider({
   nodeUrl: rpcUrl(),
 });
 
-// useful for caching - only immutable/stable data
-export const QUERY_KEYS = {
-  getBlockNumber: ["getBlockNumber"], // Re-added for BlockNumberProvider with short cache
-  getBlockWithTxs: ["getBlockWithTxs"],
-  getBlockWithReceipts: ["getBlockWithReceipts"],
-  getClassAt: ["getClassAt"],
-  getClassHashAt: ["getClassHashAt"],
-  getTransactionReceipt: ["getTransactionReceipt"],
-  getTransactionTrace: ["getTransactionTrace"],
-  getTransaction: ["getTransaction"],
-  getBlockWithTxHashes: ["getBlockWithTxHashes"],
-  getBlock: ["getBlock"],
-  specVersion: ["specVersion"],
-  getController: ["getController"],
-};
+export const QUERY_KEYS = [
+  "getBlockNumber",
+  "getBlockWithTxs",
+  "getBlockWithReceipts",
+  "getClassAt",
+  "getClassHashAt",
+  "getTransactionReceipt",
+  "getTransactionTrace",
+  "getTransaction",
+  "getBlockWithTxHashes",
+  "getBlock",
+  "specVersion",
+  "getController",
+];
 
 // Cache configuration
-const CACHE_CONFIG = {
-  staleTime: 5 * 60 * 1000, // 5 minutes
-  gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+export const CACHE_CONFIG = {
+  staleTime: 1000 * 60 * 30, // 30 minutes
+  gcTime: 1000 * 60 * 60 * 24, // 24 hours
 };
 
 // Create a proxy that intercepts method calls and adds caching for specific methods
 export const RPC_PROVIDER = new Proxy(baseRpcProvider, {
   get(target, prop: string | symbol) {
     const originalMethod = target[prop as keyof typeof target];
+    const methodName = prop as string;
 
-    // Check if this method should be cached
-    const queryKeyEntry = Object.entries(QUERY_KEYS).find(
-      ([key]) => key === prop,
-    );
-
-    if (queryKeyEntry && typeof originalMethod === "function") {
-      const [, queryKey] = queryKeyEntry;
-
-      // Return a cached version of the method
-      return function (this: typeof target, ...args: unknown[]) {
-        const fullQueryKey =
-          args.length > 0 ? [...queryKey, ...args] : queryKey;
-
-        return queryClient.fetchQuery({
-          queryKey: fullQueryKey,
-          queryFn: () =>
-            (originalMethod as (...args: unknown[]) => unknown).apply(
-              target,
-              args,
-            ),
-          ...CACHE_CONFIG,
-        });
-      };
+    // Early return for properties (non-functions)
+    if (typeof originalMethod !== "function") {
+      return originalMethod;
     }
 
-    // For non-cached methods, return the original method bound to the target
-    if (typeof originalMethod === "function") {
+    // Early return for non-cached methods
+    if (!QUERY_KEYS.includes(methodName)) {
       return originalMethod.bind(target);
     }
 
-    // For properties, return as-is
-    return originalMethod;
+    // Return cached version for queryable methods
+    const queryKey = [methodName];
+    return function (this: typeof target, ...args: unknown[]) {
+      const fullQueryKey = args.length > 0 ? [...queryKey, ...args] : queryKey;
+
+      return queryClient.fetchQuery({
+        queryKey: fullQueryKey,
+        queryFn: () =>
+          (originalMethod as (...args: unknown[]) => unknown).apply(
+            target,
+            args,
+          ),
+        ...CACHE_CONFIG,
+      });
+    };
   },
 });

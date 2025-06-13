@@ -1,4 +1,4 @@
-import { RPC_PROVIDER } from "@/services/rpc";
+import { RPC_PROVIDER, CACHE_CONFIG } from "@/services/rpc";
 import { truncateString } from "@/shared/utils/string";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -18,7 +18,7 @@ import {
   initExecutions,
   parseExecutionResources,
 } from "@/shared/utils/rpc";
-import { CACHE_TIME, STALE_TIME } from "@/services/rpc";
+
 import { useBlock } from "@starknet-react/core";
 import { isValidAddress } from "@/shared/utils/contract";
 
@@ -205,8 +205,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     },
     initialData: [],
     enabled: !!txHash,
-    staleTime: STALE_TIME,
-    gcTime: CACHE_TIME,
+    ...CACHE_CONFIG,
   });
 
   const { data: block } = useBlock({

@@ -9,7 +9,7 @@ import {
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { QUERY_KEYS, RPC_PROVIDER } from "@/services/rpc";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { getPaginatedBlockNumbers } from "@/shared/utils/rpc";
 import {
   Breadcrumb,
@@ -36,7 +36,7 @@ export function BlockList() {
     pageSize: 20,
   });
   const { data: latestBlockNumber } = useQuery({
-    queryKey: [QUERY_KEYS.getBlockNumber],
+    queryKey: ["getBlockNumber"],
     queryFn: () => RPC_PROVIDER.getBlockNumber(),
   });
 
