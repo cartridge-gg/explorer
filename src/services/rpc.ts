@@ -16,7 +16,7 @@ export const EXECUTION_RESOURCES_KEY_MAP = {
   ec_op_builtin_applications: "ec_op",
 };
 
-export function basePath(): string | undefined {
+export function getBasePath(): string | undefined {
   // See <vite.config.ts>
   if (import.meta.env.VITE_APP_IS_EMBEDDED) {
     const pathname = window.location.pathname;
@@ -33,7 +33,7 @@ export function basePath(): string | undefined {
 }
 
 // In embedded mode, it is assumed that the explorer is served at the relative path `/explorer` of the JSON-RPC server.
-export function rpcUrl(): string {
+export function getRpcUrl(): string {
   // See <vite.config.ts>
   if (import.meta.env.VITE_APP_IS_EMBEDDED) {
     const pathname = window.location.pathname;
@@ -52,7 +52,9 @@ export function rpcUrl(): string {
   return import.meta.env.VITE_RPC_URL;
 }
 
-export const CHAIN_ID = window.CHAIN_ID ?? import.meta.env.VITE_CHAIN_ID;
+export async function getChainId(): Promise<string> {
+  return window.CHAIN_ID ?? (await RPC_PROVIDER.getChainId());
+}
 
 declare global {
   interface Window {
@@ -62,7 +64,7 @@ declare global {
 
 // Create the base RPC provider
 const baseRpcProvider = new RpcProvider({
-  nodeUrl: rpcUrl(),
+  nodeUrl: getRpcUrl(),
 });
 
 export const QUERY_KEYS = [

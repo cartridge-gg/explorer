@@ -8,7 +8,7 @@ import { StarknetProvider } from "./store/starknetProvider";
 import { CallCartProvider } from "./store/ShoppingCartProvider";
 import { BlockNumberProvider } from "./store/BlockNumberProvider";
 import { BrowserRouter } from "react-router-dom";
-import { basePath } from "./services/rpc";
+import { getBasePath } from "./services/rpc";
 import { PostHogProvider } from "./store/PostHogProvider";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -21,7 +21,7 @@ createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <StarknetProvider>
         <PostHogProvider>
-          <BrowserRouter basename={basePath()}>
+          <BrowserRouter basename={getBasePath()}>
             <CallCartProvider>
               <BlockNumberProvider>
                 <App />

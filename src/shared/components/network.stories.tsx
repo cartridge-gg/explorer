@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Network } from "./network";
 import { publicProvider, StarknetConfig } from "@starknet-react/core";
 import { sepolia, mainnet, Chain } from "@starknet-react/chains";
-import { constants, num, shortString } from "starknet";
+import { num, shortString } from "starknet";
 import { ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS } from "@cartridge/utils";
 
 const meta = {
@@ -67,12 +67,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => {
-    const currentChainID =
-      import.meta.env.VITE_CHAIN_ID === constants.StarknetChainId.SN_MAIN
-        ? mainnet.id
-        : sepolia.id;
     return (
-      <StarknetProvider defaultChainID={currentChainID}>
+      <StarknetProvider defaultChainID={sepolia.id}>
         <Network />
       </StarknetProvider>
     );
