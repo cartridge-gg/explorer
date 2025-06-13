@@ -1,12 +1,13 @@
 import { useSearch } from "@/shared/search-bar/hooks";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { cn, Input, SearchIcon, Skeleton } from "@cartridge/ui";
+import { cn, Input, SearchIcon, Skeleton, Spinner } from "@cartridge/ui";
 import { Hash } from "@/shared/components/hash";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { Badge } from "@/shared/components/badge";
 import { useIsFocused } from "@/shared/hooks/useIsFocused";
 import { useClickOutside } from "../hooks/useClickOutside";
+import { useDebounce } from "@/shared/hooks/useDebounce";
 
 export function SearchBar({
   className,
@@ -21,7 +22,8 @@ export function SearchBar({
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Use the extracted search hook
-  const { result, isSearching } = useSearch(value);
+  const debouncedValue = useDebounce(value, 300);
+  const { result, isSearching } = useSearch(debouncedValue);
 
   const isDropdownOpen = useMemo(() => {
     return value || result || isSearching;
@@ -99,11 +101,12 @@ export function SearchBar({
       <div
         className="cursor-pointer flex items-center px-[15px] h-full"
         onClick={() => {
+          if (isSearching) return;
           // Trigger search by setting focus
           inputRef.current?.focus();
         }}
       >
-        <SearchIcon />
+        {isSearching ? <Spinner /> : <SearchIcon />}
       </div>
 
       {isDropdownOpen ? (
@@ -142,11 +145,11 @@ export function SearchBar({
                   <Hash value={result.value} />
                 </span>
               </div>
-            ) : value ? (
+            ) : (
               <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-foreground-100">
                 <div>No results found</div>
               </div>
-            ) : null}
+            )}
           </div>
         </div>
       ) : null}
