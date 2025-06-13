@@ -11,7 +11,7 @@ import {
   ScrollIcon,
 } from "@cartridge/ui";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
-import useBalances from "@/shared/hooks/useBalances";
+import { useBalances } from "@/shared/hooks/useBalances";
 import {
   getContractClassInfo,
   ContractClassInfo,

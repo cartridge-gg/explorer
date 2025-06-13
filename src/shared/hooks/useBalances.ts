@@ -63,7 +63,7 @@ interface UseBalancesReturn {
   refetch: () => void;
 }
 
-function useBalances(
+export function useBalances(
   contractAddress: string,
   addresses: FeeTokenAddresses = DEFAULT_ADDRESSES,
 ): UseBalancesReturn {
@@ -118,5 +118,3 @@ function useBalances(
     refetch,
   };
 }
-
-export default useBalances;
