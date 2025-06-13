@@ -2,7 +2,7 @@ import { RPC_PROVIDER } from "@/services/rpc";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchDataCreator } from "@cartridge/utils";
 import {
@@ -10,7 +10,7 @@ import {
   AddressByUsernameQuery,
   AddressByUsernameQueryVariables,
 } from "@cartridge/utils/api/cartridge";
-import { cn, Input, SearchIcon } from "@cartridge/ui";
+import { cn, Input, SearchIcon, Skeleton } from "@cartridge/ui";
 
 export function SearchBar({
   className,
@@ -22,10 +22,13 @@ export function SearchBar({
   const navigate = useNavigate();
   const { isMobile } = useScreen();
 
-  const [inputValue, setInputValue] = useState("");
+  const [value, setValue] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   // State to track visual focus on the result
   const [isResultFocused, setIsResultFocused] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [result, setResult] = useState<
     { type: "tx" | "block" | "contract" | "class"; value: string } | undefined
@@ -34,15 +37,15 @@ export function SearchBar({
   // on clicking outside of dropdown, close it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const dropdown = document.querySelector(".search-dropdown");
-      const searchInput = document.querySelector(".search-input");
-
       if (
-        dropdown &&
-        !dropdown.contains(event.target as Node) &&
-        !searchInput?.contains(event.target as Node)
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        !inputRef.current?.contains(event.target as Node)
       ) {
         setIsDropdownOpen(false);
+        setValue("");
+        setIsSearching(false);
+        setResult(undefined);
       }
     };
 
@@ -53,10 +56,10 @@ export function SearchBar({
     };
   }, []);
 
-  const handleSearch = useCallback((value: string) => {
-    if (!value || value.length === 0) return;
-
+  const onSearch = useCallback((value: string) => {
     // Check if input is a valid BigInt (hex or numeric)
+    setIsSearching(true);
+    setResult(undefined);
     try {
       BigInt(value);
       // For numeric/hex inputs, check multiple RPC methods
@@ -66,6 +69,7 @@ export function SearchBar({
         RPC_PROVIDER.getClassHashAt(value),
         RPC_PROVIDER.getClass(value),
       ]).then((results) => {
+        setIsSearching(false);
         const [isBlock, isTx, isContract, isClass] = results.map(
           (result) => result.status === "fulfilled",
         );
@@ -108,6 +112,8 @@ export function SearchBar({
         } catch (error) {
           console.error("Error fetching account:", error);
           setResult(undefined);
+        } finally {
+          setIsSearching(false);
         }
       })();
     }
@@ -135,18 +141,10 @@ export function SearchBar({
     setResult(undefined);
     setIsDropdownOpen(false);
     setIsResultFocused(false);
-
-    // Clear the input field
-    setInputValue("");
+    setValue("");
 
     onNavigate?.();
   }, [navigate, result, onNavigate]);
-
-  const handleSearchIconClick = () => {
-    if (inputValue) {
-      handleSearch(inputValue);
-    }
-  };
 
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -180,30 +178,33 @@ export function SearchBar({
       )}
     >
       <Input
-        value={inputValue}
+        value={value}
+        ref={inputRef}
         containerClassName="w-full flex-1 pl-4"
         className="bg-input border-none focus-visible:bg-input caret-foreground search-input"
         placeholder="Search blocks, transactions, contracts"
         onChange={(e) => {
-          setInputValue(e.target.value);
-          handleSearch(e.target.value);
-          setIsDropdownOpen(!!e.target.value);
+          setValue(e.target.value);
+          onSearch(e.target.value);
         }}
         onFocus={() => {
-          if (result) setIsDropdownOpen(true);
+          setIsDropdownOpen(true);
         }}
         onKeyDown={handleKeyDown}
       />
 
       <div
         className="cursor-pointer flex items-center px-[15px] h-full"
-        onClick={handleSearchIconClick}
+        onClick={() => onSearch(value)}
       >
         <SearchIcon />
       </div>
 
       {isDropdownOpen ? (
-        <div className="bg-background search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full">
+        <div
+          ref={dropdownRef}
+          className="bg-background search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full"
+        >
           <div
             // hack for doing custom spacing for the dashed line
             style={{
@@ -215,7 +216,11 @@ export function SearchBar({
             }}
             className="flex flex-col gap-2 px-[15px] py-[10px] border border-background-200 border-t-0 shadow-md"
           >
-            {result ? (
+            {isSearching && value ? (
+              <div className="flex px-2 py-2 items-center justify-center text-sm text-foreground-100">
+                <Skeleton className="w-full h-[10px] rounded-full" />
+              </div>
+            ) : result ? (
               <div
                 tabIndex={0}
                 onKeyDown={handleKeyDown}
@@ -229,11 +234,11 @@ export function SearchBar({
 
                 <span>{truncateString(result.value, isMobile ? 10 : 25)}</span>
               </div>
-            ) : (
+            ) : value ? (
               <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-foreground-100">
                 <div>No results found</div>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       ) : null}

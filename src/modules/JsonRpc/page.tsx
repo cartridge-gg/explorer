@@ -1,4 +1,4 @@
-import { rpcUrl } from "@/services/rpc";
+import { getRpcUrl } from "@/services/rpc";
 import {
   PageHeader,
   PageHeaderTitle,
@@ -153,7 +153,7 @@ export function JsonRpcPlayground() {
         return p.value;
       }
     });
-    const res = await fetch(rpcUrl(), {
+    const res = await fetch(getRpcUrl(), {
       headers: {
         "Content-Type": "application/json",
       },
