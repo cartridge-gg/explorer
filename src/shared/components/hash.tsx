@@ -58,7 +58,7 @@ export function Hash({
             <span>{first}</span>
             {!!last?.length && (
               <>
-                <DotsIcon className="text-foreground-300 hover:text-foreground-400" />
+                <DotsIcon className="text-foreground-400 hover:text-foreground-500" />
                 <span>{last}</span>
               </>
             )}
@@ -67,12 +67,12 @@ export function Hash({
           {to ? (
             <ExternalIcon
               size="sm"
-              className="text-foreground-300 hover:text-foreground-400"
+              className="text-foreground-400 hover:text-foreground-500"
             />
           ) : (
             <CopyIcon
               size="sm"
-              className="text-foreground-300 hover:text-foreground-400"
+              className="text-foreground-400 hover:text-foreground-500"
             />
           )}
         </TooltipTrigger>

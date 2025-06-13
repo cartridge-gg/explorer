@@ -17,7 +17,7 @@ import {
   ContractClassInfo,
   isValidAddress,
 } from "@/shared/utils/contract";
-import { Code } from "@/shared/components/contract/Code";
+import { CodeCard } from "@/shared/components/contract/Code";
 import { useQuery } from "@tanstack/react-query";
 import { ContractForm } from "@/shared/components/contract/Form";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
@@ -220,7 +220,7 @@ export function Contract() {
                 </TabsContent>
 
                 <TabsContent value="code">
-                  <Code abi={code.abi} sierra={code.sierra} />
+                  <CodeCard abi={code.abi} sierra={code.sierra} />
                 </TabsContent>
               </CardContent>
             </Tabs>

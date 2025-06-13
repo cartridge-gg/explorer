@@ -8,8 +8,9 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { CallData, events as eventsLib } from "starknet";
+import { useNavigate, useParams } from "react-router-dom";
+import { AbiEntry, CallData, events as eventsLib, hash } from "starknet";
+import { FunctionAbi } from "starknet";
 import {
   decodeCalldata,
   getEventName,
@@ -56,11 +57,12 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
   });
 
   const {
-    data: { tx, calldata },
+    data: { tx, calldata, declared },
     isLoading,
     error,
   } = useQuery<{
     tx?: Awaited<ReturnType<typeof RPC_PROVIDER.getTransaction>>;
+    declared?: Awaited<ReturnType<typeof RPC_PROVIDER.getClassByHash>>;
     calldata: { contract: string; selector: string; args: string[] }[];
   }>({
     queryKey: ["transaction", "calldata", txHash],
@@ -69,14 +71,20 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
         throw new Error("Invalid transaction hash");
       }
 
-      const tx = await RPC_PROVIDER.getTransaction(txHash || "");
+      const tx = await RPC_PROVIDER.getTransaction(txHash);
+      const declared =
+        tx.type === "DECLARE"
+          ? await RPC_PROVIDER.getClassByHash(tx.class_hash)
+          : undefined;
       return {
         tx,
+        declared,
         calldata: "calldata" in tx ? decodeCalldata(tx.calldata) : [],
       };
     },
     initialData: {
       tx: undefined,
+      declared: undefined,
       calldata: [],
     },
     retry: false,
@@ -384,6 +392,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     error,
     data: {
       tx,
+      declared,
       receipt,
       calldata,
       block,
@@ -393,4 +402,134 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
       storageDiff,
     },
   };
+}
+export interface Calldata {
+  contract: string;
+  selector: string;
+  args: string[];
+}
+
+interface DecodedArg {
+  name: string;
+  type: string;
+  value: string;
+}
+
+interface AbiItem {
+  type: string;
+  name?: string;
+  inputs?: Array<{ name: string; type: string }>;
+  selector?: string;
+  items?: AbiItem[];
+  state_mutability?: string;
+  members?: Array<{ name: string; type: string; offset: number }>;
+}
+
+export function useCalldata(calldata: Calldata[]) {
+  const { txHash } = useParams<{ txHash: string }>();
+
+  return useQuery({
+    queryKey: ["tx", txHash, "calldata", calldata],
+    queryFn: async () => {
+      if (!calldata || calldata.length === 0) return [];
+
+      return await Promise.all(
+        calldata.map(async (d) => {
+          try {
+            const c = await RPC_PROVIDER.getClassAt(d.contract);
+            const abi = c.abi;
+            let matchingFunction: AbiItem | undefined;
+
+            // First check interfaces
+            abi.forEach((item: AbiItem) => {
+              if (item.type === "function") {
+                const funcNameSelector = hash.getSelectorFromName(
+                  item.name || "",
+                );
+                if (funcNameSelector === d.selector) {
+                  matchingFunction = item;
+                }
+              }
+
+              if (item.type === "interface") {
+                item.items?.forEach((func: AbiItem) => {
+                  if (func.type === "function") {
+                    const funcNameSelector = hash.getSelectorFromName(
+                      func.name || "",
+                    );
+                    if (funcNameSelector === d.selector) {
+                      matchingFunction = func;
+                    }
+                  }
+                });
+              }
+            });
+
+            const formattedParams = d.args;
+
+            const myCallData = new CallData(abi);
+
+            const { inputs } = myCallData.parser
+              .getLegacyFormat()
+              .find(
+                (abiItem: AbiEntry) => abiItem.name === matchingFunction?.name,
+              ) as FunctionAbi;
+
+            const inputsTypes = inputs.map((inp: { type: string }) => {
+              return inp.type as string;
+            });
+
+            const decoded = myCallData.decodeParameters(
+              inputsTypes,
+              formattedParams,
+            );
+
+            const formattedResponse: DecodedArg[] = [];
+
+            if (Array.isArray(decoded)) {
+              if (inputs.length === 1) {
+                formattedResponse.push({
+                  value: decoded,
+                  name: inputs[0]?.name,
+                  type: inputs[0]?.type,
+                });
+              } else {
+                decoded.forEach((arg, index) => {
+                  formattedResponse.push({
+                    value: arg,
+                    name: inputs[index]?.name,
+                    type: inputs[index]?.type,
+                  });
+                });
+              }
+            }
+
+            return {
+              contract: d.contract,
+              function_name: matchingFunction?.name || "",
+              selector: d.selector,
+              data: formattedResponse,
+              params: inputs.map((inp) => inp?.name),
+              raw_args: d.args,
+            };
+          } catch {
+            return {
+              contract: d.contract,
+              function_name: "Error",
+              selector: d.selector,
+              params: [],
+              raw_args: d.args,
+              data: d.args.map((arg, index) => ({
+                name: `arg${index}`,
+                type: "unknown",
+                value: arg,
+              })),
+            };
+          }
+        }),
+      );
+    },
+    enabled: !!calldata && !!txHash,
+    retry: false,
+  });
 }

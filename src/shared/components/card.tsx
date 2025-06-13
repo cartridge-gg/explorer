@@ -132,8 +132,9 @@ export function ExecutionResourcesCard({
         <CardTitle>Execution resources</CardTitle>
       </CardHeader>
 
-      <div className="flex flex-col md:flex-row divide-x divide-y divide-background-200 relative">
-        <CardContent className="py-2 min-w-96">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_3fr] divide-y lg:divide-y-0 lg:divide-x divide-background-200">
+        {/* Steps Section */}
+        <CardContent className="py-4">
           <div>
             <CardLabel>steps</CardLabel>
             {blockComputeData ? (
@@ -146,40 +147,39 @@ export function ExecutionResourcesCard({
           </div>
         </CardContent>
 
-        <CardContent className="py-2 -top-px -left-px min-w-96">
+        {/* Gas Section */}
+        <CardContent className="py-4">
           <CardLabel>gas</CardLabel>
-          <div className="flex flex-wrap gap-px">
-            <div className="bg-background-200 flex flex-col p-2 min-w-40">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-px mt-2">
+            <div className="bg-background-200 flex flex-col p-2">
               <CardLabel>l1</CardLabel>
               {blockComputeData ? (
                 <div className="font-mono text-foreground font-semibold">
                   {formatNumber(blockComputeData.gas)}
                 </div>
               ) : (
-                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-6 w-full" />
               )}
             </div>
-            <div className="bg-background-200 flex flex-col p-2 min-w-40">
+            <div className="bg-background-200 flex flex-col p-2">
               <CardLabel>l1 data</CardLabel>
               {blockComputeData ? (
                 <div className="font-mono text-foreground font-semibold">
                   {formatNumber(blockComputeData.data_gas)}
                 </div>
               ) : (
-                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-6 w-full" />
               )}
             </div>
           </div>
         </CardContent>
 
-        <CardContent className="py-2 flex flex-col gap-2 -top-px -left-px">
+        {/* Builtins Counter Section */}
+        <CardContent className="py-4">
           <CardLabel>builtins counter</CardLabel>
-          <div className="flex flex-wrap gap-px">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-px mt-2">
             {Object.entries(executions ?? {}).map(([key, value]) => (
-              <div
-                key={key}
-                className="bg-background-200 flex flex-col p-2 w-40"
-              >
+              <div key={key} className="bg-background-200 flex flex-col p-2">
                 <CardLabel>{formatSnakeCaseToDisplayValue(key)}</CardLabel>
                 <div className="font-mono text-foreground font-semibold overflow-auto">
                   {formatNumber(value)}

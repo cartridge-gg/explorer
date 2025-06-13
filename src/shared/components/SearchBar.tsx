@@ -168,6 +168,7 @@ export const SearchBar = React.forwardRef<
   const handleSearch = useDebounce((value: string) => {
     if (!value || value.length === 0) return;
     // assuming that there will be no hash collision (very unlikely to collide)
+    setResult(undefined);
     performSearch(value).then((promises) => {
       if (promises.length > 1) {
         const [isBlock, isTx, isContract, isClass] = promises;
@@ -270,7 +271,7 @@ export const SearchBar = React.forwardRef<
         ref={inputRef}
         name="search"
         containerClassName="flex-1"
-        className="bg-background-100 focus-visible:bg-background-100 md:bg-spacer-100 md:focus-visible:bg-spacer-100  border-none caret-foreground search-input h-auto text-[14px]/[20px] placeholder:text-[14px]/[20px] px-0 font-mono rounded-none"
+        className="bg-background-100 focus-visible:bg-background-100 md:bg-spacer-100 md:focus-visible:bg-spacer-100  border-none caret-foreground search-input h-auto text-[14px]/[20px] placeholder:text-[14px]/[20px] px-0 font-mono rounded-none focus-visible:bg-input"
         placeholder="Search"
         onChange={(e) => {
           setIsLoading(true);
