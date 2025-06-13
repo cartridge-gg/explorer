@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createContext, ReactNode } from "react";
-import { RPC_PROVIDER, QUERY_KEYS } from "@/services/starknet_provider_config";
+import { RPC_PROVIDER, QUERY_KEYS } from "@/services/rpc";
 
 export type BlockNumberContextType = {
   blockNumber: number | undefined;

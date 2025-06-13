@@ -1,6 +1,6 @@
-import { RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { isValidAddress } from "@/shared/utils/contract";
-import { convertValue } from "@/shared/utils/rpc_utils";
+import { convertValue } from "@/shared/utils/rpc";
 import { isNumber } from "@/shared/utils/string";
 import { EventDataItem } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";

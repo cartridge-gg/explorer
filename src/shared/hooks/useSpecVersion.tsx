@@ -1,4 +1,4 @@
-import { RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { useQuery } from "@tanstack/react-query";
 
 export function useSpecVersion() {

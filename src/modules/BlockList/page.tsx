@@ -9,8 +9,8 @@ import {
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
-import { getPaginatedBlockNumbers } from "@/shared/utils/rpc_utils";
+import { QUERY_KEYS, RPC_PROVIDER } from "@/services/rpc";
+import { getPaginatedBlockNumbers } from "@/shared/utils/rpc";
 import {
   Breadcrumb,
   BreadcrumbList,

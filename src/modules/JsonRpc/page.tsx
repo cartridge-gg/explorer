@@ -1,4 +1,4 @@
-import { rpcUrl } from "@/constants/rpc";
+import { rpcUrl } from "@/services/rpc";
 import {
   PageHeader,
   PageHeaderTitle,
