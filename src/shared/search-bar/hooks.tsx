@@ -7,6 +7,7 @@ import {
 } from "@cartridge/utils/api/cartridge";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { isBigInt } from "@/shared/utils/bigint";
 
 export type SearchResultType = "tx" | "block" | "contract" | "class";
 
@@ -23,10 +24,7 @@ export function useSearch(searchValue: string) {
     queryFn: async (): Promise<SearchResult | null> => {
       if (!searchValue.trim()) return null;
 
-      try {
-        // Check if input is a valid BigInt (hex or numeric)
-        BigInt(searchValue);
-
+      if (isBigInt(searchValue)) {
         // For numeric/hex inputs, check multiple RPC methods
         const results = await Promise.allSettled([
           RPC_PROVIDER.getBlockWithTxs(searchValue),
@@ -74,31 +72,43 @@ export function useSearch(searchValue: string) {
         }
 
         return null;
-      } catch {
-        // For non-numeric inputs, check username/controller
-        const fetchData = fetchDataCreator(
-          `${import.meta.env.VITE_CARTRIDGE_API_URL ?? "https://api.cartridge.gg"}/query`,
-        );
+      }
 
-        try {
-          console.log("fetching account", searchValue);
-          const res = await fetchData<
-            AddressByUsernameQuery,
-            AddressByUsernameQueryVariables
-          >(AddressByUsernameDocument, {
-            username: searchValue,
-          });
+      // For non-numeric inputs, check username/controller
+      const fetchData = fetchDataCreator(
+        `${import.meta.env.VITE_CARTRIDGE_API_URL ?? "https://api.cartridge.gg"}/query`,
+      );
 
-          const address = res.account?.controllers?.edges?.[0]?.node?.address;
-          if (address) {
-            return { type: "contract", value: address };
-          }
-        } catch (error) {
+      try {
+        const res = await fetchData<
+          AddressByUsernameQuery,
+          AddressByUsernameQueryVariables
+        >(AddressByUsernameDocument, {
+          username: searchValue,
+        });
+
+        const address = res.account?.controllers?.edges?.[0]?.node?.address;
+        if (address) {
+          return {
+            type: "contract",
+            value: address,
+            onSelect: () => {
+              navigate(`/contract/${address}`);
+            },
+          };
+        }
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          error.message.includes("account not found")
+        ) {
+          console.log(`Account not found: ${searchValue}`);
+        } else {
           console.error("Error fetching account:", error);
         }
-
-        return null;
       }
+
+      return null;
     },
     enabled: !!searchValue.trim(),
     staleTime: 1000 * 60 * 5, // 5 minutes
