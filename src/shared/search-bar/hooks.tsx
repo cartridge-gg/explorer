@@ -6,15 +6,18 @@ import {
   AddressByUsernameQueryVariables,
 } from "@cartridge/utils/api/cartridge";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 export type SearchResultType = "tx" | "block" | "contract" | "class";
 
 export interface SearchResult {
   type: SearchResultType;
   value: string;
+  onSelect: () => void;
 }
 
 export function useSearch(searchValue: string) {
+  const navigate = useNavigate();
   const { data: result, isLoading: isSearching } = useQuery({
     queryKey: ["search", searchValue],
     queryFn: async (): Promise<SearchResult | null> => {
@@ -37,13 +40,37 @@ export function useSearch(searchValue: string) {
         );
 
         if (isBlock) {
-          return { type: "block", value: searchValue };
+          return {
+            type: "block",
+            value: searchValue,
+            onSelect: () => {
+              navigate(`/block/${searchValue}`);
+            },
+          };
         } else if (isTx) {
-          return { type: "tx", value: searchValue };
+          return {
+            type: "tx",
+            value: searchValue,
+            onSelect: () => {
+              navigate(`/tx/${searchValue}`);
+            },
+          };
         } else if (isContract) {
-          return { type: "contract", value: searchValue };
+          return {
+            type: "contract",
+            value: searchValue,
+            onSelect: () => {
+              navigate(`/contract/${searchValue}`);
+            },
+          };
         } else if (isClass) {
-          return { type: "class", value: searchValue };
+          return {
+            type: "class",
+            value: searchValue,
+            onSelect: () => {
+              navigate(`/class/${searchValue}`);
+            },
+          };
         }
 
         return null;

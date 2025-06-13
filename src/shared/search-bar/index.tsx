@@ -1,7 +1,6 @@
 import { useSearch } from "@/shared/search-bar/hooks";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { cn, Input, SearchIcon, Skeleton } from "@cartridge/ui";
 import { Hash } from "@/shared/components/hash";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
@@ -31,30 +30,12 @@ export function SearchBar({
     return value || result;
   }, [value, result]);
 
-  const navigate = useNavigate();
   const onSelectResult = useCallback(() => {
-    switch (result?.type) {
-      case "tx":
-        navigate(`./tx/${result.value}`);
-        break;
-      case "block":
-        navigate(`./block/${result.value}`);
-        break;
-      case "contract":
-        navigate(`./contract/${result.value}`);
-        break;
-      case "class":
-        navigate(`./class/${result.value}`);
-        break;
-      default:
-        break;
-    }
-
-    // Reset the search state
+    if (!result) return;
+    result.onSelect();
     setValue("");
-
     onNavigate?.();
-  }, [navigate, result, onNavigate]);
+  }, [result, onNavigate]);
 
   // Handle keyboard navigation
   const onKeyDown = useCallback(
