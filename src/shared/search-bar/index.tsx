@@ -1,12 +1,13 @@
 import { useSearch } from "@/shared/search-bar/hooks";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn, Input, SearchIcon, Skeleton } from "@cartridge/ui";
 import { Hash } from "@/shared/components/hash";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { Badge } from "@/shared/components/badge";
 import { useIsFocused } from "@/shared/hooks/useIsFocused";
+import { useClickOutside } from "../hooks/useClickOutside";
 
 export function SearchBar({
   className,
@@ -16,6 +17,7 @@ export function SearchBar({
   onNavigate?: () => void;
 }) {
   const [value, setValue] = useState("");
+  const searchBarRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -79,24 +81,7 @@ export function SearchBar({
   );
 
   // on clicking outside of dropdown, close it
-  useEffect(() => {
-    const onMouseDown = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node) &&
-        !inputRef.current?.contains(e.target as Node)
-      ) {
-        e.preventDefault();
-        setValue("");
-      }
-    };
-
-    document.addEventListener("mousedown", onMouseDown);
-
-    return () => {
-      document.removeEventListener("mousedown", onMouseDown);
-    };
-  }, []);
+  useClickOutside(searchBarRef, () => setValue(""));
 
   useKeydownEffect((e) => {
     if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -114,6 +99,7 @@ export function SearchBar({
         isDropdownOpen && result ? "border-b-0" : undefined,
         className,
       )}
+      ref={searchBarRef}
     >
       <Input
         value={value}

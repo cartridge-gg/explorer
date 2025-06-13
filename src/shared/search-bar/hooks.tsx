@@ -17,8 +17,8 @@ export interface SearchResult {
 export function useSearch(searchValue: string) {
   const { data: result, isLoading: isSearching } = useQuery({
     queryKey: ["search", searchValue],
-    queryFn: async (): Promise<SearchResult | undefined> => {
-      if (!searchValue.trim()) return undefined;
+    queryFn: async (): Promise<SearchResult | null> => {
+      if (!searchValue.trim()) return null;
 
       try {
         // Check if input is a valid BigInt (hex or numeric)
@@ -46,7 +46,7 @@ export function useSearch(searchValue: string) {
           return { type: "class", value: searchValue };
         }
 
-        return undefined;
+        return null;
       } catch {
         // For non-numeric inputs, check username/controller
         const fetchData = fetchDataCreator(
@@ -70,7 +70,7 @@ export function useSearch(searchValue: string) {
           console.error("Error fetching account:", error);
         }
 
-        return undefined;
+        return null;
       }
     },
     enabled: !!searchValue.trim(),
