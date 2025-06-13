@@ -1,4 +1,4 @@
-import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { QUERY_KEYS, RPC_PROVIDER } from "@/services/rpc";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { useQueryClient } from "@tanstack/react-query";

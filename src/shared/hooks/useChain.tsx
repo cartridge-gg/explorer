@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { shortString } from "starknet";
 import { ChainId } from "@/types/types";
 

@@ -1,4 +1,4 @@
-import { RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { truncateString } from "@/shared/utils/string";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,8 +17,8 @@ import {
   initBlockComputeData,
   initExecutions,
   parseExecutionResources,
-} from "@/shared/utils/rpc_utils";
-import { CACHE_TIME, STALE_TIME } from "@/constants/rpc";
+} from "@/shared/utils/rpc";
+import { CACHE_TIME, STALE_TIME } from "@/services/rpc";
 import { useBlock } from "@starknet-react/core";
 import { isValidAddress } from "@/shared/utils/contract";
 

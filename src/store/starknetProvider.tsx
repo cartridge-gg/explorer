@@ -8,7 +8,7 @@ import {
 } from "@starknet-react/core";
 import { constants } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
-import { rpcUrl, CHAIN_ID } from "@/constants/rpc";
+import { rpcUrl, CHAIN_ID } from "@/services/rpc";
 
 const controllerConnector = new ControllerConnector({
   chains: [

@@ -1,7 +1,7 @@
 import { cairo, GetTransactionReceiptResponse, shortString } from "starknet";
 import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
-import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
+import { EXECUTION_RESOURCES_KEY_MAP } from "@/services/rpc";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
