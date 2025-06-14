@@ -1,13 +1,14 @@
-import { useSearch } from "@/shared/search-bar/hooks";
-
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { cn, Input, SearchIcon, Skeleton, Spinner } from "@cartridge/ui";
 import { Hash } from "@/shared/components/hash";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { Badge } from "@/shared/components/badge";
 import { useIsFocused } from "@/shared/hooks/useIsFocused";
-import { useClickOutside } from "../hooks/useClickOutside";
+import { useClickOutside } from "@/shared/hooks/useClickOutside";
 import { useDebounce } from "@/shared/hooks/useDebounce";
+import { useScreen } from "@/shared/hooks/useScreen";
+import { useSearch } from "./hooks";
+import { isMac } from "@/constants/device";
 
 export function SearchBar({
   className,
@@ -20,17 +21,12 @@ export function SearchBar({
   const searchBarRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { isMobile } = useScreen();
 
   // Use the extracted search hook
   const debouncedValue = useDebounce(value, 300);
   const { result, isSearching } = useSearch(debouncedValue);
-
-  const isDropdownOpen = useMemo(() => {
-    return value || result || isSearching;
-  }, [value, result, isSearching]);
-  const isResultFocused = useMemo(() => {
-    return value || result;
-  }, [value, result]);
+  const isFocused = useIsFocused(inputRef);
 
   const onSelectResult = useCallback(() => {
     if (!result) return;
@@ -49,18 +45,13 @@ export function SearchBar({
         e.preventDefault();
         setValue("");
         inputRef.current?.blur();
-      } else if (e.key === "ArrowDown" && result && isDropdownOpen) {
+      } else if (e.key === "ArrowDown" && isFocused && result) {
         e.preventDefault(); // Prevent scrolling
-      } else if (
-        e.key === "ArrowUp" &&
-        result &&
-        isDropdownOpen &&
-        isResultFocused
-      ) {
+      } else if (e.key === "ArrowUp" && isFocused && result) {
         e.preventDefault(); // Prevent scrolling
       }
     },
-    [result, isResultFocused, isDropdownOpen, onSelectResult],
+    [result, onSelectResult, isFocused],
   );
 
   // on clicking outside of dropdown, close it
@@ -73,46 +64,60 @@ export function SearchBar({
     }
   });
 
-  const isFocused = useIsFocused(inputRef);
-
   return (
     <div
       className={cn(
         "bg-input min-w-[200px] w-full h-[42px] flex relative border border-background-200 items-center justify-between shadow rounded",
-        isDropdownOpen && result ? "border-b-0" : undefined,
+        value || result || isSearching ? "border-b-none rounded-b-none" : "",
         className,
       )}
       ref={searchBarRef}
     >
-      <Input
-        value={value}
-        ref={inputRef}
-        containerClassName="w-full flex-1 pl-4"
-        className="bg-input border-none focus-visible:bg-input caret-foreground search-input"
-        placeholder="Search blocks, transactions, contracts"
-        onChange={(e) => {
-          setValue(e.target.value);
-        }}
-        onKeyDown={onKeyDown}
-      />
-
-      {!isFocused && <Badge>⌘K</Badge>}
-
       <div
-        className="cursor-pointer flex items-center px-[15px] h-full"
+        className="cursor-pointer flex items-center justify-center h-full aspect-square"
         onClick={() => {
           if (isSearching) return;
           // Trigger search by setting focus
           inputRef.current?.focus();
         }}
       >
-        {isSearching ? <Spinner /> : <SearchIcon />}
+        {isSearching ? (
+          <Spinner />
+        ) : (
+          <SearchIcon
+            className={isFocused ? "text-foreground" : "text-foreground-400"}
+          />
+        )}
       </div>
+      <Input
+        value={value}
+        ref={inputRef}
+        containerClassName="w-full flex-1"
+        className="bg-input border-none focus-visible:bg-input caret-foreground search-input px-0 font-inter"
+        placeholder="Search"
+        onChange={(e) => {
+          setValue(e.target.value);
+        }}
+        onKeyDown={onKeyDown}
+      />
 
-      {isDropdownOpen ? (
+      {!isFocused && !isMobile && (
+        <div className="flex items-center justify-center h-full aspect-square">
+          <Badge
+            onClick={() => {
+              inputRef.current?.focus();
+            }}
+            className="cursor-pointer"
+          >
+            {isMac ? "⌘K" : "Ctrl+K"}
+          </Badge>
+        </div>
+      )}
+
+      {(value || result || isSearching) && (
         <div
           ref={dropdownRef}
-          className="bg-background search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full"
+          className="bg-input absolute bottom-0 left-[-1px] right-[-1px] translate-y-full rounded-b border-dashed border-t border-background-200"
         >
           <div
             // hack for doing custom spacing for the dashed line
@@ -126,7 +131,7 @@ export function SearchBar({
             className="flex flex-col gap-2 px-[15px] py-[10px] border border-background-200 border-t-0 shadow-md"
           >
             {isSearching ? (
-              <div className="flex px-2 py-2 items-center justify-center text-sm text-foreground-100">
+              <div className="flex px-2 py-2 items-center justify-center text-sm text-foreground-100 h-10">
                 <Skeleton className="w-full h-[10px] rounded-full" />
               </div>
             ) : result ? (
@@ -135,8 +140,8 @@ export function SearchBar({
                 onKeyDown={onKeyDown}
                 onClick={onSelectResult}
                 className={cn(
-                  "flex flex-row hover:bg-background-400 cursor-pointer items-center gap-2 justify-between w-full px-2 py-1 outline-none",
-                  isResultFocused && "bg-background-400",
+                  "flex flex-row hover:bg-background-400 cursor-pointer items-center gap-2 justify-between w-full p-4 outline-none rounded h-10",
+                  result && "bg-background-400",
                 )}
               >
                 <span className="font-bold uppercase">{result.type}</span>
@@ -146,13 +151,13 @@ export function SearchBar({
                 </span>
               </div>
             ) : (
-              <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-foreground-100">
-                <div>No results found</div>
+              <div className="flex px-2 py-2 items-center justify-center text-sm text-foreground-400">
+                No results found
               </div>
             )}
           </div>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

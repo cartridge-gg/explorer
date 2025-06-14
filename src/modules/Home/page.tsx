@@ -1,4 +1,4 @@
-import { SearchBar } from "@/shared/search-bar";
+import { SearchBar } from "@/shared/components/search-bar";
 import { Header } from "@/shared/components/header";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { Link } from "react-router-dom";

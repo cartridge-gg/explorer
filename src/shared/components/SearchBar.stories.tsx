@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { SearchBar } from "./SearchBar";
+import { SearchBar } from "@/shared/components/search-bar";
 
 const meta = {
   tags: ["autodocs"],
