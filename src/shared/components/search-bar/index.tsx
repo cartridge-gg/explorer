@@ -19,7 +19,6 @@ export function SearchBar({
 }) {
   const [value, setValue] = useState("");
   const searchBarRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { isMobile } = useScreen();
 
@@ -115,10 +114,7 @@ export function SearchBar({
       )}
 
       {(value || result || isSearching) && (
-        <div
-          ref={dropdownRef}
-          className="bg-input absolute bottom-0 left-[-1px] right-[-1px] translate-y-full rounded-b border-dashed border-t border-background-200"
-        >
+        <div className="bg-input absolute bottom-0 left-[-1px] right-[-1px] translate-y-full rounded-b border-dashed border-t border-background-200">
           <div
             // hack for doing custom spacing for the dashed line
             style={{
