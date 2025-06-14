@@ -1,8 +1,7 @@
 import { RPC_PROVIDER } from "@/services/rpc";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
-
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchDataCreator } from "@cartridge/utils";
 import {
@@ -10,42 +9,62 @@ import {
   AddressByUsernameQuery,
   AddressByUsernameQueryVariables,
 } from "@cartridge/utils/api/cartridge";
-import { cn, Input, SearchIcon, Skeleton } from "@cartridge/ui";
+import { cn, CommandShortcut, Input, SearchIcon } from "@cartridge/ui";
+import { isMac } from "@/constants/device";
+import { useDebounce } from "../hooks/useDebounce.tsx";
+import React from "react";
 
-export function SearchBar({
-  className,
-  onNavigate,
-}: {
-  className?: string;
-  onNavigate?: () => void;
-}) {
+export const SearchBar = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & {
+    onNavigate?: () => void;
+  }
+>(({ className, onNavigate, ...props }, ref) => {
   const navigate = useNavigate();
   const { isMobile } = useScreen();
 
-  const [value, setValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownResultRef = useRef<HTMLButtonElement>(null);
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
   // State to track visual focus on the result
   const [isResultFocused, setIsResultFocused] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const [result, setResult] = useState<
     { type: "tx" | "block" | "contract" | "class"; value: string } | undefined
   >();
 
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Handle Cmd+K / Ctrl+K keyboard shortcut to focus search
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+        event.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   // on clicking outside of dropdown, close it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const dropdown = document.querySelector(".search-dropdown");
+      const searchInput = document.querySelector(".search-input");
+
       if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
-        !inputRef.current?.contains(event.target as Node)
+        dropdown &&
+        !dropdown.contains(event.target as Node) &&
+        !searchInput?.contains(event.target as Node)
       ) {
         setIsDropdownOpen(false);
-        setValue("");
-        setIsSearching(false);
-        setResult(undefined);
       }
     };
 
@@ -56,10 +75,11 @@ export function SearchBar({
     };
   }, []);
 
-  const onSearch = useCallback((value: string) => {
+  const handleSearch = useDebounce((value: string) => {
     // Check if input is a valid BigInt (hex or numeric)
-    setIsSearching(true);
+    setIsLoading(true);
     setResult(undefined);
+
     try {
       BigInt(value);
       // For numeric/hex inputs, check multiple RPC methods
@@ -69,7 +89,7 @@ export function SearchBar({
         RPC_PROVIDER.getClassHashAt(value),
         RPC_PROVIDER.getClass(value),
       ]).then((results) => {
-        setIsSearching(false);
+        setIsLoading(false);
         const [isBlock, isTx, isContract, isClass] = results.map(
           (result) => result.status === "fulfilled",
         );
@@ -113,11 +133,11 @@ export function SearchBar({
           console.error("Error fetching account:", error);
           setResult(undefined);
         } finally {
-          setIsSearching(false);
+          setIsLoading(false);
         }
       })();
     }
-  }, []);
+  }, 500);
 
   const handleResultClick = useCallback(() => {
     switch (result?.type) {
@@ -137,19 +157,14 @@ export function SearchBar({
         break;
     }
 
-    // Reset the search state
-    setResult(undefined);
     setIsDropdownOpen(false);
-    setIsResultFocused(false);
-    setValue("");
-
     onNavigate?.();
   }, [navigate, result, onNavigate]);
 
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && result) {
-      if (isResultFocused) {
+      if (isResultFocused || e.currentTarget === dropdownResultRef.current) {
         handleResultClick();
       }
     } else if (e.key === "Escape") {
@@ -171,77 +186,107 @@ export function SearchBar({
 
   return (
     <div
+      ref={ref}
       className={cn(
-        "bg-input min-w-[200px] w-full h-[42px] flex relative border border-background-200 items-center justify-between shadow rounded",
-        isDropdownOpen && result ? "border-b-0" : undefined,
+        "min-w-[280px] w-full h-[40px] py-[7px] md:py-[10px] px-[10px] md:px-[12px] flex gap-[8px] relative border border-background-200 items-center rounded-sm bg-background-100 md:bg-spacer-100  shadow-[0px_4px_8px_0px_rgba(0,0,0,0.25)] md:shadow-none",
+        isDropdownOpen && "border-b-0 rounded-b-none",
         className,
       )}
+      {...props}
     >
+      {/* Search Icon */}
+      <div onClick={() => inputRef.current?.focus()} className="cursor-text">
+        <SearchIcon
+          className={cn(
+            "!w-[20px] !h-[20px]",
+            isInputFocused ? "text-foreground-100" : "text-foreground-400",
+          )}
+        />
+      </div>
+
+      {/* Search Input */}
       <Input
-        value={value}
         ref={inputRef}
-        containerClassName="w-full flex-1 pl-4"
-        className="bg-input border-none focus-visible:bg-input caret-foreground search-input"
-        placeholder="Search blocks, transactions, contracts"
+        name="search"
+        containerClassName="flex-1"
+        className="bg-background-100 focus-visible:bg-background-100 md:bg-spacer-100 md:focus-visible:bg-spacer-100  border-none caret-foreground search-input h-auto text-[14px]/[20px] placeholder:text-[14px]/[20px] px-0 font-mono rounded-none focus-visible:bg-input"
+        placeholder="Search"
         onChange={(e) => {
-          setValue(e.target.value);
-          onSearch(e.target.value);
+          console.log(e);
+          setIsLoading(true);
+          handleSearch(e.target.value);
+          setIsDropdownOpen(!!e.target.value);
         }}
         onFocus={() => {
-          setIsDropdownOpen(true);
+          setIsInputFocused(true);
+          if (result) setIsDropdownOpen(true);
+        }}
+        onBlur={() => {
+          setIsInputFocused(false);
         }}
         onKeyDown={handleKeyDown}
       />
 
-      <div
-        className="cursor-pointer flex items-center px-[15px] h-full"
-        onClick={() => onSearch(value)}
-      >
-        <SearchIcon />
-      </div>
-
-      {isDropdownOpen ? (
-        <div
-          ref={dropdownRef}
-          className="bg-background search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full"
+      {/* Command Shortcut - Only show when input is not focused */}
+      {!isInputFocused && !isMobile && (
+        <CommandShortcut
+          className="flex items-center justify-center select-none cursor-text bg-[#262A27] border border-[#27292C] rounded-[3px] px-[8px] text-foreground-100 text-[12px]/[16px] font-semibold tracking-[0.24px] h-[17px] w-[30.768px]"
+          onClick={() => inputRef.current?.focus()}
         >
-          <div
-            // hack for doing custom spacing for the dashed line
-            style={{
-              backgroundImage:
-                "linear-gradient(to right, var(--background) 50%, var(--background-400) 0%)",
-              backgroundPosition: "top",
-              backgroundSize: "15px 1px",
-              backgroundRepeat: "repeat-x",
-            }}
-            className="flex flex-col gap-2 px-[15px] py-[10px] border border-background-200 border-t-0 shadow-md"
-          >
-            {isSearching && value ? (
-              <div className="flex px-2 py-2 items-center justify-center text-sm text-foreground-100">
-                <Skeleton className="w-full h-[10px] rounded-full" />
+          {isMac ? "⌘K" : "Ctrl+K"}
+        </CommandShortcut>
+      )}
+
+      {/* {isDropdownOpen ? ( */}
+      <div
+        className={cn(
+          "bg-background-100 md:bg-spacer-100 search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full select-none rounded-b-sm",
+          isResultFocused && "cursor-pointer",
+          isDropdownOpen ? "block" : "hidden",
+        )}
+      >
+        <div className="border-t border-dashed border-background-200">
+          <div className="flex flex-col gap-2 p-[10px] border border-background-200 border-t-0 rounded-b-sm h-[55px]">
+            {isLoading ? (
+              <div className="h-[35px] flex items-center justify-center">
+                <span className="text-[12px]/[16px] font-normal normal-case text-foreground-400">
+                  Searching...
+                </span>
               </div>
             ) : result ? (
-              <div
+              <button
+                ref={dropdownResultRef}
                 tabIndex={0}
                 onKeyDown={handleKeyDown}
                 onClick={handleResultClick}
                 className={cn(
-                  "flex flex-row hover:bg-background-400 cursor-pointer items-center gap-2 justify-between w-full px-2 py-1 outline-none",
-                  isResultFocused && "bg-background-400",
+                  "flex flex-row hover:bg-background-200 cursor-pointer items-center justify-between w-full px-[8px] py-[9px] outline-none rounded-sm h-[35px]",
+                  isResultFocused && "bg-background-200",
                 )}
               >
-                <span className="font-bold uppercase">{result.type}</span>
+                <div className="bg-background-200 rounded-[3px] py-[2px] px-[8px] flex items-center justify-center">
+                  <span className="capitalize text-[#A8A8A8] text-[12px]/[16px] font-semibold tracking-[0.24px]">
+                    {result.type}
+                  </span>
+                </div>
 
-                <span>{truncateString(result.value, isMobile ? 10 : 25)}</span>
+                <span className="text-[13px]/[16px] font-normal font-mono text-foreground-400">
+                  {truncateString(result.value, isMobile ? 10 : 25)}
+                </span>
+              </button>
+            ) : (
+              <div className="h-[35px] flex items-center justify-center">
+                <span className="text-[12px]/[16px] font-normal normal-case text-foreground-400">
+                  No results found
+                </span>
               </div>
-            ) : value ? (
-              <div className="flex px-2 py-2 items-center justify-center text-sm lowercase text-foreground-100">
-                <div>No results found</div>
-              </div>
-            ) : null}
+            )}
           </div>
         </div>
-      ) : null}
+      </div>
+      {/* ) : null} */}
     </div>
   );
-}
+});
+
+SearchBar.displayName = "Searchbar";
