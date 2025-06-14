@@ -1,4 +1,4 @@
-import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { QUERY_KEYS, RPC_PROVIDER } from "@/services/rpc";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { useQueryClient } from "@tanstack/react-query";
@@ -10,7 +10,7 @@ import {
   AddressByUsernameQuery,
   AddressByUsernameQueryVariables,
 } from "@cartridge/utils/api/cartridge";
-import { cn, CommandShortcut, Input, SearchIcon, Skeleton } from "@cartridge/ui";
+import { cn, CommandShortcut, Input, SearchIcon } from "@cartridge/ui";
 import { isMac } from "@/constants/device";
 import { useDebounce } from "../hooks/useDebounce";
 import React from "react";
@@ -165,13 +165,24 @@ export const SearchBar = React.forwardRef<
     [queryClient],
   );
 
-  const handleSearch = useDebounce((value: string) => {
-    if (!value || value.length === 0) return;
-    // assuming that there will be no hash collision (very unlikely to collide)
+  const handleSearch = useCallback((value: string) => {
+    // Check if input is a valid BigInt (hex or numeric)
+    setIsLoading(true);
     setResult(undefined);
-    performSearch(value).then((promises) => {
-      if (promises.length > 1) {
-        const [isBlock, isTx, isContract, isClass] = promises;
+    try {
+      BigInt(value);
+      // For numeric/hex inputs, check multiple RPC methods
+      Promise.allSettled([
+        RPC_PROVIDER.getBlockWithTxs(value),
+        RPC_PROVIDER.getTransaction(value),
+        RPC_PROVIDER.getClassHashAt(value),
+        RPC_PROVIDER.getClass(value),
+      ]).then((results) => {
+        setIsLoading(false);
+        const [isBlock, isTx, isContract, isClass] = results.map(
+          (result) => result.status === "fulfilled",
+        );
+
         if (isBlock) {
           setResult({ type: "block", value });
         } else if (isTx) {
@@ -185,21 +196,73 @@ export const SearchBar = React.forwardRef<
         }
 
         if (isBlock || isTx || isContract || isClass) {
-          if (!isMobile) {
-            setIsResultFocused(true);
+          setIsResultFocused(true);
+        }
+      });
+    } catch {
+      // For non-numeric inputs, check username/controller
+      (async () => {
+        const fetchData = fetchDataCreator(
+          `${import.meta.env.VITE_CARTRIDGE_API_URL ?? "https://api.cartridge.gg"}/query`,
+        );
+        try {
+          const res = await fetchData<
+            AddressByUsernameQuery,
+            AddressByUsernameQueryVariables
+          >(AddressByUsernameDocument, {
+            username: value,
+          });
+          const address = res.account?.controllers?.edges?.[0]?.node?.address;
+          if (address) {
+            setResult({ type: "contract", value: address });
+          } else {
+            setResult(undefined);
           }
-        }
-      } else {
-        const [address] = promises;
-        if (address) {
-          setResult({ type: "contract", value: address as string });
-        } else {
+        } catch (error) {
+          console.error("Error fetching account:", error);
           setResult(undefined);
+        } finally {
+          setIsLoading(false);
         }
-      }
-      setIsLoading(false);
-    });
-  }, 500);
+      })();
+    }
+  }, []);
+
+  // const handleSearch = useDebounce((value: string) => {
+  //   if (!value || value.length === 0) return;
+  //   // assuming that there will be no hash collision (very unlikely to collide)
+  //   setResult(undefined);
+  //   performSearch(value).then((promises) => {
+  //     if (promises.length > 1) {
+  //       const [isBlock, isTx, isContract, isClass] = promises;
+  //       if (isBlock) {
+  //         setResult({ type: "block", value });
+  //       } else if (isTx) {
+  //         setResult({ type: "tx", value });
+  //       } else if (isContract) {
+  //         setResult({ type: "contract", value });
+  //       } else if (isClass) {
+  //         setResult({ type: "class", value });
+  //       } else {
+  //         setResult(undefined);
+  //       }
+
+  //       if (isBlock || isTx || isContract || isClass) {
+  //         if (!isMobile) {
+  //           setIsResultFocused(true);
+  //         }
+  //       }
+  //     } else {
+  //       const [address] = promises;
+  //       if (address) {
+  //         setResult({ type: "contract", value: address as string });
+  //       } else {
+  //         setResult(undefined);
+  //       }
+  //     }
+  //     setIsLoading(false);
+  //   });
+  // }, 500);
 
   const handleResultClick = useCallback(() => {
     switch (result?.type) {
@@ -258,7 +321,12 @@ export const SearchBar = React.forwardRef<
     >
       {/* Search Icon */}
       <div onClick={() => inputRef.current?.focus()} className="cursor-text">
-        <SearchIcon className="text-foreground-100 !w-[20px] !h-[20px]" />
+        <SearchIcon
+          className={cn(
+            "!w-[20px] !h-[20px]",
+            isInputFocused ? "text-foreground-100" : "text-foreground-400",
+          )}
+        />
       </div>
 
       {/* Search Input */}
@@ -266,9 +334,10 @@ export const SearchBar = React.forwardRef<
         ref={inputRef}
         name="search"
         containerClassName="flex-1"
-        className="bg-spacer-100 border-none focus-visible:bg-spacer-100 caret-foreground search-input search-input"
+        className="bg-background-100 focus-visible:bg-background-100 md:bg-spacer-100 md:focus-visible:bg-spacer-100  border-none caret-foreground search-input h-auto text-[14px]/[20px] placeholder:text-[14px]/[20px] px-0 font-mono rounded-none focus-visible:bg-input"
         placeholder="Search"
         onChange={(e) => {
+          console.log(e);
           setIsLoading(true);
           handleSearch(e.target.value);
           setIsDropdownOpen(!!e.target.value);
@@ -296,7 +365,7 @@ export const SearchBar = React.forwardRef<
       {/* {isDropdownOpen ? ( */}
       <div
         className={cn(
-          "bg-background-100 md:bg-spacer-100 search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full select-none",
+          "bg-background-100 md:bg-spacer-100 search-dropdown absolute bottom-0 left-[-1px] right-[-1px] translate-y-full select-none rounded-b-sm",
           isResultFocused && "cursor-pointer",
           isDropdownOpen ? "block" : "hidden",
         )}
