@@ -17,7 +17,9 @@ export function truncateString(str: string, n: number = 6): string {
 
 export function formatSnakeCaseToDisplayValue(variable: string) {
   if (!variable) return "";
-  return variable.replace(/_/g, " ").toUpperCase();
+  return variable
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 export function fromCamelCase(str: string) {

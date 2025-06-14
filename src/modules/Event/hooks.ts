@@ -1,6 +1,6 @@
-import { RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { isValidAddress } from "@/shared/utils/contract";
-import { convertValue } from "@/shared/utils/rpc_utils";
+import { convertValue } from "@/shared/utils/rpc";
 import { isNumber } from "@/shared/utils/string";
 import { EventDataItem } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
@@ -36,7 +36,7 @@ export function useEvent() {
       }
       const block = await RPC_PROVIDER.getBlock(receipt?.block_number);
 
-      const event = receipt?.events?.[Number(eventIndex)];
+      const event = receipt?.events?.[eventIndex];
 
       if (!event) {
         throw new Error("Event not found");
@@ -55,14 +55,11 @@ export function useEvent() {
         },
         to_block: { block_number: receipt?.block_number },
       });
-      const abiEvents = events.getAbiEvents(contract_abi);
-      const abiStructs = CallData.getAbiStruct(contract_abi);
-      const abiEnums = CallData.getAbiEnum(contract_abi);
       const parsedEvent = events.parseEvents(
         eventsC.events,
-        abiEvents,
-        abiStructs,
-        abiEnums,
+        events.getAbiEvents(contract_abi),
+        CallData.getAbiStruct(contract_abi),
+        CallData.getAbiEnum(contract_abi),
       );
 
       if (!parsedEvent) {
@@ -131,6 +128,7 @@ export function useEvent() {
         eventKeys,
       };
     },
+    retry: false,
   });
   return {
     data: {

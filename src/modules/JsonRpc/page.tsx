@@ -1,20 +1,35 @@
-import { rpcUrl } from "@/constants/rpc";
-import { Accordion, AccordionItem } from "@/shared/components/accordion";
+import { getRpcUrl } from "@/services/rpc";
+import {
+  PageHeader,
+  PageHeaderTitle,
+  PageHeaderRight,
+} from "@/shared/components/PageHeader";
+import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
+import { cn, Button, Input, TerminalIcon } from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/shared/components/breadcrumbs";
-import PageHeader from "@/shared/components/PageHeader";
-import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
-import { cn } from "@cartridge/ui-next";
+} from "@/shared/components/breadcrumb";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/shared/components/accordion";
 import { useQuery } from "@tanstack/react-query";
 import { PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fromCamelCase } from "@/shared/utils/string";
 import { OpenRPC, Method } from "./open-rpc";
-import { ParamForm } from "@/shared/form";
+import { ParamForm } from "@/shared/components/form";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Card } from "@/shared/components/card";
+import { Badge } from "@/shared/components/badge";
+import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 
 interface FormState {
   inputs: { name: string; value: string }[];
@@ -138,7 +153,7 @@ export function JsonRpcPlayground() {
         return p.value;
       }
     });
-    const res = await fetch(rpcUrl(), {
+    const res = await fetch(getRpcUrl(), {
       headers: {
         "Content-Type": "application/json",
       },
@@ -175,40 +190,35 @@ export function JsonRpcPlayground() {
     }));
   }, [methods]);
 
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (!methods.length) return;
+  useKeydownEffect((e) => {
+    if (!methods.length) return;
 
-      const currentIndex = methods.findIndex((m) => m.name === selected?.name);
-      if (currentIndex === -1) return;
+    const currentIndex = methods.findIndex((m) => m.name === selected?.name);
+    if (currentIndex === -1) return;
 
-      switch (e.key) {
-        case "ArrowDown":
-        case "j": {
-          e.preventDefault();
-          const newIndex = Math.min(methods.length - 1, currentIndex + 1);
-          onMethodChange(methods[newIndex]);
-          break;
-        }
-        case "ArrowUp":
-        case "k": {
-          e.preventDefault();
-          const newIndex = Math.max(0, currentIndex - 1);
-          onMethodChange(methods[newIndex]);
-          break;
-        }
-        case "Enter": {
-          if (!e.metaKey && !e.ctrlKey) return;
-          e.preventDefault();
-          onExecute();
-          break;
-        }
+    switch (e.key) {
+      case "ArrowDown":
+      case "j": {
+        e.preventDefault();
+        const newIndex = Math.min(methods.length - 1, currentIndex + 1);
+        onMethodChange(methods[newIndex]);
+        break;
+      }
+      case "ArrowUp":
+      case "k": {
+        e.preventDefault();
+        const newIndex = Math.max(0, currentIndex - 1);
+        onMethodChange(methods[newIndex]);
+        break;
+      }
+      case "Enter": {
+        if (!e.metaKey && !e.ctrlKey) return;
+        e.preventDefault();
+        onExecute();
+        break;
       }
     }
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [methods, selected, onMethodChange, onExecute]);
+  });
 
   useEffect(() => {
     const method = methods.find((m) => m.name === hash.replace("#", ""));
@@ -217,46 +227,54 @@ export function JsonRpcPlayground() {
   }, [hash, methods, onMethodChange]);
 
   return (
-    <div id="json-playground" className="w-full gap-8">
-      <div className="mb-2">
-        <Breadcrumb>
-          <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
+    <div id="json-playground" className="w-full flex flex-col gap-4">
+      <Breadcrumb>
+        <BreadcrumbList className="font-bold">
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>JSON-RPC Playground</BreadcrumbItem>
-        </Breadcrumb>
-      </div>
+          <BreadcrumbItem>
+            <BreadcrumbPage className="font-bold">
+              JSON-RPC Playground
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-      <PageHeader
-        className="mb-6"
-        title={`JSON-RPC Playground (${specVersion})`}
-      />
+      <PageHeader>
+        <PageHeaderTitle>
+          <TerminalIcon variant="solid" />
+          <div>JSON-RPC Playground</div>
+        </PageHeaderTitle>
+        <PageHeaderRight className="px-2 gap-2">
+          <Badge>v{specVersion}</Badge>
+        </PageHeaderRight>
+      </PageHeader>
 
       <div className="flex flex-col sl:flex-row sl:h-[76vh] w-full gap-4">
-        <div className="flex flex-col flex-1 md:flex-row justify-stretch border border-borderGray overflow-hidden py-5 px-4 gap-4 bg-white">
+        <Card className="flex flex-col flex-1 md:flex-row justify-stretch border overflow-hidden py-5 px-4 gap-4">
           <div className="min-w-[250px] flex flex-col gap-[6px] sl:overflow-y-auto">
-            <input
-              className="bg-white border border-borderGray px-4 py-2 text-base rounded-none search-input relative focus:outline-none focus:ring-0"
+            <Input
               placeholder="Search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
 
-            <div className="max-h-[30vh] sl:max-h-none overflow-y-auto border-b border-borderGray">
-              <Accordion>
-                <AccordionItem
-                  open
-                  title="Starknet"
-                  titleClassName="uppercase font-bold"
-                  contentClassName="p-0 overflow-y-scroll"
-                >
-                  <div>
+            <div className="max-h-[30vh] sl:max-h-none overflow-y-auto">
+              <Accordion defaultValue="starknet">
+                <AccordionItem value="starknet">
+                  <AccordionTrigger parentClassName="[&[data-state=open]]:border-b">
+                    Starknet
+                  </AccordionTrigger>
+                  <AccordionContent>
                     {methods?.map((method) => (
                       <div
                         className={cn(
                           "py-1 px-3",
                           method.name === selected?.name
-                            ? "bg-[#DBDBDB]"
-                            : "bg-[#F3F3F3] cursor-pointer",
+                            ? "bg-background-200"
+                            : "bg-background-100 cursor-pointer",
                         )}
                         key={method.name}
                         onClick={() => onMethodChange(method)}
@@ -264,7 +282,7 @@ export function JsonRpcPlayground() {
                         {method.name.replace("starknet_", "")}
                       </div>
                     ))}
-                  </div>
+                  </AccordionContent>
                 </AccordionItem>
               </Accordion>
             </div>
@@ -290,42 +308,44 @@ export function JsonRpcPlayground() {
               onSubmit={onExecute}
             />
           </div>
-        </div>
+        </Card>
 
-        <div className="w-full flex-1 flex flex-col gap-2 border border-borderGray py-5 px-4 bg-white lg:max-w-[800px]">
-          <button
+        <Card className="w-full flex-1 flex flex-col gap-2 py-5 px-4 lg:max-w-[800px]">
+          <Button
             onClick={onExecute}
-            className="bg-black text-white px-2 py-1 text-sm self-end flex items-center gap-3 uppercase font-bold hover:bg-opacity-80"
+            variant="secondary"
+            className="self-end w-40"
+            isLoading={form[selected?.name ?? ""]?.loading}
           >
-            {form[selected?.name ?? ""]?.loading ? (
-              "Executing..."
-            ) : (
-              <>
-                Execute
-                <PlayIcon className="size-2 fill-white" />
-              </>
-            )}
-          </button>
+            Execute
+            <PlayIcon className="size-2 fill-white" />
+          </Button>
 
           <div className="w-full overflow-auto">
-            <Accordion>
-              <AccordionItem title="request" titleClassName="uppercase" open>
-                <div className="w-full overflow-x-auto">
+            <Accordion type="multiple" defaultValue={["request", "response"]}>
+              <AccordionItem value="request">
+                <AccordionTrigger parentClassName="[&[data-state=open]>div]:text-foreground-200 [&[data-state=open]]:border-b">
+                  Request
+                </AccordionTrigger>
+                <AccordionContent className="min-h-80 overflow-x-auto p-3">
                   <code>
                     <pre>{requestJSON}</pre>
                   </code>
-                </div>
+                </AccordionContent>
               </AccordionItem>
-              <AccordionItem title="response" titleClassName="uppercase" open>
-                <div className="min-h-80 overflow-x-auto">
+              <AccordionItem value="response">
+                <AccordionTrigger parentClassName="[&[data-state=open]>div]:text-foreground-200 [&[data-state=open]]:border-b">
+                  Response
+                </AccordionTrigger>
+                <AccordionContent className="min-h-80 overflow-x-auto p-3">
                   <code>
                     <pre>{responseJSON}</pre>
                   </code>
-                </div>
+                </AccordionContent>
               </AccordionItem>
             </Accordion>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

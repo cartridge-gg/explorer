@@ -1,50 +1,48 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { getPaginatedBlockNumbers } from "@/shared/utils/rpc_utils";
-import { BlocksTable } from "./components/BlocksTable";
-import { TransactionTable } from "./components/TransactionsTable";
-import { QUERY_KEYS, RPC_PROVIDER } from "@/services/starknet_provider_config";
-
-const POLLING_INTERVAL = 3000; // 3 seconds
-const INITIAL_BLOCKS_TO_FETCH = 10;
+import { SearchBar } from "@/shared/components/search-bar";
+import { Header } from "@/shared/components/header";
+import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
+import { Link } from "react-router-dom";
+import { Network, Skeleton } from "@cartridge/ui";
+import useChain from "@/shared/hooks/useChain";
 
 export function Home() {
-  // Fetch the latest block number
-  const { data: latestBlockNumber } = useQuery({
-    queryKey: QUERY_KEYS.getBlockNumber,
-    queryFn: () => RPC_PROVIDER.getBlockNumber(),
-    refetchInterval: POLLING_INTERVAL,
-  });
-
-  // Fetch the last 10 blocks (Dependent on latestBlockNumber) in parallel
-  const latestBlocksQueries = useQueries({
-    queries: latestBlockNumber
-      ? getPaginatedBlockNumbers(
-          latestBlockNumber,
-          INITIAL_BLOCKS_TO_FETCH,
-        ).map((blockNumber) => ({
-          queryKey: [QUERY_KEYS.getBlockWithTxs, blockNumber],
-          queryFn: () => RPC_PROVIDER.getBlockWithTxs(blockNumber),
-          enabled: !!blockNumber,
-          refetchInterval: POLLING_INTERVAL,
-        }))
-      : [],
-  });
-
-  // Extract blocks data & loading states
-  const latestBlocks = latestBlocksQueries
-    ?.map((query) => query.data)
-    .filter(Boolean);
-  const isBlocksLoading = latestBlocksQueries?.some((query) => query.isLoading);
+  const { id: chainId } = useChain();
+  const { data: specVersion } = useSpecVersion();
 
   return (
-    <div className="flex flex-col w-full gap-8 px-2 py-4">
-      <div className="flex flex-col w-full gap-8">
-        <BlocksTable blocks={latestBlocks} isBlocksLoading={isBlocksLoading} />
-        <TransactionTable
-          blocks={latestBlocks}
-          isBlocksLoading={isBlocksLoading}
-        />
+    <div className="relative w-full h-full flex flex-col items-center">
+      <Header />
+
+      <div className="h-full flex flex-col items-center justify-center gap-2 p-1 w-full sm:w-[520px]">
+        <div className="flex gap-2 w-full uppercase text-sm font-bold">
+          <div className="px-3 py-1 flex flex-1 items-center bg-background-200 rounded-tl">
+            Explorer
+          </div>
+
+          {chainId ? (
+            <Network
+              chainId={chainId.id}
+              tooltipTriggerClassName="w-40 bg-background-200 hover:bg-background-300 rounded-none rounded-tr"
+            />
+          ) : (
+            <Skeleton className="w-40 h-10 rounded-none rounded-tr" />
+          )}
+        </div>
+
+        <SearchBar className="rounded-t-none" />
       </div>
+
+      <Link
+        to="./json-rpc"
+        className="absolute bottom-0 left-0 flex flex-col uppercase text-sm items-start gap-1"
+      >
+        <div className="homepage-chain-info-item border border-background-200 h-[20px] flex items-center">
+          <span className="font-bold px-2">Starknet JSON-RPC Spec</span>
+          <span className="border-l border-background-200 px-2">
+            {specVersion || "N/A"}
+          </span>
+        </div>
+      </Link>
     </div>
   );
 }
