@@ -384,87 +384,71 @@ export function Transaction() {
             </div>
 
             <Card className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-              <Tabs
-                value={tab.selected}
-                onValueChange={tab.onChange}
-                className="h-full"
-              >
-                <CardContent>
-                  <TabsList>
+              {tx ? (
+                <Tabs
+                  value={tab.selected}
+                  onValueChange={tab.onChange}
+                  className="h-full"
+                >
+                  <CardContent>
+                    <TabsList>
+                      {tx?.type === "INVOKE" && (
+                        <TabsTrigger value="calldata">
+                          <ListIcon variant="solid" />
+                          <div>Calldata</div>
+                        </TabsTrigger>
+                      )}
+                      {tx?.type === "DECLARE" && (
+                        <TabsTrigger value="class">
+                          <ListIcon variant="solid" />
+                          <div>Class</div>
+                        </TabsTrigger>
+                      )}
+                      <TabsTrigger value="signature">
+                        <PencilIcon variant="solid" />
+                        <div>Signature</div>
+                      </TabsTrigger>
+                      <TabsTrigger value="events">
+                        <PulseIcon variant="solid" />
+                        <div>Events</div>
+                      </TabsTrigger>
+                      <TabsTrigger value="storage-diffs">
+                        <StackOvalIcon variant="solid" />
+                        <div>Storage Diffs</div>
+                      </TabsTrigger>
+                    </TabsList>
+                  </CardContent>
+                  <CardSeparator />
+
+                  <CardContent>
                     {tx?.type === "INVOKE" && (
-                      <TabsTrigger value="calldata">
-                        <ListIcon variant="solid" />
-                        <div>Calldata</div>
-                      </TabsTrigger>
+                      <TabsContent value="calldata">
+                        <Calldata tx={tx} />
+                      </TabsContent>
                     )}
-                    {tx?.type === "DECLARE" && (
-                      <TabsTrigger value="class">
-                        <ListIcon variant="solid" />
-                        <div>Class</div>
-                      </TabsTrigger>
-                    )}
-                    <TabsTrigger value="signature">
-                      <PencilIcon variant="solid" />
-                      <div>Signature</div>
-                    </TabsTrigger>
-                    <TabsTrigger value="events">
-                      <PulseIcon variant="solid" />
-                      <div>Events</div>
-                    </TabsTrigger>
-                    <TabsTrigger value="storage-diffs">
-                      <StackOvalIcon variant="solid" />
-                      <div>Storage Diffs</div>
-                    </TabsTrigger>
-                  </TabsList>
-                </CardContent>
-                <CardSeparator />
-
-                <CardContent>
-                  {tx?.type === "INVOKE" && (
-                    <TabsContent value="calldata">
-                      <Calldata tx={tx} />
-                    </TabsContent>
-                  )}
-                  {tx?.type === "DECLARE" && !!declared && (
-                    <TabsContent value="class" className="flex flex-col gap-4">
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <CardLabel>Class Hash</CardLabel>
-                          <Hash
-                            value={tx.class_hash}
-                            to={`../class/${tx.class_hash}`}
-                          />
+                    {tx?.type === "DECLARE" && !!declared && (
+                      <TabsContent
+                        value="class"
+                        className="flex flex-col gap-4"
+                      >
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <CardLabel>Class Hash</CardLabel>
+                            <Hash
+                              value={tx.class_hash}
+                              to={`../class/${tx.class_hash}`}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between gap-2">
+                            <CardLabel>Compiled Class Hash</CardLabel>
+                            <Hash value={tx.compiled_class_hash} />
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between gap-2">
-                          <CardLabel>Compiled Class Hash</CardLabel>
-                          <Hash value={tx.compiled_class_hash} />
-                        </div>
-                      </div>
 
-                      <Editor
-                        className="min-h-[80vh]"
-                        defaultLanguage="json"
-                        value={JSON.stringify(declared, null, 2)}
-                        options={{
-                          readOnly: true,
-                          scrollbar: {
-                            alwaysConsumeMouseWheel: false,
-                          },
-                        }}
-                      />
-                    </TabsContent>
-                  )}
-                  <TabsContent value="signature">
-                    <UITabs defaultValue="hex">
-                      <UITabsList>
-                        <UITabsTrigger value="hex">Hex</UITabsTrigger>
-                        <UITabsTrigger value="decoded">Dec</UITabsTrigger>
-                      </UITabsList>
-                      <UITabsContent value="hex">
                         <Editor
                           className="min-h-[80vh]"
                           defaultLanguage="json"
-                          value={JSON.stringify(tx?.signature ?? [], null, 2)}
+                          value={JSON.stringify(declared, null, 2)}
                           options={{
                             readOnly: true,
                             scrollbar: {
@@ -472,24 +456,55 @@ export function Transaction() {
                             },
                           }}
                         />
-                      </UITabsContent>
-                      <UITabsContent value="dec">
-                        {tx ? (
-                          <FeltList list={tx?.signature} displayAs="dec" />
-                        ) : (
-                          <Skeleton className="h-4 w-full" />
-                        )}
-                      </UITabsContent>
-                    </UITabs>
-                  </TabsContent>
-                  <TabsContent value="events">
-                    <DataTable table={events} />
-                  </TabsContent>
-                  <TabsContent value="storage-diffs">
-                    <DataTable table={storageDiff} />
-                  </TabsContent>
-                </CardContent>
-              </Tabs>
+                      </TabsContent>
+                    )}
+                    <TabsContent value="signature">
+                      <UITabs defaultValue="hex">
+                        <UITabsList>
+                          <UITabsTrigger value="hex">Hex</UITabsTrigger>
+                          <UITabsTrigger value="decoded">Dec</UITabsTrigger>
+                        </UITabsList>
+                        <UITabsContent value="hex">
+                          <Editor
+                            className="min-h-[80vh]"
+                            defaultLanguage="json"
+                            value={JSON.stringify(tx?.signature ?? [], null, 2)}
+                            options={{
+                              readOnly: true,
+                              scrollbar: {
+                                alwaysConsumeMouseWheel: false,
+                              },
+                            }}
+                          />
+                        </UITabsContent>
+                        <UITabsContent value="dec">
+                          {tx ? (
+                            <FeltList list={tx?.signature} displayAs="dec" />
+                          ) : (
+                            <Skeleton className="h-4 w-full" />
+                          )}
+                        </UITabsContent>
+                      </UITabs>
+                    </TabsContent>
+                    <TabsContent value="events">
+                      <DataTable table={events} />
+                    </TabsContent>
+                    <TabsContent value="storage-diffs">
+                      <DataTable table={storageDiff} />
+                    </TabsContent>
+                  </CardContent>
+                </Tabs>
+              ) : (
+                <Tabs>
+                  <TabsList className="border-b border-background-200 animate-pulse pointer-events-none">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <TabsTrigger value={`dummy-tab-${i}`}>
+                        <Skeleton className="h-4 w-40" />
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+              )}
             </Card>
           </div>
 
