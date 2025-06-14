@@ -12,7 +12,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AbiEntry, CallData, events as eventsLib, hash } from "starknet";
 import { FunctionAbi } from "starknet";
 import {
-  decodeCalldata,
   getEventName,
   initBlockComputeData,
   initExecutions,
@@ -63,7 +62,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
   } = useQuery<{
     tx?: Awaited<ReturnType<typeof RPC_PROVIDER.getTransaction>>;
     declared?: Awaited<ReturnType<typeof RPC_PROVIDER.getClassByHash>>;
-    calldata: { contract: string; selector: string; args: string[] }[];
+    calldata?: { contract: string; selector: string; args: string[] }[];
   }>({
     queryKey: ["transaction", "calldata", txHash],
     queryFn: async () => {
@@ -79,13 +78,11 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
       return {
         tx,
         declared,
-        calldata: "calldata" in tx ? decodeCalldata(tx.calldata) : [],
       };
     },
     initialData: {
       tx: undefined,
       declared: undefined,
-      calldata: [],
     },
     retry: false,
   });
@@ -424,15 +421,15 @@ interface AbiItem {
   members?: Array<{ name: string; type: string; offset: number }>;
 }
 
-export function useCalldata(calldata: Calldata[]) {
+export function useCalldata(calldata: Calldata[] | undefined) {
   const { txHash } = useParams<{ txHash: string }>();
 
   return useQuery({
     queryKey: ["tx", txHash, "calldata", calldata],
     queryFn: async () => {
-      if (!calldata || calldata.length === 0) return [];
+      if (!calldata || calldata.length === 0) return;
 
-      return await Promise.all(
+      return Promise.all(
         calldata.map(async (d) => {
           try {
             const c = await RPC_PROVIDER.getClassAt(d.contract);

@@ -65,7 +65,6 @@ export function Transaction() {
     data: {
       tx,
       receipt,
-      calldata,
       declared,
       block,
       blockComputeData,
@@ -423,7 +422,7 @@ export function Transaction() {
                 <CardContent>
                   {tx?.type === "INVOKE" && (
                     <TabsContent value="calldata">
-                      <Calldata calldata={calldata} />
+                      <Calldata tx={tx} />
                     </TabsContent>
                   )}
                   {tx?.type === "DECLARE" && !!declared && (
