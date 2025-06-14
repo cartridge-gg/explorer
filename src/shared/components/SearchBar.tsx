@@ -1,7 +1,6 @@
-import { QUERY_KEYS, RPC_PROVIDER } from "@/services/rpc";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
-import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchDataCreator } from "@cartridge/utils";
@@ -12,7 +11,7 @@ import {
 } from "@cartridge/utils/api/cartridge";
 import { cn, CommandShortcut, Input, SearchIcon } from "@cartridge/ui";
 import { isMac } from "@/constants/device";
-import { useDebounce } from "../hooks/useDebounce";
+import { useDebounce } from "../hooks/useDebounce.tsx";
 import React from "react";
 
 export const SearchBar = React.forwardRef<
@@ -37,8 +36,6 @@ export const SearchBar = React.forwardRef<
   >();
 
   const [isLoading, setIsLoading] = useState(false);
-
-  const queryClient = useQueryClient();
 
   // Handle Cmd+K / Ctrl+K keyboard shortcut to focus search
   useEffect(() => {
@@ -78,97 +75,11 @@ export const SearchBar = React.forwardRef<
     };
   }, []);
 
-  const performSearch = useCallback(
-    (input: string) => {
-      try {
-        BigInt(input);
-        const blockWithTxsPromise = queryClient
-          .fetchQuery({
-            queryKey: [QUERY_KEYS.getBlockWithTxs, input],
-            queryFn: () => RPC_PROVIDER.getBlockWithTxs(input),
-          })
-          .then(() => true)
-          .catch((error) => {
-            console.error("Error fetching block with txs:", error);
-            return false;
-          });
-
-        const transactionPromise = queryClient
-          .fetchQuery({
-            queryKey: [QUERY_KEYS.getTransaction, input],
-            queryFn: () => RPC_PROVIDER.getTransaction(input),
-          })
-          .then(() => true)
-          .catch((error) => {
-            console.error("Error fetching transaction:", error);
-            return false;
-          });
-
-        const classHashPromise = queryClient
-          .fetchQuery({
-            queryKey: [QUERY_KEYS.getClassHashAt, input],
-            queryFn: () => RPC_PROVIDER.getClassHashAt(input),
-          })
-          .then(() => true)
-          .catch((error) => {
-            console.error("Error fetching class hash:", error);
-            return false;
-          });
-
-        const classPromise = queryClient
-          .fetchQuery({
-            queryKey: [QUERY_KEYS.getClassAt, input],
-            queryFn: () => RPC_PROVIDER.getClass(input),
-          })
-          .then(() => true)
-          .catch((error) => {
-            console.error("Error fetching class:", error);
-            return false;
-          });
-
-        return Promise.all([
-          blockWithTxsPromise,
-          transactionPromise,
-          classHashPromise,
-          classPromise,
-        ]);
-      } catch {
-        const controllerPromise = queryClient
-          .fetchQuery({
-            queryKey: [QUERY_KEYS.getController, input],
-            queryFn: async () => {
-              const fetchData = fetchDataCreator(
-                `${import.meta.env.VITE_CARTRIDGE_API_URL ?? "https://api.cartridge.gg"}/query`,
-              );
-              try {
-                const res = await fetchData<
-                  AddressByUsernameQuery,
-                  AddressByUsernameQueryVariables
-                >(AddressByUsernameDocument, {
-                  username: input,
-                });
-                return res.account?.controllers?.edges?.[0]?.node?.address;
-              } catch (error) {
-                console.error("Error fetching account:", error);
-                return;
-              }
-            },
-          })
-          .catch((error) => {
-            console.error("Error fetching account:", error);
-            return false;
-          });
-
-        return Promise.all([controllerPromise]);
-      }
-    },
-    [queryClient],
-  );
-
-  const handleSearch = useCallback((value: string) => {
+  const handleSearch = useDebounce((value: string) => {
     // Check if input is a valid BigInt (hex or numeric)
     setIsLoading(true);
     setResult(undefined);
+
     try {
       BigInt(value);
       // For numeric/hex inputs, check multiple RPC methods
@@ -226,43 +137,7 @@ export const SearchBar = React.forwardRef<
         }
       })();
     }
-  }, []);
-
-  // const handleSearch = useDebounce((value: string) => {
-  //   if (!value || value.length === 0) return;
-  //   // assuming that there will be no hash collision (very unlikely to collide)
-  //   setResult(undefined);
-  //   performSearch(value).then((promises) => {
-  //     if (promises.length > 1) {
-  //       const [isBlock, isTx, isContract, isClass] = promises;
-  //       if (isBlock) {
-  //         setResult({ type: "block", value });
-  //       } else if (isTx) {
-  //         setResult({ type: "tx", value });
-  //       } else if (isContract) {
-  //         setResult({ type: "contract", value });
-  //       } else if (isClass) {
-  //         setResult({ type: "class", value });
-  //       } else {
-  //         setResult(undefined);
-  //       }
-
-  //       if (isBlock || isTx || isContract || isClass) {
-  //         if (!isMobile) {
-  //           setIsResultFocused(true);
-  //         }
-  //       }
-  //     } else {
-  //       const [address] = promises;
-  //       if (address) {
-  //         setResult({ type: "contract", value: address as string });
-  //       } else {
-  //         setResult(undefined);
-  //       }
-  //     }
-  //     setIsLoading(false);
-  //   });
-  // }, 500);
+  }, 500);
 
   const handleResultClick = useCallback(() => {
     switch (result?.type) {
