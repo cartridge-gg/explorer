@@ -26,14 +26,19 @@ export function Hash({
   const [first, last] = truncateString(value ?? "", length).split("...");
   const navigate = useNavigate();
 
-  const onCopy = useCallback(() => {
-    if (!value) {
-      return;
-    }
+  const onCopy = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      e.stopPropagation();
 
-    navigator.clipboard.writeText(value);
-    toast.success("Address copied to clipboard");
-  }, [value]);
+      if (!value) {
+        return;
+      }
+
+      navigator.clipboard.writeText(value);
+      toast.success("Address copied to clipboard");
+    },
+    [value],
+  );
 
   const onNavigate = useCallback(() => {
     if (!to) {

@@ -1,4 +1,4 @@
-import { RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { RPC_PROVIDER, CACHE_CONFIG } from "@/services/rpc";
 import { truncateString } from "@/shared/utils/string";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -12,13 +12,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AbiEntry, CallData, events as eventsLib, hash } from "starknet";
 import { FunctionAbi } from "starknet";
 import {
-  decodeCalldata,
   getEventName,
   initBlockComputeData,
   initExecutions,
   parseExecutionResources,
-} from "@/shared/utils/rpc_utils";
-import { CACHE_TIME, STALE_TIME } from "@/constants/rpc";
+} from "@/shared/utils/rpc";
+
 import { useBlock } from "@starknet-react/core";
 import { isValidAddress } from "@/shared/utils/contract";
 
@@ -63,7 +62,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
   } = useQuery<{
     tx?: Awaited<ReturnType<typeof RPC_PROVIDER.getTransaction>>;
     declared?: Awaited<ReturnType<typeof RPC_PROVIDER.getClassByHash>>;
-    calldata: { contract: string; selector: string; args: string[] }[];
+    calldata?: { contract: string; selector: string; args: string[] }[];
   }>({
     queryKey: ["transaction", "calldata", txHash],
     queryFn: async () => {
@@ -79,13 +78,11 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
       return {
         tx,
         declared,
-        calldata: "calldata" in tx ? decodeCalldata(tx.calldata) : [],
       };
     },
     initialData: {
       tx: undefined,
       declared: undefined,
-      calldata: [],
     },
     retry: false,
   });
@@ -205,8 +202,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     },
     initialData: [],
     enabled: !!txHash,
-    staleTime: STALE_TIME,
-    gcTime: CACHE_TIME,
+    ...CACHE_CONFIG,
   });
 
   const { data: block } = useBlock({
@@ -425,15 +421,15 @@ interface AbiItem {
   members?: Array<{ name: string; type: string; offset: number }>;
 }
 
-export function useCalldata(calldata: Calldata[]) {
+export function useCalldata(calldata: Calldata[] | undefined) {
   const { txHash } = useParams<{ txHash: string }>();
 
   return useQuery({
     queryKey: ["tx", txHash, "calldata", calldata],
     queryFn: async () => {
-      if (!calldata || calldata.length === 0) return [];
+      if (!calldata || calldata.length === 0) return;
 
-      return await Promise.all(
+      return Promise.all(
         calldata.map(async (d) => {
           try {
             const c = await RPC_PROVIDER.getClassAt(d.contract);

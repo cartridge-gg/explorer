@@ -1,7 +1,12 @@
-import { cairo, GetTransactionReceiptResponse, shortString } from "starknet";
+import {
+  cairo,
+  GetTransactionReceiptResponse,
+  GetTransactionResponse,
+  shortString,
+} from "starknet";
 import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
-import { EXECUTION_RESOURCES_KEY_MAP } from "@/constants/rpc";
+import { EXECUTION_RESOURCES_KEY_MAP } from "@/services/rpc";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
@@ -13,18 +18,22 @@ export function getPaginatedBlockNumbers(block_number: number, limit: number) {
 }
 
 // Function to decode Starknet calldata
-export function decodeCalldata(calldata: string[]) {
-  const numTxns = Number(cairo.felt(calldata[0])); // Number of transactions in batch
+export function decodeCalldata(tx: GetTransactionResponse) {
+  if (tx.version === "0x0" || !("calldata" in tx)) {
+    return;
+  }
+
+  const numTxns = Number(cairo.felt(tx.calldata[0])); // Number of transactions in batch
   const transactions = [];
   let index = 1; // Start after batch size
 
   for (let i = 0; i < numTxns; i++) {
-    const contract = calldata[index]; // Contract address
-    const sender = calldata[index + 1]; // Sender address
-    const numArgs = Number(cairo.felt(calldata[index + 2])); // Number of arguments
+    const contract = tx.calldata[index]; // Contract address
+    const sender = tx.calldata[index + 1]; // Sender address
+    const numArgs = Number(cairo.felt(tx.calldata[index + 2])); // Number of arguments
 
     // Extract arguments dynamically
-    const args = calldata.slice(index + 3, index + 3 + numArgs);
+    const args = tx.calldata.slice(index + 3, index + 3 + numArgs);
 
     transactions.push({
       contract: contract,

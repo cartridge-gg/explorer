@@ -65,7 +65,6 @@ export function Transaction() {
     data: {
       tx,
       receipt,
-      calldata,
       declared,
       block,
       blockComputeData,
@@ -84,7 +83,7 @@ export function Transaction() {
   const { isMobile } = useScreen();
 
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-2">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -423,7 +422,7 @@ export function Transaction() {
                 <CardContent>
                   {tx?.type === "INVOKE" && (
                     <TabsContent value="calldata">
-                      <Calldata calldata={calldata} />
+                      <Calldata tx={tx} />
                     </TabsContent>
                   )}
                   {tx?.type === "DECLARE" && !!declared && (

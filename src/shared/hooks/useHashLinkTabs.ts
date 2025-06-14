@@ -9,7 +9,7 @@ export function useHashLinkTabs(defaultValue: string) {
   const onChange = (tab: string) => {
     const newHash = toHash(tab);
     if (newHash === hash) return;
-    navigate({ pathname: ".", hash: newHash });
+    navigate({ pathname: ".", hash: newHash }, { replace: true });
   };
 
   return { selected: hash.replace("#", "") || defaultValue, onChange };

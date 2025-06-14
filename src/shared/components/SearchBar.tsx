@@ -10,7 +10,7 @@ import {
   AddressByUsernameQuery,
   AddressByUsernameQueryVariables,
 } from "@cartridge/utils/api/cartridge";
-import { cn, CommandShortcut, Input, SearchIcon } from "@cartridge/ui";
+import { cn, CommandShortcut, Input, SearchIcon, Skeleton } from "@cartridge/ui";
 import { isMac } from "@/constants/device";
 import { useDebounce } from "../hooks/useDebounce";
 import React from "react";
@@ -258,12 +258,7 @@ export const SearchBar = React.forwardRef<
     >
       {/* Search Icon */}
       <div onClick={() => inputRef.current?.focus()} className="cursor-text">
-        <SearchIcon
-          className={cn(
-            "!w-[20px] !h-[20px]",
-            isInputFocused ? "text-foreground-100" : "text-foreground-400",
-          )}
-        />
+        <SearchIcon className="text-foreground-100 !w-[20px] !h-[20px]" />
       </div>
 
       {/* Search Input */}
@@ -271,7 +266,7 @@ export const SearchBar = React.forwardRef<
         ref={inputRef}
         name="search"
         containerClassName="flex-1"
-        className="bg-background-100 focus-visible:bg-background-100 md:bg-spacer-100 md:focus-visible:bg-spacer-100  border-none caret-foreground search-input h-auto text-[14px]/[20px] placeholder:text-[14px]/[20px] px-0 font-mono rounded-none focus-visible:bg-input"
+        className="bg-spacer-100 border-none focus-visible:bg-spacer-100 caret-foreground search-input search-input"
         placeholder="Search"
         onChange={(e) => {
           setIsLoading(true);

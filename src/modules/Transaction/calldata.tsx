@@ -19,10 +19,13 @@ import {
 } from "@/shared/components/dialog";
 import { toast } from "sonner";
 import { Badge } from "@/shared/components/badge";
-import { Calldata as CalldataType, useCalldata } from "./hooks";
+import { useCalldata } from "./hooks";
+import { GetTransactionResponse } from "starknet";
+import { decodeCalldata } from "@/shared/utils/rpc";
 
-export function Calldata({ calldata }: { calldata: CalldataType[] }) {
-  const { data: decoded } = useCalldata(calldata);
+export function Calldata({ tx }: { tx: GetTransactionResponse }) {
+  const { data: decoded } = useCalldata(decodeCalldata(tx));
+
   return (
     <Tabs defaultValue="decoded">
       <TabsList>
@@ -31,7 +34,17 @@ export function Calldata({ calldata }: { calldata: CalldataType[] }) {
       </TabsList>
 
       <TabsContent value="decoded">
-        {decoded ? (
+        {!tx ? (
+          <>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </>
+        ) : !decoded ? (
+          <div className="w-full h-[10vh] flex items-center justify-center">
+            Unknown calldata
+          </div>
+        ) : (
           decoded.map((c, i) => (
             <Dialog key={i}>
               <DialogTrigger asChild>
@@ -109,12 +122,6 @@ export function Calldata({ calldata }: { calldata: CalldataType[] }) {
               </DialogContent>
             </Dialog>
           ))
-        ) : (
-          <>
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
-            ))}
-          </>
         )}
       </TabsContent>
 
@@ -122,11 +129,7 @@ export function Calldata({ calldata }: { calldata: CalldataType[] }) {
         <Editor
           className="min-h-[80vh]"
           defaultLanguage="json"
-          value={JSON.stringify(
-            calldata.flatMap((calldata) => calldata.args),
-            null,
-            2,
-          )}
+          value={JSON.stringify(tx.calldata, null, 2)}
           options={{
             readOnly: true,
             scrollbar: {

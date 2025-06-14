@@ -2,7 +2,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useScreen } from "@/shared/hooks/useScreen";
 import dayjs from "dayjs";
 import { useState } from "react";
-import { convertValue } from "@/shared/utils/rpc_utils";
+import { convertValue } from "@/shared/utils/rpc";
 import { DisplayFormatTypes } from "@/types/types";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { useEvent } from "./hooks";

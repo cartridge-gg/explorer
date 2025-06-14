@@ -1,4 +1,4 @@
-import { RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { Badge } from "@/shared/components/badge";
 import { Hash } from "@/shared/components/hash";
 import { useScreen } from "@/shared/hooks/useScreen";
@@ -7,7 +7,7 @@ import {
   initExecutions,
   parseExecutionResources,
   initBlockComputeData,
-} from "@/shared/utils/rpc_utils";
+} from "@/shared/utils/rpc";
 import { isNumber } from "@/shared/utils/string";
 import { EventTableData, TransactionTableData } from "@/types/types";
 import { CircleCheckIcon, TimesCircleIcon } from "@cartridge/ui";

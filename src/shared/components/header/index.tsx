@@ -1,4 +1,4 @@
-import { SearchBar } from "@/shared/components/SearchBar";
+import { SearchBar } from "@/shared/search-bar";
 import { Account } from "./account";
 import { useLocation } from "react-router-dom";
 import {

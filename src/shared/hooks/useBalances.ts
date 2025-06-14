@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { RPC_PROVIDER } from "@/services/starknet_provider_config";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { Contract, uint256 } from "starknet";
 
 // Default addresses for fee tokens
@@ -63,7 +63,7 @@ interface UseBalancesReturn {
   refetch: () => void;
 }
 
-function useBalances(
+export function useBalances(
   contractAddress: string,
   addresses: FeeTokenAddresses = DEFAULT_ADDRESSES,
 ): UseBalancesReturn {
@@ -118,5 +118,3 @@ function useBalances(
     refetch,
   };
 }
-
-export default useBalances;
