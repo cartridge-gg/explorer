@@ -83,7 +83,7 @@ export function Transaction() {
   const { isMobile } = useScreen();
 
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-2">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
