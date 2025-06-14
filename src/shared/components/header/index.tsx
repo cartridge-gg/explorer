@@ -1,4 +1,4 @@
-import { SearchBar } from "@/shared/search-bar";
+// import { SearchBar } from "@/shared/search-bar";
 import { Account } from "./account";
 import { useLocation } from "react-router-dom";
 import {
@@ -13,6 +13,7 @@ import useChain from "@/shared/hooks/useChain";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { Network } from "../network";
 import { useState } from "react";
+import { SearchBar } from "../SearchBar";
 
 export function Header() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
