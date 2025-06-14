@@ -250,7 +250,7 @@ export const SearchBar = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "min-w-[280px] w-full py-[7px] md:py-[10px] px-[10px] md:px-[12px] flex gap-[8px] relative border border-background-200 items-center rounded-sm bg-background-100 md:bg-spacer-100  shadow-[0px_4px_8px_0px_rgba(0,0,0,0.25)] md:shadow-none",
+        "min-w-[280px] w-full h-[40px] py-[7px] md:py-[10px] px-[10px] md:px-[12px] flex gap-[8px] relative border border-background-200 items-center rounded-sm bg-background-100 md:bg-spacer-100  shadow-[0px_4px_8px_0px_rgba(0,0,0,0.25)] md:shadow-none",
         isDropdownOpen && "border-b-0 rounded-b-none",
         className,
       )}
