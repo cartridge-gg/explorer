@@ -25,12 +25,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumb";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/shared/components/accordion";
+
 import {
   Card,
   CardContent,
@@ -250,7 +245,7 @@ export function JsonRpcPlayground() {
   }, [hash, methods, onMethodChange]);
 
   return (
-    <div id="json-playground" className="w-full flex flex-col gap-2">
+    <div id="json-playground" className="w-full max-w-full flex flex-col gap-2">
       <Breadcrumb>
         <BreadcrumbList className="font-bold">
           <BreadcrumbItem>
@@ -275,8 +270,8 @@ export function JsonRpcPlayground() {
         </PageHeaderRight>
       </PageHeader>
 
-      <div className="flex flex-col md:flex-row md:h-[76vh] gap-2">
-        <Card className="py-0 flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-background-200">
+      <div className="flex flex-col md:flex-row md:h-[90vh] gap-2">
+        <Card className="py-0 flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-background-200 min-w-0">
           <div className="md:w-[300px] flex flex-col gap-3 py-3">
             <CardContent>
               <div className="relative flex items-center w-full">
@@ -399,29 +394,30 @@ export function JsonRpcPlayground() {
           </div>
         </Card>
 
-        <div className="flex-1 w-full overflow-auto">
-          <Accordion type="multiple" defaultValue={["request", "response"]}>
-            <AccordionItem value="request">
-              <AccordionTrigger parentClassName="[&[data-state=open]>div]:text-foreground-200 [&[data-state=open]]:border-b">
-                Request
-              </AccordionTrigger>
-              <AccordionContent className="min-h-80 overflow-x-auto p-3 bg-input">
-                <code>
-                  <pre>{requestJSON}</pre>
-                </code>
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="response">
-              <AccordionTrigger parentClassName="[&[data-state=open]>div]:text-foreground-200 [&[data-state=open]]:border-b">
-                Response
-              </AccordionTrigger>
-              <AccordionContent className="min-h-80 overflow-x-auto p-3 bg-input flex-grow rounded-b">
-                <code>
-                  <pre>{responseJSON}</pre>
-                </code>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+        <div className="w-full grid grid-rows-[auto_1fr] h-full">
+          {/* Request Section */}
+          <div className="border border-b-0 first:rounded-t border-background-200">
+            <div className="border-background-200 p-3 font-semibold text-foreground-200 border-b">
+              Request
+            </div>
+            <div className="p-3 bg-input">
+              <code className="text-sm block">
+                <pre className="whitespace-pre-wrap">{requestJSON}</pre>
+              </code>
+            </div>
+          </div>
+
+          {/* Response Section */}
+          <div className="border last:border-b last:rounded-b border-background-200 grid grid-rows-[auto_1fr] min-h-80">
+            <div className="border-background-200 p-3 font-semibold text-foreground-200 border-b">
+              Response
+            </div>
+            <div className="p-3 bg-input rounded-b">
+              <code className="text-sm block">
+                <pre className="whitespace-pre-wrap">{responseJSON}</pre>
+              </code>
+            </div>
+          </div>
         </div>
       </div>
     </div>
