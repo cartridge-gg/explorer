@@ -41,9 +41,10 @@ import { NotFound } from "@/modules/NotFound/page";
 import { Hash } from "@/shared/components/hash";
 import { Badge } from "@/shared/components/badge";
 import { FunctionAbiWithAst, isReadFunction } from "@/shared/utils/abi";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
+import { useScrollTo } from "@/shared/hooks/useScrollTo";
 import { CodeCard } from "@/shared/components/contract/Code";
 
 const initialData: ContractClassInfo = {
@@ -65,8 +66,6 @@ const initialData: ContractClassInfo = {
 export function ClassHash() {
   const { classHash } = useParams();
   const { isMobile } = useScreen();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const selectedItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const { data: contractVersion } = useQuery({
     queryKey: ["contractVersion", classHash],
@@ -109,31 +108,16 @@ export function ClassHash() {
     () => filtered[0],
   );
 
+  // Scroll to selected function hook
+  const { scrollContainerRef, setItemRef } = useScrollTo({
+    item: selected,
+    getItemKey: (method: FunctionAbiWithAst) => method.name,
+  });
+
   useEffect(() => {
     if (selected) return;
     setSelected(filtered[0]);
   }, [selected, filtered]);
-
-  useEffect(() => {
-    if (!selected || !scrollContainerRef.current) return;
-
-    const selectedElement = selectedItemRefs.current[selected.name];
-    if (!selectedElement) return;
-
-    const container = scrollContainerRef.current;
-    const containerRect = container.getBoundingClientRect();
-    const elementRect = selectedElement.getBoundingClientRect();
-
-    const isAbove = elementRect.top < containerRect.top;
-    const isBelow = elementRect.bottom > containerRect.bottom;
-
-    if (isAbove || isBelow) {
-      selectedElement.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-      });
-    }
-  }, [selected]);
 
   useKeydownEffect((e) => {
     if (!filtered.length) return;
@@ -239,9 +223,7 @@ export function ClassHash() {
                       filtered.map((f) => (
                         <div
                           key={f.name}
-                          ref={(el) => {
-                            selectedItemRefs.current[f.name] = el;
-                          }}
+                          ref={(el) => setItemRef(f, el)}
                           className={cn(
                             "flex items-center justify-between gap-2 rounded-md p-2 border transition-all",
                             selected?.name === f.name

@@ -46,6 +46,7 @@ import { OpenRPC, Method } from "./open-rpc";
 import { ParamForm } from "@/shared/components/form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
+import { useScrollTo } from "@/shared/hooks/useScrollTo";
 
 interface FormState {
   inputs: { name: string; value: string }[];
@@ -88,6 +89,12 @@ export function JsonRpcPlayground() {
       methods?.find((m) => m.name === hash.replace("#", "")) ?? methods?.[0],
   );
   const [form, setForm] = useState<Record<string, FormState>>({});
+
+  // Scroll to selected method hook
+  const { scrollContainerRef, setItemRef } = useScrollTo({
+    item: selected,
+    getItemKey: (method: Method) => method.name,
+  });
 
   const onMethodChange = useCallback(
     (method: Method) => {
@@ -319,9 +326,13 @@ export function JsonRpcPlayground() {
               </CardContent>
 
               {/* Desktop List */}
-              <CardContent className="hidden md:block overflow-y-auto max-h-[20vh] md:max-h-full">
+              <CardContent
+                ref={scrollContainerRef}
+                className="hidden md:block overflow-y-auto max-h-[20vh] md:max-h-full"
+              >
                 {methods?.map((method) => (
                   <div
+                    ref={(el) => setItemRef(method, el)}
                     className={cn(
                       "py-2 px-4 cursor-pointer flex flex-col gap-1 transition-colors rounded border border-transparent",
                       method.name === selected?.name
@@ -404,7 +415,7 @@ export function JsonRpcPlayground() {
               <AccordionTrigger parentClassName="[&[data-state=open]>div]:text-foreground-200 [&[data-state=open]]:border-b">
                 Response
               </AccordionTrigger>
-              <AccordionContent className="min-h-80 overflow-x-auto p-3 bg-input">
+              <AccordionContent className="min-h-80 overflow-x-auto p-3 bg-input flex-grow rounded-b">
                 <code>
                   <pre>{responseJSON}</pre>
                 </code>
