@@ -8,37 +8,49 @@ import {
 } from "@starknet-react/core";
 import { constants } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
-import { rpcUrl, CHAIN_ID } from "@/constants/rpc";
-
-const controllerConnector = new ControllerConnector({
-  chains: [
-    {
-      rpcUrl: rpcUrl(),
-    },
-  ],
-  defaultChainId: CHAIN_ID,
-  url: import.meta.env.VITE_KEYCHAIN_URL,
-});
+import { getRpcUrl, getChainId } from "@/services/rpc";
+import { useQuery } from "@tanstack/react-query";
 
 export function StarknetProvider({ children }: { children: React.ReactNode }) {
-  const providers = jsonRpcProvider({
-    rpc: () => ({
-      nodeUrl: import.meta.env.VITE_RPC_URL as string,
-    }),
+  const rpcUrl = getRpcUrl();
+  const { data, error } = useQuery({
+    queryKey: ["chainId", rpcUrl],
+    queryFn: async () => {
+      const chainId = await getChainId();
+      const controllerConnector = new ControllerConnector({
+        chains: [{ rpcUrl }],
+        defaultChainId: chainId,
+        url: import.meta.env.VITE_KEYCHAIN_URL,
+      });
+      return { chainId, controllerConnector };
+    },
+    staleTime: Infinity, // Chain ID doesn't change
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 
   const { connectors } = useInjectedConnectors({
-    recommended: [controllerConnector],
+    recommended: data?.controllerConnector ? [data.controllerConnector] : [],
   });
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Error loading Starknet provider
+      </div>
+    );
+  }
 
   return (
     <StarknetConfig
       chains={[
-        import.meta.env.VITE_CHAIN_ID === constants.StarknetChainId.SN_MAIN
-          ? mainnet
-          : sepolia,
+        data?.chainId === constants.StarknetChainId.SN_MAIN ? mainnet : sepolia,
       ]}
-      provider={providers}
+      provider={jsonRpcProvider({
+        rpc: () => ({ nodeUrl: rpcUrl }),
+      })}
       connectors={connectors}
     >
       {children}
