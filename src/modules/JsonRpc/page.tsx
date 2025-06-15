@@ -276,13 +276,13 @@ export function JsonRpcPlayground() {
             <CardContent>
               <div className="relative flex items-center w-full">
                 <Input
-                  placeholder="Search methods..."
+                  placeholder="Method"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   containerClassName="w-full"
-                  className="bg-input focus-visible:bg-input pl-10"
+                  className="bg-input focus-visible:bg-input focus-visible:border-foreground-300 pr-10 caret-foreground"
                 />
-                <SearchIcon className="absolute left-3 text-foreground" />
+                <SearchIcon className="absolute right-3" />
               </div>
             </CardContent>
 
@@ -325,28 +325,34 @@ export function JsonRpcPlayground() {
                 ref={scrollContainerRef}
                 className="hidden md:block overflow-y-auto max-h-[20vh] md:max-h-full"
               >
-                {methods?.map((method) => (
-                  <div
-                    ref={(el) => setItemRef(method, el)}
-                    className={cn(
-                      "py-2 px-4 cursor-pointer flex flex-col gap-1 transition-colors rounded border border-transparent",
-                      method.name === selected?.name
-                        ? "border-primary"
-                        : "hover:border-background-400",
-                    )}
-                    key={method.name}
-                    onClick={() => onMethodChange(method)}
-                  >
-                    <div className="text-foreground-400 text-xs font-medium">
-                      {method.name.split("_")[0]}
-                    </div>
-                    {method.summary && (
-                      <div className="text-sm text-foreground-200 text-medium">
-                        {method.name.replace("starknet_", "")}
+                {methods?.length > 0 ? (
+                  methods.map((method) => (
+                    <div
+                      ref={(el) => setItemRef(method, el)}
+                      className={cn(
+                        "py-2 px-4 cursor-pointer flex flex-col gap-1 transition-colors rounded border border-transparent",
+                        method.name === selected?.name
+                          ? "border-primary"
+                          : "hover:border-background-400",
+                      )}
+                      key={method.name}
+                      onClick={() => onMethodChange(method)}
+                    >
+                      <div className="text-foreground-400 text-xs font-medium">
+                        {method.name.split("_")[0]}
                       </div>
-                    )}
+                      {method.summary && (
+                        <div className="text-sm text-foreground-200 text-medium">
+                          {method.name.replace("starknet_", "")}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-4 px-4 text-center text-foreground-300">
+                    No method found
                   </div>
-                ))}
+                )}
               </CardContent>
             </>
           </div>
