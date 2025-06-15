@@ -5,7 +5,18 @@ import {
   PageHeaderRight,
 } from "@/shared/components/PageHeader";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
-import { cn, Button, Input, TerminalIcon } from "@cartridge/ui";
+import {
+  cn,
+  Button,
+  Input,
+  TerminalIcon,
+  SearchIcon,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,15 +31,20 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/shared/components/accordion";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardLabel,
+  CardTitle,
+} from "@/shared/components/card";
+import { Badge } from "@/shared/components/badge";
 import { useQuery } from "@tanstack/react-query";
-import { PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fromCamelCase } from "@/shared/utils/string";
 import { OpenRPC, Method } from "./open-rpc";
 import { ParamForm } from "@/shared/components/form";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Card } from "@/shared/components/card";
-import { Badge } from "@/shared/components/badge";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 
 interface FormState {
@@ -227,7 +243,7 @@ export function JsonRpcPlayground() {
   }, [hash, methods, onMethodChange]);
 
   return (
-    <div id="json-playground" className="w-full flex flex-col gap-4">
+    <div id="json-playground" className="w-full flex flex-col gap-2">
       <Breadcrumb>
         <BreadcrumbList className="font-bold">
           <BreadcrumbItem>
@@ -252,100 +268,150 @@ export function JsonRpcPlayground() {
         </PageHeaderRight>
       </PageHeader>
 
-      <div className="flex flex-col sl:flex-row sl:h-[76vh] w-full gap-4">
-        <Card className="flex flex-col flex-1 md:flex-row justify-stretch border overflow-hidden py-5 px-4 gap-4">
-          <div className="min-w-[250px] flex flex-col gap-[6px] sl:overflow-y-auto">
-            <Input
-              placeholder="Search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+      <div className="flex flex-col md:flex-row md:h-[76vh] gap-2">
+        <Card className="py-0 flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-background-200">
+          <div className="md:w-[300px] flex flex-col gap-3 py-3">
+            <CardContent>
+              <div className="relative flex items-center w-full">
+                <Input
+                  placeholder="Search methods..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  containerClassName="w-full"
+                  className="bg-input focus-visible:bg-input pl-10"
+                />
+                <SearchIcon className="absolute left-3 text-foreground" />
+              </div>
+            </CardContent>
 
-            <div className="max-h-[30vh] sl:max-h-none overflow-y-auto">
-              <Accordion defaultValue="starknet">
-                <AccordionItem value="starknet">
-                  <AccordionTrigger parentClassName="[&[data-state=open]]:border-b">
-                    Starknet
-                  </AccordionTrigger>
-                  <AccordionContent>
+            <CardHeader>
+              <CardTitle>Methods</CardTitle>
+            </CardHeader>
+
+            <>
+              {/* Mobile Select */}
+              <CardContent className="md:hidden">
+                <Select
+                  value={selected?.name || ""}
+                  onValueChange={(value) => {
+                    const method = methods.find((m) => m.name === value);
+                    if (method) onMethodChange(method);
+                  }}
+                >
+                  <SelectTrigger className="w-full h-full">
+                    <SelectValue placeholder="Select a method..." />
+                  </SelectTrigger>
+                  <SelectContent>
                     {methods?.map((method) => (
-                      <div
-                        className={cn(
-                          "py-1 px-3",
-                          method.name === selected?.name
-                            ? "bg-background-200"
-                            : "bg-background-100 cursor-pointer",
-                        )}
-                        key={method.name}
-                        onClick={() => onMethodChange(method)}
-                      >
+                      <SelectItem key={method.name} value={method.name}>
+                        <div className="flex flex-col gap-1 items-start">
+                          <div className="text-foreground-400 text-xs font-medium">
+                            {method.name.split("_")[0]}
+                          </div>
+                          <div className="text-sm text-foreground-200">
+                            {method.name.replace("starknet_", "")}
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </CardContent>
+
+              {/* Desktop List */}
+              <CardContent className="hidden md:block overflow-y-auto max-h-[20vh] md:max-h-full">
+                {methods?.map((method) => (
+                  <div
+                    className={cn(
+                      "py-2 px-4 cursor-pointer flex flex-col gap-1 transition-colors rounded border border-transparent",
+                      method.name === selected?.name
+                        ? "border-primary"
+                        : "hover:border-background-400",
+                    )}
+                    key={method.name}
+                    onClick={() => onMethodChange(method)}
+                  >
+                    <div className="text-foreground-400 text-xs font-medium">
+                      {method.name.split("_")[0]}
+                    </div>
+                    {method.summary && (
+                      <div className="text-sm text-foreground-200 text-medium">
                         {method.name.replace("starknet_", "")}
                       </div>
-                    ))}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </>
           </div>
 
-          <div className="w-full flex flex-col gap-8">
-            <div className="flex flex-col gap-2">
-              <div className="uppercase font-bold text-lg">
-                {fromCamelCase(selected?.name?.replace("starknet_", "") ?? "")}
-              </div>
-              {selected?.summary && <div>{selected.summary}</div>}
+          <div className="w-full flex flex-col justify-between py-3 md:w-[400px]">
+            <div className="flex flex-col gap-4 divide-y divide-background-200">
+              <CardContent className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2">
+                  <CardLabel>Method</CardLabel>
+                  <div>
+                    {fromCamelCase(
+                      selected?.name?.replace("starknet_", "") ?? "",
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <CardLabel>Description</CardLabel>
+                  {selected?.summary && <div>{selected.summary}</div>}
+                </div>
+              </CardContent>
+
+              <CardContent className="py-3">
+                <ParamForm
+                  params={
+                    selected?.params.map((p, i) => ({
+                      ...p,
+                      id: `${selected.name}-${i}`,
+                      value: form[selected?.name]?.inputs[i]?.value || "",
+                    })) ?? []
+                  }
+                  onChange={onParamChange}
+                  onSubmit={onExecute}
+                />
+              </CardContent>
             </div>
 
-            <ParamForm
-              params={
-                selected?.params.map((p, i) => ({
-                  ...p,
-                  id: `${selected.name}-${i}`,
-                  value: form[selected.name].inputs[i].value,
-                })) ?? []
-              }
-              onChange={onParamChange}
-              onSubmit={onExecute}
-            />
+            <Button
+              onClick={onExecute}
+              variant="secondary"
+              className="self-end mx-3"
+              isLoading={form[selected?.name ?? ""]?.loading}
+            >
+              Execute
+            </Button>
           </div>
         </Card>
 
-        <Card className="w-full flex-1 flex flex-col gap-2 py-5 px-4 lg:max-w-[800px]">
-          <Button
-            onClick={onExecute}
-            variant="secondary"
-            className="self-end w-40"
-            isLoading={form[selected?.name ?? ""]?.loading}
-          >
-            Execute
-            <PlayIcon className="size-2 fill-white" />
-          </Button>
-
-          <div className="w-full overflow-auto">
-            <Accordion type="multiple" defaultValue={["request", "response"]}>
-              <AccordionItem value="request">
-                <AccordionTrigger parentClassName="[&[data-state=open]>div]:text-foreground-200 [&[data-state=open]]:border-b">
-                  Request
-                </AccordionTrigger>
-                <AccordionContent className="min-h-80 overflow-x-auto p-3">
-                  <code>
-                    <pre>{requestJSON}</pre>
-                  </code>
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="response">
-                <AccordionTrigger parentClassName="[&[data-state=open]>div]:text-foreground-200 [&[data-state=open]]:border-b">
-                  Response
-                </AccordionTrigger>
-                <AccordionContent className="min-h-80 overflow-x-auto p-3">
-                  <code>
-                    <pre>{responseJSON}</pre>
-                  </code>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-        </Card>
+        <div className="flex-1 w-full overflow-auto">
+          <Accordion type="multiple" defaultValue={["request", "response"]}>
+            <AccordionItem value="request">
+              <AccordionTrigger parentClassName="[&[data-state=open]>div]:text-foreground-200 [&[data-state=open]]:border-b">
+                Request
+              </AccordionTrigger>
+              <AccordionContent className="min-h-80 overflow-x-auto p-3 bg-input">
+                <code>
+                  <pre>{requestJSON}</pre>
+                </code>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="response">
+              <AccordionTrigger parentClassName="[&[data-state=open]>div]:text-foreground-200 [&[data-state=open]]:border-b">
+                Response
+              </AccordionTrigger>
+              <AccordionContent className="min-h-80 overflow-x-auto p-3 bg-input">
+                <code>
+                  <pre>{responseJSON}</pre>
+                </code>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
       </div>
     </div>
   );
