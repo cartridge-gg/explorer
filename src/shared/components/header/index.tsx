@@ -45,7 +45,7 @@ export function Header() {
                   }
                 }}
               >
-                <SearchBar />
+                <SearchBar onNavigate={() => setIsDialogOpen(false)} />
               </DialogContent>
             </Dialog>
           ))}

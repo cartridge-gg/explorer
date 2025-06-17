@@ -115,17 +115,7 @@ export function SearchBar({
 
       {(value || result || isSearching) && (
         <div className="bg-input absolute bottom-0 left-[-1px] right-[-1px] translate-y-full rounded-b border-dashed border-t border-background-200">
-          <div
-            // hack for doing custom spacing for the dashed line
-            style={{
-              backgroundImage:
-                "linear-gradient(to right, var(--background) 50%, var(--background-400) 0%)",
-              backgroundPosition: "top",
-              backgroundSize: "15px 1px",
-              backgroundRepeat: "repeat-x",
-            }}
-            className="flex flex-col gap-2 px-[15px] py-[10px] border border-background-200 border-t-0 shadow-md"
-          >
+          <div className="flex flex-col gap-2 px-[15px] py-[10px] border border-background-200 border-t-0 shadow-md">
             {isSearching ? (
               <div className="flex px-2 py-2 items-center justify-center text-sm text-foreground-100 h-10">
                 <Skeleton className="w-full h-[10px] rounded-full" />
