@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Connector, useConnect } from "@starknet-react/core";
 import { connectorIconToSrc } from "@/shared/utils/image";
-import { cn, Button, Skeleton, Spinner, WalletIcon } from "@cartridge/ui";
-import { useScreen } from "@/shared/hooks/useScreen";
+import { cn, Button, Skeleton, Spinner } from "@cartridge/ui";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +12,6 @@ import {
 } from "@/shared/components/dialog";
 
 export function ConnectButton() {
-  const { isMobile } = useScreen();
   const { connectAsync, connectors } = useConnect();
   const [connecting, setConnecting] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,12 +54,10 @@ export function ConnectButton() {
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          variant="outline"
-          className="border-primary text-primary gap-3 text-md h-12 w-12 p-0 sm:p-4 sm:w-auto hover:bg-transparent hover:text-primary-200 hover:border-primary-200 justify-center sm:justify-between"
-          size={isMobile ? "icon" : "default"}
+          variant="secondary"
+          className="h-[40px] w-[102px] border border-primary-100 text-primary hover:text-spacer bg-background-100 hover:bg-primary transition-colors select-none px-[16px] py-[10px] rounded-sm"
         >
-          <WalletIcon variant="solid" />
-          <span className="hidden sm:block">connect</span>
+          <span className="font-medium text-[14px]/[20px]">Connect</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
