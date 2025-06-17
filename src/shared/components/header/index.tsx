@@ -23,7 +23,7 @@ export function Header() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
-    <div className="w-full flex items-center justify-between gap-2 mb-[20px]">
+    <div className="w-full flex items-center justify-between gap-2 mb-[20px] sticky top-[20px] lg:relative">
       <div className="w-[467px]">
         {!isHome &&
           (!isMobile ? (
