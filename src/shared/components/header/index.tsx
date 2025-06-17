@@ -1,6 +1,7 @@
 import { Account } from "./account";
 import { useLocation } from "react-router-dom";
 import {
+  cn,
   Dialog,
   DialogContent,
   DialogTrigger,
@@ -12,18 +13,46 @@ import useChain from "@/shared/hooks/useChain";
 import { Network } from "@/shared/components/network";
 import { SearchBar } from "@/shared/components/search-bar";
 import { useScreen } from "@/shared/hooks/useScreen";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export function Header() {
+export function Header({ className }: { className?: string }) {
   const location = useLocation();
   const isHome = location.pathname === "/";
   const { isMobile } = useScreen();
   const { id: chainId } = useChain();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Scroll threshold in pixels - adjust this value as needed
+  const scrollThreshold = 10;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > scrollThreshold);
+    };
+
+    // Add scroll event listener
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    // Check initial scroll position
+    handleScroll();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [scrollThreshold]);
 
   return (
-    <div className="w-full flex items-center justify-between gap-2 mb-[20px] sticky top-[20px] lg:relative">
+    <header
+      className={cn(
+        "w-full flex items-center justify-between gap-2 sticky top-0 lg:relative transition-all duration-300 z-10",
+        isScrolled && isMobile && "backdrop-blur-md",
+        className,
+      )}
+    >
       <div className="w-[467px]">
         {!isHome &&
           (!isMobile ? (
@@ -68,6 +97,6 @@ export function Header() {
 
         <Account />
       </div>
-    </div>
+    </header>
   );
 }

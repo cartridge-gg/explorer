@@ -20,27 +20,29 @@ export function App() {
   const isHomePage = location.pathname === "/";
 
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-[15px] px-[20px] py-[20px] xl:px-[189px] w-full min-w-[320px] relative",
-        isHomePage ? "h-screen" : "lg:h-screen",
-      )}
-    >
-      {!isHomePage && <Header />}
+    <div className={cn(isHomePage ? "h-screen" : "lg:h-screen")}>
+      {!isHomePage && <Header className="py-[20px] px-[20px] xl:px-[189px]" />}
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/txns" element={<TransactionList />} />
-        <Route path="/tx/:txHash" element={<Transaction />} />
-        <Route path="/blocks" element={<BlockList />} />
-        <Route path="/block/:blockId" element={<Block />} />
-        <Route path="/class/:classHash" element={<ClassHash />} />
-        <Route path="/contract/:contractAddress" element={<Contract />} />
-        <Route path="/event/:eventId" element={<Event />} />
-        <Route path="/json-rpc" element={<JsonRpcPlayground />} />
-        <Route path="/world" element={<World />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <div
+        className={cn(
+          "flex flex-col gap-[15px] px-[20px] xl:px-[189px] w-full min-w-[320px] relative",
+          isHomePage ? "h-screen" : "lg:h-screen",
+        )}
+      >
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/txns" element={<TransactionList />} />
+          <Route path="/tx/:txHash" element={<Transaction />} />
+          <Route path="/blocks" element={<BlockList />} />
+          <Route path="/block/:blockId" element={<Block />} />
+          <Route path="/class/:classHash" element={<ClassHash />} />
+          <Route path="/contract/:contractAddress" element={<Contract />} />
+          <Route path="/event/:eventId" element={<Event />} />
+          <Route path="/json-rpc" element={<JsonRpcPlayground />} />
+          <Route path="/world" element={<World />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
     </div>
   );
 }

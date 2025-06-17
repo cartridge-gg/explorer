@@ -11,7 +11,7 @@ export function Home() {
 
   return (
     <div className="relative w-full h-full flex flex-col items-center">
-      <Header />
+      <Header className="py-[20px]" />
 
       <div className="h-full flex flex-col items-center justify-center gap-2 p-1 w-full sm:w-[520px]">
         <div className="flex gap-2 w-full uppercase text-sm font-bold">
