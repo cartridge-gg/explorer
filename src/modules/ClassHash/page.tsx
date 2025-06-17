@@ -1,28 +1,51 @@
 import { truncateString } from "@/shared/utils/string";
 import {
+  BookIcon,
+  cn,
+  CopyIcon,
+  Input,
+  ScrollIcon,
+  Skeleton,
+} from "@cartridge/ui";
+import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/shared/components/breadcrumbs";
-import { BreadcrumbPage } from "@cartridge/ui-next";
+} from "@/shared/components/breadcrumb";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardSeparator,
+  CardContent,
+  CardLabel,
+} from "@/shared/components/card";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
-import PageHeader from "@/shared/components/PageHeader";
-import { SectionBoxEntry } from "@/shared/components/section";
-import { SectionBox } from "@/shared/components/section/SectionBox";
-import { RPC_PROVIDER } from "@/services/starknet_provider_config";
+import {
+  PageHeader,
+  PageHeaderRight,
+  PageHeaderTitle,
+} from "@/shared/components/PageHeader";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { useQuery } from "@tanstack/react-query";
-import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
-import { Overview } from "./Overview";
-import { Deploy } from "./Deploy";
 import {
   getContractClassInfo,
   ContractClassInfo,
   isValidAddress,
 } from "@/shared/utils/contract";
 import { NotFound } from "@/modules/NotFound/page";
-import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
-import { Loading } from "@/shared/components/Loading";
+import { Hash } from "@/shared/components/hash";
+import { Badge } from "@/shared/components/badge";
+import { FunctionAbiWithAst, isReadFunction } from "@/shared/utils/abi";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
+import { useScrollTo } from "@/shared/hooks/useScrollTo";
+import { CodeCard } from "@/shared/components/contract/Code";
 
 const initialData: ContractClassInfo = {
   constructor: {
@@ -30,6 +53,7 @@ const initialData: ContractClassInfo = {
     name: "constructor",
     outputs: [],
     type: "constructor",
+    selector: "",
   },
   readFuncs: [],
   writeFuncs: [],
@@ -42,10 +66,6 @@ const initialData: ContractClassInfo = {
 export function ClassHash() {
   const { classHash } = useParams();
   const { isMobile } = useScreen();
-  const { selected, onTabChange, tabs } = useHashLinkTabs([
-    "Overview",
-    "Deploy",
-  ]);
 
   const { data: contractVersion } = useQuery({
     queryKey: ["contractVersion", classHash],
@@ -54,8 +74,7 @@ export function ClassHash() {
   });
 
   const {
-    data: { constructor, readFuncs, writeFuncs, code },
-    isLoading,
+    data: { readFuncs, writeFuncs, code },
     error,
   } = useQuery({
     queryKey: ["contractClass", classHash],
@@ -71,83 +90,238 @@ export function ClassHash() {
     retry: false,
   });
 
-  if (isLoading || (!error && (!contractVersion || !code))) {
-    return <Loading />;
-  }
+  const [search, setSearch] = useState("");
+  const filtered = useMemo(
+    () =>
+      [...readFuncs, ...writeFuncs].filter(
+        (f) =>
+          f.name.toLowerCase().includes(search.toLowerCase()) ||
+          f.inputs.some((a) =>
+            a.name.toLowerCase().includes(search.toLowerCase()),
+          ) ||
+          f.interface?.toLowerCase().includes(search.toLowerCase()) ||
+          f.selector.toLowerCase().includes(search.toLowerCase()),
+      ),
+    [readFuncs, writeFuncs, search],
+  );
+  const [selected, setSelected] = useState<FunctionAbiWithAst>(
+    () => filtered[0],
+  );
 
-  if (error) {
-    return <NotFound />;
-  }
+  // Scroll to selected function hook
+  const { scrollContainerRef, setItemRef } = useScrollTo({
+    item: selected,
+    getItemKey: (method: FunctionAbiWithAst) => method.name,
+  });
+
+  useEffect(() => {
+    if (selected) return;
+    setSelected(filtered[0]);
+  }, [selected, filtered]);
+
+  useKeydownEffect((e) => {
+    if (!filtered.length) return;
+
+    const currentIndex = filtered.findIndex((m) => m.name === selected?.name);
+    if (currentIndex === -1) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+      case "j": {
+        e.preventDefault();
+        const newIndex = Math.min(filtered.length - 1, currentIndex + 1);
+        setSelected(filtered[newIndex]);
+        break;
+      }
+      case "ArrowUp":
+      case "k": {
+        e.preventDefault();
+        const newIndex = Math.max(0, currentIndex - 1);
+        setSelected(filtered[newIndex]);
+        break;
+      }
+    }
+  });
 
   return (
-    <div id="class-details" className="w-full flex-grow">
-      <Breadcrumb className="mb-2">
-        <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>Class</BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbPage className="text-sm">
-            {isMobile && classHash ? truncateString(classHash) : classHash}
-          </BreadcrumbPage>
-        </BreadcrumbItem>
+    <div className="w-full flex flex-col gap-2">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>Class</BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>
+              {isMobile && classHash ? truncateString(classHash) : classHash}
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader className="mb-6" title="Class" />
+      <PageHeader>
+        <PageHeaderTitle>
+          <ScrollIcon variant="solid" />
+          <div>Class</div>
+        </PageHeaderTitle>
 
-      {isLoading ? (
-        <div className="h-40 flex items-center justify-center text-xs border border-borderGray animate-pulse">
-          <span className="text-[#D0D0D0]">Loading...</span>
-        </div>
+        <PageHeaderRight className="px-2 gap-2">
+          {contractVersion ? (
+            <>
+              <Badge>Compiler v{contractVersion?.compiler}</Badge>
+              <Badge>Cairo v{contractVersion?.cairo}</Badge>
+            </>
+          ) : (
+            <>
+              <Skeleton className="rounded-sm h-6 w-8" />
+              <Skeleton className="rounded-sm h-6 w-8" />
+            </>
+          )}
+        </PageHeaderRight>
+      </PageHeader>
+
+      <Card>
+        <CardContent>
+          <div className="flex justify-between gap-2">
+            <CardLabel>Class Hash</CardLabel>
+            <Hash value={classHash} />
+          </div>
+        </CardContent>
+      </Card>
+
+      {error ? (
+        <NotFound />
       ) : (
-        <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-4">
-          {/* Contract Info Section */}
-          <div className="sl:w-[468px] min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
-            <SectionBox>
-              <SectionBoxEntry title="Class Hash">
-                {isMobile && classHash ? truncateString(classHash) : classHash}
-              </SectionBoxEntry>
+        <div className="flex flex-col gap-2">
+          <Card className="gap-0 pb-0">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookIcon variant="solid" />
+                <div>ABI</div>
+              </CardTitle>
+            </CardHeader>
 
-              <SectionBoxEntry title="Compiler Version">
-                v{contractVersion?.compiler}
-              </SectionBoxEntry>
+            <CardSeparator className="mb-0" />
 
-              <SectionBoxEntry title="Cairo Version">
-                v{contractVersion?.cairo}
-              </SectionBoxEntry>
-            </SectionBox>
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] gap-2 divide-y md:divide-y-0 md:divide-x divide-background-300">
+              <CardContent className="flex flex-col justify-start gap-2 p-4">
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Function name / selector / interface"
+                  className="bg-input focus-visible:bg-input caret-foreground"
+                />
+                <div
+                  ref={scrollContainerRef}
+                  className="flex flex-col gap-2 overflow-y-auto max-h-[40vh]"
+                >
+                  <CardLabel>Functions</CardLabel>
+                  <div className="flex flex-col gap-1">
+                    {filtered.length ? (
+                      filtered.map((f) => (
+                        <div
+                          key={f.name}
+                          ref={(el) => setItemRef(f, el)}
+                          className={cn(
+                            "flex items-center justify-between gap-2 rounded-md p-2 border transition-all",
+                            selected?.name === f.name
+                              ? "border-primary"
+                              : "border-transparent hover:border-background-300 cursor-pointer ",
+                          )}
+                          onClick={() => setSelected(f)}
+                        >
+                          <div className="truncate">{f.name}</div>
+                          <Badge>{isReadFunction(f) ? "Read" : "Write"}</Badge>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        {Array.from({ length: 9 }).map((_, i) => (
+                          <Skeleton
+                            key={i}
+                            className="rounded-sm h-11 w-full"
+                          />
+                        ))}
+                      </>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
 
-          <div className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-            <DetailsPageSelector
-              selected={selected}
-              onTabSelect={onTabChange}
-              items={tabs}
-            />
-
-            {(() => {
-              switch (selected) {
-                case "Overview":
-                  return (
-                    <Overview
-                      readFuncs={readFuncs}
-                      writeFuncs={writeFuncs}
-                      code={code}
-                    />
-                  );
-                case "Deploy":
-                  return (
-                    <Deploy classHash={classHash!} constructor={constructor} />
-                  );
-                default:
-                  return (
-                    <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
-                      <span className="text-[#D0D0D0]">No data found</span>
+              <div className="w-full h-full flex flex-col justify-start gap-2">
+                <div className="flex flex-col gap-2 divide-y divide-background-300 h-full">
+                  <div className="p-3 flex flex-col gap-2">
+                    {!!selected?.interface && (
+                      <div className="flex items-center justify-between gap-2">
+                        <CardLabel>inteface</CardLabel>
+                        <div
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              selected?.interface ?? "",
+                            );
+                            toast.success(
+                              "Interface name is copied to clipboard",
+                            );
+                          }}
+                          className="flex items-center gap-2 cursor-pointer hover:opacity-80 overflow-x-auto"
+                        >
+                          <div>{selected?.interface}</div>
+                          <CopyIcon size="sm" className="text-foreground-400" />
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between gap-2">
+                      <CardLabel>function</CardLabel>
+                      {selected ? (
+                        <div
+                          onClick={() => {
+                            navigator.clipboard.writeText(selected?.name ?? "");
+                            toast.success(
+                              "Function name is copied to clipboard",
+                            );
+                          }}
+                          className="flex items-center gap-2 cursor-pointer hover:opacity-80"
+                        >
+                          <div>{selected?.name}</div>
+                          <CopyIcon size="sm" className="text-foreground-400" />
+                        </div>
+                      ) : (
+                        <Skeleton className="rounded-sm h-6 w-40" />
+                      )}
                     </div>
-                  );
-              }
-            })()}
-          </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <CardLabel>selector</CardLabel>
+                      <Hash value={selected?.selector} />
+                    </div>
+                  </div>
+
+                  <div className="h-full p-3">
+                    {selected?.inputs.length ? (
+                      selected?.inputs.map((input) => (
+                        <div key={input.name} className="flex flex-col gap-2">
+                          <CardLabel className="lowercase">
+                            {input.name}
+                          </CardLabel>
+                          <Input
+                            value={input.type.name}
+                            disabled
+                            className="bg-input focus-visible:bg-input"
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-foreground-300">
+                        No inputs
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+          <CodeCard {...code} />
         </div>
       )}
     </div>

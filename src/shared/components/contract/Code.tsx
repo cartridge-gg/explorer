@@ -1,103 +1,77 @@
-import ToggleButton from "@/shared/components/ToggleButton";
-import { CheckIcon, CopyIcon } from "@cartridge/ui-next";
-import { Editor } from "@monaco-editor/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  TabsTrigger,
+  TabsList,
+  TabsContent,
+  CodeIcon,
+  CardHeaderRight,
+  Button,
+  CopyIcon,
+} from "@cartridge/ui";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/shared/components/card";
+import { Editor } from "@/shared/components/editor";
+import { useCallback, useState } from "react";
+import { Tabs } from "../tabs";
+import { CardSeparator } from "../card";
+import { toast } from "sonner";
 
 export type CodeProps = {
   abi?: string;
   sierra?: string;
 };
 
-export function Code({ abi, sierra }: CodeProps) {
-  const variants = useMemo(() => {
-    const _varriants = ["contract abi"];
-    if (sierra) {
-      _varriants.push("sierra bytecode");
-    }
-    return _varriants;
-  }, [sierra]);
+export function CodeCard({ abi, sierra }: CodeProps) {
+  const [selected, setSelected] = useState("abi");
 
-  const [selectedTab, setSelectedTab] = useState<(typeof variants)[number]>(
-    variants[0],
-  );
-
-  const [copied, setCopied] = useState(false);
   const onCopy = useCallback(() => {
-    switch (selectedTab) {
-      case "contract abi":
-        if (!abi) {
-          return;
-        }
-        navigator.clipboard.writeText(abi);
-        setCopied(true);
-        break;
-      case "sierra bytecode":
-        if (!sierra) {
-          return;
-        }
-        navigator.clipboard.writeText(sierra);
-        setCopied(true);
-        break;
-    }
-  }, [abi, sierra, selectedTab]);
-
-  useEffect(() => {
-    if (copied) {
-      setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-    }
-  }, [copied]);
+    const code = selected === "abi" ? abi : sierra;
+    if (!code) return;
+    navigator.clipboard.writeText(code);
+    toast.success("Copied to clipboard");
+  }, [abi, sierra, selected]);
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex justify-between items-center">
-        <ToggleButton
-          variants={variants}
-          selected={selectedTab}
-          onChange={setSelectedTab}
-        />
-        <button
-          className="flex items-center gap-2 uppercase bg-black text-white px-2 py-1 text-sm font-bold"
-          onClick={onCopy}
-          disabled={copied}
-        >
-          {copied ? (
-            <>
-              <CheckIcon size="xs" />
-              <div>Copied</div>
-            </>
-          ) : (
-            <>
-              <CopyIcon size="xs" />
-              <div>Copy</div>
-            </>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <CodeIcon variant="solid" />
+          <div>Code</div>
+        </CardTitle>
+        <CardHeaderRight></CardHeaderRight>
+      </CardHeader>
+      <CardSeparator className="mb-0" />
+      <CardContent>
+        <Tabs defaultValue="abi" onValueChange={setSelected}>
+          {sierra && (
+            <div className="flex items-center justify-between">
+              <TabsList className="self-start">
+                <TabsTrigger value="abi">Contract ABI</TabsTrigger>
+                <TabsTrigger value="sierra">Sierra Bytecode</TabsTrigger>
+              </TabsList>
+              <Button variant="secondary" size="icon" onClick={onCopy}>
+                <CopyIcon size="sm" />
+              </Button>
+            </div>
           )}
-        </button>
-      </div>
-
-      {(() => {
-        switch (selectedTab) {
-          case "contract abi":
-            return (
-              <Editor
-                className="min-h-[80vh]"
-                defaultLanguage="json"
-                value={abi}
-                options={{
-                  readOnly: true,
-                  scrollbar: {
-                    alwaysConsumeMouseWheel: false,
-                  },
-                }}
-              />
-            );
-          case "sierra bytecode":
-            if (!sierra) {
-              return null;
-            }
-
-            return (
+          <TabsContent value="abi">
+            <Editor
+              className="min-h-[80vh]"
+              defaultLanguage="json"
+              value={abi}
+              options={{
+                readOnly: true,
+                scrollbar: {
+                  alwaysConsumeMouseWheel: false,
+                },
+              }}
+            />
+          </TabsContent>
+          {sierra && (
+            <TabsContent value="sierra">
               <Editor
                 className="min-h-[80vh]"
                 defaultLanguage="json"
@@ -109,9 +83,10 @@ export function Code({ abi, sierra }: CodeProps) {
                   },
                 }}
               />
-            );
-        }
-      })()}
-    </div>
+            </TabsContent>
+          )}
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 }

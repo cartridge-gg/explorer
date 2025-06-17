@@ -1,5 +1,4 @@
-import { Editor } from "@monaco-editor/react";
-import DetailsPageSelector from "@/shared/components/DetailsPageSelector";
+import { Editor } from "@/shared/components/editor";
 import { useWorld } from "./hooks";
 import {
   Select,
@@ -8,25 +7,29 @@ import {
   SelectItem,
   SelectContent,
   cn,
-} from "@cartridge/ui-next";
-import { flexRender } from "@tanstack/react-table";
-import PageHeader from "@/shared/components/PageHeader";
+  Input,
+  GlobeIcon,
+} from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbSeparator,
-} from "@/shared/components/breadcrumbs";
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbLink,
+} from "@/shared/components/breadcrumb";
+import { flexRender } from "@tanstack/react-table";
+import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/shared/components/tabs";
 
 export function World() {
-  const { selected, onTabChange, tabs } = useHashLinkTabs([
-    "GraphQL Schema",
-    "Models",
-    "Model",
-    "Transactions",
-    "Events",
-    "Event Messages",
-  ]);
+  const tab = useHashLinkTabs("graphql-schema");
   const {
     form,
     setForm,
@@ -40,14 +43,26 @@ export function World() {
   } = useWorld();
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
       <Breadcrumb>
-        <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>World</BreadcrumbItem>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>World</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader className="mb-6" title={`World (${form.project})`} />
+      <PageHeader>
+        <PageHeaderTitle>
+          <GlobeIcon variant="solid" />
+          <div>World ({form.project})</div>
+        </PageHeaderTitle>
+      </PageHeader>
+
       <div className="flex items-center gap-2">
         Project:{" "}
         {deployments ? (
@@ -78,7 +93,7 @@ export function World() {
             </SelectContent>
           </Select>
         ) : (
-          <input
+          <Input
             className="border border-gray-300 rounded-md p-2"
             value={form.project}
             onChange={(e) =>
@@ -93,107 +108,105 @@ export function World() {
       </div>
 
       <div className="h-full flex-grow grid grid-rows-[min-content_1fr] gap-4">
-        <DetailsPageSelector
-          selected={selected}
-          onTabSelect={onTabChange}
-          items={tabs}
-        />
+        <Tabs value={tab.selected} onValueChange={tab.onChange}>
+          <TabsList>
+            <TabsTrigger value="graphql-schema">GraphQL Schema</TabsTrigger>
+            <TabsTrigger value="models">Models</TabsTrigger>
+            <TabsTrigger value="model">Model</TabsTrigger>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="events">Events</TabsTrigger>
+            <TabsTrigger value="event-messages">Event Messages</TabsTrigger>
+          </TabsList>
 
-        {(() => {
-          switch (selected) {
-            case "GraphQL Schema":
-              return (
+          <TabsContent value="graphql-schema">
+            <Editor
+              height="80vh"
+              defaultLanguage="json"
+              value={JSON.stringify(schema, null, 2)}
+              options={{
+                readOnly: true,
+              }}
+            />
+          </TabsContent>
+
+          <TabsContent value="models">
+            {models?.length ? (
+              <Editor
+                height="80vh"
+                defaultLanguage="json"
+                value={JSON.stringify(models, null, 2)}
+                options={{
+                  readOnly: true,
+                }}
+              />
+            ) : (
+              <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
+                <span className="text-[#D0D0D0]">No data found</span>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="model">
+            {models?.length ? (
+              <div className="flex flex-col gap-4">
+                <Select
+                  onValueChange={(value) =>
+                    setForm((form) => ({ ...form, model: value }))
+                  }
+                  value={form.model}
+                >
+                  <SelectTrigger className="bg-white border border-gray-300 rounded-md p-2 w-60 overflow-x-auto">
+                    <SelectValue placeholder="model name" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white w-60 border border-gray-300 rounded-md mt-1">
+                    {models.map((m) => (
+                      <SelectItem
+                        key={m.name}
+                        value={m.name}
+                        className={cn(
+                          "cursor-pointer p-2 hover:bg-gray-100",
+                          // disabled prefix doesn't work for some reason
+                          form.model === m.name
+                            ? "opacity-50 cursor-not-allowed hover:bg-white"
+                            : undefined,
+                        )}
+                        simplified
+                        disabled={form.model === m.name}
+                      >
+                        {m.namespace} - {m.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
                 <Editor
                   height="80vh"
                   defaultLanguage="json"
-                  value={JSON.stringify(schema, null, 2)}
+                  value={JSON.stringify(model, null, 2)}
                   options={{
                     readOnly: true,
                   }}
                 />
-              );
-            case "Models":
-              if (!models?.length) {
-                return (
-                  <div className="w-full h-[80vh] flex items-center justify-center text-sm text-gray-500">
-                    no models
-                  </div>
-                );
-              }
-              return (
-                <Editor
-                  height="80vh"
-                  defaultLanguage="json"
-                  value={JSON.stringify(models, null, 2)}
-                  options={{
-                    readOnly: true,
-                  }}
-                />
-              );
-            case "Model":
-              if (!models?.length) {
-                return (
-                  <div className="w-full h-[80vh] flex items-center justify-center text-sm text-gray-500">
-                    no model found
-                  </div>
-                );
-              }
-              return (
-                <div className="flex flex-col gap-4">
-                  <Select
-                    onValueChange={(value) =>
-                      setForm((form) => ({ ...form, model: value }))
-                    }
-                    value={form.model}
-                  >
-                    <SelectTrigger className="bg-white border border-gray-300 rounded-md p-2 w-60 overflow-x-auto">
-                      <SelectValue placeholder="model name" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white w-60 border border-gray-300 rounded-md mt-1">
-                      {models.map((m) => (
-                        <SelectItem
-                          key={m.name}
-                          value={m.name}
-                          className={cn(
-                            "cursor-pointer p-2 hover:bg-gray-100",
-                            // disabled prefix doesn't work for some reason
-                            form.model === m.name
-                              ? "opacity-50 cursor-not-allowed hover:bg-white"
-                              : undefined,
-                          )}
-                          simplified
-                          disabled={form.model === m.name}
-                        >
-                          {m.namespace} - {m.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              </div>
+            ) : (
+              <div className="w-full h-[80vh] flex items-center justify-center text-sm text-gray-500">
+                no model found
+              </div>
+            )}
+          </TabsContent>
 
-                  <Editor
-                    height="80vh"
-                    defaultLanguage="json"
-                    value={JSON.stringify(model, null, 2)}
-                    options={{
-                      readOnly: true,
-                    }}
-                  />
-                </div>
-              );
-            case "Transactions":
-              return <Table table={txs} />;
-            case "Events":
-              return <Table table={events} />;
-            case "Event Messages":
-              return <Table table={eventMessages} />;
-            default:
-              return (
-                <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">
-                  <span className="text-[#D0D0D0]">Coming soon</span>
-                </div>
-              );
-          }
-        })()}
+          <TabsContent value="transactions">
+            <Table table={txs} />
+          </TabsContent>
+
+          <TabsContent value="events">
+            <Table table={events} />
+          </TabsContent>
+
+          <TabsContent value="event-messages">
+            <Table table={eventMessages} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createContext, ReactNode } from "react";
-import { RPC_PROVIDER, QUERY_KEYS } from "@/services/starknet_provider_config";
+import { RPC_PROVIDER } from "@/services/rpc";
 
 export type BlockNumberContextType = {
   blockNumber: number | undefined;
@@ -22,7 +22,7 @@ export function BlockNumberProvider({
   refetchInterval = 10000,
 }: BlockNumberProviderProps) {
   const { data, isLoading, error } = useQuery({
-    queryKey: QUERY_KEYS.getBlockNumber,
+    queryKey: ["getBlockNumber"],
     queryFn: () => RPC_PROVIDER.getBlockNumber(),
     // This should ideally be equal or less the block time of the chain to prevent delay
     refetchInterval: refetchInterval,

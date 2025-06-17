@@ -1,4 +1,9 @@
-import { Accordion, AccordionItem } from "@/shared/components/accordion";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/shared/components/accordion";
 import FeltDisplay from "@/shared/components/FeltDisplay";
 import FeltDisplayAsToggle, {
   FeltDisplayVariants,
@@ -15,10 +20,10 @@ import {
 import { useAccount } from "@starknet-react/core";
 import { Link } from "react-router-dom";
 import AddIcon from "@/shared/icons/Add";
-import { cn } from "@cartridge/ui-next";
+import { Button } from "@cartridge/ui";
 import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
-import { useToast } from "@/shared/components/toast";
-import { ParamForm } from "@/shared/form";
+import { ParamForm } from "@/shared/components/form";
+import { toast } from "sonner";
 
 export interface ContractFormProps {
   contract?: Contract;
@@ -70,22 +75,29 @@ export function ContractForm({ contract, functions }: ContractFormProps) {
       {functions.map((f, i) => (
         <AccordionItem
           key={i}
-          titleClassName="h-[45px] z-10"
-          title={
+          value={f.name}
+          className={
+            !contract
+              ? "first:rounded-t-none last:rounded-b-none border-x-0"
+              : undefined
+          }
+          disabled={!contract && !f.inputs.length}
+        >
+          <AccordionTrigger hideIcon={!contract && !f.inputs.length}>
             <div className="flex flex-row items-center gap-2">
               <span className="font-bold">fn</span>
               <span className="italic">{f.name}</span>
               <span>({f.inputs.map((arg) => arg.name).join(", ")})</span>
             </div>
-          }
-          disabled={!contract && !f.inputs.length}
-        >
-          <FunctionForm
-            item={f}
-            contract={contract}
-            state={form[f.name] || initFormState}
-            onUpdate={(update) => onUpdate(f.name, update)}
-          />
+          </AccordionTrigger>
+          <AccordionContent className="p-4">
+            <FunctionForm
+              item={f}
+              contract={contract}
+              state={form[f.name] || initFormState}
+              onUpdate={(update) => onUpdate(f.name, update)}
+            />
+          </AccordionContent>
         </AccordionItem>
       ))}
     </Accordion>
@@ -170,7 +182,6 @@ function FunctionForm({
     [state, onUpdate],
   );
 
-  const { toast } = useToast();
   const { addCall } = useCallCartDispatch();
 
   const onAddToCart = useCallback(() => {
@@ -193,66 +204,45 @@ function FunctionForm({
       entrypoint: f.name,
       contractAddress: contract.address,
     });
-    toast(`Function call added: ${f.name}`, "success");
-  }, [toast, contract, f, state.inputs, addCall, account, isRead]);
+    toast.success(`Function call added: ${f.name}`);
+  }, [contract, f, state.inputs, addCall, account, isRead]);
 
   return (
     <div className="flex flex-col gap-[10px] items-end">
       {!!contract &&
         (isRead ? (
-          <button
-            disabled={state.loading}
+          <Button
+            variant="secondary"
+            isLoading={state.loading}
             onClick={onCallOrExecute}
-            className={`px-3 py-[2px] text-sm uppercase font-bold w-fit  ${
-              state.loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-primary hover:bg-[#6E6E6E]"
-            } text-white`}
           >
-            {state.loading ? "Calling..." : "Call"}
-          </button>
+            call
+          </Button>
         ) : (
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="secondary"
+              size="icon"
               onClick={onAddToCart}
               disabled={!account}
-              className={cn(
-                `bg-white w-[19px] h-[19px] flex items-center justify-center border`,
-                !account
-                  ? "border-gray-300 text-gray-300 cursor-not-allowed"
-                  : "border-borderGray hover:border-0 hover:bg-primary hover:text-white cursor-pointer",
-              )}
-              title={
-                !account ? "Please connect your wallet first" : "Add to cart"
-              }
             >
               <AddIcon />
-            </button>
+            </Button>
 
-            <button
+            <Button
+              variant="secondary"
               disabled={!account || state.loading}
               onClick={onCallOrExecute}
-              className={`px-3 py-[2px] text-sm uppercase font-bold w-fit text-white ${
-                !account || state.loading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-primary hover:bg-[#6E6E6E]"
-              }`}
-              title={
-                !account
-                  ? "Please connect your wallet first"
-                  : state.loading
-                    ? "Transaction in progress"
-                    : ""
-              }
             >
               {state.loading ? "Executing..." : "Execute"}
-            </button>
+            </Button>
           </div>
         ))}
 
       <ParamForm
         params={f.inputs.map((input, i) => ({
           ...input,
+          id: `${f.name}-${input.name}`,
           value:
             i < state.inputs.length
               ? state.inputs[i]?.value

@@ -1,20 +1,47 @@
-import { rpcUrl } from "@/constants/rpc";
-import { Accordion, AccordionItem } from "@/shared/components/accordion";
+import { getRpcUrl } from "@/services/rpc";
+import {
+  PageHeader,
+  PageHeaderTitle,
+  PageHeaderRight,
+} from "@/shared/components/PageHeader";
+import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
+import {
+  cn,
+  Button,
+  Input,
+  TerminalIcon,
+  SearchIcon,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/shared/components/breadcrumbs";
-import PageHeader from "@/shared/components/PageHeader";
-import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
-import { cn } from "@cartridge/ui-next";
+} from "@/shared/components/breadcrumb";
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardLabel,
+  CardTitle,
+} from "@/shared/components/card";
+import { Badge } from "@/shared/components/badge";
 import { useQuery } from "@tanstack/react-query";
-import { PlayIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fromCamelCase } from "@/shared/utils/string";
 import { OpenRPC, Method } from "./open-rpc";
-import { ParamForm } from "@/shared/form";
+import { ParamForm } from "@/shared/components/form";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
+import { useScrollTo } from "@/shared/hooks/useScrollTo";
 
 interface FormState {
   inputs: { name: string; value: string }[];
@@ -57,6 +84,12 @@ export function JsonRpcPlayground() {
       methods?.find((m) => m.name === hash.replace("#", "")) ?? methods?.[0],
   );
   const [form, setForm] = useState<Record<string, FormState>>({});
+
+  // Scroll to selected method hook
+  const { scrollContainerRef, setItemRef } = useScrollTo({
+    item: selected,
+    getItemKey: (method: Method) => method.name,
+  });
 
   const onMethodChange = useCallback(
     (method: Method) => {
@@ -138,7 +171,7 @@ export function JsonRpcPlayground() {
         return p.value;
       }
     });
-    const res = await fetch(rpcUrl(), {
+    const res = await fetch(getRpcUrl(), {
       headers: {
         "Content-Type": "application/json",
       },
@@ -175,40 +208,35 @@ export function JsonRpcPlayground() {
     }));
   }, [methods]);
 
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (!methods.length) return;
+  useKeydownEffect((e) => {
+    if (!methods.length) return;
 
-      const currentIndex = methods.findIndex((m) => m.name === selected?.name);
-      if (currentIndex === -1) return;
+    const currentIndex = methods.findIndex((m) => m.name === selected?.name);
+    if (currentIndex === -1) return;
 
-      switch (e.key) {
-        case "ArrowDown":
-        case "j": {
-          e.preventDefault();
-          const newIndex = Math.min(methods.length - 1, currentIndex + 1);
-          onMethodChange(methods[newIndex]);
-          break;
-        }
-        case "ArrowUp":
-        case "k": {
-          e.preventDefault();
-          const newIndex = Math.max(0, currentIndex - 1);
-          onMethodChange(methods[newIndex]);
-          break;
-        }
-        case "Enter": {
-          if (!e.metaKey && !e.ctrlKey) return;
-          e.preventDefault();
-          onExecute();
-          break;
-        }
+    switch (e.key) {
+      case "ArrowDown":
+      case "j": {
+        e.preventDefault();
+        const newIndex = Math.min(methods.length - 1, currentIndex + 1);
+        onMethodChange(methods[newIndex]);
+        break;
+      }
+      case "ArrowUp":
+      case "k": {
+        e.preventDefault();
+        const newIndex = Math.max(0, currentIndex - 1);
+        onMethodChange(methods[newIndex]);
+        break;
+      }
+      case "Enter": {
+        if (!e.metaKey && !e.ctrlKey) return;
+        e.preventDefault();
+        onExecute();
+        break;
       }
     }
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [methods, selected, onMethodChange, onExecute]);
+  });
 
   useEffect(() => {
     const method = methods.find((m) => m.name === hash.replace("#", ""));
@@ -217,113 +245,184 @@ export function JsonRpcPlayground() {
   }, [hash, methods, onMethodChange]);
 
   return (
-    <div id="json-playground" className="w-full gap-8">
-      <div className="mb-2">
-        <Breadcrumb>
-          <BreadcrumbItem to="..">Explorer</BreadcrumbItem>
+    <div id="json-playground" className="w-full max-w-full flex flex-col gap-2">
+      <Breadcrumb>
+        <BreadcrumbList className="font-bold">
+          <BreadcrumbItem>
+            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>JSON-RPC Playground</BreadcrumbItem>
-        </Breadcrumb>
-      </div>
+          <BreadcrumbItem>
+            <BreadcrumbPage className="font-bold">
+              JSON-RPC Playground
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-      <PageHeader
-        className="mb-6"
-        title={`JSON-RPC Playground (${specVersion})`}
-      />
+      <PageHeader>
+        <PageHeaderTitle>
+          <TerminalIcon variant="solid" />
+          <div>JSON-RPC Playground</div>
+        </PageHeaderTitle>
+        <PageHeaderRight className="px-2 gap-2">
+          <Badge>v{specVersion}</Badge>
+        </PageHeaderRight>
+      </PageHeader>
 
-      <div className="flex flex-col sl:flex-row sl:h-[76vh] w-full gap-4">
-        <div className="flex flex-col flex-1 md:flex-row justify-stretch border border-borderGray overflow-hidden py-5 px-4 gap-4 bg-white">
-          <div className="min-w-[250px] flex flex-col gap-[6px] sl:overflow-y-auto">
-            <input
-              className="bg-white border border-borderGray px-4 py-2 text-base rounded-none search-input relative focus:outline-none focus:ring-0"
-              placeholder="Search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-
-            <div className="max-h-[30vh] sl:max-h-none overflow-y-auto border-b border-borderGray">
-              <Accordion>
-                <AccordionItem
-                  open
-                  title="Starknet"
-                  titleClassName="uppercase font-bold"
-                  contentClassName="p-0 overflow-y-scroll"
-                >
-                  <div>
-                    {methods?.map((method) => (
-                      <div
-                        className={cn(
-                          "py-1 px-3",
-                          method.name === selected?.name
-                            ? "bg-[#DBDBDB]"
-                            : "bg-[#F3F3F3] cursor-pointer",
-                        )}
-                        key={method.name}
-                        onClick={() => onMethodChange(method)}
-                      >
-                        {method.name.replace("starknet_", "")}
-                      </div>
-                    ))}
-                  </div>
-                </AccordionItem>
-              </Accordion>
-            </div>
-          </div>
-
-          <div className="w-full flex flex-col gap-8">
-            <div className="flex flex-col gap-2">
-              <div className="uppercase font-bold text-lg">
-                {fromCamelCase(selected?.name?.replace("starknet_", "") ?? "")}
+      <div className="flex flex-col md:flex-row md:h-[90vh] gap-2">
+        <Card className="py-0 flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-background-200 min-w-0">
+          <div className="md:w-[300px] flex flex-col gap-3 py-3">
+            <CardContent>
+              <div className="relative flex items-center w-full">
+                <Input
+                  placeholder="Method"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  containerClassName="w-full"
+                  className="bg-input focus-visible:bg-input focus-visible:border-foreground-300 pr-10 caret-foreground"
+                />
+                <SearchIcon className="absolute right-3" />
               </div>
-              {selected?.summary && <div>{selected.summary}</div>}
+            </CardContent>
+
+            <CardHeader>
+              <CardTitle>Methods</CardTitle>
+            </CardHeader>
+
+            <>
+              {/* Mobile Select */}
+              <CardContent className="md:hidden">
+                <Select
+                  value={selected?.name || ""}
+                  onValueChange={(value) => {
+                    const method = methods.find((m) => m.name === value);
+                    if (method) onMethodChange(method);
+                  }}
+                >
+                  <SelectTrigger className="w-full h-full">
+                    <SelectValue placeholder="Select a method..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {methods?.map((method) => (
+                      <SelectItem key={method.name} value={method.name}>
+                        <div className="flex flex-col gap-1 items-start">
+                          <div className="text-foreground-400 text-xs font-medium">
+                            {method.name.split("_")[0]}
+                          </div>
+                          <div className="text-sm text-foreground-200">
+                            {method.name.replace("starknet_", "")}
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </CardContent>
+
+              {/* Desktop List */}
+              <CardContent
+                ref={scrollContainerRef}
+                className="hidden md:block overflow-y-auto max-h-[20vh] md:max-h-full"
+              >
+                {methods?.length > 0 ? (
+                  methods.map((method) => (
+                    <div
+                      ref={(el) => setItemRef(method, el)}
+                      className={cn(
+                        "py-2 px-4 cursor-pointer flex flex-col gap-1 transition-colors rounded border border-transparent",
+                        method.name === selected?.name
+                          ? "border-primary"
+                          : "hover:border-background-400",
+                      )}
+                      key={method.name}
+                      onClick={() => onMethodChange(method)}
+                    >
+                      <div className="text-foreground-400 text-xs font-medium">
+                        {method.name.split("_")[0]}
+                      </div>
+                      {method.summary && (
+                        <div className="text-sm text-foreground-200 text-medium">
+                          {method.name.replace("starknet_", "")}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-4 px-4 text-center text-foreground-300">
+                    No method found
+                  </div>
+                )}
+              </CardContent>
+            </>
+          </div>
+
+          <div className="w-full flex flex-col justify-between py-3 md:w-[400px]">
+            <div className="flex flex-col gap-4 divide-y divide-background-200">
+              <CardContent className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2">
+                  <CardLabel>Method</CardLabel>
+                  <div>
+                    {fromCamelCase(
+                      selected?.name?.replace("starknet_", "") ?? "",
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <CardLabel>Description</CardLabel>
+                  {selected?.summary && <div>{selected.summary}</div>}
+                </div>
+              </CardContent>
+
+              <CardContent className="py-3">
+                <ParamForm
+                  params={
+                    selected?.params.map((p, i) => ({
+                      ...p,
+                      id: `${selected.name}-${i}`,
+                      value: form[selected?.name]?.inputs[i]?.value || "",
+                    })) ?? []
+                  }
+                  onChange={onParamChange}
+                  onSubmit={onExecute}
+                />
+              </CardContent>
             </div>
 
-            <ParamForm
-              params={
-                selected?.params.map((p, i) => ({
-                  ...p,
-                  id: `${selected.name}-${i}`,
-                  value: form[selected.name].inputs[i].value,
-                })) ?? []
-              }
-              onChange={onParamChange}
-              onSubmit={onExecute}
-            />
+            <Button
+              onClick={onExecute}
+              variant="secondary"
+              className="self-end mx-3"
+              isLoading={form[selected?.name ?? ""]?.loading}
+            >
+              Execute
+            </Button>
           </div>
-        </div>
+        </Card>
 
-        <div className="w-full flex-1 flex flex-col gap-2 border border-borderGray py-5 px-4 bg-white lg:max-w-[800px]">
-          <button
-            onClick={onExecute}
-            className="bg-black text-white px-2 py-1 text-sm self-end flex items-center gap-3 uppercase font-bold hover:bg-opacity-80"
-          >
-            {form[selected?.name ?? ""]?.loading ? (
-              "Executing..."
-            ) : (
-              <>
-                Execute
-                <PlayIcon className="size-2 fill-white" />
-              </>
-            )}
-          </button>
+        <div className="w-full grid grid-rows-[auto_1fr] h-full">
+          {/* Request Section */}
+          <div className="border border-b-0 first:rounded-t border-background-200">
+            <div className="border-background-200 p-3 font-semibold text-foreground-200 border-b">
+              Request
+            </div>
+            <div className="p-3 bg-input">
+              <code className="text-sm block">
+                <pre className="whitespace-pre-wrap">{requestJSON}</pre>
+              </code>
+            </div>
+          </div>
 
-          <div className="w-full overflow-auto">
-            <Accordion>
-              <AccordionItem title="request" titleClassName="uppercase" open>
-                <div className="w-full overflow-x-auto">
-                  <code>
-                    <pre>{requestJSON}</pre>
-                  </code>
-                </div>
-              </AccordionItem>
-              <AccordionItem title="response" titleClassName="uppercase" open>
-                <div className="min-h-80 overflow-x-auto">
-                  <code>
-                    <pre>{responseJSON}</pre>
-                  </code>
-                </div>
-              </AccordionItem>
-            </Accordion>
+          {/* Response Section */}
+          <div className="border last:border-b last:rounded-b border-background-200 grid grid-rows-[auto_1fr] min-h-80">
+            <div className="border-background-200 p-3 font-semibold text-foreground-200 border-b">
+              Response
+            </div>
+            <div className="p-3 bg-input rounded-b">
+              <code className="text-sm block">
+                <pre className="whitespace-pre-wrap">{responseJSON}</pre>
+              </code>
+            </div>
           </div>
         </div>
       </div>
