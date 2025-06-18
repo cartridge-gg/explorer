@@ -114,8 +114,8 @@ export function SearchBar({
       )}
 
       {(value || result || isSearching) && (
-        <div className="bg-input absolute bottom-0 left-[-1px] right-[-1px] translate-y-full rounded-b border-dashed border-t border-background-200">
-          <div className="flex flex-col gap-2 px-[15px] py-[10px] border border-background-200 border-t-0 shadow-md">
+        <div className="bg-input absolute bottom-0 left-[-1px] right-[-1px] translate-y-full border-dashed border-t border-background-200">
+          <div className="flex flex-col gap-2 px-[15px] py-[10px] border border-background-200 border-t-0 shadow-md rounded-b">
             {isSearching ? (
               <div className="flex px-2 py-2 items-center justify-center text-sm text-foreground-100 h-10">
                 <Skeleton className="w-full h-[10px] rounded-full" />
