@@ -48,8 +48,7 @@ export function Header({ className }: { className?: string }) {
   return (
     <header
       className={cn(
-        "w-full flex items-center justify-between gap-2 sticky top-0 lg:relative transition-all duration-300 z-10",
-        isScrolled && isMobile && "backdrop-blur",
+        "fixed w-full flex items-center justify-between gap-2 top-0 lg:relative transition-all duration-300 z-30 bg-gradient-to-b from-[#0C0E0C] to-transparent",
         className,
       )}
     >
