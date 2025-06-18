@@ -13,7 +13,7 @@ import useChain from "@/shared/hooks/useChain";
 import { Network } from "@/shared/components/network";
 import { SearchBar } from "@/shared/components/search-bar";
 import { useScreen } from "@/shared/hooks/useScreen";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function Header({ className }: { className?: string }) {
   const location = useLocation();
@@ -22,28 +22,6 @@ export function Header({ className }: { className?: string }) {
   const { id: chainId } = useChain();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  // Scroll threshold in pixels - adjust this value as needed
-  const scrollThreshold = 10;
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setIsScrolled(scrollY > scrollThreshold);
-    };
-
-    // Add scroll event listener
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    // Check initial scroll position
-    handleScroll();
-
-    // Cleanup
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [scrollThreshold]);
 
   return (
     <header

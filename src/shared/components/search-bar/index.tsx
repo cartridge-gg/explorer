@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState } from "react";
 import { cn, Input, SearchIcon, Skeleton, Spinner } from "@cartridge/ui";
-import { Hash } from "@/shared/components/hash";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { Badge } from "@/shared/components/badge";
 import { useIsFocused } from "@/shared/hooks/useIsFocused";
@@ -66,7 +65,7 @@ export function SearchBar({
   return (
     <div
       className={cn(
-        "bg-input min-w-[200px] w-full h-[42px] flex relative border border-background-200 items-center justify-between shadow rounded",
+        "bg-background-100 min-w-[200px] w-full h-[42px] flex relative border border-background-200 items-center justify-between shadow rounded-sm",
         value || result || isSearching ? "border-b-none rounded-b-none" : "",
         className,
       )}
@@ -92,7 +91,7 @@ export function SearchBar({
         value={value}
         ref={inputRef}
         containerClassName="w-full flex-1"
-        className="bg-input border-none focus-visible:bg-input caret-foreground search-input px-0 font-inter"
+        className="bg-background-100 border-none focus-visible:bg-background-100 caret-foreground search-input px-0 font-inter"
         placeholder="Search"
         onChange={(e) => {
           setValue(e.target.value);
@@ -101,21 +100,21 @@ export function SearchBar({
       />
 
       {!isFocused && !isMobile && (
-        <div className="flex items-center justify-center h-full aspect-square">
-          <Badge
-            onClick={() => {
-              inputRef.current?.focus();
-            }}
-            className="cursor-pointer"
-          >
+        <Badge
+          onClick={() => {
+            inputRef.current?.focus();
+          }}
+          className="cursor-pointer mr-[12px] px-[8px]"
+        >
+          <span className="text-foreground-100 font-semibold text-[12px]/[16px]">
             {isMac ? "⌘K" : "Ctrl+K"}
-          </Badge>
-        </div>
+          </span>
+        </Badge>
       )}
 
       {(value || result || isSearching) && (
-        <div className="bg-input absolute bottom-0 left-[-1px] right-[-1px] translate-y-full border-dashed border-t border-background-200">
-          <div className="flex flex-col gap-2 px-[15px] py-[10px] border border-background-200 border-t-0 shadow-md rounded-b">
+        <div className="bg-background-100 absolute bottom-0 left-[-1px] right-[-1px] translate-y-full border-dashed border-t border-background-200">
+          <div className="flex flex-col gap-2 p-[10px] border border-background-200 border-t-0 shadow-sm rounded-b-sm">
             {isSearching ? (
               <div className="flex px-2 py-2 items-center justify-center text-sm text-foreground-100 h-10">
                 <Skeleton className="w-full h-[10px] rounded-full" />
@@ -126,14 +125,16 @@ export function SearchBar({
                 onKeyDown={onKeyDown}
                 onClick={onSelectResult}
                 className={cn(
-                  "flex flex-row hover:bg-background-400 cursor-pointer items-center gap-2 justify-between w-full p-4 outline-none rounded h-10",
+                  "flex flex-row hover:bg-background-400 cursor-pointer items-center gap-[100px] justify-between w-full p-4 outline-none rounded-sm h-10",
                   result && "bg-background-400",
                 )}
               >
-                <span className="font-bold uppercase">{result.type}</span>
+                <span className="font-semibold text-[12px]/[16px] text-[#A8A8A8] capitalize">
+                  {result.type}
+                </span>
 
-                <span>
-                  <Hash value={result.value} />
+                <span className="font-mono font-normal text-[13px]/[16px] text-foreground-400 overflow-ellipsis overflow-hidden whitespace-nowrap flex-1 text-right">
+                  {result.value}
                 </span>
               </div>
             ) : (
