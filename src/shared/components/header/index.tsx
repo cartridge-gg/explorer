@@ -20,13 +20,15 @@ export function Header({ className }: { className?: string }) {
   const isHome = location.pathname === "/";
   const { isMobile } = useScreen();
   const { id: chainId } = useChain();
+  const isHomePage = location.pathname === "/";
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
     <header
       className={cn(
-        "fixed w-full flex items-center justify-between gap-2 top-0 lg:relative transition-all duration-300 z-30 bg-gradient-to-b from-[#0C0E0C] to-transparent",
+        "fixed w-full flex items-center justify-between gap-2 top-0 lg:relative transition-all duration-300 z-30",
+        !isHomePage && "bg-gradient-to-b from-[#0C0E0C] to-transparent",
         className,
       )}
     >
