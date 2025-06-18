@@ -34,7 +34,7 @@ export function Home() {
 
       <Link
         to="./json-rpc"
-        className="absolute bottom-0 left-0 flex flex-col uppercase text-sm items-start gap-1"
+        className="absolute bottom-[20px] left-0 flex flex-col uppercase text-sm items-start gap-1"
       >
         <div className="homepage-chain-info-item border border-background-200 h-[20px] flex items-center">
           <span className="font-bold px-2">Starknet JSON-RPC Spec</span>

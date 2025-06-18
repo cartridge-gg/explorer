@@ -49,7 +49,7 @@ export function Header({ className }: { className?: string }) {
     <header
       className={cn(
         "w-full flex items-center justify-between gap-2 sticky top-0 lg:relative transition-all duration-300 z-10",
-        isScrolled && isMobile && "backdrop-blur-md",
+        isScrolled && isMobile && "backdrop-blur",
         className,
       )}
     >

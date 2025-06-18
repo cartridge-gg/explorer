@@ -14,6 +14,7 @@ import { JsonRpcPlayground } from "@/modules/JsonRpc/page";
 import { NotFound } from "@/modules/NotFound/page";
 import { World } from "@/modules/World/page";
 import { cn } from "@cartridge/ui";
+import { DotBackground } from "./shared/components/dotted-background";
 
 export function App() {
   const location = useLocation();
@@ -21,11 +22,12 @@ export function App() {
 
   return (
     <div className={cn(isHomePage ? "h-screen" : "lg:h-screen")}>
+      <DotBackground />
       {!isHomePage && <Header className="py-[20px] px-[20px] xl:px-[189px]" />}
 
       <div
         className={cn(
-          "flex flex-col gap-[15px] px-[20px] xl:px-[189px] w-full min-w-[320px] relative",
+          "flex flex-col gap-[15px] px-[20px] xl:px-[189px] w-full min-w-[320px] relative z-20",
           isHomePage ? "h-screen" : "lg:h-screen",
         )}
       >
