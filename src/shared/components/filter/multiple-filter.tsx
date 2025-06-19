@@ -9,8 +9,10 @@ import {
   TimesCircleIcon,
 } from "@cartridge/ui";
 import React, { useState } from "react";
+
 interface MultiSelectProps {
   buttonClassName?: string;
+  placeholder?: string;
   items: Array<{ key: string; value: string }>;
   value?: string[];
   onValueChange?: (value: string[]) => void;
@@ -18,6 +20,7 @@ interface MultiSelectProps {
 
 export const MultiFilterTransaction = ({
   buttonClassName,
+  placeholder,
   items,
   value = [],
   onValueChange,
@@ -50,10 +53,12 @@ export const MultiFilterTransaction = ({
             buttonClassName,
           )}
         >
-          {/* Filter icon and text */}
-          <FilterIcon variant="solid" className="w-[16px] h-[16px]" />
-          <span className="font-medium text-[12px]/[16px] font-sans normal-case">
-            Filter
+          <FilterIcon
+            variant="solid"
+            className="w-[16px] h-[16px] text-foreground-200"
+          />
+          <span className="font-medium text-[12px]/[16px] font-sans normal-case text-foreground-200">
+            {placeholder || "Filter"}
           </span>
 
           <div className="flex items-center">

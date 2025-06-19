@@ -8,11 +8,6 @@ import {
   ListIcon,
   PulseIcon,
   WedgeIcon,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectItem,
-  SelectContent,
 } from "@cartridge/ui";
 import {
   Card,
@@ -331,6 +326,7 @@ export function Block() {
                     className="flex flex-col gap-2 w-full flex-1"
                   >
                     <MultiFilterTransaction
+                      placeholder="Type"
                       value={txs.getColumn("type")?.getFilterValue() ?? []}
                       onValueChange={(values) => {
                         // If no values selected or "ALL" is conceptually selected, show all

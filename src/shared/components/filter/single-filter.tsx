@@ -9,11 +9,13 @@ import {
 import React from "react";
 
 interface Props {
+  placeholder?: string;
   buttonClassName?: string;
   items: Array<{ key: string; value: string }>;
 }
 
 export const SingleFilterTransaction = ({
+  placeholder,
   buttonClassName,
   items,
   ...props
@@ -27,8 +29,13 @@ export const SingleFilterTransaction = ({
             buttonClassName,
           )}
         >
-          <FilterIcon variant="solid" />
-          <span>Filter</span>
+          <FilterIcon
+            variant="solid"
+            className="w-[16px] h-[16px] text-foreground-200"
+          />
+          <span className="font-medium text-[12px]/[16px] font-sans normal-case text-foreground-200">
+            {placeholder || "Filter"}
+          </span>
         </SelectTrigger>
       </div>
       <SelectContent>
