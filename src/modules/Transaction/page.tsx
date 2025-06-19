@@ -161,7 +161,7 @@ export function Transaction() {
                 </CardContent>
               </Card>
 
-              <Card className="flex-1 overflow-y-scroll">
+              <Card className="flex-1 overflow-y-scroll scrollbar-none">
                 <CardContent>
                   <div className="flex justify-between gap-2">
                     <CardLabel>Hash</CardLabel>
