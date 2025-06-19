@@ -53,6 +53,10 @@ import dayjs from "dayjs";
 import { getFinalityStatus } from "@/shared/utils/receipt";
 import { Badge } from "@/shared/components/badge";
 import { DataTable } from "@/shared/components/data-table";
+import {
+  FilterTransaction,
+  MultiFilterTransaction,
+} from "@/shared/components/filter";
 
 export function Block() {
   const tab = useHashLinkTabs("transactions");
@@ -329,27 +333,23 @@ export function Block() {
                     value="transactions"
                     className="flex flex-col gap-2 w-full flex-1"
                   >
-                    <Select
-                      value={txs.getColumn("type")?.getFilterValue() ?? "ALL"}
-                      onValueChange={(value) => {
-                        txs
-                          .getColumn("type")
-                          ?.setFilterValue(value === "ALL" ? undefined : value);
+                    <MultiFilterTransaction
+                      value={txs.getColumn("type")?.getFilterValue() ?? []}
+                      onValueChange={(values) => {
+                        // If no values selected or "ALL" is conceptually selected, show all
+                        if (values.length === 0) {
+                          txs.getColumn("type")?.setFilterValue(undefined);
+                        } else {
+                          // Set filter to show rows that match any of the selected values
+                          txs.getColumn("type")?.setFilterValue(values);
+                        }
                       }}
-                    >
-                      <SelectTrigger className="w-40">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ALL">All</SelectItem>
-                        <SelectItem value="INVOKE">Invoke</SelectItem>
-                        <SelectItem value="DEPLOY_ACCOUNT">
-                          Deploy Account
-                        </SelectItem>
-                        <SelectItem value="DECLARE">Declare</SelectItem>
-                      </SelectContent>
-                    </Select>
-
+                      items={[
+                        { key: "INVOKE", value: "Invoke" },
+                        { key: "DEPLOY_ACCOUNT", value: "Deploy Account" },
+                        { key: "DECLARE", value: "Declare" },
+                      ]}
+                    />
                     <DataTable
                       table={txs}
                       onRowClick={(row) => navigate(`../tx/${row.hash}`)}
