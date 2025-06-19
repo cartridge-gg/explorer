@@ -10,6 +10,8 @@ import {
   PopoverTrigger,
   PopoverContent,
   Checkbox,
+  XIcon,
+  TimesCircleIcon,
 } from "@cartridge/ui";
 import React, { useState } from "react";
 
@@ -18,6 +20,7 @@ interface Props {
   items: Array<{ key: string; value: string }>;
 }
 
+// Single select version (existing)
 export const FilterTransaction = ({
   buttonClassName,
   items,
@@ -47,6 +50,7 @@ export const FilterTransaction = ({
   );
 };
 
+// Multi-select version with just names and clear all
 interface MultiSelectProps {
   buttonClassName?: string;
   items: Array<{ key: string; value: string }>;
@@ -69,13 +73,13 @@ export const MultiFilterTransaction = ({
     onValueChange?.(newValue);
   };
 
-  const getDisplayText = () => {
-    if (value.length === 0) return "All";
-    if (value.length === 1) {
-      const item = items.find((item) => item.key === value[0]);
-      return item?.value || "Selected";
-    }
-    return `${value.length} selected`;
+  const handleClearAll = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent opening the popover
+    onValueChange?.([]);
+  };
+
+  const getSelectedItems = () => {
+    return items.filter((item) => value.includes(item.key));
   };
 
   return (
@@ -84,15 +88,34 @@ export const MultiFilterTransaction = ({
         <Button
           variant="outline"
           className={cn(
-            "px-[5px] bg-background-500 rounded-sm hover:bg-background-400 w-fit gap-[4px] h-[22px] border border-[#454B46]",
+            "px-[5px] bg-background-500 rounded-sm hover:bg-background-400 gap-[4px] h-[22px] border border-[#454B46] w-fit",
             buttonClassName,
           )}
         >
+          {/* Filter icon and text */}
           <FilterIcon variant="solid" className="w-[16px] h-[16px]" />
           <span className="font-medium text-[12px]/[16px] font-sans normal-case">
             Filter
           </span>
-          {/* <span>{getDisplayText()}</span> */}
+
+          <div className="flex items-center">
+            {getSelectedItems().map((item, index) => (
+              <span
+                key={item.key}
+                className="font-medium text-[12px]/[16px] font-sans normal-case text-foreground-100"
+              >
+                {index > 0 && ", "}
+                {item.value.trim()}
+              </span>
+            ))}
+          </div>
+
+          {/* Clear all button */}
+          {value.length > 0 && (
+            <button onClick={handleClearAll} aria-label="Clear all filters">
+              <TimesCircleIcon className="w-[13px] h-[13px] text-foreground-100 hover:text-destructive-100" />
+            </button>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-56 p-2">
