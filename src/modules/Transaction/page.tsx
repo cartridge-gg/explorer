@@ -215,7 +215,7 @@ export function Transaction() {
                   <CardLabel>L1 execution gas</CardLabel>
 
                   <div className="flex items-center gap-px">
-                    <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
+                    <div className="bg-background-200 p-3 flex-1 flex-col gap-1">
                       <CardLabel>Max amount</CardLabel>
                       <div className="flex items-center justify-between">
                         <div className="font-mono text-foreground font-semibold">
@@ -233,7 +233,7 @@ export function Transaction() {
                       </div>
                     </div>
 
-                    <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
+                    <div className="bg-background-200 p-3 flex-1 flex-col gap-1">
                       <CardLabel>Max price / unit</CardLabel>
                       <div className="flex items-center justify-between">
                         <div className="font-mono text-foreground font-semibold">
@@ -256,7 +256,7 @@ export function Transaction() {
                   <CardLabel>L2 execution gas</CardLabel>
 
                   <div className="flex items-center gap-px">
-                    <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
+                    <div className="bg-background-200 p-3 flex-1 flex-col gap-1">
                       <CardLabel>Max amount</CardLabel>
                       <div className="flex items-center justify-between">
                         <div className="font-mono text-foreground font-semibold">
@@ -274,7 +274,7 @@ export function Transaction() {
                       </div>
                     </div>
 
-                    <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
+                    <div className="bg-background-200 p-3 flex-1 flex-col gap-1">
                       <CardLabel>Max price / unit</CardLabel>
                       <div className="flex items-center justify-between">
                         <div className="font-mono text-foreground font-semibold">
@@ -297,7 +297,7 @@ export function Transaction() {
                   <CardLabel>L1 data gas</CardLabel>
 
                   <div className="flex items-center gap-px">
-                    <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
+                    <div className="bg-background-200 p-3 flex-1 flex-col gap-1">
                       <CardLabel>Max amount</CardLabel>
                       <div className="flex items-center justify-between">
                         <div className="font-mono text-foreground font-semibold">
@@ -316,7 +316,7 @@ export function Transaction() {
                       </div>
                     </div>
 
-                    <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
+                    <div className="bg-background-200 p-3 flex-1 flex-col gap-1">
                       <CardLabel>Max price / unit</CardLabel>
                       <div className="flex items-center justify-between">
                         <div className="font-mono text-foreground font-semibold">
