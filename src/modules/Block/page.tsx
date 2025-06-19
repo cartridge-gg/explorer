@@ -53,10 +53,7 @@ import dayjs from "dayjs";
 import { getFinalityStatus } from "@/shared/utils/receipt";
 import { Badge } from "@/shared/components/badge";
 import { DataTable } from "@/shared/components/data-table";
-import {
-  FilterTransaction,
-  MultiFilterTransaction,
-} from "@/shared/components/filter";
+import { MultiFilterTransaction } from "@/shared/components/filter";
 
 export function Block() {
   const tab = useHashLinkTabs("transactions");
