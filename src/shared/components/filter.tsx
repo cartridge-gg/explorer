@@ -10,7 +10,6 @@ import {
   PopoverTrigger,
   PopoverContent,
   Checkbox,
-  XIcon,
   TimesCircleIcon,
 } from "@cartridge/ui";
 import React, { useState } from "react";
@@ -20,7 +19,6 @@ interface Props {
   items: Array<{ key: string; value: string }>;
 }
 
-// Single select version (existing)
 export const FilterTransaction = ({
   buttonClassName,
   items,
@@ -50,7 +48,6 @@ export const FilterTransaction = ({
   );
 };
 
-// Multi-select version with just names and clear all
 interface MultiSelectProps {
   buttonClassName?: string;
   items: Array<{ key: string; value: string }>;
@@ -118,7 +115,13 @@ export const MultiFilterTransaction = ({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-56 p-2">
+      <PopoverContent
+        side="bottom"
+        align="start"
+        sideOffset={4}
+        alignOffset={0}
+        className="w-56 p-2 border-[#454B46]"
+      >
         <div className="space-y-2">
           {items.map((item) => (
             <div key={item.key} className="flex items-center space-x-2">
