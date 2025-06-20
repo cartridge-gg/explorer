@@ -92,7 +92,7 @@ export function Connected() {
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="relative gap-3 text-md h-12 w-12 p-0 sm:p-6 sm:w-48 hover:bg-transparent hover:text-foreground hover:cursor-pointer justify-center sm:justify-between"
+          className="relative gap-3 text-md h-12 w-12 p-0 sm:p-6 sm:w-48 hover:bg-background-200 hover:text-foreground hover:cursor-pointer justify-center sm:justify-between"
           size={isMobile ? "icon" : "default"}
         >
           {state.calls.length > 0 && (
