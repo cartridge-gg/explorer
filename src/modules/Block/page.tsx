@@ -14,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
-  CardIcon,
   CardLabel,
   CardSeparator,
   ExecutionResourcesCard,
@@ -128,7 +127,7 @@ export function Block() {
       ) : (
         <div className="flex flex-col gap-2 pb-8">
           <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-2">
-            <div className="sl:w-[468px] sl:min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
+            <div className="sl:min-w-[337px] flex flex-col gap-[6px] sl:overflow-y-scroll">
               <Card>
                 <CardContent className="flex-row justify-between">
                   <div className="flex flex-col gap-2">
@@ -157,8 +156,8 @@ export function Block() {
                 </CardContent>
               </Card>
 
-              <Card className="flex-1">
-                <CardContent>
+              <Card className="flex-1 overflow-y-scroll scrollbar-none py-[10px] px-[15px]">
+                <CardContent className="px-0">
                   <div className="flex items-center justify-between">
                     <CardLabel>Hash</CardLabel>
                     <Hash value={block?.block_hash} />
@@ -175,7 +174,7 @@ export function Block() {
 
                 <CardSeparator />
 
-                <CardContent>
+                <CardContent className="px-0">
                   <div className="flex items-center justify-between">
                     <CardLabel>Sequencer</CardLabel>
                     <Hash
@@ -187,7 +186,7 @@ export function Block() {
 
                 <CardSeparator />
 
-                <CardContent>
+                <CardContent className="px-0">
                   <div className="flex items-center justify-between">
                     <CardLabel>Starknet version</CardLabel>
                     <div className="font-mono text-foreground font-semibold">
@@ -202,16 +201,16 @@ export function Block() {
 
                 <CardSeparator />
 
-                <CardHeader>
-                  <CardIcon icon={<GasIcon />} />
+                <CardHeader className="px-0 mb-[15px]">
+                  <GasIcon />
                   <CardTitle>gas prices</CardTitle>
                 </CardHeader>
 
-                <CardContent className="gap-4">
+                <CardContent className="gap-[15px] px-0">
                   <CardLabel>L1 execution gas</CardLabel>
 
                   <div className="flex items-center gap-px">
-                    <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
+                    <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
                       <CardLabel className="uppercase">strk</CardLabel>
                       <div className="flex items-center justify-between">
                         {block ? (
@@ -231,7 +230,7 @@ export function Block() {
                       </div>
                     </div>
 
-                    <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
+                    <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
                       <CardLabel className="uppercase">eth</CardLabel>
                       <div className="flex items-center justify-between">
                         {block ? (
@@ -255,7 +254,7 @@ export function Block() {
                   <CardLabel>L1 data gas</CardLabel>
 
                   <div className="flex items-center gap-px">
-                    <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
+                    <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
                       <CardLabel className="uppercase">strk</CardLabel>
                       <div className="flex items-center justify-between">
                         {block ? (
@@ -277,7 +276,7 @@ export function Block() {
                       </div>
                     </div>
 
-                    <div className="bg-background-200 p-3 w-60 flex flex-col gap-1">
+                    <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
                       <CardLabel className="uppercase">eth</CardLabel>
                       <div className="flex items-center justify-between">
                         {block ? (
@@ -327,7 +326,10 @@ export function Block() {
                   >
                     <MultiFilterTransaction
                       placeholder="Type"
-                      value={txs.getColumn("type")?.getFilterValue() ?? []}
+                      value={
+                        (txs.getColumn("type")?.getFilterValue() as string[]) ??
+                        []
+                      }
                       onValueChange={(values) => {
                         // If no values selected or "ALL" is conceptually selected, show all
                         if (values.length === 0) {

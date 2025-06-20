@@ -129,29 +129,29 @@ export function ExecutionResourcesCard({
     <Card className="gap-0 pb-0">
       <CardHeader className="pb-3 border-b border-background-200">
         <CardIcon icon={<BoltIcon variant="solid" />} />
-        <CardTitle>Execution resources</CardTitle>
+        <CardTitle className="font-bold text-[12px]">
+          Execution resources
+        </CardTitle>
       </CardHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_3fr] divide-y lg:divide-y-0 lg:divide-x divide-background-200">
         {/* Steps Section */}
-        <CardContent className="py-4">
-          <div>
-            <CardLabel>steps</CardLabel>
-            {blockComputeData ? (
-              <div className="font-mono text-foreground font-semibold overflow-auto">
-                {formatNumber(blockComputeData.steps)}
-              </div>
-            ) : (
-              <Skeleton className="h-6 w-40" />
-            )}
-          </div>
+        <CardContent className="py-[10px] px-[14px] gap-[10px]">
+          <CardLabel>steps</CardLabel>
+          {blockComputeData ? (
+            <div className="font-mono text-foreground font-semibold overflow-auto">
+              {formatNumber(blockComputeData.steps)}
+            </div>
+          ) : (
+            <Skeleton className="h-6 w-40" />
+          )}
         </CardContent>
 
         {/* Gas Section */}
-        <CardContent className="py-4">
+        <CardContent className="py-[10px] px-[11px] gap-[13px]">
           <CardLabel>gas</CardLabel>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-px mt-2">
-            <div className="bg-background-200 flex flex-col p-2">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-px">
+            <div className="bg-background-200 flex flex-col p-[10px]">
               <CardLabel>l1</CardLabel>
               {blockComputeData ? (
                 <div className="font-mono text-foreground font-semibold">
@@ -161,7 +161,7 @@ export function ExecutionResourcesCard({
                 <Skeleton className="h-6 w-full" />
               )}
             </div>
-            <div className="bg-background-200 flex flex-col p-2">
+            <div className="bg-background-200 flex flex-col p-[10px]">
               <CardLabel>l1 data</CardLabel>
               {blockComputeData ? (
                 <div className="font-mono text-foreground font-semibold">
@@ -175,11 +175,14 @@ export function ExecutionResourcesCard({
         </CardContent>
 
         {/* Builtins Counter Section */}
-        <CardContent className="py-4">
+        <CardContent className="py-[10px] px-[11px] gap-[13px]">
           <CardLabel>builtins counter</CardLabel>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-px mt-2">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-px">
             {Object.entries(executions ?? {}).map(([key, value]) => (
-              <div key={key} className="bg-background-200 flex flex-col p-2">
+              <div
+                key={key}
+                className="bg-background-200 flex flex-col p-[10px]"
+              >
                 <CardLabel>{formatSnakeCaseToDisplayValue(key)}</CardLabel>
                 <div className="font-mono text-foreground font-semibold overflow-auto">
                   {formatNumber(value)}
