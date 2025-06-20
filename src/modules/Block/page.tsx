@@ -14,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
-  CardIcon,
   CardLabel,
   CardSeparator,
   ExecutionResourcesCard,
