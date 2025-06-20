@@ -21,6 +21,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  cn,
 } from "@cartridge/ui";
 import {
   Card,
@@ -92,7 +93,14 @@ function TruncatedValue({
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger className={className}>{truncated}</TooltipTrigger>
+        <TooltipTrigger
+          className={cn(
+            "text-[13px]/[16px] tracking-[0.26px] font-semibold",
+            className,
+          )}
+        >
+          {truncated}
+        </TooltipTrigger>
         <TooltipContent className="bg-background-200 text-foreground-200 max-w-xs break-all">
           {stringValue}
         </TooltipContent>
@@ -175,7 +183,7 @@ export function Transaction() {
       ) : (
         <div className="flex flex-col gap-2 pb-8">
           <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-2">
-            <div className="sl:w-[468px] sl:min-w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
+            <div className="sl:min-w-[337px] flex flex-col gap-[6px] sl:overflow-y-scroll">
               <Card>
                 <CardContent className="flex-row justify-between">
                   <div className="flex flex-col gap-2">
@@ -280,7 +288,7 @@ export function Transaction() {
                             maxLength={12}
                             className="font-mono text-foreground font-semibold"
                           />
-                          <Badge className="uppercase bg-background-500">
+                          <Badge className="uppercase bg-background-500 text-[10px] font-medium">
                             strk
                           </Badge>
                         </div>
@@ -303,7 +311,7 @@ export function Transaction() {
                             maxLength={12}
                             className="font-mono text-foreground font-semibold"
                           />
-                          <Badge className="uppercase bg-background-500">
+                          <Badge className="uppercase bg-background-500 text-[10px] font-medium">
                             strk
                           </Badge>
                         </div>
@@ -332,7 +340,7 @@ export function Transaction() {
                             maxLength={12}
                             className="font-mono text-foreground font-semibold"
                           />
-                          <Badge className="uppercase bg-background-500">
+                          <Badge className="uppercase bg-background-500 text-[10px] font-medium">
                             strk
                           </Badge>
                         </div>
@@ -355,7 +363,7 @@ export function Transaction() {
                             maxLength={12}
                             className="font-mono text-foreground font-semibold"
                           />
-                          <Badge className="uppercase bg-background-500">
+                          <Badge className="uppercase bg-background-500 text-[10px] font-medium">
                             strk
                           </Badge>
                         </div>
@@ -384,7 +392,7 @@ export function Transaction() {
                             maxLength={12}
                             className="font-mono text-foreground font-semibold"
                           />
-                          <Badge className="uppercase bg-background-500">
+                          <Badge className="uppercase bg-background-500 text-[10px] font-medium">
                             strk
                           </Badge>
                         </div>
@@ -407,7 +415,7 @@ export function Transaction() {
                             maxLength={12}
                             className="font-mono text-foreground font-semibold"
                           />
-                          <Badge className="uppercase bg-background-500">
+                          <Badge className="uppercase bg-background-500 text-[10px] font-medium">
                             strk
                           </Badge>
                         </div>
