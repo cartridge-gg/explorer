@@ -3,6 +3,8 @@ import { truncateString } from "@/shared/utils/string";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { cairo } from "starknet";
+import { useCallback } from "react";
+import { toast } from "sonner";
 import { Calldata } from "./calldata";
 import {
   BoltIcon,
@@ -133,6 +135,20 @@ export function Transaction() {
   );
   const { isMobile } = useScreen();
 
+  const onCopySenderAddress = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+
+      if (!tx?.sender_address) {
+        return;
+      }
+
+      navigator.clipboard.writeText(tx.sender_address);
+      toast.success("Address copied to clipboard");
+    },
+    [tx?.sender_address],
+  );
+
   return (
     <div className="w-full flex flex-col gap-2">
       <Breadcrumb>
@@ -231,18 +247,19 @@ export function Transaction() {
                     </div>
                   </div>
                 </CardContent>
-
                 {(!!tx?.sender_address || !!tx?.nonce) && (
                   <>
                     <CardSeparator />
                     <CardContent className="px-0">
                       {!!tx?.sender_address && (
-                        <div className="flex justify-between gap-2">
+                        <div className="flex flex-col justify-between gap-[8px]">
                           <CardLabel>Sender</CardLabel>
-                          <Hash
-                            value={tx?.sender_address}
-                            to={`../contract/${tx?.sender_address}`}
-                          />
+                          <div
+                            className="bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
+                            onClick={onCopySenderAddress}
+                          >
+                            <Hash value={tx?.sender_address} />
+                          </div>
                         </div>
                       )}
                       {!!tx?.nonce && (
@@ -259,170 +276,174 @@ export function Transaction() {
                   </>
                 )}
 
-                <CardSeparator />
+                {Number(tx?.type) === 3 && (
+                  <>
+                    <CardSeparator />
 
-                <CardHeader className="px-0 mb-[15px]">
-                  <GasIcon />
-                  <CardTitle>Resource Bounds</CardTitle>
-                </CardHeader>
+                    <CardHeader className="px-0 mb-[15px]">
+                      <GasIcon />
+                      <CardTitle>Resource Bounds</CardTitle>
+                    </CardHeader>
 
-                <CardContent className="gap-[15px] px-0">
-                  <div className="space-y-[8px]">
-                    <CardLabel>L1 execution gas</CardLabel>
+                    <CardContent className="gap-[15px] px-0">
+                      <div className="space-y-[8px]">
+                        <CardLabel>L1 execution gas</CardLabel>
 
-                    <div className="flex items-center gap-px">
-                      <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                        <CardLabel>Max amount</CardLabel>
-                        <div className="flex items-center justify-between">
-                          <TruncatedValue
-                            value={formatNumber(
-                              ConvertToSTRK(
-                                Number(
-                                  cairo.felt(
-                                    tx?.resource_bounds?.l1_gas?.max_amount ??
-                                      0,
+                        <div className="flex items-center gap-px">
+                          <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
+                            <CardLabel>Max amount</CardLabel>
+                            <div className="flex items-center justify-between">
+                              <TruncatedValue
+                                value={formatNumber(
+                                  ConvertToSTRK(
+                                    Number(
+                                      cairo.felt(
+                                        tx?.resource_bounds?.l1_gas
+                                          ?.max_amount ?? 0,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            )}
-                            maxLength={12}
-                            className="font-mono text-foreground font-semibold"
-                          />
-                          <Badge className="uppercase bg-background-500 text-[10px] font-medium">
-                            strk
-                          </Badge>
+                                )}
+                                maxLength={12}
+                                className="font-mono text-foreground font-semibold"
+                              />
+                              <Badge className="uppercase bg-background-500 text-[10px] font-medium">
+                                strk
+                              </Badge>
+                            </div>
+                          </div>
+
+                          <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
+                            <CardLabel>Max price / unit</CardLabel>
+                            <div className="flex items-center justify-between">
+                              <TruncatedValue
+                                value={formatNumber(
+                                  ConvertToSTRK(
+                                    Number(
+                                      cairo.felt(
+                                        tx?.resource_bounds?.l1_gas
+                                          ?.max_price_per_unit ?? 0,
+                                      ),
+                                    ),
+                                  ),
+                                )}
+                                maxLength={12}
+                                className="font-mono text-foreground font-semibold"
+                              />
+                              <Badge className="uppercase bg-background-500 text-[10px] font-medium">
+                                strk
+                              </Badge>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                        <CardLabel>Max price / unit</CardLabel>
-                        <div className="flex items-center justify-between">
-                          <TruncatedValue
-                            value={formatNumber(
-                              ConvertToSTRK(
-                                Number(
-                                  cairo.felt(
-                                    tx?.resource_bounds?.l1_gas
-                                      ?.max_price_per_unit ?? 0,
+                      <div className="space-y-[8px]">
+                        <CardLabel>L2 execution gas</CardLabel>
+
+                        <div className="flex items-center gap-px">
+                          <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
+                            <CardLabel>Max amount</CardLabel>
+                            <div className="flex items-center justify-between">
+                              <TruncatedValue
+                                value={formatNumber(
+                                  ConvertToSTRK(
+                                    Number(
+                                      cairo.felt(
+                                        tx?.resource_bounds?.l2_gas
+                                          ?.max_amount ?? 0,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            )}
-                            maxLength={12}
-                            className="font-mono text-foreground font-semibold"
-                          />
-                          <Badge className="uppercase bg-background-500 text-[10px] font-medium">
-                            strk
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                                )}
+                                maxLength={12}
+                                className="font-mono text-foreground font-semibold"
+                              />
+                              <Badge className="uppercase bg-background-500 text-[10px] font-medium">
+                                strk
+                              </Badge>
+                            </div>
+                          </div>
 
-                  <div className="space-y-[8px]">
-                    <CardLabel>L2 execution gas</CardLabel>
-
-                    <div className="flex items-center gap-px">
-                      <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                        <CardLabel>Max amount</CardLabel>
-                        <div className="flex items-center justify-between">
-                          <TruncatedValue
-                            value={formatNumber(
-                              ConvertToSTRK(
-                                Number(
-                                  cairo.felt(
-                                    tx?.resource_bounds?.l2_gas?.max_amount ??
-                                      0,
+                          <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
+                            <CardLabel>Max price / unit</CardLabel>
+                            <div className="flex items-center justify-between">
+                              <TruncatedValue
+                                value={formatNumber(
+                                  ConvertToSTRK(
+                                    Number(
+                                      cairo.felt(
+                                        tx?.resource_bounds?.l2_gas
+                                          ?.max_price_per_unit ?? 0,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            )}
-                            maxLength={12}
-                            className="font-mono text-foreground font-semibold"
-                          />
-                          <Badge className="uppercase bg-background-500 text-[10px] font-medium">
-                            strk
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                        <CardLabel>Max price / unit</CardLabel>
-                        <div className="flex items-center justify-between">
-                          <TruncatedValue
-                            value={formatNumber(
-                              ConvertToSTRK(
-                                Number(
-                                  cairo.felt(
-                                    tx?.resource_bounds?.l2_gas
-                                      ?.max_price_per_unit ?? 0,
-                                  ),
-                                ),
-                              ),
-                            )}
-                            maxLength={12}
-                            className="font-mono text-foreground font-semibold"
-                          />
-                          <Badge className="uppercase bg-background-500 text-[10px] font-medium">
-                            strk
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-[8px]">
-                    <CardLabel>L1 data gas</CardLabel>
-
-                    <div className="flex items-center gap-px">
-                      <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                        <CardLabel>Max amount</CardLabel>
-                        <div className="flex items-center justify-between">
-                          <TruncatedValue
-                            value={formatNumber(
-                              ConvertToSTRK(
-                                Number(
-                                  cairo.felt(
-                                    tx?.resource_bounds?.l1_data_gas
-                                      ?.max_amount ?? 0,
-                                  ),
-                                ),
-                              ),
-                            )}
-                            maxLength={12}
-                            className="font-mono text-foreground font-semibold"
-                          />
-                          <Badge className="uppercase bg-background-500 text-[10px] font-medium">
-                            strk
-                          </Badge>
+                                )}
+                                maxLength={12}
+                                className="font-mono text-foreground font-semibold"
+                              />
+                              <Badge className="uppercase bg-background-500 text-[10px] font-medium">
+                                strk
+                              </Badge>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                        <CardLabel>Max price / unit</CardLabel>
-                        <div className="flex items-center justify-between">
-                          <TruncatedValue
-                            value={formatNumber(
-                              ConvertToSTRK(
-                                Number(
-                                  cairo.felt(
-                                    tx?.resource_bounds?.l1_data_gas
-                                      ?.max_price_per_unit ?? 0,
+                      <div className="space-y-[8px]">
+                        <CardLabel>L1 data gas</CardLabel>
+
+                        <div className="flex items-center gap-px">
+                          <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
+                            <CardLabel>Max amount</CardLabel>
+                            <div className="flex items-center justify-between">
+                              <TruncatedValue
+                                value={formatNumber(
+                                  ConvertToSTRK(
+                                    Number(
+                                      cairo.felt(
+                                        tx?.resource_bounds?.l1_data_gas
+                                          ?.max_amount ?? 0,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            )}
-                            maxLength={12}
-                            className="font-mono text-foreground font-semibold"
-                          />
-                          <Badge className="uppercase bg-background-500 text-[10px] font-medium">
-                            strk
-                          </Badge>
+                                )}
+                                maxLength={12}
+                                className="font-mono text-foreground font-semibold"
+                              />
+                              <Badge className="uppercase bg-background-500 text-[10px] font-medium">
+                                strk
+                              </Badge>
+                            </div>
+                          </div>
+
+                          <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
+                            <CardLabel>Max price / unit</CardLabel>
+                            <div className="flex items-center justify-between">
+                              <TruncatedValue
+                                value={formatNumber(
+                                  ConvertToSTRK(
+                                    Number(
+                                      cairo.felt(
+                                        tx?.resource_bounds?.l1_data_gas
+                                          ?.max_price_per_unit ?? 0,
+                                      ),
+                                    ),
+                                  ),
+                                )}
+                                maxLength={12}
+                                className="font-mono text-foreground font-semibold"
+                              />
+                              <Badge className="uppercase bg-background-500 text-[10px] font-medium">
+                                strk
+                              </Badge>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </CardContent>
+                    </CardContent>
+                  </>
+                )}
 
                 {!!(
                   tx?.fee_data_availability_mode ??
@@ -457,7 +478,6 @@ export function Transaction() {
                     </div>
                   </>
                 )}
-
                 {!!tx?.tip && (
                   <>
                     <CardSeparator />
