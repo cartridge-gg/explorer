@@ -9,6 +9,7 @@ import {
   PulseIcon,
   WedgeIcon,
 } from "@cartridge/ui";
+import { toast } from "sonner";
 import {
   Card,
   CardHeader,
@@ -48,6 +49,7 @@ import { getFinalityStatus } from "@/shared/utils/receipt";
 import { Badge } from "@/shared/components/badge";
 import { DataTable } from "@/shared/components/data-table";
 import { MultiFilterTransaction } from "@/shared/components/filter";
+import { memo, useCallback } from "react";
 
 export function Block() {
   const tab = useHashLinkTabs("transactions");
@@ -63,8 +65,21 @@ export function Block() {
     latestBlockNumber !== undefined &&
     block?.block_number >= Number(latestBlockNumber);
 
+  const onCopySequencerAddress = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+
+      if (!block?.sequencer_address) {
+        return;
+      }
+
+      navigator.clipboard.writeText(block?.sequencer_address);
+      toast.success("Address copied to clipboard");
+    },
+    [block?.sequencer_address],
+  );
   return (
-    <div className="w-full flex flex-col gap-2">
+    <div className="w-full flex flex-col gap-[3px]">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -81,7 +96,10 @@ export function Block() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader>
+      <PageHeader
+        containerClassName="rounded-t-[12px] rounded-b-[4px]"
+        className="px-[15px] py-[8px]"
+      >
         <PageHeaderTitle>
           <StackDiamondIcon variant="solid" />
           Block{" "}
@@ -125,23 +143,28 @@ export function Block() {
       {error ? (
         <NotFound />
       ) : (
-        <div className="flex flex-col gap-2 pb-8">
-          <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-2">
+        <div className="flex flex-col gap-[40px] pb-8">
+          <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-[3px]">
             <div className="sl:min-w-[337px] flex flex-col gap-[6px] sl:overflow-y-scroll">
               <Card>
                 <CardContent className="flex-row justify-between">
                   <div className="flex flex-col gap-2">
                     <CardLabel>Status</CardLabel>
                     {block ? (
-                      <div className="font-semibold">
+                      <p
+                        className="inline-block text-[13px] font-semibold
+                            bg-gradient-to-r from-[#fff] to-[#636363]
+                            bg-clip-text text-transparent
+                             [text-shadow:0px_0px_10px_#6A6863]"
+                      >
                         {getFinalityStatus(block.status)}
-                      </div>
+                      </p>
                     ) : (
-                      <Skeleton className="h-6 w-28" />
+                      <Skeleton className="h-4 w-28" />
                     )}
                   </div>
 
-                  <div className="flex flex-col gap-2 w-44">
+                  <div className="flex flex-col gap-[6px] w-44">
                     <CardLabel>Timestamp</CardLabel>
                     {block ? (
                       <div className="font-semibold">
@@ -156,8 +179,8 @@ export function Block() {
                 </CardContent>
               </Card>
 
-              <Card className="flex-1 overflow-y-scroll scrollbar-none py-[10px] px-[15px]">
-                <CardContent className="px-0">
+              <Card className="flex-1 overflow-y-scroll scrollbar-none py-[10px] px-[15px] gap-0">
+                <CardContent className="px-0 gap-[8px]">
                   <div className="flex items-center justify-between">
                     <CardLabel>Hash</CardLabel>
                     <Hash value={block?.block_hash} />
@@ -172,19 +195,21 @@ export function Block() {
                   </div>
                 </CardContent>
 
-                <CardSeparator />
+                <Separator />
 
                 <CardContent className="px-0">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col justify-between gap-[8px]">
                     <CardLabel>Sequencer</CardLabel>
-                    <Hash
-                      value={block?.sequencer_address}
-                      to={`../contract/${block?.sequencer_address}`}
-                    />
+                    <div
+                      className="bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
+                      onClick={onCopySequencerAddress}
+                    >
+                      <Hash value={block?.sequencer_address} />
+                    </div>
                   </div>
                 </CardContent>
 
-                <CardSeparator />
+                <Separator />
 
                 <CardContent className="px-0">
                   <div className="flex items-center justify-between">
@@ -199,7 +224,7 @@ export function Block() {
                   </div>
                 </CardContent>
 
-                <CardSeparator />
+                <Separator />
 
                 <CardHeader className="px-0 mb-[15px]">
                   <GasIcon />
@@ -207,94 +232,98 @@ export function Block() {
                 </CardHeader>
 
                 <CardContent className="gap-[15px] px-0">
-                  <CardLabel>L1 execution gas</CardLabel>
+                  <div className="space-y-[8px]">
+                    <CardLabel>L1 execution gas</CardLabel>
 
-                  <div className="flex items-center gap-px">
-                    <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                      <CardLabel className="uppercase">strk</CardLabel>
-                      <div className="flex items-center justify-between">
-                        {block ? (
-                          <div className="font-mono text-foreground font-semibold">
-                            {formatNumber(
-                              Number(
-                                cairo.felt(block.l1_gas_price.price_in_fri),
-                              ),
-                            )}
-                          </div>
-                        ) : (
-                          <Skeleton className="h-4 w-40" />
-                        )}
-                        <Badge className="uppercase bg-background-500">
-                          gfri
-                        </Badge>
+                    <div className="flex items-center gap-px">
+                      <div className="bg-background-200 p-[12px] flex-1 flex-col">
+                        <CardLabel className="uppercase">strk</CardLabel>
+                        <div className="flex items-center justify-between">
+                          {block ? (
+                            <div className="font-mono text-foreground font-semibold">
+                              {formatNumber(
+                                Number(
+                                  cairo.felt(block.l1_gas_price.price_in_fri),
+                                ),
+                              )}
+                            </div>
+                          ) : (
+                            <Skeleton className="h-4 w-40" />
+                          )}
+                          <Badge className="uppercase bg-background-500">
+                            gfri
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                      <CardLabel className="uppercase">eth</CardLabel>
-                      <div className="flex items-center justify-between">
-                        {block ? (
-                          <div className="font-mono text-foreground font-semibold">
-                            {formatNumber(
-                              Number(
-                                cairo.felt(block.l1_gas_price.price_in_wei),
-                              ),
-                            )}
-                          </div>
-                        ) : (
-                          <Skeleton className="h-4 w-40" />
-                        )}
-                        <Badge className="uppercase bg-background-500">
-                          gwei
-                        </Badge>
+                      <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
+                        <CardLabel className="uppercase">eth</CardLabel>
+                        <div className="flex items-center justify-between">
+                          {block ? (
+                            <div className="font-mono text-foreground font-semibold">
+                              {formatNumber(
+                                Number(
+                                  cairo.felt(block.l1_gas_price.price_in_wei),
+                                ),
+                              )}
+                            </div>
+                          ) : (
+                            <Skeleton className="h-4 w-40" />
+                          )}
+                          <Badge className="uppercase bg-background-500">
+                            gwei
+                          </Badge>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <CardLabel>L1 data gas</CardLabel>
+                  <div className="space-y-[8px]">
+                    <CardLabel>L1 data gas</CardLabel>
 
-                  <div className="flex items-center gap-px">
-                    <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                      <CardLabel className="uppercase">strk</CardLabel>
-                      <div className="flex items-center justify-between">
-                        {block ? (
-                          <div className="font-mono text-foreground font-semibold">
-                            {formatNumber(
-                              Number(
-                                cairo.felt(
-                                  block.l1_data_gas_price.price_in_fri,
+                    <div className="flex items-center gap-px">
+                      <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
+                        <CardLabel className="uppercase">strk</CardLabel>
+                        <div className="flex items-center justify-between">
+                          {block ? (
+                            <div className="font-mono text-foreground font-semibold">
+                              {formatNumber(
+                                Number(
+                                  cairo.felt(
+                                    block.l1_data_gas_price.price_in_fri,
+                                  ),
                                 ),
-                              ),
-                            )}
-                          </div>
-                        ) : (
-                          <Skeleton className="h-4 w-40" />
-                        )}
-                        <Badge className="uppercase bg-background-500">
-                          gfri
-                        </Badge>
+                              )}
+                            </div>
+                          ) : (
+                            <Skeleton className="h-4 w-40" />
+                          )}
+                          <Badge className="uppercase bg-background-500">
+                            gfri
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                      <CardLabel className="uppercase">eth</CardLabel>
-                      <div className="flex items-center justify-between">
-                        {block ? (
-                          <div className="font-mono text-foreground font-semibold">
-                            {formatNumber(
-                              Number(
-                                cairo.felt(
-                                  block.l1_data_gas_price.price_in_wei,
+                      <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
+                        <CardLabel className="uppercase">eth</CardLabel>
+                        <div className="flex items-center justify-between">
+                          {block ? (
+                            <div className="font-mono text-foreground font-semibold">
+                              {formatNumber(
+                                Number(
+                                  cairo.felt(
+                                    block.l1_data_gas_price.price_in_wei,
+                                  ),
                                 ),
-                              ),
-                            )}
-                          </div>
-                        ) : (
-                          <Skeleton className="h-4 w-40" />
-                        )}
-                        <Badge className="uppercase bg-background-500">
-                          gwei
-                        </Badge>
+                              )}
+                            </div>
+                          ) : (
+                            <Skeleton className="h-4 w-40" />
+                          )}
+                          <Badge className="uppercase bg-background-500">
+                            gwei
+                          </Badge>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -317,7 +346,7 @@ export function Block() {
                   </TabsList>
                 </CardContent>
 
-                <CardSeparator />
+                <Separator />
 
                 <CardContent className="h-full">
                   <TabsContent
@@ -373,3 +402,7 @@ export function Block() {
     </div>
   );
 }
+
+const Separator = memo(() => (
+  <CardSeparator className="my-[10px] relative left-[-15px] w-[calc(100%+30px)]" />
+));
