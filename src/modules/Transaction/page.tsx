@@ -150,8 +150,8 @@ export function Transaction() {
   );
 
   return (
-    <div className="w-full flex flex-col gap-2">
-      <Breadcrumb>
+    <div className="w-full flex flex-col gap-[3px]">
+      <Breadcrumb className="mb-[7px]">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
@@ -197,9 +197,9 @@ export function Transaction() {
       {error ? (
         <NotFound />
       ) : (
-        <div className="flex flex-col gap-2 pb-8">
-          <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-2">
-            <div className="sl:min-w-[337px] flex flex-col gap-[6px] sl:overflow-y-scroll">
+        <div className="flex flex-col gap-[40px] pb-8">
+          <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-[3px]">
+            <div className="sl:min-w-[337px] flex flex-col gap-[3px] sl:overflow-y-scroll">
               <Card className="py-[10px] px-[15px]">
                 <CardContent className="flex-row justify-between px-0">
                   <div className="flex flex-col gap-[6px]">
