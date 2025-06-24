@@ -205,7 +205,12 @@ export function Transaction() {
                   <div className="flex flex-col gap-2">
                     <CardLabel>Status</CardLabel>
                     {block ? (
-                      <p className="font-semibold">
+                      <p
+                        className="inline-block text-[13px] font-semibold
+                            bg-gradient-to-r from-[#fff] to-[#636363]
+                            bg-clip-text text-transparent
+                             [text-shadow:0px_0px_10px_#6A6863]"
+                      >
                         {getFinalityStatus(receipt.finality_status)}
                       </p>
                     ) : (
