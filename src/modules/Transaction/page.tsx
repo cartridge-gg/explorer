@@ -205,9 +205,9 @@ export function Transaction() {
                   <div className="flex flex-col gap-2">
                     <CardLabel>Status</CardLabel>
                     {block ? (
-                      <div className="font-semibold">
+                      <p className="font-semibold">
                         {getFinalityStatus(receipt.finality_status)}
-                      </div>
+                      </p>
                     ) : (
                       <Skeleton className="h-4 w-28" />
                     )}
@@ -276,7 +276,7 @@ export function Transaction() {
                   </>
                 )}
 
-                {Number(tx?.type) === 3 && (
+                {Number(tx?.version) === 3 && (
                   <>
                     <CardSeparator />
 
