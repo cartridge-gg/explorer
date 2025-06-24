@@ -33,7 +33,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
         <TabsTrigger value="raw">Raw</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="decoded">
+      <TabsContent value="decoded" className="mt-[15px]">
         {!tx ? (
           <>
             {Array.from({ length: 4 }).map((_, i) => (
