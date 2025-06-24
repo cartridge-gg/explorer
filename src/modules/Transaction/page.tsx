@@ -173,7 +173,10 @@ export function Transaction() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader className="px-[15px] py-[8px]">
+      <PageHeader
+        containerClassName="rounded-t-[12px] rounded-b-[4px]"
+        className="px-[15px] py-[8px]"
+      >
         <PageHeaderTitle className="gap-[12px]">
           <ListIcon variant="solid" />
           <h1 className="text-[14px]/[20px] font-medium">Transaction</h1>
