@@ -173,17 +173,25 @@ export function Transaction() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader>
-        <PageHeaderTitle>
+      <PageHeader className="px-[15px] py-[8px]">
+        <PageHeaderTitle className="gap-[12px]">
           <ListIcon variant="solid" />
-          <div>Transaction</div>
+          <h1 className="text-[14px]/[20px] font-medium">Transaction</h1>
         </PageHeaderTitle>
 
-        <PageHeaderRight className="px-2 gap-2">
+        <PageHeaderRight className="pr-[15px] gap-[6px]">
           {tx ? (
             <>
-              <Badge>{tx?.type.toLowerCase()}</Badge>
-              <Badge>v{Number(tx.version)}</Badge>
+              <Badge className="px-[7px] py-[2px]">
+                <span className="text-[12px]/[16px] tracking-[0.24px] font-semibold">
+                  {tx?.type.toLowerCase()}
+                </span>
+              </Badge>
+              <Badge className="px-[7px] py-[2px]">
+                <span className="text-[12px]/[16px] tracking-[0.24px] font-semibold">
+                  v{Number(tx.version)}
+                </span>
+              </Badge>
             </>
           ) : (
             <>
