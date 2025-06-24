@@ -513,7 +513,7 @@ export function Transaction() {
               </Card>
             </div>
 
-            <Card className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+            <Card className="h-full flex-grow grid grid-rows-[min-content_1fr] overflow-x-scroll">
               {tx ? (
                 <Tabs
                   value={tab.selected}
