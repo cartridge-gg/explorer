@@ -513,7 +513,7 @@ export function Transaction() {
               </Card>
             </div>
 
-            <Card className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+            <Card className="h-full flex-grow grid grid-rows-[min-content_1fr] overflow-x-scroll">
               {tx ? (
                 <Tabs
                   value={tab.selected}
@@ -523,43 +523,58 @@ export function Transaction() {
                   <CardContent>
                     <TabsList>
                       {tx?.type === "INVOKE" && (
-                        <TabsTrigger value="calldata">
+                        <TabsTrigger
+                          value="calldata"
+                          className="data-[state=active]:shadow-none"
+                        >
                           <ListIcon variant="solid" />
                           <div>Calldata</div>
                         </TabsTrigger>
                       )}
                       {tx?.type === "DECLARE" && (
-                        <TabsTrigger value="class">
+                        <TabsTrigger
+                          value="class"
+                          className="data-[state=active]:shadow-none select-none"
+                        >
                           <ListIcon variant="solid" />
                           <div>Class</div>
                         </TabsTrigger>
                       )}
-                      <TabsTrigger value="signature">
+                      <TabsTrigger
+                        value="signature"
+                        className="data-[state=active]:shadow-none select-none"
+                      >
                         <PencilIcon variant="solid" />
                         <div>Signature</div>
                       </TabsTrigger>
-                      <TabsTrigger value="events">
+                      <TabsTrigger
+                        value="events"
+                        className="data-[state=active]:shadow-none select-none"
+                      >
                         <PulseIcon variant="solid" />
                         <div>Events</div>
                       </TabsTrigger>
-                      <TabsTrigger value="storage-diffs">
+                      <TabsTrigger
+                        value="storage-diffs"
+                        className="data-[state=active]:shadow-none select-none"
+                      >
                         <StackOvalIcon variant="solid" />
                         <div>Storage Diffs</div>
                       </TabsTrigger>
                     </TabsList>
                   </CardContent>
-                  <CardSeparator />
+                  <CardSeparator className="mt-1 mb-0" />
 
-                  <CardContent>
+                  <CardContent className="p-[15px]">
                     {tx?.type === "INVOKE" && (
-                      <TabsContent value="calldata">
+                      <TabsContent value="calldata" className="mt-0">
                         <Calldata tx={tx} />
                       </TabsContent>
                     )}
                     {tx?.type === "DECLARE" && !!declared && (
                       <TabsContent
                         value="class"
-                        className="flex flex-col gap-4"
+                        className="flex flex-col gap-4 mt-0"
                       >
                         <div className="flex flex-col gap-2">
                           <div className="flex items-center justify-between gap-2">
@@ -588,13 +603,13 @@ export function Transaction() {
                         />
                       </TabsContent>
                     )}
-                    <TabsContent value="signature">
+                    <TabsContent value="signature" className="mt-0">
                       <UITabs defaultValue="hex">
                         <UITabsList>
                           <UITabsTrigger value="hex">Hex</UITabsTrigger>
                           <UITabsTrigger value="decoded">Dec</UITabsTrigger>
                         </UITabsList>
-                        <UITabsContent value="hex">
+                        <UITabsContent value="hex" className="mt-[15px]">
                           <Editor
                             className="min-h-[80vh]"
                             defaultLanguage="json"
@@ -616,10 +631,10 @@ export function Transaction() {
                         </UITabsContent>
                       </UITabs>
                     </TabsContent>
-                    <TabsContent value="events">
+                    <TabsContent value="events" className="mt-0">
                       <DataTable table={events} />
                     </TabsContent>
-                    <TabsContent value="storage-diffs">
+                    <TabsContent value="storage-diffs" className="mt-0">
                       <DataTable table={storageDiff} />
                     </TabsContent>
                   </CardContent>
