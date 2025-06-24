@@ -53,7 +53,6 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                   <div className="flex items-center gap-2 text-foreground-200">
                     <FnIcon className="text-foreground-400" />
                     <span className="font-semibold">{c.function_name}</span>
-                    <span>({c.params.map((arg) => arg).join(", ")})</span>
                   </div>
                 </div>
               </DialogTrigger>
