@@ -3,7 +3,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { cairo } from "starknet";
-import { useCallback } from "react";
+import { memo, useCallback } from "react";
 import { toast } from "sonner";
 import { Calldata } from "./calldata";
 import {
@@ -200,9 +200,9 @@ export function Transaction() {
         <div className="flex flex-col gap-2 pb-8">
           <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-2">
             <div className="sl:min-w-[337px] flex flex-col gap-[6px] sl:overflow-y-scroll">
-              <Card>
-                <CardContent className="flex-row justify-between">
-                  <div className="flex flex-col gap-2">
+              <Card className="py-[10px] px-[15px]">
+                <CardContent className="flex-row justify-between px-0">
+                  <div className="flex flex-col gap-[6px]">
                     <CardLabel>Status</CardLabel>
                     {block ? (
                       <p
@@ -218,7 +218,7 @@ export function Transaction() {
                     )}
                   </div>
 
-                  <div className="flex flex-col gap-2 w-44">
+                  <div className="flex flex-col gap-[6px] w-44">
                     <CardLabel>Timestamp</CardLabel>
                     {block ? (
                       <div className="font-semibold">
@@ -233,8 +233,8 @@ export function Transaction() {
                 </CardContent>
               </Card>
 
-              <Card className="flex-1 overflow-y-scroll scrollbar-none py-[10px] px-[15px]">
-                <CardContent className="px-0">
+              <Card className="flex-1 overflow-y-scroll scrollbar-none py-[10px] px-[15px] gap-0">
+                <CardContent className="px-0 gap-[8px]">
                   <div className="flex justify-between gap-2">
                     <CardLabel>Hash</CardLabel>
                     <div>
@@ -244,18 +244,14 @@ export function Transaction() {
                   <div className="flex justify-between gap-2">
                     <CardLabel>Block</CardLabel>
                     <div className="flex items-center">
-                      <Badge className="p-2"># {receipt?.block_number}</Badge>
-                      <Hash
-                        value={receipt?.block_hash}
-                        to={`../block/${receipt?.block_hash}`}
-                      />
+                      <p>{receipt?.block_number}</p>
                     </div>
                   </div>
                 </CardContent>
                 {(!!tx?.sender_address || !!tx?.nonce) && (
                   <>
-                    <CardSeparator />
-                    <CardContent className="px-0">
+                    <Separator />
+                    <CardContent className="px-0 gap-[8px]">
                       {!!tx?.sender_address && (
                         <div className="flex flex-col justify-between gap-[8px]">
                           <CardLabel>Sender</CardLabel>
@@ -283,8 +279,7 @@ export function Transaction() {
 
                 {Number(tx?.version) === 3 && (
                   <>
-                    <CardSeparator />
-
+                    <Separator />
                     <CardHeader className="px-0 mb-[15px]">
                       <GasIcon />
                       <CardTitle>Resource Bounds</CardTitle>
@@ -295,7 +290,7 @@ export function Transaction() {
                         <CardLabel>L1 execution gas</CardLabel>
 
                         <div className="flex items-center gap-px">
-                          <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
+                          <div className="bg-background-200 p-[12px] flex-1 flex-col">
                             <CardLabel>Max amount</CardLabel>
                             <div className="flex items-center justify-between">
                               <TruncatedValue
@@ -312,7 +307,7 @@ export function Transaction() {
                                 maxLength={12}
                                 className="font-mono text-foreground font-semibold"
                               />
-                              <Badge className="uppercase bg-background-500 text-[10px] font-medium">
+                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
                                 strk
                               </Badge>
                             </div>
@@ -335,7 +330,7 @@ export function Transaction() {
                                 maxLength={12}
                                 className="font-mono text-foreground font-semibold"
                               />
-                              <Badge className="uppercase bg-background-500 text-[10px] font-medium">
+                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
                                 strk
                               </Badge>
                             </div>
@@ -364,7 +359,7 @@ export function Transaction() {
                                 maxLength={12}
                                 className="font-mono text-foreground font-semibold"
                               />
-                              <Badge className="uppercase bg-background-500 text-[10px] font-medium">
+                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
                                 strk
                               </Badge>
                             </div>
@@ -387,7 +382,7 @@ export function Transaction() {
                                 maxLength={12}
                                 className="font-mono text-foreground font-semibold"
                               />
-                              <Badge className="uppercase bg-background-500 text-[10px] font-medium">
+                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
                                 strk
                               </Badge>
                             </div>
@@ -416,7 +411,7 @@ export function Transaction() {
                                 maxLength={12}
                                 className="font-mono text-foreground font-semibold"
                               />
-                              <Badge className="uppercase bg-background-500 text-[10px] font-medium">
+                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
                                 strk
                               </Badge>
                             </div>
@@ -439,7 +434,7 @@ export function Transaction() {
                                 maxLength={12}
                                 className="font-mono text-foreground font-semibold"
                               />
-                              <Badge className="uppercase bg-background-500 text-[10px] font-medium">
+                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
                                 strk
                               </Badge>
                             </div>
@@ -641,3 +636,7 @@ export function Transaction() {
     </div>
   );
 }
+
+const Separator = memo(() => (
+  <CardSeparator className="my-[10px] relative left-[-15px] w-[calc(100%+30px)]" />
+));
