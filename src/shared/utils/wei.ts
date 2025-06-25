@@ -10,6 +10,8 @@
  * - Ether: 1,000,000,000,000,000,000 Wei (10^18)
  */
 
+import { BigNumberish } from "starknet";
+
 export type WeiUnit = "Wei" | "Kwei" | "Mwei" | "Gwei" | "Ether";
 
 interface WeiFormatResult {
@@ -32,7 +34,7 @@ const WEI_UNITS = {
  * @returns Object with formatted value and unit
  */
 export function formatWei(
-  valueInWei: number | string | bigint,
+  valueInWei: BigNumberish,
   decimals: number = 2,
 ): WeiFormatResult {
   const numValue =

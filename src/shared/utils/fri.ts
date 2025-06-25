@@ -9,6 +9,8 @@
  * - GFRI: 1,000,000,000 FRI (10^9)
  */
 
+import { BigNumberish } from "starknet";
+
 export type FriUnit = "FRI" | "KFRI" | "MFRI" | "GFRI";
 
 interface FriFormatResult {
@@ -30,7 +32,7 @@ const FRI_UNITS = {
  * @returns Object with formatted value and unit
  */
 export function formatFri(
-  valueInFri: number | string | bigint,
+  valueInFri: BigNumberish,
   decimals: number = 2,
 ): FriFormatResult {
   const numValue =
