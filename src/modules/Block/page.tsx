@@ -489,38 +489,3 @@ export function Block() {
 const Separator = memo(() => (
   <CardSeparator className="my-[10px] relative left-[-15px] w-[calc(100%+30px)]" />
 ));
-
-const PriceCard = ({
-  label,
-  value,
-  unit,
-  className,
-  onClick,
-}: {
-  label: string;
-  value: string | number;
-  unit: string;
-  className?: string;
-  onClick?: () => void;
-}) => {
-  return (
-    <button
-      type="button"
-      className={cn(
-        "bg-background-200 hover:bg-background-300 p-[12px] flex-1 flex flex-col items-start w-full gap-1",
-        className,
-      )}
-      onClick={onClick}
-    >
-      <CardLabel>{label}</CardLabel>
-      <div className="flex items-center justify-between w-full">
-        <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-          {Number(value) === 0 ? "-" : value}
-        </p>
-        <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
-          {unit}
-        </Badge>
-      </div>
-    </button>
-  );
-};
