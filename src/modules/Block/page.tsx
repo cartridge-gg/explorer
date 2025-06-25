@@ -264,7 +264,7 @@ export function Block() {
                                   <div className="font-mono text-foreground font-semibold">
                                     {formatted.value}
                                   </div>
-                                  <Badge className="uppercase bg-background-500">
+                                  <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
                                     {formatted.unit.toLowerCase()}
                                   </Badge>
                                 </>
@@ -273,7 +273,7 @@ export function Block() {
                           ) : (
                             <>
                               <Skeleton className="h-4 w-40" />
-                              <Badge className="uppercase bg-background-500">
+                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
                                 fri
                               </Badge>
                             </>
@@ -302,7 +302,7 @@ export function Block() {
                                   <div className="font-mono text-foreground font-semibold">
                                     {formatted.value}
                                   </div>
-                                  <Badge className="uppercase bg-background-500">
+                                  <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
                                     {formatted.unit.toLowerCase()}
                                   </Badge>
                                 </>
@@ -311,7 +311,7 @@ export function Block() {
                           ) : (
                             <>
                               <Skeleton className="h-4 w-40" />
-                              <Badge className="uppercase bg-background-500">
+                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
                                 wei
                               </Badge>
                             </>
@@ -350,7 +350,7 @@ export function Block() {
                                   <div className="font-mono text-foreground font-semibold">
                                     {formatted.value}
                                   </div>
-                                  <Badge className="uppercase bg-background-500">
+                                  <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
                                     {formatted.unit.toLowerCase()}
                                   </Badge>
                                 </>
@@ -359,7 +359,7 @@ export function Block() {
                           ) : (
                             <>
                               <Skeleton className="h-4 w-40" />
-                              <Badge className="uppercase bg-background-500">
+                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
                                 fri
                               </Badge>
                             </>
@@ -392,7 +392,7 @@ export function Block() {
                                   <div className="font-mono text-foreground font-semibold">
                                     {formatted.value}
                                   </div>
-                                  <Badge className="uppercase bg-background-500">
+                                  <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
                                     {formatted.unit.toLowerCase()}
                                   </Badge>
                                 </>
@@ -401,7 +401,7 @@ export function Block() {
                           ) : (
                             <>
                               <Skeleton className="h-4 w-40" />
-                              <Badge className="uppercase bg-background-500">
+                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
                                 wei
                               </Badge>
                             </>
