@@ -18,6 +18,7 @@ import {
   TabsList as UITabsList,
   TabsTrigger as UITabsTrigger,
   TabsContent as UITabsContent,
+  cn,
 } from "@cartridge/ui";
 import {
   Card,
@@ -119,6 +120,11 @@ export function Transaction() {
     },
     [tx?.sender_address],
   );
+
+  const onCopyValue = useCallback((value: string) => {
+    navigator.clipboard.writeText(value);
+    toast.success("Value copied to clipboard");
+  }, []);
 
   return (
     <div className="w-full flex flex-col gap-[3px]">
@@ -270,44 +276,38 @@ export function Transaction() {
                         <CardLabel>L1 execution gas</CardLabel>
 
                         <div className="flex items-center gap-px">
-                          <div className="bg-background-200 p-[12px] flex-1 flex-col">
-                            <CardLabel>Max amount</CardLabel>
-                            <div className="flex items-center justify-between">
-                              <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                                {ConvertToSTRK(
-                                  Number(
-                                    cairo.felt(
-                                      tx?.resource_bounds?.l1_gas?.max_amount ??
-                                        0,
-                                    ),
-                                  ),
-                                )}
-                              </p>
-
-                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
-                                strk
-                              </Badge>
-                            </div>
-                          </div>
-
-                          <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                            <CardLabel>Max price / unit</CardLabel>
-                            <div className="flex items-center justify-between">
-                              <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                                {ConvertToSTRK(
-                                  Number(
-                                    cairo.felt(
-                                      tx?.resource_bounds?.l1_gas
-                                        ?.max_price_per_unit ?? 0,
-                                    ),
-                                  ),
-                                )}
-                              </p>
-                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
-                                strk
-                              </Badge>
-                            </div>
-                          </div>
+                          <PriceCard
+                            label="Max amount"
+                            value={Number(
+                              cairo.felt(
+                                tx?.resource_bounds?.l1_gas?.max_amount ?? 0,
+                              ),
+                            )}
+                            unit="strk"
+                            onClick={() =>
+                              onCopyValue(
+                                tx?.resource_bounds?.l1_gas?.max_amount ?? "0",
+                              )
+                            }
+                          />
+                          <PriceCard
+                            label="Max price / unit"
+                            value={ConvertToSTRK(
+                              Number(
+                                cairo.felt(
+                                  tx?.resource_bounds?.l1_gas
+                                    ?.max_price_per_unit ?? 0,
+                                ),
+                              ),
+                            )}
+                            unit="strk"
+                            onClick={() =>
+                              onCopyValue(
+                                tx?.resource_bounds?.l1_gas
+                                  ?.max_price_per_unit ?? "0",
+                              )
+                            }
+                          />
                         </div>
                       </div>
 
@@ -315,43 +315,38 @@ export function Transaction() {
                         <CardLabel>L2 execution gas</CardLabel>
 
                         <div className="flex items-center gap-px">
-                          <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                            <CardLabel>Max amount</CardLabel>
-                            <div className="flex items-center justify-between">
-                              <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                                {ConvertToSTRK(
-                                  Number(
-                                    cairo.felt(
-                                      tx?.resource_bounds?.l2_gas?.max_amount ??
-                                        0,
-                                    ),
-                                  ),
-                                )}
-                              </p>
-                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
-                                strk
-                              </Badge>
-                            </div>
-                          </div>
-
-                          <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                            <CardLabel>Max price / unit</CardLabel>
-                            <div className="flex items-center justify-between">
-                              <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                                {ConvertToSTRK(
-                                  Number(
-                                    cairo.felt(
-                                      tx?.resource_bounds?.l2_gas
-                                        ?.max_price_per_unit ?? 0,
-                                    ),
-                                  ),
-                                )}
-                              </p>
-                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
-                                strk
-                              </Badge>
-                            </div>
-                          </div>
+                          <PriceCard
+                            label="Max amount"
+                            value={Number(
+                              cairo.felt(
+                                tx?.resource_bounds?.l2_gas?.max_amount ?? 0,
+                              ),
+                            )}
+                            unit="strk"
+                            onClick={() =>
+                              onCopyValue(
+                                tx?.resource_bounds?.l2_gas?.max_amount ?? "0",
+                              )
+                            }
+                          />
+                          <PriceCard
+                            label="Max price / unit"
+                            value={ConvertToSTRK(
+                              Number(
+                                cairo.felt(
+                                  tx?.resource_bounds?.l2_gas
+                                    ?.max_price_per_unit ?? 0,
+                                ),
+                              ),
+                            )}
+                            unit="strk"
+                            onClick={() =>
+                              onCopyValue(
+                                tx?.resource_bounds?.l2_gas
+                                  ?.max_price_per_unit ?? "0",
+                              )
+                            }
+                          />
                         </div>
                       </div>
 
@@ -359,43 +354,40 @@ export function Transaction() {
                         <CardLabel>L1 data gas</CardLabel>
 
                         <div className="flex items-center gap-px">
-                          <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                            <CardLabel>Max amount</CardLabel>
-                            <div className="flex items-center justify-between">
-                              <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                                {ConvertToSTRK(
-                                  Number(
-                                    cairo.felt(
-                                      tx?.resource_bounds?.l1_data_gas
-                                        ?.max_amount ?? 0,
-                                    ),
-                                  ),
-                                )}
-                              </p>
-                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
-                                strk
-                              </Badge>
-                            </div>
-                          </div>
-
-                          <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
-                            <CardLabel>Max price / unit</CardLabel>
-                            <div className="flex items-center justify-between">
-                              <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                                {ConvertToSTRK(
-                                  Number(
-                                    cairo.felt(
-                                      tx?.resource_bounds?.l1_data_gas
-                                        ?.max_price_per_unit ?? 0,
-                                    ),
-                                  ),
-                                )}
-                              </p>
-                              <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
-                                strk
-                              </Badge>
-                            </div>
-                          </div>
+                          <PriceCard
+                            label="Max amount"
+                            value={Number(
+                              cairo.felt(
+                                tx?.resource_bounds?.l1_data_gas?.max_amount ??
+                                  0,
+                              ),
+                            )}
+                            unit="strk"
+                            onClick={() =>
+                              onCopyValue(
+                                tx?.resource_bounds?.l1_data_gas?.max_amount ??
+                                  "0",
+                              )
+                            }
+                          />
+                          <PriceCard
+                            label="Max price / unit"
+                            value={ConvertToSTRK(
+                              Number(
+                                cairo.felt(
+                                  tx?.resource_bounds?.l1_data_gas
+                                    ?.max_price_per_unit ?? 0,
+                                ),
+                              ),
+                            )}
+                            unit="strk"
+                            onClick={() =>
+                              onCopyValue(
+                                tx?.resource_bounds?.l1_data_gas
+                                  ?.max_price_per_unit ?? "0",
+                              )
+                            }
+                          />
                         </div>
                       </div>
                     </CardContent>
@@ -610,3 +602,38 @@ export function Transaction() {
 const Separator = memo(() => (
   <CardSeparator className="my-[10px] relative left-[-15px] w-[calc(100%+30px)]" />
 ));
+
+const PriceCard = ({
+  label,
+  value,
+  unit,
+  className,
+  onClick,
+}: {
+  label: string;
+  value: string | number;
+  unit: string;
+  className?: string;
+  onClick?: () => void;
+}) => {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "bg-background-200 hover:bg-background-300 p-[12px] flex-1 flex flex-col items-start w-full gap-1",
+        className,
+      )}
+      onClick={onClick}
+    >
+      <CardLabel>{label}</CardLabel>
+      <div className="flex items-center justify-between w-full">
+        <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+          {Number(value) === 0 ? "-" : value}
+        </p>
+        <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
+          {unit}
+        </Badge>
+      </div>
+    </button>
+  );
+};

@@ -1,4 +1,3 @@
-import { formatNumber } from "@/shared/utils/number";
 import { cairo } from "starknet";
 import { formatFri } from "@/shared/utils/fri";
 import { formatWei } from "@/shared/utils/wei";
@@ -80,6 +79,12 @@ export function Block() {
     },
     [block?.sequencer_address],
   );
+
+  const onCopyValue = useCallback((value: string) => {
+    navigator.clipboard.writeText(value);
+    toast.success("Value copied to clipboard");
+  }, []);
+
   return (
     <div className="w-full flex flex-col gap-[3px]">
       <Breadcrumb>
@@ -238,9 +243,15 @@ export function Block() {
                     <CardLabel>L1 execution gas</CardLabel>
 
                     <div className="flex items-center gap-px">
-                      <div className="bg-background-200 p-[12px] flex-1 flex-col">
+                      <button
+                        type="button"
+                        className="bg-background-200 hover:bg-background-300 p-[12px] flex-1 flex flex-col items-start w-full gap-1"
+                        onClick={() =>
+                          onCopyValue(block?.l1_gas_price.price_in_fri ?? "0")
+                        }
+                      >
                         <CardLabel className="uppercase">strk</CardLabel>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between w-full">
                           {block ? (
                             (() => {
                               const formatted = formatFri(
@@ -268,11 +279,17 @@ export function Block() {
                             </>
                           )}
                         </div>
-                      </div>
+                      </button>
 
-                      <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
+                      <button
+                        type="button"
+                        className="bg-background-200 hover:bg-background-300 p-[12px] flex-1 flex flex-col items-start w-full gap-1"
+                        onClick={() =>
+                          onCopyValue(block?.l1_gas_price.price_in_wei ?? "0")
+                        }
+                      >
                         <CardLabel className="uppercase">eth</CardLabel>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between w-full">
                           {block ? (
                             (() => {
                               const formatted = formatWei(
@@ -300,7 +317,7 @@ export function Block() {
                             </>
                           )}
                         </div>
-                      </div>
+                      </button>
                     </div>
                   </div>
 
@@ -308,9 +325,17 @@ export function Block() {
                     <CardLabel>L1 data gas</CardLabel>
 
                     <div className="flex items-center gap-px">
-                      <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
+                      <button
+                        type="button"
+                        className="bg-background-200 hover:bg-background-300 p-[12px] flex-1 flex flex-col items-start w-full gap-1"
+                        onClick={() =>
+                          onCopyValue(
+                            block?.l1_data_gas_price.price_in_fri ?? "0",
+                          )
+                        }
+                      >
                         <CardLabel className="uppercase">strk</CardLabel>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between w-full">
                           {block ? (
                             (() => {
                               const formatted = formatFri(
@@ -340,11 +365,19 @@ export function Block() {
                             </>
                           )}
                         </div>
-                      </div>
+                      </button>
 
-                      <div className="bg-background-200 p-[12px] flex-1 flex-col gap-1">
+                      <button
+                        type="button"
+                        className="bg-background-200 hover:bg-background-300 p-[12px] flex-1 flex flex-col items-start w-full gap-1"
+                        onClick={() =>
+                          onCopyValue(
+                            block?.l1_data_gas_price.price_in_wei ?? "0",
+                          )
+                        }
+                      >
                         <CardLabel className="uppercase">eth</CardLabel>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between w-full">
                           {block ? (
                             (() => {
                               const formatted = formatWei(
@@ -374,7 +407,7 @@ export function Block() {
                             </>
                           )}
                         </div>
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </CardContent>
@@ -456,3 +489,38 @@ export function Block() {
 const Separator = memo(() => (
   <CardSeparator className="my-[10px] relative left-[-15px] w-[calc(100%+30px)]" />
 ));
+
+const PriceCard = ({
+  label,
+  value,
+  unit,
+  className,
+  onClick,
+}: {
+  label: string;
+  value: string | number;
+  unit: string;
+  className?: string;
+  onClick?: () => void;
+}) => {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "bg-background-200 hover:bg-background-300 p-[12px] flex-1 flex flex-col items-start w-full gap-1",
+        className,
+      )}
+      onClick={onClick}
+    >
+      <CardLabel>{label}</CardLabel>
+      <div className="flex items-center justify-between w-full">
+        <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+          {Number(value) === 0 ? "-" : value}
+        </p>
+        <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
+          {unit}
+        </Badge>
+      </div>
+    </button>
+  );
+};
