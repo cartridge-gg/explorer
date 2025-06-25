@@ -1,5 +1,7 @@
 import { formatNumber } from "@/shared/utils/number";
 import { cairo } from "starknet";
+import { formatFri } from "@/shared/utils/fri";
+import { formatWei } from "@/shared/utils/wei";
 import {
   GasIcon,
   StackDiamondIcon,
@@ -240,19 +242,31 @@ export function Block() {
                         <CardLabel className="uppercase">strk</CardLabel>
                         <div className="flex items-center justify-between">
                           {block ? (
-                            <div className="font-mono text-foreground font-semibold">
-                              {formatNumber(
+                            (() => {
+                              const formatted = formatFri(
                                 Number(
                                   cairo.felt(block.l1_gas_price.price_in_fri),
                                 ),
-                              )}
-                            </div>
+                              );
+                              return (
+                                <>
+                                  <div className="font-mono text-foreground font-semibold">
+                                    {formatted.value}
+                                  </div>
+                                  <Badge className="uppercase bg-background-500">
+                                    {formatted.unit.toLowerCase()}
+                                  </Badge>
+                                </>
+                              );
+                            })()
                           ) : (
-                            <Skeleton className="h-4 w-40" />
+                            <>
+                              <Skeleton className="h-4 w-40" />
+                              <Badge className="uppercase bg-background-500">
+                                fri
+                              </Badge>
+                            </>
                           )}
-                          <Badge className="uppercase bg-background-500">
-                            gfri
-                          </Badge>
                         </div>
                       </div>
 
@@ -260,19 +274,31 @@ export function Block() {
                         <CardLabel className="uppercase">eth</CardLabel>
                         <div className="flex items-center justify-between">
                           {block ? (
-                            <div className="font-mono text-foreground font-semibold">
-                              {formatNumber(
+                            (() => {
+                              const formatted = formatWei(
                                 Number(
                                   cairo.felt(block.l1_gas_price.price_in_wei),
                                 ),
-                              )}
-                            </div>
+                              );
+                              return (
+                                <>
+                                  <div className="font-mono text-foreground font-semibold">
+                                    {formatted.value}
+                                  </div>
+                                  <Badge className="uppercase bg-background-500">
+                                    {formatted.unit.toLowerCase()}
+                                  </Badge>
+                                </>
+                              );
+                            })()
                           ) : (
-                            <Skeleton className="h-4 w-40" />
+                            <>
+                              <Skeleton className="h-4 w-40" />
+                              <Badge className="uppercase bg-background-500">
+                                wei
+                              </Badge>
+                            </>
                           )}
-                          <Badge className="uppercase bg-background-500">
-                            gwei
-                          </Badge>
                         </div>
                       </div>
                     </div>
@@ -286,21 +312,33 @@ export function Block() {
                         <CardLabel className="uppercase">strk</CardLabel>
                         <div className="flex items-center justify-between">
                           {block ? (
-                            <div className="font-mono text-foreground font-semibold">
-                              {formatNumber(
+                            (() => {
+                              const formatted = formatFri(
                                 Number(
                                   cairo.felt(
                                     block.l1_data_gas_price.price_in_fri,
                                   ),
                                 ),
-                              )}
-                            </div>
+                              );
+                              return (
+                                <>
+                                  <div className="font-mono text-foreground font-semibold">
+                                    {formatted.value}
+                                  </div>
+                                  <Badge className="uppercase bg-background-500">
+                                    {formatted.unit.toLowerCase()}
+                                  </Badge>
+                                </>
+                              );
+                            })()
                           ) : (
-                            <Skeleton className="h-4 w-40" />
+                            <>
+                              <Skeleton className="h-4 w-40" />
+                              <Badge className="uppercase bg-background-500">
+                                fri
+                              </Badge>
+                            </>
                           )}
-                          <Badge className="uppercase bg-background-500">
-                            gfri
-                          </Badge>
                         </div>
                       </div>
 
@@ -308,21 +346,33 @@ export function Block() {
                         <CardLabel className="uppercase">eth</CardLabel>
                         <div className="flex items-center justify-between">
                           {block ? (
-                            <div className="font-mono text-foreground font-semibold">
-                              {formatNumber(
+                            (() => {
+                              const formatted = formatWei(
                                 Number(
                                   cairo.felt(
                                     block.l1_data_gas_price.price_in_wei,
                                   ),
                                 ),
-                              )}
-                            </div>
+                              );
+                              return (
+                                <>
+                                  <div className="font-mono text-foreground font-semibold">
+                                    {formatted.value}
+                                  </div>
+                                  <Badge className="uppercase bg-background-500">
+                                    {formatted.unit.toLowerCase()}
+                                  </Badge>
+                                </>
+                              );
+                            })()
                           ) : (
-                            <Skeleton className="h-4 w-40" />
+                            <>
+                              <Skeleton className="h-4 w-40" />
+                              <Badge className="uppercase bg-background-500">
+                                wei
+                              </Badge>
+                            </>
                           )}
-                          <Badge className="uppercase bg-background-500">
-                            gwei
-                          </Badge>
                         </div>
                       </div>
                     </div>
