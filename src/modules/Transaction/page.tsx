@@ -457,45 +457,53 @@ export function Transaction() {
                   className="h-full"
                 >
                   <CardContent>
-                    <TabsList>
+                    <TabsList className="gap-[12px] p-0">
                       {tx?.type === "INVOKE" && (
                         <TabsTrigger
                           value="calldata"
-                          className="data-[state=active]:shadow-none"
+                          className="data-[state=active]:shadow-none gap-[4px] p-[8px]"
                         >
                           <ListIcon variant="solid" />
-                          <div>Calldata</div>
+                          <p className="text-[13px]/[20px] font-normal">
+                            Calldata
+                          </p>
                         </TabsTrigger>
                       )}
                       {tx?.type === "DECLARE" && (
                         <TabsTrigger
                           value="class"
-                          className="data-[state=active]:shadow-none select-none"
+                          className="data-[state=active]:shadow-none gap-[4px] p-[8px]"
                         >
                           <ListIcon variant="solid" />
-                          <div>Class</div>
+                          <p className="text-[13px]/[20px] font-normal">
+                            Class
+                          </p>
                         </TabsTrigger>
                       )}
                       <TabsTrigger
                         value="signature"
-                        className="data-[state=active]:shadow-none select-none"
+                        className="data-[state=active]:shadow-none gap-[4px] p-[8px]"
                       >
                         <PencilIcon variant="solid" />
-                        <div>Signature</div>
+                        <p className="text-[13px]/[20px] font-normal">
+                          Signature
+                        </p>
                       </TabsTrigger>
                       <TabsTrigger
                         value="events"
-                        className="data-[state=active]:shadow-none select-none"
+                        className="data-[state=active]:shadow-none gap-[4px] p-[8px]"
                       >
                         <PulseIcon variant="solid" />
-                        <div>Events</div>
+                        <p className="text-[13px]/[20px] font-normal">Events</p>
                       </TabsTrigger>
                       <TabsTrigger
                         value="storage-diffs"
-                        className="data-[state=active]:shadow-none select-none"
+                        className="data-[state=active]:shadow-none gap-[4px] p-[8px]"
                       >
                         <StackOvalIcon variant="solid" />
-                        <div>Storage Diffs</div>
+                        <p className="text-[13px]/[20px] font-normal">
+                          Storage Diffs
+                        </p>
                       </TabsTrigger>
                     </TabsList>
                   </CardContent>
