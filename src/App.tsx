@@ -27,7 +27,7 @@ export function App() {
 
       <div
         className={cn(
-          "flex flex-col gap-[15px] px-[20px] xl:px-[189px] w-full min-w-[320px] relative z-20 pt-[80px] lg:pt-[15px]",
+          "flex flex-col items-center gap-[15px] px-[20px] xl:px-[189px] w-full min-w-[320px] relative z-20 pt-[80px] lg:pt-[15px]",
           isHomePage ? "h-screen" : "lg:h-screen",
         )}
       >
