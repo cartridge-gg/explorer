@@ -141,9 +141,9 @@ export function Contract() {
       ) : error ? (
         <NotFound />
       ) : (
-        <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-[3px] sl:w-[1134px]">
+        <div className="flex flex-col gap-[3px] w-full">
           {/* Contract Info Section */}
-          <div className="sl:w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
+          <div className="w-full flex flex-col gap-[6px]">
             <Card>
               <CardContent>
                 <div className="flex justify-between gap-2">
@@ -156,9 +156,9 @@ export function Contract() {
                   <Hash value={classHash} to={`../class/${classHash}`} />
                 </div>
               </CardContent>
+            </Card>
 
-              <CardSeparator />
-
+            <Card>
               <CardHeader>
                 <CardIcon icon={<CoinsIcon variant="solid" />} />
                 <CardTitle>Balances</CardTitle>
@@ -190,7 +190,7 @@ export function Contract() {
             </Card>
           </div>
 
-          <Card className="h-full flex-grow grid grid-rows-[min-content_1fr]">
+          <Card className="w-full my-[20px] lg:my-[40px]">
             <Tabs value={tab.selected} onValueChange={tab.onChange}>
               <CardContent>
                 <TabsList>
