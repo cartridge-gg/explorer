@@ -178,7 +178,7 @@ export function ClassHash() {
         <NotFound />
       ) : (
         <div className="flex flex-col py-[20px] lg:py-[40px]">
-          <Card className="h-full flex-grow grid grid-rows-[min-content_1fr] overflow-x-scroll rounded-[12px] py-0 pt-[3px] gap-0">
+          <Card className="h-full flex-grow grid grid-rows-[min-content_1fr] rounded-[12px] py-0 pt-[3px] gap-0">
             <Tabs defaultValue="abi" className="h-full">
               <CardContent className="px-[15px] py-[3px]">
                 <TabsList className="gap-[12px] p-0">
