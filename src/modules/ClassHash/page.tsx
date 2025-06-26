@@ -144,7 +144,7 @@ export function ClassHash() {
   });
 
   return (
-    <div className="w-full flex flex-col gap-2">
+    <div className="w-full flex flex-col gap-[3px] sl:w-[1135px]">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -194,7 +194,7 @@ export function ClassHash() {
       {error ? (
         <NotFound />
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-[40px]">
           <Card className="gap-0 pb-0">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
