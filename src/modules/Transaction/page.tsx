@@ -6,7 +6,6 @@ import { memo, useCallback } from "react";
 import { toast } from "sonner";
 import { Calldata } from "./calldata";
 import {
-  CoinsIcon,
   GasIcon,
   StackOvalIcon,
   ListIcon,
@@ -97,6 +96,7 @@ export function Transaction() {
       storageDiff,
     },
   } = useTransaction({ txHash });
+
   const tab = useHashLinkTabs(
     tx?.type === "INVOKE"
       ? "calldata"
@@ -262,6 +262,29 @@ export function Transaction() {
                   </>
                 )}
 
+                {!!tx?.tip && (
+                  <>
+                    <Separator />
+                    <div className="flex justify-between gap-2">
+                      <CardLabel>Tip</CardLabel>
+                      <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+                        {Number(tx?.tip).toLocaleString()}
+                      </p>
+                    </div>
+                  </>
+                )}
+                {!!tx?.max_fee && (
+                  <>
+                    <Separator />
+                    <div className="flex justify-between gap-2">
+                      <CardLabel>Tip</CardLabel>
+                      <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+                        {Number(tx?.max_fee).toLocaleString()}
+                      </p>
+                    </div>
+                  </>
+                )}
+
                 {Number(tx?.version) === 3 && (
                   <>
                     <Separator />
@@ -398,7 +421,7 @@ export function Transaction() {
                   tx?.nonce_data_availability_mode
                 ) && (
                   <>
-                    <CardSeparator />
+                    <Separator />
 
                     <div className="space-y-[13px]">
                       <CardHeader className="px-0">
@@ -417,27 +440,6 @@ export function Transaction() {
                           <CardLabel>Fee</CardLabel>
                           <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
                             {tx.fee_data_availability_mode}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </div>
-                  </>
-                )}
-                {!!tx?.tip && (
-                  <>
-                    <CardSeparator />
-
-                    <div className="space-y-[13px]">
-                      <CardHeader className="px-0">
-                        <CoinsIcon variant="solid" />
-                        <CardTitle>Tip</CardTitle>
-                      </CardHeader>
-
-                      <CardContent className="px-0">
-                        <div className="flex justify-between gap-2">
-                          <CardLabel>Tip</CardLabel>
-                          <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                            {Number(tx.tip).toLocaleString()}
                           </p>
                         </div>
                       </CardContent>
@@ -497,7 +499,7 @@ export function Transaction() {
                       </TabsTrigger>
                     </TabsList>
                   </CardContent>
-                  <CardSeparator className="mt-1 mb-0" />
+                  <Separator className="mt-1 mb-0" />
 
                   <CardContent className="p-[15px]">
                     {tx?.type === "INVOKE" && (
@@ -598,7 +600,9 @@ export function Transaction() {
 }
 
 const Separator = memo(() => (
-  <CardSeparator className="my-[10px] relative left-[-15px] w-[calc(100%+30px)]" />
+  <span>
+    <CardSeparator className="my-[10px] relative left-[-15px] w-[calc(100%+30px)]" />
+  </span>
 ));
 
 const PriceCard = ({
