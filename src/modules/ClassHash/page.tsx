@@ -170,7 +170,7 @@ export function ClassHash() {
       <Card className="p-[15px] rounded-t-sm rounded-b-[12px] h-[72px]">
         <CardContent className="gap-[6px] px-0">
           <CardLabel className="text-[12px]/[16px] font-normal">Hash</CardLabel>
-          <Hash value={classHash} className="px-0" />
+          <Hash value={classHash} containerClassName="w-fit" className="px-0" />
         </CardContent>
       </Card>
 
