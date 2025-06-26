@@ -7,6 +7,7 @@ import {
   ScrollIcon,
   Skeleton,
   PulseIcon,
+  SearchIcon,
 } from "@cartridge/ui";
 import {
   Breadcrumb,
@@ -40,7 +41,7 @@ import { NotFound } from "@/modules/NotFound/page";
 import { Hash } from "@/shared/components/hash";
 import { Badge } from "@/shared/components/badge";
 import { FunctionAbiWithAst, isReadFunction } from "@/shared/utils/abi";
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { useScrollTo } from "@/shared/hooks/useScrollTo";
@@ -214,12 +215,20 @@ export function ClassHash() {
                 <TabsContent value="abi" className="mt-0 h-full">
                   <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] divide-y md:divide-y-0 md:divide-x divide-background-300 h-full">
                     <div className="flex flex-col justify-start gap-[15px] p-[15px] h-full">
-                      <Input
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Function name / selector / interface"
-                        className="bg-input focus-visible:bg-input caret-foreground"
-                      />
+                      <div className="relative">
+                        <Input
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                          placeholder="Function name / selector / interface"
+                          className="bg-input focus-visible:bg-input caret-foreground placeholder:text-[#262A27] px-[10px] py-[7px] focus-visible:border-background-400"
+                        />
+                        <SearchIcon
+                          className={cn(
+                            "absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none",
+                            search ? "text-foreground" : "text-foreground-400",
+                          )}
+                        />
+                      </div>
                       <div
                         ref={scrollContainerRef}
                         className="flex flex-col gap-2 overflow-y-auto flex-1"
@@ -324,7 +333,7 @@ export function ClassHash() {
                           </div>
                         </div>
 
-                        <div className="flex-1 p-[15px] gap-[10px]">
+                        <div className="flex-1 p-[15px] space-y-[10px]">
                           {selected?.inputs.length ? (
                             selected?.inputs.map((input) => (
                               <div
@@ -337,7 +346,7 @@ export function ClassHash() {
                                 <Input
                                   value={input.type.name}
                                   disabled
-                                  className="bg-input focus-visible:bg-input"
+                                  className="bg-input focus-visible:bg-input border-none disabled:bg-input px-[10px] py-[7px]"
                                 />
                               </div>
                             ))
