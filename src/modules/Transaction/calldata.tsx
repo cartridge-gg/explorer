@@ -22,9 +22,14 @@ import { Badge } from "@/shared/components/badge";
 import { useCalldata } from "./hooks";
 import { GetTransactionResponse } from "starknet";
 import { decodeCalldata } from "@/shared/utils/rpc";
+import { useEffect } from "react";
 
 export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
+
+  useEffect(() => {
+    console.log("decoded: ", decoded);
+  }, [decoded]);
 
   return (
     <Tabs defaultValue="decoded">
@@ -129,25 +134,33 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                     value="decoded"
                     className="flex flex-col gap-[10px] mt-0"
                   >
-                    {c.data.map((input, i) => (
-                      <div key={i} className="flex flex-col gap-[10px]">
-                        <div className="flex items-center gap-[7px]">
-                          <p className="text-foreground-400 font-semibold text-[12px]">
-                            {input.name}
-                          </p>
-                          <Badge className="px-[7px] py-[2px] lowercase">
-                            <span className="text-[10px] font-semibold">
-                              {input.type}
-                            </span>
-                          </Badge>
+                    {c.data.map((input, i) => {
+                      const resultValue =
+                        typeof input.value === "object"
+                          ? JSON.stringify(input.value, (_, value) =>
+                              typeof value === "bigint" ? Number(value) : value,
+                            )
+                          : input.value.toString();
+                      return (
+                        <div key={i} className="flex flex-col gap-[10px]">
+                          <div className="flex items-center gap-[7px]">
+                            <p className="text-foreground-400 font-semibold text-[12px]">
+                              {input.name}
+                            </p>
+                            <Badge className="px-[7px] py-[2px] lowercase">
+                              <span className="text-[10px] font-semibold">
+                                {input.type}
+                              </span>
+                            </Badge>
+                          </div>
+                          <Input
+                            value={resultValue}
+                            disabled
+                            className="bg-input focus-visible:bg-input border-none disabled:bg-input px-[10px] py-[7px]"
+                          />
                         </div>
-                        <Input
-                          value={input.value.toString()}
-                          disabled
-                          className="bg-input focus-visible:bg-input border-none disabled:bg-input px-[10px] py-[7px]"
-                        />
-                      </div>
-                    ))}
+                      );
+                    })}
                   </TabsContent>
 
                   <TabsContent value="raw">
