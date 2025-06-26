@@ -61,7 +61,10 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                 </div>
               </DialogTrigger>
 
-              <DialogContent className="[&>button]:hidden min-w-[586px] rounded-[12px] p-0 border gap-0 min-h-0">
+              <DialogContent
+                overlayClassName="bg-[#000000]/[0.7]"
+                className="[&>button]:hidden lg:min-w-[586px] rounded-[12px] p-0 border gap-0 min-h-0"
+              >
                 <div className="flex items-center justify-between px-[15px] border-b border-background-200 h-[32px]">
                   <h1 className="text-[12px]/[16px] font-normal capitalize">
                     function calldata overview
