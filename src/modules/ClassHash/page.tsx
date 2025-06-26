@@ -241,16 +241,20 @@ export function ClassHash() {
                                 key={f.name}
                                 ref={(el) => setItemRef(f, el)}
                                 className={cn(
-                                  "flex items-center justify-between gap-2 rounded-md p-2 border transition-all",
+                                  "flex items-center justify-between gap-2 rounded-md px-[8px] border transition-all h-[35px]",
                                   selected?.name === f.name
                                     ? "border-primary"
                                     : "border-transparent hover:border-background-300 cursor-pointer ",
                                 )}
                                 onClick={() => setSelected(f)}
                               >
-                                <div className="truncate">{f.name}</div>
-                                <Badge>
-                                  {isReadFunction(f) ? "Read" : "Write"}
+                                <p className="text-[13px]/[16px] font-semibold tracking-[0.26px] truncate">
+                                  {f.name}
+                                </p>
+                                <Badge className="px-[8px] py-[2px]">
+                                  <span className="text-[12px]/[16px] font-medium">
+                                    {isReadFunction(f) ? "Read" : "Write"}
+                                  </span>
                                 </Badge>
                               </div>
                             ))
