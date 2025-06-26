@@ -86,7 +86,7 @@ export function Block() {
   }, []);
 
   return (
-    <div className="w-full flex flex-col gap-[3px]">
+    <div className="w-full flex flex-col gap-[3px] sl:w-[1135px]">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>

@@ -127,7 +127,7 @@ export function Transaction() {
   }, []);
 
   return (
-    <div className="w-full flex flex-col gap-[3px]">
+    <div className="w-full flex flex-col gap-[3px] sl:w-[1135px]">
       <Breadcrumb className="mb-[7px]">
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -449,7 +449,7 @@ export function Transaction() {
               </Card>
             </div>
 
-            <Card className="h-full flex-grow grid grid-rows-[min-content_1fr] overflow-x-scroll">
+            <Card className="h-full flex-grow grid grid-rows-[min-content_1fr] overflow-x-scroll sl:min-w-[794px]">
               {tx ? (
                 <Tabs
                   value={tab.selected}
@@ -542,8 +542,8 @@ export function Transaction() {
                     <TabsContent value="signature" className="mt-0">
                       <UITabs defaultValue="hex">
                         <UITabsList>
-                          <UITabsTrigger value="hex">Hex</UITabsTrigger>
                           <UITabsTrigger value="decoded">Dec</UITabsTrigger>
+                          <UITabsTrigger value="hex">Hex</UITabsTrigger>
                         </UITabsList>
                         <UITabsContent value="hex" className="mt-[15px]">
                           <Editor
