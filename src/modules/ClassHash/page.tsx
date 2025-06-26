@@ -177,7 +177,7 @@ export function ClassHash() {
       {error ? (
         <NotFound />
       ) : (
-        <div className="flex flex-col pt-[40px] mb-[40px]">
+        <div className="flex flex-col py-[20px] lg:py-[40px]">
           <Card className="h-full flex-grow grid grid-rows-[min-content_1fr] overflow-x-scroll rounded-[12px] py-0 pt-[3px] gap-0">
             <Tabs defaultValue="abi" className="h-full">
               <CardContent className="px-[15px] py-[3px]">
