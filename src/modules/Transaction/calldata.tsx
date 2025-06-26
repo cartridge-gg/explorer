@@ -99,7 +99,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                         toast.success("Function name copied to clipboard");
                       }}
                     >
-                      <span className="text-foreground-100 group-hover:text-foreground-200">
+                      <span className="text-[13px]/[16px] tracking-[0.26px] font-semibold text-foreground-100 group-hover:text-foreground-200">
                         {c.function_name}
                       </span>
                       <CopyIcon size="sm" className="text-foreground-400" />
