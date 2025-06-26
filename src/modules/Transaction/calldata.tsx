@@ -28,9 +28,13 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
 
   return (
     <Tabs defaultValue="decoded">
-      <TabsList>
-        <TabsTrigger value="decoded">Decoded</TabsTrigger>
-        <TabsTrigger value="raw">Raw</TabsTrigger>
+      <TabsList className="h-auto rounded-sm p-[2px]">
+        <TabsTrigger value="raw" className="py-[2px] px-[8px] rounded-sm">
+          <span className="text-[12px]/[16px] font-medium">Raw</span>
+        </TabsTrigger>
+        <TabsTrigger value="decoded" className="py-[2px] px-[8px] rounded-sm">
+          <span className="text-[12px]/[16px] font-medium">Decoded</span>
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="decoded" className="mt-[15px]">
@@ -49,7 +53,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
             <Dialog key={i}>
               <DialogTrigger asChild>
                 <div className="w-full bg-background-200 p-2 first:rounded-t last:rounded-b flex items-center gap-4">
-                  <Hash value={c.contract} to={`../contract/${c.contract}`} />
+                  <Hash value={c.contract} />
                   <div className="flex items-center gap-2 text-foreground-200">
                     <FnIcon className="text-foreground-400" />
                     <span className="font-semibold">{c.function_name}</span>

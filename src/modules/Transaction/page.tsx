@@ -542,8 +542,8 @@ export function Transaction() {
                     <TabsContent value="signature" className="mt-0">
                       <UITabs defaultValue="hex">
                         <UITabsList>
-                          <UITabsTrigger value="hex">Hex</UITabsTrigger>
                           <UITabsTrigger value="decoded">Dec</UITabsTrigger>
+                          <UITabsTrigger value="hex">Hex</UITabsTrigger>
                         </UITabsList>
                         <UITabsContent value="hex" className="mt-[15px]">
                           <Editor
