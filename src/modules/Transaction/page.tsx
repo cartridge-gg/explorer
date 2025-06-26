@@ -127,7 +127,7 @@ export function Transaction() {
   }, []);
 
   return (
-    <div className="w-full flex flex-col gap-[3px] sl:w-[1135px]">
+    <div className="w-full flex flex-col gap-[3px] sl:w-[1134px]">
       <Breadcrumb className="mb-[7px]">
         <BreadcrumbList>
           <BreadcrumbItem>

@@ -18,10 +18,14 @@ export function Hash({
   value,
   length = 4,
   to,
+  containerClassName,
+  className,
 }: {
   value: string | undefined;
   length?: number;
   to?: string;
+  containerClassName?: string;
+  className?: string;
 }) {
   const [first, last] = truncateString(value ?? "", length).split("...");
   const navigate = useNavigate();
@@ -57,9 +61,17 @@ export function Hash({
       <Tooltip>
         <TooltipTrigger
           onClick={to ? onNavigate : onCopy}
-          className="flex items-center gap-1 font-mono font-bold text-foreground hover:text-foreground-200 cursor-pointer transition-all"
+          className={cn(
+            "flex items-center gap-1 font-mono font-bold text-foreground hover:text-foreground-200 cursor-pointer transition-all",
+            containerClassName,
+          )}
         >
-          <div className="flex items-center gap-1 border-b border-transparent px-2">
+          <div
+            className={cn(
+              "flex items-center gap-1 border-b border-transparent px-2",
+              className,
+            )}
+          >
             <span>{first}</span>
             {!!last?.length && (
               <>

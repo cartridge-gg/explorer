@@ -32,7 +32,7 @@ export function Header({ className }: { className?: string }) {
         className,
       )}
     >
-      <div className="w-full sl:w-[1135px] flex items-center justify-between gap-2 ">
+      <div className="w-full sl:w-[1134px] flex items-center justify-between gap-2 ">
         <div className="w-[467px]">
           {!isHome &&
             (!isMobile ? (

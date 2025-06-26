@@ -110,7 +110,7 @@ export function Contract() {
   );
 
   return (
-    <div className="w-full flex flex-col gap-[3px] sl:w-[1135px]">
+    <div className="w-full flex flex-col gap-[3px] sl:w-[1134px]">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -141,7 +141,7 @@ export function Contract() {
       ) : error ? (
         <NotFound />
       ) : (
-        <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-[3px] sl:w-[1135px]">
+        <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-[3px] sl:w-[1134px]">
           {/* Contract Info Section */}
           <div className="sl:w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
             <Card>
