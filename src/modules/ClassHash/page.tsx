@@ -25,11 +25,7 @@ import {
 } from "@/shared/components/card";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
-import {
-  PageHeader,
-  PageHeaderRight,
-  PageHeaderTitle,
-} from "@/shared/components/PageHeader";
+import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { RPC_PROVIDER } from "@/services/rpc";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -41,7 +37,7 @@ import { NotFound } from "@/modules/NotFound/page";
 import { Hash } from "@/shared/components/hash";
 import { Badge } from "@/shared/components/badge";
 import { FunctionAbiWithAst, isReadFunction } from "@/shared/utils/abi";
-import { memo, useEffect, useMemo, useState, useRef } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { useScrollTo } from "@/shared/hooks/useScrollTo";
@@ -72,12 +68,6 @@ const initialData: ContractClassInfo = {
 export function ClassHash() {
   const { classHash } = useParams();
   const { isMobile } = useScreen();
-
-  const { data: contractVersion } = useQuery({
-    queryKey: ["contractVersion", classHash],
-    queryFn: () => RPC_PROVIDER.getContractVersion(undefined, classHash!),
-    enabled: !!classHash,
-  });
 
   const {
     data: { readFuncs, writeFuncs, code },
@@ -177,7 +167,7 @@ export function ClassHash() {
         </PageHeaderTitle>
       </PageHeader>
 
-      <Card className="p-[15px] rounded-t-sm rounded-b-[12px]">
+      <Card className="p-[15px] rounded-t-sm rounded-b-[12px] h-[72px]">
         <CardContent className="gap-[6px] px-0">
           <CardLabel className="text-[12px]/[16px] font-normal">Hash</CardLabel>
           <Hash value={classHash} className="px-0" />
