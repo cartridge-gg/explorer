@@ -367,7 +367,7 @@ export function ClassHash() {
 
                 <TabsContent value="code" className="mt-0">
                   <Editor
-                    className="min-h-[80vh]"
+                    className="min-h-[80vh] p-[15px]"
                     defaultLanguage="json"
                     value={code.abi}
                     options={{
