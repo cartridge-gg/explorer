@@ -23,7 +23,7 @@ export function App() {
   return (
     <div className={cn(isHomePage ? "h-screen" : "lg:h-screen")}>
       <DotBackground />
-      {!isHomePage && <Header className="py-[20px] px-[20px] xl:px-[189px]" />}
+      {!isHomePage && <Header className="py-[20px] px-[20px]" />}
 
       <div
         className={cn(
