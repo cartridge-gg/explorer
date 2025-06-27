@@ -1,6 +1,7 @@
 import { Hash } from "@/shared/components/hash";
 import {
   CopyIcon,
+  DialogClose,
   FnIcon,
   Input,
   Skeleton,
@@ -8,13 +9,12 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  TimesIcon,
 } from "@cartridge/ui";
 import { Editor } from "@/shared/components/editor";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/shared/components/dialog";
 import { toast } from "sonner";
@@ -22,9 +22,14 @@ import { Badge } from "@/shared/components/badge";
 import { useCalldata } from "./hooks";
 import { GetTransactionResponse } from "starknet";
 import { decodeCalldata } from "@/shared/utils/rpc";
+import { useEffect } from "react";
 
 export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
+
+  useEffect(() => {
+    console.log("decoded: ", decoded);
+  }, [decoded]);
 
   return (
     <Tabs defaultValue="decoded">
@@ -61,51 +66,101 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                 </div>
               </DialogTrigger>
 
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>function calldata overview</DialogTitle>
-                </DialogHeader>
-
-                <div className="flex items-center justify-between gap-2">
-                  <div className="capitalize text-foreground-400 text-sm">
-                    contract
-                  </div>
-                  <Hash value={c.contract} />
-                </div>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="capitalize text-foreground-400 text-sm">
-                    function
-                  </div>
-                  <div
-                    className="flex items-center gap-2 cursor-pointer hover:opacity-80"
-                    onClick={() => {
-                      navigator.clipboard.writeText(c.function_name);
-                      toast.success("Function name copied to clipboard");
-                    }}
-                  >
-                    <span>{c.function_name}</span>
-                    <CopyIcon size="sm" className="text-foreground-400" />
-                  </div>
+              <DialogContent
+                overlayClassName="bg-[#000000]/[0.7]"
+                className="[&>button]:hidden w-full sm:max-w-[586px] rounded-[12px] sm:rounded-[12px] p-0 border gap-0 min-h-0"
+              >
+                <div className="flex items-center justify-between px-[15px] border-b border-background-200 h-[32px]">
+                  <h1 className="text-[12px]/[16px] font-normal capitalize">
+                    function calldata overview
+                  </h1>
+                  <DialogClose asChild>
+                    <button className="text-foreground-400 hover:text-foreground-300">
+                      <TimesIcon className="w-[15px] h-[15px]" />
+                    </button>
+                  </DialogClose>
                 </div>
 
-                <Tabs defaultValue="decoded" className="flex flex-col gap-4">
-                  <TabsList className="self-start">
-                    <TabsTrigger value="decoded">Decoded</TabsTrigger>
-                    <TabsTrigger value="raw">Raw</TabsTrigger>
+                <div className="flex flex-col gap-[10px] p-[15px] border-b border-background-200">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="capitalize text-foreground-400 text-[12px]/[16px] font-normal">
+                      contract
+                    </p>
+                    <Hash value={c.contract} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="capitalize text-foreground-400 text-[12px]/[16px] font-normal">
+                      function
+                    </p>
+                    <div
+                      className="flex items-center gap-2 cursor-pointer group"
+                      onClick={() => {
+                        navigator.clipboard.writeText(c.function_name);
+                        toast.success("Function name copied to clipboard");
+                      }}
+                    >
+                      <span className="text-[13px]/[16px] tracking-[0.26px] font-semibold text-foreground-100 group-hover:text-foreground-200">
+                        {c.function_name}
+                      </span>
+                      <CopyIcon size="sm" className="text-foreground-400" />
+                    </div>
+                  </div>
+                </div>
+
+                <Tabs
+                  defaultValue="decoded"
+                  className="flex flex-col gap-[13px] p-[15px]"
+                >
+                  <TabsList className="self-start h-auto rounded-sm p-[2px]">
+                    <TabsTrigger
+                      value="raw"
+                      className="py-[2px] px-[8px] rounded-sm"
+                    >
+                      <span className="text-[12px]/[16px] font-medium">
+                        Raw
+                      </span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="decoded"
+                      className="py-[2px] px-[8px] rounded-sm"
+                    >
+                      <span className="text-[12px]/[16px] font-medium">
+                        Decoded
+                      </span>
+                    </TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="decoded" className="flex flex-col gap-4">
-                    {c.data.map((input, i) => (
-                      <div key={i} className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                          <div className="text-foreground-400 font-semibold">
-                            {input.name}
+                  <TabsContent
+                    value="decoded"
+                    className="flex flex-col gap-[10px] mt-0"
+                  >
+                    {c.data.map((input, i) => {
+                      const resultValue =
+                        typeof input.value === "object"
+                          ? JSON.stringify(input.value, (_, value) =>
+                              typeof value === "bigint" ? Number(value) : value,
+                            )
+                          : input.value.toString();
+                      return (
+                        <div key={i} className="flex flex-col gap-[10px]">
+                          <div className="flex items-center gap-[7px]">
+                            <p className="text-foreground-400 font-semibold text-[12px]">
+                              {input.name}
+                            </p>
+                            <Badge className="px-[7px] py-[2px] lowercase">
+                              <span className="text-[10px] font-semibold">
+                                {input.type}
+                              </span>
+                            </Badge>
                           </div>
-                          <Badge className="lowercase">{input.type}</Badge>
+                          <Input
+                            value={resultValue}
+                            disabled
+                            className="bg-input focus-visible:bg-input border-none disabled:bg-input px-[10px] py-[7px]"
+                          />
                         </div>
-                        <Input value={input.value.toString()} disabled />
-                      </div>
-                    ))}
+                      );
+                    })}
                   </TabsContent>
 
                   <TabsContent value="raw">
