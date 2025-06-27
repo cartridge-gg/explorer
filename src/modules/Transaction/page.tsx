@@ -275,12 +275,14 @@ export function Transaction() {
                     <div className="flex flex-row items-center gap-[10px]">
                       <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
                         {ConvertToSTRK(
-                          Number(cairo.felt(receipt?.actual_fee.amount ?? 0)),
+                          Number(cairo.felt(receipt?.actual_fee?.amount ?? 0)),
                         ).toLocaleString()}
                       </p>
-                      <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
-                        strk
-                      </Badge>
+                      {receipt?.actual_fee && (
+                        <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
+                          strk
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </CardContent>
