@@ -222,13 +222,13 @@ export function Transaction() {
 
               <Card className="flex-1 overflow-y-scroll scrollbar-none py-[10px] px-[15px] gap-0">
                 <CardContent className="px-0 gap-[8px]">
-                  <div className="flex justify-between gap-2">
+                  <div className="flex justify-between items-center">
                     <CardLabel>Hash</CardLabel>
                     <div>
                       <Hash value={receipt?.transaction_hash} />
                     </div>
                   </div>
-                  <div className="flex justify-between gap-2">
+                  <div className="flex justify-between items-center">
                     <CardLabel>Block</CardLabel>
                     <div className="flex items-center">
                       <p>{receipt?.block_number}</p>
@@ -251,7 +251,7 @@ export function Transaction() {
                         </div>
                       )}
                       {!!tx?.nonce && (
-                        <div className="flex justify-between gap-2">
+                        <div className="flex justify-between items-center">
                           <CardLabel>Nonce</CardLabel>
                           <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
                             {Number(tx?.nonce)}
@@ -262,28 +262,28 @@ export function Transaction() {
                   </>
                 )}
 
-                {!!tx?.tip && (
-                  <>
-                    <Separator />
-                    <div className="flex justify-between gap-2">
-                      <CardLabel>Tip</CardLabel>
+                <Separator />
+                <CardContent className="px-0 gap-[8px]">
+                  <div className="flex justify-between items-center">
+                    <CardLabel>Tip</CardLabel>
+                    <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+                      {tx?.tip ? Number(tx?.tip).toLocaleString() : "-"}
+                    </p>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <CardLabel>Fee</CardLabel>
+                    <div className="flex flex-row items-center gap-[10px]">
                       <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                        {Number(tx?.tip).toLocaleString()}
+                        {ConvertToSTRK(
+                          Number(cairo.felt(receipt?.actual_fee.amount ?? 0)),
+                        ).toLocaleString()}
                       </p>
+                      <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
+                        strk
+                      </Badge>
                     </div>
-                  </>
-                )}
-                {!!tx?.max_fee && (
-                  <>
-                    <Separator />
-                    <div className="flex justify-between gap-2">
-                      <CardLabel>Tip</CardLabel>
-                      <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                        {Number(tx?.max_fee).toLocaleString()}
-                      </p>
-                    </div>
-                  </>
-                )}
+                  </div>
+                </CardContent>
 
                 {Number(tx?.version) === 3 && (
                   <>
