@@ -27,7 +27,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
 
   return (
-    <Tabs defaultValue="decoded">
+    <Tabs defaultValue="decoded" className="space-y-[15px]">
       <TabsList className="h-auto rounded-sm p-[2px]">
         <TabsTrigger value="raw" className="py-[2px] px-[8px] rounded-sm">
           <span className="text-[12px]/[16px] font-medium">Raw</span>
@@ -126,7 +126,10 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                   </TabsList>
 
                   <TabsContent value="raw" className="mt-0">
-                    <RawDataDisplay data={c.raw_args} />
+                    <RawDataDisplay
+                      data={c.raw_args}
+                      className="max-h-[400px]"
+                    />
                   </TabsContent>
 
                   <TabsContent
@@ -169,10 +172,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
       </TabsContent>
 
       <TabsContent value="raw">
-        <RawDataDisplay
-          data={"calldata" in tx ? tx.calldata || [] : []}
-          minHeight="80vh"
-        />
+        <RawDataDisplay data={"calldata" in tx ? tx.calldata || [] : []} />
       </TabsContent>
     </Tabs>
   );

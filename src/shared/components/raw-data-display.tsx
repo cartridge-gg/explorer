@@ -3,14 +3,9 @@ import { cn } from "@cartridge/ui";
 interface RawDataDisplayProps {
   data: string | any[];
   className?: string;
-  minHeight?: string;
 }
 
-export function RawDataDisplay({
-  data,
-  className = "",
-  minHeight = "80vh",
-}: RawDataDisplayProps) {
+export function RawDataDisplay({ data, className = "" }: RawDataDisplayProps) {
   let lines: string[] = [];
 
   if (Array.isArray(data)) {
@@ -33,10 +28,9 @@ export function RawDataDisplay({
   return (
     <div
       className={cn(
-        "bg-spacer border border-background-200 rounded-[5px] overflow-auto font-mono px-[10px] py-[7px]",
+        "bg-spacer border border-background-200 rounded-[5px] overflow-auto font-mono px-[10px] py-[7px] max-h-[80vh]",
         className,
       )}
-      style={{ minHeight }}
     >
       <div className="flex gap-[10px]">
         {/* Line numbers */}
