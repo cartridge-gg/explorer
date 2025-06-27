@@ -11,7 +11,7 @@ import {
   TabsTrigger,
   TimesIcon,
 } from "@cartridge/ui";
-import { Editor } from "@/shared/components/editor";
+import { RawDataDisplay } from "@/shared/components/raw-data-display";
 import {
   Dialog,
   DialogContent,
@@ -22,14 +22,9 @@ import { Badge } from "@/shared/components/badge";
 import { useCalldata } from "./hooks";
 import { GetTransactionResponse } from "starknet";
 import { decodeCalldata } from "@/shared/utils/rpc";
-import { useEffect } from "react";
 
 export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
-
-  useEffect(() => {
-    console.log("decoded: ", decoded);
-  }, [decoded]);
 
   return (
     <Tabs defaultValue="decoded">
@@ -130,6 +125,10 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                     </TabsTrigger>
                   </TabsList>
 
+                  <TabsContent value="raw" className="mt-0">
+                    <RawDataDisplay data={c.raw_args} />
+                  </TabsContent>
+
                   <TabsContent
                     value="decoded"
                     className="flex flex-col gap-[10px] mt-0"
@@ -147,7 +146,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                             <p className="text-foreground-400 font-semibold text-[12px]">
                               {input.name}
                             </p>
-                            <Badge className="px-[7px] py-[2px] lowercase">
+                            <Badge className="px-[7px] py-[2px]">
                               <span className="text-[10px] font-semibold">
                                 {input.type}
                               </span>
@@ -162,20 +161,6 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                       );
                     })}
                   </TabsContent>
-
-                  <TabsContent value="raw">
-                    <Editor
-                      className="min-h-[300px]"
-                      defaultLanguage="json"
-                      value={JSON.stringify(c.raw_args, null, 2)}
-                      options={{
-                        readOnly: true,
-                        scrollbar: {
-                          alwaysConsumeMouseWheel: false,
-                        },
-                      }}
-                    />
-                  </TabsContent>
                 </Tabs>
               </DialogContent>
             </Dialog>
@@ -184,16 +169,9 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
       </TabsContent>
 
       <TabsContent value="raw">
-        <Editor
-          className="min-h-[80vh]"
-          defaultLanguage="json"
-          value={JSON.stringify(tx.calldata, null, 2)}
-          options={{
-            readOnly: true,
-            scrollbar: {
-              alwaysConsumeMouseWheel: false,
-            },
-          }}
+        <RawDataDisplay
+          data={"calldata" in tx ? tx.calldata || [] : []}
+          minHeight="80vh"
         />
       </TabsContent>
     </Tabs>
