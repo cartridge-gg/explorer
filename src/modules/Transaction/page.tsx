@@ -6,8 +6,6 @@ import { memo, useCallback } from "react";
 import { toast } from "sonner";
 import { Calldata } from "./calldata";
 import {
-  BoltIcon,
-  CoinsIcon,
   GasIcon,
   StackOvalIcon,
   ListIcon,
@@ -98,6 +96,7 @@ export function Transaction() {
       storageDiff,
     },
   } = useTransaction({ txHash });
+
   const tab = useHashLinkTabs(
     tx?.type === "INVOKE"
       ? "calldata"
@@ -223,13 +222,13 @@ export function Transaction() {
 
               <Card className="flex-1 overflow-y-scroll scrollbar-none py-[10px] px-[15px] gap-0">
                 <CardContent className="px-0 gap-[8px]">
-                  <div className="flex justify-between gap-2">
+                  <div className="flex justify-between items-center">
                     <CardLabel>Hash</CardLabel>
                     <div>
                       <Hash value={receipt?.transaction_hash} />
                     </div>
                   </div>
-                  <div className="flex justify-between gap-2">
+                  <div className="flex justify-between items-center">
                     <CardLabel>Block</CardLabel>
                     <div className="flex items-center">
                       <p>{receipt?.block_number}</p>
@@ -252,7 +251,7 @@ export function Transaction() {
                         </div>
                       )}
                       {!!tx?.nonce && (
-                        <div className="flex justify-between gap-2">
+                        <div className="flex justify-between items-center">
                           <CardLabel>Nonce</CardLabel>
                           <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
                             {Number(tx?.nonce)}
@@ -262,6 +261,31 @@ export function Transaction() {
                     </CardContent>
                   </>
                 )}
+
+                <Separator />
+                <CardContent className="px-0 gap-[8px]">
+                  <div className="flex justify-between items-center">
+                    <CardLabel>Tip</CardLabel>
+                    <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+                      {tx?.tip ? Number(tx?.tip).toLocaleString() : "-"}
+                    </p>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <CardLabel>Fee</CardLabel>
+                    <div className="flex flex-row items-center gap-[10px]">
+                      <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+                        {ConvertToSTRK(
+                          Number(cairo.felt(receipt?.actual_fee?.amount ?? 0)),
+                        ).toLocaleString()}
+                      </p>
+                      {receipt?.actual_fee && (
+                        <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
+                          strk
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
 
                 {Number(tx?.version) === 3 && (
                   <>
@@ -399,47 +423,25 @@ export function Transaction() {
                   tx?.nonce_data_availability_mode
                 ) && (
                   <>
-                    <CardSeparator />
+                    <Separator />
 
                     <div className="space-y-[13px]">
                       <CardHeader className="px-0">
-                        <BoltIcon variant="solid" />
+                        <ServerIcon />
                         <CardTitle>Data Availability Mode</CardTitle>
                       </CardHeader>
 
                       <CardContent className="px-0">
-                        <div className="flex justify-between gap-2">
-                          <CardLabel>Fee</CardLabel>
-                          <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                            {tx.fee_data_availability_mode}
-                          </p>
-                        </div>
-
                         <div className="flex justify-between gap-2">
                           <CardLabel>Nonce</CardLabel>
                           <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
                             {tx.nonce_data_availability_mode}
                           </p>
                         </div>
-                      </CardContent>
-                    </div>
-                  </>
-                )}
-                {!!tx?.tip && (
-                  <>
-                    <CardSeparator />
-
-                    <div className="space-y-[13px]">
-                      <CardHeader className="px-0">
-                        <CoinsIcon variant="solid" />
-                        <CardTitle>Tip</CardTitle>
-                      </CardHeader>
-
-                      <CardContent className="px-0">
                         <div className="flex justify-between gap-2">
-                          <CardLabel>Tip</CardLabel>
+                          <CardLabel>Fee</CardLabel>
                           <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                            {Number(tx.tip).toLocaleString()}
+                            {tx.fee_data_availability_mode}
                           </p>
                         </div>
                       </CardContent>
@@ -507,7 +509,7 @@ export function Transaction() {
                       </TabsTrigger>
                     </TabsList>
                   </CardContent>
-                  <CardSeparator className="mt-1 mb-0" />
+                  <Separator className="mt-1 mb-0" />
 
                   <CardContent className="p-[15px]">
                     {tx?.type === "INVOKE" && (
@@ -608,7 +610,9 @@ export function Transaction() {
 }
 
 const Separator = memo(() => (
-  <CardSeparator className="my-[10px] relative left-[-15px] w-[calc(100%+30px)]" />
+  <span>
+    <CardSeparator className="my-[10px] relative left-[-15px] w-[calc(100%+30px)]" />
+  </span>
 ));
 
 const PriceCard = ({
@@ -645,3 +649,14 @@ const PriceCard = ({
     </button>
   );
 };
+
+const ServerIcon = memo(() => {
+  return (
+    <svg viewBox="0 0 11 11" fill="none" className="w-[11px] h-[11px]">
+      <path
+        d="M9.77778 6.11111H1.22222C0.55 6.11111 0 6.66111 0 7.33333V9.77778C0 10.45 0.55 11 1.22222 11H9.77778C10.45 11 11 10.45 11 9.77778V7.33333C11 6.66111 10.45 6.11111 9.77778 6.11111ZM2.44444 9.77778C1.77222 9.77778 1.22222 9.22778 1.22222 8.55556C1.22222 7.88333 1.77222 7.33333 2.44444 7.33333C3.11667 7.33333 3.66667 7.88333 3.66667 8.55556C3.66667 9.22778 3.11667 9.77778 2.44444 9.77778ZM9.77778 0H1.22222C0.55 0 0 0.55 0 1.22222V3.66667C0 4.33889 0.55 4.88889 1.22222 4.88889H9.77778C10.45 4.88889 11 4.33889 11 3.66667V1.22222C11 0.55 10.45 0 9.77778 0ZM2.44444 3.66667C1.77222 3.66667 1.22222 3.11667 1.22222 2.44444C1.22222 1.77222 1.77222 1.22222 2.44444 1.22222C3.11667 1.22222 3.66667 1.77222 3.66667 2.44444C3.66667 3.11667 3.11667 3.66667 2.44444 3.66667Z"
+        fill="white"
+      />
+    </svg>
+  );
+});
