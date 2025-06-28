@@ -41,13 +41,13 @@ import { memo, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { useScrollTo } from "@/shared/hooks/useScrollTo";
-import { Editor } from "@/shared/components/editor";
 import {
   Tabs,
   TabsList,
   TabsTrigger,
   TabsContent,
 } from "@/shared/components/tabs";
+import { RawDataDisplay } from "@/shared/components/raw-data-display";
 
 const initialData: ContractClassInfo = {
   constructor: {
@@ -356,17 +356,7 @@ export function ClassHash() {
                 </TabsContent>
 
                 <TabsContent value="code" className="mt-0">
-                  <Editor
-                    className="min-h-[80vh] p-[15px]"
-                    defaultLanguage="json"
-                    value={code.abi}
-                    options={{
-                      readOnly: true,
-                      scrollbar: {
-                        alwaysConsumeMouseWheel: false,
-                      },
-                    }}
-                  />
+                  <RawDataDisplay data={code.abi} />
                 </TabsContent>
               </CardContent>
             </Tabs>

@@ -55,7 +55,6 @@ import { Hash } from "@/shared/components/hash";
 import dayjs from "dayjs";
 import { getFinalityStatus } from "@/shared/utils/receipt";
 import FeltList from "@/shared/components/FeltList";
-import { Editor } from "@/shared/components/editor";
 import { RawDataDisplay } from "@/shared/components/raw-data-display";
 
 /**
@@ -537,16 +536,8 @@ export function Transaction() {
                           </div>
                         </div>
 
-                        <Editor
-                          className="min-h-[80vh]"
-                          defaultLanguage="json"
-                          value={JSON.stringify(declared, null, 2)}
-                          options={{
-                            readOnly: true,
-                            scrollbar: {
-                              alwaysConsumeMouseWheel: false,
-                            },
-                          }}
+                        <RawDataDisplay
+                          data={JSON.stringify(declared, null, 2)}
                         />
                       </TabsContent>
                     )}
@@ -558,17 +549,6 @@ export function Transaction() {
                         </UITabsList>
                         <UITabsContent value="hex" className="mt-[15px]">
                           <RawDataDisplay data={tx?.signature ?? []} />
-                          {/* <Editor
-                            className="min-h-[80vh]"
-                            defaultLanguage="json"
-                            value={JSON.stringify(tx?.signature ?? [], null, 2)}
-                            options={{
-                              readOnly: true,
-                              scrollbar: {
-                                alwaysConsumeMouseWheel: false,
-                              },
-                            }}
-                          /> */}
                         </UITabsContent>
                         <UITabsContent value="dec">
                           {tx ? (

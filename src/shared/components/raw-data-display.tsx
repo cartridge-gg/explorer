@@ -1,6 +1,7 @@
 import { cn } from "@cartridge/ui";
 
 interface RawDataDisplayProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: string | any[];
   className?: string;
 }
