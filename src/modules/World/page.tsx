@@ -119,25 +119,14 @@ export function World() {
           </TabsList>
 
           <TabsContent value="graphql-schema">
-            <Editor
-              height="80vh"
-              defaultLanguage="json"
-              value={JSON.stringify(schema, null, 2)}
-              options={{
-                readOnly: true,
-              }}
-            />
+            <Editor className="80vh" value={JSON.stringify(schema, null, 2)} />
           </TabsContent>
 
           <TabsContent value="models">
             {models?.length ? (
               <Editor
-                height="80vh"
-                defaultLanguage="json"
+                className="80vh"
                 value={JSON.stringify(models, null, 2)}
-                options={{
-                  readOnly: true,
-                }}
               />
             ) : (
               <div className="h-full p-2 flex items-center justify-center min-h-[150px] text-xs lowercase">

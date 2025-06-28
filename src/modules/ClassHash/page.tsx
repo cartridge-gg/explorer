@@ -47,7 +47,7 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@/shared/components/tabs";
-import { RawDataDisplay } from "@/shared/components/raw-data-display";
+import { Editor } from "@/shared/components/editor";
 
 const initialData: ContractClassInfo = {
   constructor: {
@@ -356,7 +356,7 @@ export function ClassHash() {
                 </TabsContent>
 
                 <TabsContent value="code" className="mt-0">
-                  <RawDataDisplay data={code.abi} />
+                  <Editor value={code.abi} />
                 </TabsContent>
               </CardContent>
             </Tabs>

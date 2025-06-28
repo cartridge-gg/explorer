@@ -11,7 +11,7 @@ import {
   TabsTrigger,
   TimesIcon,
 } from "@cartridge/ui";
-import { RawDataDisplay } from "@/shared/components/raw-data-display";
+import { Editor } from "@/shared/components/editor";
 import {
   Dialog,
   DialogContent,
@@ -126,10 +126,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                   </TabsList>
 
                   <TabsContent value="raw" className="mt-0">
-                    <RawDataDisplay
-                      data={c.raw_args}
-                      className="max-h-[400px]"
-                    />
+                    <Editor value={c.raw_args} className="max-h-[400px]" />
                   </TabsContent>
 
                   <TabsContent
@@ -172,7 +169,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
       </TabsContent>
 
       <TabsContent value="raw">
-        <RawDataDisplay data={"calldata" in tx ? tx.calldata || [] : []} />
+        <Editor data={"calldata" in tx ? tx.calldata || [] : []} />
       </TabsContent>
     </Tabs>
   );

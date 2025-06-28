@@ -1,39 +1,63 @@
-import {
-  Editor as MonacoEditor,
-  EditorProps,
-  Monaco,
-} from "@monaco-editor/react";
-import { useCallback } from "react";
+import { cn } from "@cartridge/ui";
 
-export function Editor({
-  beforeMount: beforeMountProp,
-  ...props
-}: EditorProps) {
-  const dark = document.querySelector(".dark");
-  const beforeMount = useCallback(
-    (monaco: Monaco) => {
-      if (dark) {
-        monaco.editor.defineTheme("cartridge-dark", {
-          base: "vs-dark",
-          inherit: true,
-          rules: [],
-          colors: {
-            "editor.background":
-              getComputedStyle(dark).getPropertyValue("--background-200"),
-          },
-        });
-      }
+interface EditorProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value: string | any[];
+  className?: string;
+}
 
-      beforeMountProp?.(monaco);
-    },
-    [dark, beforeMountProp],
-  );
+export function Editor({ value, className }: EditorProps) {
+  let lines: string[] = [];
+
+  if (Array.isArray(value)) {
+    // If it's an array, display each item on its own line
+    lines = value.map((item) => String(item));
+  } else if (typeof value === "string") {
+    // If it's a string, try to parse as JSON first
+    try {
+      const parsed = JSON.parse(value);
+      // If it's valid JSON, format it nicely and split by lines
+      lines = JSON.stringify(parsed, null, 2).split("\n");
+    } catch {
+      // If not valid JSON, split by newlines
+      lines = value.split("\n");
+    }
+  } else {
+    lines = [String(value)];
+  }
 
   return (
-    <MonacoEditor
-      beforeMount={beforeMount}
-      theme={dark ? "cartridge-dark" : "vs-light"}
-      {...props}
-    />
+    <div
+      className={cn(
+        "bg-spacer border border-background-200 rounded-[5px] overflow-auto font-mono px-[10px] py-[7px] max-h-[80vh]",
+        className,
+      )}
+    >
+      <div className="flex gap-[10px]">
+        {/* Line numbers */}
+        <div className="bg-spacer select-none space-y-[5px]">
+          {lines.map((_, index) => (
+            <p
+              key={index}
+              className="text-right text-[12px] font-normal text-foreground-400 "
+            >
+              {index + 1}
+            </p>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 space-y-[5px]">
+          {lines.map((line, index) => (
+            <p
+              key={index}
+              className="text-[12px] font-normal whitespace-pre-wrap text-foreground-200"
+            >
+              {line}
+            </p>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

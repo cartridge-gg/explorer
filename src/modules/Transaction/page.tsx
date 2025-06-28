@@ -55,7 +55,7 @@ import { Hash } from "@/shared/components/hash";
 import dayjs from "dayjs";
 import { getFinalityStatus } from "@/shared/utils/receipt";
 import FeltList from "@/shared/components/FeltList";
-import { RawDataDisplay } from "@/shared/components/raw-data-display";
+import { Editor } from "@/shared/components/editor";
 
 /**
  *
@@ -536,9 +536,7 @@ export function Transaction() {
                           </div>
                         </div>
 
-                        <RawDataDisplay
-                          data={JSON.stringify(declared, null, 2)}
-                        />
+                        <Editor value={JSON.stringify(declared, null, 2)} />
                       </TabsContent>
                     )}
                     <TabsContent value="signature" className="mt-0">
@@ -548,7 +546,7 @@ export function Transaction() {
                           <UITabsTrigger value="hex">Hex</UITabsTrigger>
                         </UITabsList>
                         <UITabsContent value="hex" className="mt-[15px]">
-                          <RawDataDisplay data={tx?.signature ?? []} />
+                          <Editor value={tx?.signature ?? []} />
                         </UITabsContent>
                         <UITabsContent value="dec">
                           {tx ? (
