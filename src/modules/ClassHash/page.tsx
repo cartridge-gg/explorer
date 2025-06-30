@@ -356,7 +356,17 @@ export function ClassHash() {
                 </TabsContent>
 
                 <TabsContent value="code" className="mt-0">
-                  <Editor value={code.abi} />
+                  <Editor
+                    className="min-h-[80vh] p-[15px]"
+                    defaultLanguage="json"
+                    value={code.abi}
+                    options={{
+                      readOnly: true,
+                      scrollbar: {
+                        alwaysConsumeMouseWheel: false,
+                      },
+                    }}
+                  />
                 </TabsContent>
               </CardContent>
             </Tabs>
