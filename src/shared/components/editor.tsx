@@ -40,7 +40,9 @@ export function Editor({ value, className }: EditorProps) {
       )}
     >
       <Virtuoso
-        style={{ height: "80vh" }}
+        style={{ height: "100vh" }}
+        className="scrollbar-none"
+        totalCount={lines.length}
         data={lines}
         itemContent={(index, line) => (
           <div className="flex gap-[10px]">
