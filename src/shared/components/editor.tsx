@@ -35,12 +35,12 @@ export function Editor({ value, className }: EditorProps) {
   return (
     <div
       className={cn(
-        "bg-spacer border border-background-200 rounded-[5px] overflow-auto font-mono px-[10px] py-[7px] max-h-[80vh]",
+        "bg-spacer border border-background-200 rounded-[5px] overflow-auto font-mono px-[10px] py-[7px] h-full max-h-[80vh]",
         className,
       )}
     >
       <Virtuoso
-        style={{ height: "100vh" }}
+        style={{ height: "80vh" }}
         data={lines}
         itemContent={(index, line) => (
           <div className="flex gap-[10px]">
