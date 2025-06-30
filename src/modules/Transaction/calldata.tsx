@@ -11,7 +11,7 @@ import {
   TabsTrigger,
   TimesIcon,
 } from "@cartridge/ui";
-import { Editor } from "@/shared/components/editor";
+import { FeltDisplayer } from "@/shared/components/felt-displayer";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,7 @@ import { Badge } from "@/shared/components/badge";
 import { useCalldata } from "./hooks";
 import { GetTransactionResponse } from "starknet";
 import { decodeCalldata } from "@/shared/utils/rpc";
+import { Editor } from "@/shared/components/editor";
 
 export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
@@ -126,7 +127,10 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                   </TabsList>
 
                   <TabsContent value="raw" className="mt-0">
-                    <Editor value={c.raw_args} className="max-h-[400px]" />
+                    <FeltDisplayer
+                      value={c.raw_args}
+                      className="max-h-[400px]"
+                    />
                   </TabsContent>
 
                   <TabsContent
@@ -169,7 +173,17 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
       </TabsContent>
 
       <TabsContent value="raw">
-        <Editor data={"calldata" in tx ? tx.calldata || [] : []} />
+        <Editor
+          className="min-h-[80vh]"
+          defaultLanguage="json"
+          value={JSON.stringify(tx.calldata, null, 2)}
+          options={{
+            readOnly: true,
+            scrollbar: {
+              alwaysConsumeMouseWheel: false,
+            },
+          }}
+        />
       </TabsContent>
     </Tabs>
   );

@@ -536,7 +536,17 @@ export function Transaction() {
                           </div>
                         </div>
 
-                        <Editor value={JSON.stringify(declared, null, 2)} />
+                        <Editor
+                          className="min-h-[80vh]"
+                          defaultLanguage="json"
+                          value={JSON.stringify(declared, null, 2)}
+                          options={{
+                            readOnly: true,
+                            scrollbar: {
+                              alwaysConsumeMouseWheel: false,
+                            },
+                          }}
+                        />
                       </TabsContent>
                     )}
                     <TabsContent value="signature" className="mt-0">
@@ -546,7 +556,17 @@ export function Transaction() {
                           <UITabsTrigger value="hex">Hex</UITabsTrigger>
                         </UITabsList>
                         <UITabsContent value="hex" className="mt-[15px]">
-                          <Editor value={tx?.signature ?? []} />
+                          <Editor
+                            className="min-h-[80vh]"
+                            defaultLanguage="json"
+                            value={JSON.stringify(tx?.signature ?? [], null, 2)}
+                            options={{
+                              readOnly: true,
+                              scrollbar: {
+                                alwaysConsumeMouseWheel: false,
+                              },
+                            }}
+                          />
                         </UITabsContent>
                         <UITabsContent value="dec">
                           {tx ? (
