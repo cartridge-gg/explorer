@@ -245,33 +245,39 @@ export function JsonRpcPlayground() {
   }, [hash, methods, onMethodChange]);
 
   return (
-    <div id="json-playground" className="w-full max-w-full flex flex-col gap-2">
-      <Breadcrumb>
-        <BreadcrumbList className="font-bold">
+    <div
+      id="json-playground"
+      className="w-full max-w-full flex flex-col gap-[3px] sl:w-[1134px]"
+    >
+      <Breadcrumb className="mb-[7px]">
+        <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="font-bold">
-              JSON-RPC Playground
+            <BreadcrumbPage className="text-foreground-400 text-[12px]/[16px] font-normal">
+              Playground
             </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader>
-        <PageHeaderTitle>
+      <PageHeader
+        containerClassName="rounded-t-[12px] rounded-b-[4px]"
+        className="px-[15px] py-[8px]"
+      >
+        <PageHeaderTitle className="gap-[12px]">
           <TerminalIcon variant="solid" />
-          <div>JSON-RPC Playground</div>
+          <h1 className="text-[14px]/[20px] font-medium">
+            JSON-RPC Playground
+          </h1>
         </PageHeaderTitle>
-        <PageHeaderRight className="px-2 gap-2">
-          <Badge>v{specVersion}</Badge>
-        </PageHeaderRight>
       </PageHeader>
 
-      <div className="flex flex-col md:flex-row md:h-[90vh] gap-2">
+      <div className="flex flex-col gap-2">
         <Card className="py-0 flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-background-200 min-w-0">
+          {/* Methods Section */}
           <div className="md:w-[300px] flex flex-col gap-3 py-3">
             <CardContent>
               <div className="relative flex items-center w-full">
@@ -357,7 +363,8 @@ export function JsonRpcPlayground() {
             </>
           </div>
 
-          <div className="w-full flex flex-col justify-between py-3 md:w-[400px]">
+          {/* Parameters and Request/Response Section */}
+          <div className="w-full flex flex-col py-3">
             <div className="flex flex-col gap-4 divide-y divide-background-200">
               <CardContent className="flex flex-col gap-2">
                 <div className="flex flex-col gap-2">
@@ -387,44 +394,40 @@ export function JsonRpcPlayground() {
                   onSubmit={onExecute}
                 />
               </CardContent>
-            </div>
 
-            <Button
-              onClick={onExecute}
-              variant="secondary"
-              className="self-end mx-3"
-              isLoading={form[selected?.name ?? ""]?.loading}
-            >
-              Execute
-            </Button>
+              <CardContent className="py-3">
+                <Button
+                  onClick={onExecute}
+                  variant="secondary"
+                  className="self-end"
+                  isLoading={form[selected?.name ?? ""]?.loading}
+                >
+                  Execute
+                </Button>
+              </CardContent>
+
+              {/* Request Section */}
+              <CardContent className="flex flex-col gap-2">
+                <CardLabel>Request</CardLabel>
+                <div className="p-3 bg-input rounded">
+                  <code className="text-sm block">
+                    <pre className="whitespace-pre-wrap">{requestJSON}</pre>
+                  </code>
+                </div>
+              </CardContent>
+
+              {/* Response Section */}
+              <CardContent className="flex flex-col gap-2">
+                <CardLabel>Response</CardLabel>
+                <div className="p-3 bg-input rounded min-h-40">
+                  <code className="text-sm block">
+                    <pre className="whitespace-pre-wrap">{responseJSON}</pre>
+                  </code>
+                </div>
+              </CardContent>
+            </div>
           </div>
         </Card>
-
-        <div className="w-full grid grid-rows-[auto_1fr] h-full">
-          {/* Request Section */}
-          <div className="border border-b-0 first:rounded-t border-background-200">
-            <div className="border-background-200 p-3 font-semibold text-foreground-200 border-b">
-              Request
-            </div>
-            <div className="p-3 bg-input">
-              <code className="text-sm block">
-                <pre className="whitespace-pre-wrap">{requestJSON}</pre>
-              </code>
-            </div>
-          </div>
-
-          {/* Response Section */}
-          <div className="border last:border-b last:rounded-b border-background-200 grid grid-rows-[auto_1fr] min-h-80">
-            <div className="border-background-200 p-3 font-semibold text-foreground-200 border-b">
-              Response
-            </div>
-            <div className="p-3 bg-input rounded-b">
-              <code className="text-sm block">
-                <pre className="whitespace-pre-wrap">{responseJSON}</pre>
-              </code>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
