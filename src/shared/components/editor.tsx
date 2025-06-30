@@ -1,4 +1,5 @@
 import { cn } from "@cartridge/ui";
+import { Virtuoso } from "react-virtuoso";
 
 interface EditorProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -26,6 +27,11 @@ export function Editor({ value, className }: EditorProps) {
     lines = [String(value)];
   }
 
+  // If no data, show placeholder
+  if (lines.length === 0) {
+    lines = ["No data to display"];
+  }
+
   return (
     <div
       className={cn(
@@ -33,31 +39,50 @@ export function Editor({ value, className }: EditorProps) {
         className,
       )}
     >
-      <div className="flex gap-[10px]">
-        {/* Line numbers */}
-        <div className="bg-spacer select-none space-y-[5px]">
-          {lines.map((_, index) => (
-            <p
-              key={index}
-              className="text-right text-[12px] font-normal text-foreground-400 "
-            >
-              {index + 1}
-            </p>
-          ))}
-        </div>
+      {/* <div className="flex gap-[10px]"> */}
+      {/* Line numbers */}
+      {/* <FixedSizeList
+          height={400}
+          width={15}
+          itemCount={lines.length}
+          itemSize={30}
+          className="bg-spacer select-none space-y-[5px]"
+        >
+          {LineRow}
+        </FixedSizeList> */}
 
-        {/* Content */}
-        <div className="flex-1 space-y-[5px]">
-          {lines.map((line, index) => (
-            <p
-              key={index}
-              className="text-[12px] font-normal whitespace-pre-wrap text-foreground-200"
-            >
-              {line}
-            </p>
-          ))}
-        </div>
-      </div>
+      {/* Content */}
+      {/* <FixedSizeList
+        height={400}
+        width={200}
+        itemCount={lines.length}
+        itemSize={30}
+        className="flex gap-[10px]"
+      >
+        {ItemRow}
+      </FixedSizeList> */}
+      {/* </div> */}
+
+      <Virtuoso
+        style={{ height: "100vh" }}
+        data={lines}
+        itemContent={(index, line) => (
+          <div className="flex gap-[10px]">
+            <div className="bg-spacer select-none space-y-[5px]">
+              <p className="text-right text-[12px] font-normal text-foreground-400 ">
+                {index}
+              </p>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 space-y-[5px]">
+              <p className="text-[12px] font-normal whitespace-pre-wrap text-foreground-200">
+                {line}
+              </p>
+            </div>
+          </div>
+        )}
+      />
     </div>
   );
 }
