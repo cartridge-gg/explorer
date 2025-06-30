@@ -9,6 +9,8 @@ import {
   ListIcon,
   PulseIcon,
   WedgeIcon,
+  DotsIcon,
+  CopyIcon,
 } from "@cartridge/ui";
 import { toast } from "sonner";
 import {
@@ -51,6 +53,8 @@ import { Badge } from "@/shared/components/badge";
 import { DataTable } from "@/shared/components/data-table";
 import { MultiFilterTransaction } from "@/shared/components/filter";
 import { memo, useCallback } from "react";
+import { truncateString } from "@/shared/utils/string";
+import { useScreen } from "@/shared/hooks/useScreen";
 
 export function Block() {
   const tab = useHashLinkTabs("transactions");
@@ -61,6 +65,7 @@ export function Block() {
   const { blockNumber: latestBlockNumber } = useBlockNumber();
   const { hash } = useLocation();
   const navigate = useNavigate();
+  const { isMobile } = useScreen();
 
   const isLatestBlock =
     latestBlockNumber !== undefined &&
@@ -88,7 +93,15 @@ export function Block() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>{blockId}</BreadcrumbPage>
+            <BreadcrumbPage>
+              {blockId ? (
+                <BreadcrumbPage>
+                  {isMobile && blockId ? truncateString(blockId) : blockId}
+                </BreadcrumbPage>
+              ) : (
+                <Skeleton className="h-4 w-[400px] rounded-sm" />
+              )}
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -198,10 +211,35 @@ export function Block() {
                   <div className="flex flex-col justify-between gap-[8px]">
                     <CardLabel>Sequencer</CardLabel>
                     <div
-                      className="bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
+                      className="flex flex-row items-center justify-between bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
                       onClick={onClickSequencerAddress}
                     >
-                      <Hash value={block?.sequencer_address} />
+                      {(() => {
+                        const [first, last] = truncateString(
+                          block?.sequencer_address ?? "",
+                          12,
+                        ).split("...");
+
+                        return (
+                          <div className="flex items-center gap-1 font-mono font-bold text-foreground">
+                            <span>{first}</span>
+                            {!!last?.length && (
+                              <>
+                                <DotsIcon className="text-foreground-400 hover:text-foreground-500" />
+                                <span>{last}</span>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })()}
+                      <CopyIcon
+                        size="sm"
+                        className="text-foreground-400 hover:text-foreground-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onCopyValue(block?.sequencer_address || "");
+                        }}
+                      />
                     </div>
                   </div>
                 </CardContent>
