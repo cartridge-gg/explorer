@@ -66,19 +66,9 @@ export function Block() {
     latestBlockNumber !== undefined &&
     block?.block_number >= Number(latestBlockNumber);
 
-  const onCopySequencerAddress = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-
-      if (!block?.sequencer_address) {
-        return;
-      }
-
-      navigator.clipboard.writeText(block?.sequencer_address);
-      toast.success("Address copied to clipboard");
-    },
-    [block?.sequencer_address],
-  );
+  const onClickSequencerAddress = useCallback(() => {
+    navigate(`../contract/${block?.sequencer_address}`);
+  }, [block?.sequencer_address, navigate]);
 
   const onCopyValue = useCallback((value: string) => {
     navigator.clipboard.writeText(value);
@@ -209,7 +199,7 @@ export function Block() {
                     <CardLabel>Sequencer</CardLabel>
                     <div
                       className="bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
-                      onClick={onCopySequencerAddress}
+                      onClick={onClickSequencerAddress}
                     >
                       <Hash value={block?.sequencer_address} />
                     </div>
