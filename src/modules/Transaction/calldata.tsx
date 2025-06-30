@@ -141,7 +141,9 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                       const resultValue =
                         typeof input.value === "object"
                           ? JSON.stringify(input.value, (_, value) =>
-                              typeof value === "bigint" ? Number(value) : value,
+                              typeof value === "bigint"
+                                ? `0x${value.toString(16)}`
+                                : value,
                             )
                           : input.value.toString();
                       return (
