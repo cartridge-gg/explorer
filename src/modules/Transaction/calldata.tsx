@@ -22,17 +22,12 @@ import { Badge } from "@/shared/components/badge";
 import { useCalldata } from "./hooks";
 import { GetTransactionResponse } from "starknet";
 import { decodeCalldata } from "@/shared/utils/rpc";
-import { useEffect } from "react";
 
 export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
 
-  useEffect(() => {
-    console.log("decoded: ", decoded);
-  }, [decoded]);
-
   return (
-    <Tabs defaultValue="decoded">
+    <Tabs defaultValue="decoded" className="space-y-[15px]">
       <TabsList className="h-auto rounded-sm p-[2px]">
         <TabsTrigger value="raw" className="py-[2px] px-[8px] rounded-sm">
           <span className="text-[12px]/[16px] font-medium">Raw</span>
@@ -130,6 +125,10 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                     </TabsTrigger>
                   </TabsList>
 
+                  <TabsContent value="raw" className="mt-0">
+                    <Editor value={c.raw_args} className="max-h-[400px]" />
+                  </TabsContent>
+
                   <TabsContent
                     value="decoded"
                     className="flex flex-col gap-[10px] mt-0"
@@ -147,7 +146,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                             <p className="text-foreground-400 font-semibold text-[12px]">
                               {input.name}
                             </p>
-                            <Badge className="px-[7px] py-[2px] lowercase">
+                            <Badge className="px-[7px] py-[2px]">
                               <span className="text-[10px] font-semibold">
                                 {input.type}
                               </span>
@@ -162,20 +161,6 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                       );
                     })}
                   </TabsContent>
-
-                  <TabsContent value="raw">
-                    <Editor
-                      className="min-h-[300px]"
-                      defaultLanguage="json"
-                      value={JSON.stringify(c.raw_args, null, 2)}
-                      options={{
-                        readOnly: true,
-                        scrollbar: {
-                          alwaysConsumeMouseWheel: false,
-                        },
-                      }}
-                    />
-                  </TabsContent>
                 </Tabs>
               </DialogContent>
             </Dialog>
@@ -184,17 +169,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
       </TabsContent>
 
       <TabsContent value="raw">
-        <Editor
-          className="min-h-[80vh]"
-          defaultLanguage="json"
-          value={JSON.stringify(tx.calldata, null, 2)}
-          options={{
-            readOnly: true,
-            scrollbar: {
-              alwaysConsumeMouseWheel: false,
-            },
-          }}
-        />
+        <Editor data={"calldata" in tx ? tx.calldata || [] : []} />
       </TabsContent>
     </Tabs>
   );

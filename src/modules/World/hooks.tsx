@@ -456,15 +456,7 @@ function useEventMessagesTable(project: string) {
       columnHelper.accessor("keys", {
         header: () => "keys",
         cell: (info) => (
-          <Editor
-            height={200}
-            language="json"
-            options={{
-              readOnly: true,
-              lineNumbers: "off",
-            }}
-            value={JSON.stringify(info.getValue(), null, 2)}
-          />
+          <RawDataDisplay value={JSON.stringify(info.getValue(), null, 2)} />
         ),
       }),
       columnHelper.accessor("models", {

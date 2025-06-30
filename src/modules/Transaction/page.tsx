@@ -511,7 +511,7 @@ export function Transaction() {
                   </CardContent>
                   <Separator className="mt-1 mb-0" />
 
-                  <CardContent className="p-[15px]">
+                  <CardContent className="p-[15px] pt-[5px]">
                     {tx?.type === "INVOKE" && (
                       <TabsContent value="calldata" className="mt-0">
                         <Calldata tx={tx} />
@@ -536,17 +536,7 @@ export function Transaction() {
                           </div>
                         </div>
 
-                        <Editor
-                          className="min-h-[80vh]"
-                          defaultLanguage="json"
-                          value={JSON.stringify(declared, null, 2)}
-                          options={{
-                            readOnly: true,
-                            scrollbar: {
-                              alwaysConsumeMouseWheel: false,
-                            },
-                          }}
-                        />
+                        <Editor value={JSON.stringify(declared, null, 2)} />
                       </TabsContent>
                     )}
                     <TabsContent value="signature" className="mt-0">
@@ -556,17 +546,7 @@ export function Transaction() {
                           <UITabsTrigger value="hex">Hex</UITabsTrigger>
                         </UITabsList>
                         <UITabsContent value="hex" className="mt-[15px]">
-                          <Editor
-                            className="min-h-[80vh]"
-                            defaultLanguage="json"
-                            value={JSON.stringify(tx?.signature ?? [], null, 2)}
-                            options={{
-                              readOnly: true,
-                              scrollbar: {
-                                alwaysConsumeMouseWheel: false,
-                              },
-                            }}
-                          />
+                          <Editor value={tx?.signature ?? []} />
                         </UITabsContent>
                         <UITabsContent value="dec">
                           {tx ? (
