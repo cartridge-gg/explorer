@@ -39,30 +39,6 @@ export function Editor({ value, className }: EditorProps) {
         className,
       )}
     >
-      {/* <div className="flex gap-[10px]"> */}
-      {/* Line numbers */}
-      {/* <FixedSizeList
-          height={400}
-          width={15}
-          itemCount={lines.length}
-          itemSize={30}
-          className="bg-spacer select-none space-y-[5px]"
-        >
-          {LineRow}
-        </FixedSizeList> */}
-
-      {/* Content */}
-      {/* <FixedSizeList
-        height={400}
-        width={200}
-        itemCount={lines.length}
-        itemSize={30}
-        className="flex gap-[10px]"
-      >
-        {ItemRow}
-      </FixedSizeList> */}
-      {/* </div> */}
-
       <Virtuoso
         style={{ height: "100vh" }}
         data={lines}
