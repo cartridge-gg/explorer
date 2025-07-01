@@ -46,6 +46,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { useScrollTo } from "@/shared/hooks/useScrollTo";
 import { toast } from "sonner";
+import { Editor } from "@/shared/components/editor";
 
 interface FormState {
   inputs: { name: string; value: string }[];
@@ -248,7 +249,7 @@ export function JsonRpcPlayground() {
   const onCopyResult = useCallback(() => {
     if (!selected || !form[selected.name]?.result) return;
     const result = form[selected.name].result;
-    if (result && typeof result === 'object' && 'result' in result) {
+    if (result && typeof result === "object" && "result" in result) {
       const resultText = JSON.stringify(result.result, null, 2);
       navigator.clipboard.writeText(resultText);
       toast.success("Result copied to clipboard");
@@ -308,7 +309,7 @@ export function JsonRpcPlayground() {
   return (
     <div
       id="json-playground"
-      className="w-full max-w-full flex flex-col gap-[3px] sl:w-[1134px]"
+      className="w-full max-w-full flex flex-col gap-[3px] sl:w-[1134px] pb-[20px]"
     >
       <Breadcrumb className="mb-[7px]">
         <BreadcrumbList>
@@ -475,7 +476,7 @@ export function JsonRpcPlayground() {
             </Card>
 
             {/* Request and Response Card */}
-            <Card className="p-[15px]">
+            <Card className="p-[15px] h-[375px]">
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
@@ -531,24 +532,40 @@ export function JsonRpcPlayground() {
                     value="request"
                     className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0"
                   >
-                    <div className="p-3 bg-input rounded">
-                      <code className="text-sm block">
-                        <pre className="whitespace-pre-wrap">{requestJSON}</pre>
-                      </code>
-                    </div>
+                    <Editor
+                      className="min-h-[310px]"
+                      value={requestJSON}
+                      language="json"
+                      options={{
+                        readOnly: true,
+                        scrollbar: {
+                          alwaysConsumeMouseWheel: false,
+                        },
+                        minimap: {
+                          enabled: false,
+                        },
+                      }}
+                    />
                   </TabsContent>
 
                   <TabsContent
                     value="response"
                     className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0"
                   >
-                    <div className="p-3 bg-input rounded min-h-40">
-                      <code className="text-sm block">
-                        <pre className="whitespace-pre-wrap">
-                          {responseJSON}
-                        </pre>
-                      </code>
-                    </div>
+                    <Editor
+                      className="min-h-[310px]"
+                      value={responseJSON}
+                      language="json"
+                      options={{
+                        readOnly: true,
+                        scrollbar: {
+                          alwaysConsumeMouseWheel: false,
+                        },
+                        minimap: {
+                          enabled: false,
+                        },
+                      }}
+                    />
                   </TabsContent>
                 </CardContent>
               </Tabs>
