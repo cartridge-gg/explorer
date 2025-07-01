@@ -13,6 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
   Badge,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  CopyIcon,
 } from "@cartridge/ui";
 import {
   Breadcrumb,
@@ -40,12 +45,7 @@ import { OpenRPC, Method } from "./open-rpc";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { useScrollTo } from "@/shared/hooks/useScrollTo";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/shared/components/tabs";
+import { toast } from "sonner";
 
 interface FormState {
   inputs: { name: string; value: string }[];
@@ -88,6 +88,7 @@ export function JsonRpcPlayground() {
       methods?.find((m) => m.name === hash.replace("#", "")) ?? methods?.[0],
   );
   const [form, setForm] = useState<Record<string, FormState>>({});
+  const [activeTab, setActiveTab] = useState("request");
 
   // Scroll to selected method hook
   const { scrollContainerRef, setItemRef } = useScrollTo({
@@ -232,7 +233,29 @@ export function JsonRpcPlayground() {
         loading: false,
       },
     }));
+
+    // Switch to response tab after execution
+    setActiveTab("response");
   }, [id, selected, form]);
+
+  const onCopyRawResponse = useCallback(() => {
+    if (!selected || !form[selected.name]?.result) return;
+    const responseText = JSON.stringify(form[selected.name].result, null, 2);
+    navigator.clipboard.writeText(responseText);
+    toast.success("Raw response copied to clipboard");
+  }, [selected, form]);
+
+  const onCopyResult = useCallback(() => {
+    if (!selected || !form[selected.name]?.result) return;
+    const result = form[selected.name].result;
+    if (result && typeof result === 'object' && 'result' in result) {
+      const resultText = JSON.stringify(result.result, null, 2);
+      navigator.clipboard.writeText(resultText);
+      toast.success("Result copied to clipboard");
+    } else {
+      toast.error("No result field found in response");
+    }
+  }, [selected, form]);
 
   useEffect(() => {
     if (!methods.length) return;
@@ -452,17 +475,62 @@ export function JsonRpcPlayground() {
             </Card>
 
             {/* Request and Response Card */}
-            <Card className="divide-y divide-background-200">
-              <Tabs defaultValue="request">
-                <CardContent>
-                  <TabsList>
-                    <TabsTrigger value="request">Request</TabsTrigger>
-                    <TabsTrigger value="response">Response</TabsTrigger>
+            <Card className="p-[15px]">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="space-y-0"
+              >
+                <CardContent className="p-0 flex flex-row items-center justify-between">
+                  <TabsList className="self-start h-auto rounded-sm p-[2px]">
+                    <TabsTrigger
+                      value="request"
+                      className="py-[2px] px-[8px] rounded-sm"
+                    >
+                      <span className="text-[12px]/[16px] font-medium">
+                        Request
+                      </span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="response"
+                      className="py-[2px] px-[8px] rounded-sm"
+                    >
+                      <span className="text-[12px]/[16px] font-medium">
+                        Response
+                      </span>
+                    </TabsTrigger>
                   </TabsList>
+                  <div className="flex flex-row items-center gap-[6px]">
+                    <button
+                      type="button"
+                      onClick={onCopyRawResponse}
+                      disabled={!selected || !form[selected.name]?.hasCalled}
+                      className="flex items-center gap-[6px] py-[3px] pl-[10px] pr-[8px] bg-background-200 border border-[#454B46] rounded-sm text-foreground-200 hover:text-foreground-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="text-[12px]/[16px] font-semibold tracking-[0.24px]">
+                        Raw response
+                      </span>
+                      <CopyIcon className="w-[18px] h-[18px]" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onCopyResult}
+                      disabled={!selected || !form[selected.name]?.hasCalled}
+                      className="flex items-center gap-[6px] py-[3px] pl-[10px] pr-[8px] bg-background-200 border border-[#454B46] rounded-sm text-foreground-200 hover:text-foreground-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="text-[12px]/[16px] font-semibold tracking-[0.24px]">
+                        Result
+                      </span>
+                      <CopyIcon className="w-[18px] h-[18px]" />
+                    </button>
+                  </div>
                 </CardContent>
 
-                <CardContent>
-                  <TabsContent value="request" className="flex flex-col gap-2">
+                <CardContent className="p-0 gap-0">
+                  <TabsContent
+                    value="request"
+                    className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0"
+                  >
                     <div className="p-3 bg-input rounded">
                       <code className="text-sm block">
                         <pre className="whitespace-pre-wrap">{requestJSON}</pre>
@@ -470,7 +538,10 @@ export function JsonRpcPlayground() {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="response" className="flex flex-col gap-2">
+                  <TabsContent
+                    value="response"
+                    className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0"
+                  >
                     <div className="p-3 bg-input rounded min-h-40">
                       <code className="text-sm block">
                         <pre className="whitespace-pre-wrap">
