@@ -31,7 +31,10 @@ import {
 } from "@/shared/components/card";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { fromCamelCase } from "@/shared/utils/string";
+import {
+  formatSnakeCaseToDisplayValue,
+  fromCamelCase,
+} from "@/shared/utils/string";
 import { OpenRPC, Method } from "./open-rpc";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
@@ -164,7 +167,7 @@ export function JsonRpcPlayground() {
         {selected.params.map((param, i) => (
           <div key={i} className="flex flex-col gap-[8px]">
             <CardLabel className="text-[12px]/[16px] font-semibold tracking-[0.24px] text-foreground-400">
-              {param.name}
+              {formatSnakeCaseToDisplayValue(param.name)}
             </CardLabel>
             <div className="relative flex items-center w-full">
               <Input
