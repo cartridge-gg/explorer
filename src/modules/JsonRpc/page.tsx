@@ -1,9 +1,5 @@
 import { getRpcUrl } from "@/services/rpc";
-import {
-  PageHeader,
-  PageHeaderTitle,
-  PageHeaderRight,
-} from "@/shared/components/PageHeader";
+import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import {
   cn,
@@ -33,12 +29,10 @@ import {
   CardLabel,
   CardTitle,
 } from "@/shared/components/card";
-import { Badge } from "@/shared/components/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fromCamelCase } from "@/shared/utils/string";
 import { OpenRPC, Method } from "./open-rpc";
-import { ParamForm } from "@/shared/components/form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { useScrollTo } from "@/shared/hooks/useScrollTo";
@@ -113,8 +107,17 @@ export function JsonRpcPlayground() {
       if (!selected || typeof value === "undefined") return;
       setForm((prev) => {
         const newForm = { ...prev };
+        if (!newForm[selected.name]) {
+          newForm[selected.name] = {
+            inputs:
+              selected.params?.map((p) => ({ name: p.name, value: "" })) || [],
+            result: null,
+            hasCalled: false,
+            loading: false,
+          };
+        }
         newForm[selected.name].inputs[i].value = value;
-        return prev;
+        return newForm;
       });
     },
     [selected],
@@ -152,6 +155,31 @@ export function JsonRpcPlayground() {
     if (!result) return "";
     return JSON.stringify(result, null, 2);
   }, [selected, form]);
+
+  const parametersSection = useMemo(() => {
+    if (!selected?.params || selected.params.length === 0) return null;
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-[15px]">
+        {selected.params.map((param, i) => (
+          <div key={i} className="flex flex-col gap-[8px]">
+            <CardLabel className="text-[12px]/[16px] font-semibold tracking-[0.24px] text-foreground-400">
+              {param.name}
+            </CardLabel>
+            <div className="relative flex items-center w-full">
+              <Input
+                placeholder={param.name}
+                value={form[selected?.name]?.inputs[i]?.value || ""}
+                onChange={(e) => onParamChange(i, e.target.value)}
+                containerClassName="w-full"
+                className="bg-input focus-visible:bg-input border-none caret-foreground font-sans px-[10px] py-[5px] h-[30px] rounded-sm"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }, [selected, form, onParamChange]);
 
   const onExecute = useCallback(async () => {
     if (!selected) return;
@@ -381,31 +409,28 @@ export function JsonRpcPlayground() {
                 </div>
               </CardContent>
 
-              <CardContent className="py-3">
-                <ParamForm
-                  params={
-                    selected?.params.map((p, i) => ({
-                      ...p,
-                      id: `${selected.name}-${i}`,
-                      value: form[selected?.name]?.inputs[i]?.value || "",
-                    })) ?? []
-                  }
-                  onChange={onParamChange}
-                  onSubmit={onExecute}
-                />
-              </CardContent>
+              <div className="flex flex-col gap-4">
+                <CardContent className="py-3">
+                  {/* New custom parameters implementation */}
+                  {parametersSection}
+                </CardContent>
 
-              <CardContent className="py-3">
-                <Button
-                  onClick={onExecute}
-                  variant="secondary"
-                  className="self-end"
-                  isLoading={form[selected?.name ?? ""]?.loading}
-                >
-                  Execute
-                </Button>
-              </CardContent>
+                <CardContent className="py-3">
+                  <Button
+                    onClick={onExecute}
+                    variant="primary"
+                    className="self-end bg-foreground-100 px-[10px] h-[25px] rounded-sm"
+                    isLoading={form[selected?.name ?? ""]?.loading}
+                  >
+                    <span className="text-[13px]/[16px] font-semibold uppercase">
+                      Send
+                    </span>
+                  </Button>
+                </CardContent>
+              </div>
+            </div>
 
+            <div className="flex flex-col gap-4 border-t border-background-200">
               {/* Request Section */}
               <CardContent className="flex flex-col gap-2">
                 <CardLabel>Request</CardLabel>
