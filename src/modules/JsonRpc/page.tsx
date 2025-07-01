@@ -338,9 +338,9 @@ export function JsonRpcPlayground() {
       </PageHeader>
 
       <div className="flex flex-col gap-2">
-        <div className="flex flex-col md:flex-row gap-[3px]">
+        <div className="flex flex-col lg:flex-row gap-[3px] w-full">
           {/* Sidebar Card */}
-          <Card className="flex flex-col gap-3 p-[15px] md:w-[356px] h-[795px]">
+          <Card className="flex flex-col gap-3 p-[15px] w-full lg:w-[356px] lg:h-auto">
             <CardContent className="px-0">
               <div className="relative flex items-center w-full">
                 <Input
@@ -355,82 +355,53 @@ export function JsonRpcPlayground() {
             </CardContent>
 
             <CardHeader className="px-0">
-              <CardTitle className="px-0">Methods</CardTitle>
+              <CardTitle className="px-[8px] text-[12px]/[16px] font-semibold tracking-[0.24px] text-foreground-400">
+                Methods
+              </CardTitle>
             </CardHeader>
 
-            <>
-              {/* Mobile Select */}
-              <CardContent className="md:hidden">
-                <Select
-                  value={selected?.name || ""}
-                  onValueChange={(value) => {
-                    const method = methods.find((m) => m.name === value);
-                    if (method) onMethodChange(method);
-                  }}
-                >
-                  <SelectTrigger className="w-full h-full">
-                    <SelectValue placeholder="Select a method..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {methods?.map((method) => (
-                      <SelectItem key={method.name} value={method.name}>
-                        <div className="flex flex-col gap-1 items-start">
-                          <div className="text-foreground-400 text-xs font-medium">
-                            {method.name.split("_")[0]}
-                          </div>
-                          <div className="text-sm text-foreground-200">
-                            {method.name.replace("starknet_", "")}
-                          </div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </CardContent>
-
-              {/* Desktop List */}
-              <CardContent
-                ref={scrollContainerRef}
-                className="hidden md:block overflow-y-auto max-h-[20vh] md:max-h-full px-0 space-y-[3px]"
-              >
-                {methods?.length > 0 ? (
-                  methods.map((method) => (
-                    <div
-                      ref={(el) => setItemRef(method, el)}
-                      className={cn(
-                        "py-[3px] px-[8px] cursor-pointer flex flex-row items-center justify-between gap-1 transition-colors rounded border border-transparent h-[35px]",
-                        method.name === selected?.name
-                          ? "border-primary"
-                          : "hover:border-background-400",
-                      )}
-                      key={method.name}
-                      onClick={() => onMethodChange(method)}
-                    >
-                      {method.summary && (
-                        <div className="text-sm text-foreground-200 text-medium">
-                          {method.name.replace("starknet_", "")}
-                        </div>
-                      )}
-                      <Badge className="py-[2px] px-[8px]">
-                        <span className="text-[12px]/[16px] font-medium text-foreground-200">
-                          {method.name.split("_")[0]}
-                        </span>
-                      </Badge>
-                    </div>
-                  ))
-                ) : (
-                  <div className="py-4 px-4 text-center text-foreground-300">
-                    No method found
+            {/* Desktop List */}
+            <CardContent
+              ref={scrollContainerRef}
+              className="overflow-y-auto max-h-[200px] lg:max-h-[calc(100vh-200px)] px-0 space-y-[3px]"
+            >
+              {methods?.length > 0 ? (
+                methods.map((method) => (
+                  <div
+                    ref={(el) => setItemRef(method, el)}
+                    className={cn(
+                      "py-[3px] px-[8px] cursor-pointer flex flex-row items-center justify-between gap-1 transition-colors rounded border border-transparent h-[35px]",
+                      method.name === selected?.name
+                        ? "border-primary"
+                        : "hover:border-background-400",
+                    )}
+                    key={method.name}
+                    onClick={() => onMethodChange(method)}
+                  >
+                    {method.summary && (
+                      <div className="text-sm text-foreground-200 text-medium">
+                        {method.name.replace("starknet_", "")}
+                      </div>
+                    )}
+                    <Badge className="py-[2px] px-[8px]">
+                      <span className="text-[12px]/[16px] font-medium text-foreground-200">
+                        {method.name.split("_")[0]}
+                      </span>
+                    </Badge>
                   </div>
-                )}
-              </CardContent>
-            </>
+                ))
+              ) : (
+                <div className="py-4 px-4 text-center text-foreground-300">
+                  No method found
+                </div>
+              )}
+            </CardContent>
           </Card>
 
           {/* Right Column - Method/Params and Request/Response Cards */}
-          <div className="flex flex-col gap-[3px] flex-1 h-[416px]">
+          <div className="flex flex-col gap-[3px] flex-1 min-h-0 w-full">
             {/* Method Details and Parameters Card */}
-            <Card className="py-0 flex flex-col divide-y divide-background-200 gap-0">
+            <Card className="py-0 flex flex-col divide-y divide-background-200 gap-0 w-full">
               <CardContent className="flex flex-col p-[15px] gap-[10px]">
                 <div className="flex flex-col gap-[4px]">
                   <CardLabel className="text-[12px]/[16px] tracking-[0.25px] font-semibold text-foreground-400">
@@ -454,39 +425,37 @@ export function JsonRpcPlayground() {
                 </div>
               </CardContent>
 
-              <div className="flex flex-col p-[15px] justify-between h-[304px]">
+              <div className="flex flex-col p-[15px] gap-[30px] justify-between h-auto">
                 <CardContent className="p-0">
                   {/* New custom parameters implementation */}
                   {parametersSection}
                 </CardContent>
 
-                <CardContent className="p-0">
-                  <Button
-                    onClick={onExecute}
-                    variant="primary"
-                    className="self-end bg-foreground-100 px-[10px] h-[25px] rounded-sm"
-                    isLoading={form[selected?.name ?? ""]?.loading}
-                  >
-                    <span className="text-[13px]/[16px] font-semibold uppercase">
-                      Send
-                    </span>
-                  </Button>
-                </CardContent>
+                <Button
+                  onClick={onExecute}
+                  variant="primary"
+                  className="self-end bg-foreground-100 px-[10px] h-[25px] rounded-sm w-full lg:w-fit"
+                  isLoading={form[selected?.name ?? ""]?.loading}
+                >
+                  <span className="text-[13px]/[16px] font-semibold uppercase">
+                    Send
+                  </span>
+                </Button>
               </div>
             </Card>
 
             {/* Request and Response Card */}
-            <Card className="p-[15px] h-[375px]">
+            <Card className="p-[15px] flex-1 min-h-0 w-full">
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
-                className="space-y-0"
+                className="space-y-0 h-full flex flex-col"
               >
-                <CardContent className="p-0 flex flex-row items-center justify-between">
-                  <TabsList className="self-start h-auto rounded-sm p-[2px]">
+                <CardContent className="p-0 flex flex-col gap-[20px] lg:flex-row items-center justify-between">
+                  <TabsList className="self-start h-auto rounded-sm p-[2px] w-full lg:w-fit">
                     <TabsTrigger
                       value="request"
-                      className="py-[2px] px-[8px] rounded-sm"
+                      className="py-[2px] px-[8px] rounded-sm w-full"
                     >
                       <span className="text-[12px]/[16px] font-medium">
                         Request
@@ -494,14 +463,14 @@ export function JsonRpcPlayground() {
                     </TabsTrigger>
                     <TabsTrigger
                       value="response"
-                      className="py-[2px] px-[8px] rounded-sm"
+                      className="py-[2px] px-[8px] rounded-sm w-full"
                     >
                       <span className="text-[12px]/[16px] font-medium">
                         Response
                       </span>
                     </TabsTrigger>
                   </TabsList>
-                  <div className="flex flex-row items-center gap-[6px]">
+                  <div className="flex flex-row items-center self-start gap-[6px]">
                     <button
                       type="button"
                       onClick={onCopyRawResponse}
@@ -527,13 +496,13 @@ export function JsonRpcPlayground() {
                   </div>
                 </CardContent>
 
-                <CardContent className="p-0 gap-0">
+                <CardContent className="p-0 gap-0 flex-1 min-h-0">
                   <TabsContent
                     value="request"
-                    className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0"
+                    className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0 h-full min-h-0"
                   >
                     <Editor
-                      className="min-h-[310px]"
+                      className="min-h-[150px] h-full min-w-0"
                       value={requestJSON}
                       language="json"
                       options={{
@@ -550,10 +519,10 @@ export function JsonRpcPlayground() {
 
                   <TabsContent
                     value="response"
-                    className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0"
+                    className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0 h-full min-h-0"
                   >
                     <Editor
-                      className="min-h-[310px]"
+                      className="min-h-[150px] h-full min-w-0"
                       value={responseJSON}
                       language="json"
                       options={{
