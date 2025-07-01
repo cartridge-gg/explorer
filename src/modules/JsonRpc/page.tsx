@@ -7,11 +7,6 @@ import {
   Input,
   TerminalIcon,
   SearchIcon,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Badge,
   Tabs,
   TabsList,
@@ -499,10 +494,10 @@ export function JsonRpcPlayground() {
                 <CardContent className="p-0 gap-0 flex-1 min-h-0">
                   <TabsContent
                     value="request"
-                    className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0 h-full min-h-0"
+                    className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0 data-[state=inactive]:hidden h-full min-h-0"
                   >
                     <Editor
-                      className="min-h-[150px] h-full min-w-0"
+                      className="min-h-[470px] h-full min-w-0"
                       value={requestJSON}
                       language="json"
                       options={{
@@ -519,10 +514,10 @@ export function JsonRpcPlayground() {
 
                   <TabsContent
                     value="response"
-                    className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0 h-full min-h-0"
+                    className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0 data-[state=inactive]:hidden h-full min-h-0"
                   >
                     <Editor
-                      className="min-h-[150px] h-full min-w-0"
+                      className="min-h-[470px] h-full min-w-0"
                       value={responseJSON}
                       language="json"
                       options={{
