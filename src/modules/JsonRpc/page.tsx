@@ -12,6 +12,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Badge,
 } from "@cartridge/ui";
 import {
   Breadcrumb,
@@ -39,6 +40,12 @@ import { OpenRPC, Method } from "./open-rpc";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { useScrollTo } from "@/shared/hooks/useScrollTo";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/shared/components/tabs";
 
 interface FormState {
   inputs: { name: string; value: string }[];
@@ -295,7 +302,7 @@ export function JsonRpcPlayground() {
       </Breadcrumb>
 
       <PageHeader
-        containerClassName="rounded-t-[12px] rounded-b-[4px]"
+        containerClassName="rounded-t-[12px] rounded-b-[4px] h-[40px]"
         className="px-[15px] py-[8px]"
       >
         <PageHeaderTitle className="gap-[12px]">
@@ -307,10 +314,10 @@ export function JsonRpcPlayground() {
       </PageHeader>
 
       <div className="flex flex-col gap-2">
-        <Card className="py-0 flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-background-200 min-w-0">
-          {/* Methods Section */}
-          <div className="md:w-[300px] flex flex-col gap-3 py-3">
-            <CardContent>
+        <div className="flex flex-col md:flex-row gap-[3px]">
+          {/* Sidebar Card */}
+          <Card className="flex flex-col gap-3 p-[15px] md:w-[356px] h-[795px]">
+            <CardContent className="px-0">
               <div className="relative flex items-center w-full">
                 <Input
                   placeholder="Method"
@@ -323,8 +330,8 @@ export function JsonRpcPlayground() {
               </div>
             </CardContent>
 
-            <CardHeader>
-              <CardTitle>Methods</CardTitle>
+            <CardHeader className="px-0">
+              <CardTitle className="px-0">Methods</CardTitle>
             </CardHeader>
 
             <>
@@ -360,14 +367,14 @@ export function JsonRpcPlayground() {
               {/* Desktop List */}
               <CardContent
                 ref={scrollContainerRef}
-                className="hidden md:block overflow-y-auto max-h-[20vh] md:max-h-full"
+                className="hidden md:block overflow-y-auto max-h-[20vh] md:max-h-full px-0 space-y-[3px]"
               >
                 {methods?.length > 0 ? (
                   methods.map((method) => (
                     <div
                       ref={(el) => setItemRef(method, el)}
                       className={cn(
-                        "py-2 px-4 cursor-pointer flex flex-col gap-1 transition-colors rounded border border-transparent",
+                        "py-[3px] px-[8px] cursor-pointer flex flex-row items-center justify-between gap-1 transition-colors rounded border border-transparent h-[35px]",
                         method.name === selected?.name
                           ? "border-primary"
                           : "hover:border-background-400",
@@ -375,14 +382,16 @@ export function JsonRpcPlayground() {
                       key={method.name}
                       onClick={() => onMethodChange(method)}
                     >
-                      <div className="text-foreground-400 text-xs font-medium">
-                        {method.name.split("_")[0]}
-                      </div>
                       {method.summary && (
                         <div className="text-sm text-foreground-200 text-medium">
                           {method.name.replace("starknet_", "")}
                         </div>
                       )}
+                      <Badge className="py-[2px] px-[8px]">
+                        <span className="text-[12px]/[16px] font-medium text-foreground-200">
+                          {method.name.split("_")[0]}
+                        </span>
+                      </Badge>
                     </div>
                   ))
                 ) : (
@@ -392,33 +401,42 @@ export function JsonRpcPlayground() {
                 )}
               </CardContent>
             </>
-          </div>
+          </Card>
 
-          {/* Parameters and Request/Response Section */}
-          <div className="w-full flex flex-col py-3">
-            <div className="flex flex-col gap-4 divide-y divide-background-200">
-              <CardContent className="flex flex-col gap-2">
-                <div className="flex flex-col gap-2">
-                  <CardLabel>Method</CardLabel>
-                  <div>
+          {/* Right Column - Method/Params and Request/Response Cards */}
+          <div className="flex flex-col gap-[3px] flex-1 h-[416px]">
+            {/* Method Details and Parameters Card */}
+            <Card className="py-0 flex flex-col divide-y divide-background-200 gap-0">
+              <CardContent className="flex flex-col p-[15px] gap-[10px]">
+                <div className="flex flex-col gap-[4px]">
+                  <CardLabel className="text-[12px]/[16px] tracking-[0.25px] font-semibold text-foreground-400">
+                    Method
+                  </CardLabel>
+                  <p className="text-[13px]/[16px] font-normal text-foreground-200">
                     {fromCamelCase(
                       selected?.name?.replace("starknet_", "") ?? "",
                     )}
-                  </div>
+                  </p>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <CardLabel>Description</CardLabel>
-                  {selected?.summary && <div>{selected.summary}</div>}
+                <div className="flex flex-col gap-[4px]">
+                  <CardLabel className="text-[12px]/[16px] tracking-[0.25px] font-semibold text-foreground-400">
+                    Description
+                  </CardLabel>
+                  {selected?.summary && (
+                    <p className="text-[13px]/[16px] font-normal text-foreground-200">
+                      {selected.summary}
+                    </p>
+                  )}
                 </div>
               </CardContent>
 
-              <div className="flex flex-col gap-4">
-                <CardContent className="py-3">
+              <div className="flex flex-col p-[15px] justify-between h-[304px]">
+                <CardContent className="p-0">
                   {/* New custom parameters implementation */}
                   {parametersSection}
                 </CardContent>
 
-                <CardContent className="py-3">
+                <CardContent className="p-0">
                   <Button
                     onClick={onExecute}
                     variant="primary"
@@ -431,31 +449,41 @@ export function JsonRpcPlayground() {
                   </Button>
                 </CardContent>
               </div>
-            </div>
+            </Card>
 
-            <div className="flex flex-col gap-4 border-t border-background-200">
-              {/* Request Section */}
-              <CardContent className="flex flex-col gap-2">
-                <CardLabel>Request</CardLabel>
-                <div className="p-3 bg-input rounded">
-                  <code className="text-sm block">
-                    <pre className="whitespace-pre-wrap">{requestJSON}</pre>
-                  </code>
-                </div>
-              </CardContent>
+            {/* Request and Response Card */}
+            <Card className="divide-y divide-background-200">
+              <Tabs defaultValue="request">
+                <CardContent>
+                  <TabsList>
+                    <TabsTrigger value="request">Request</TabsTrigger>
+                    <TabsTrigger value="response">Response</TabsTrigger>
+                  </TabsList>
+                </CardContent>
 
-              {/* Response Section */}
-              <CardContent className="flex flex-col gap-2">
-                <CardLabel>Response</CardLabel>
-                <div className="p-3 bg-input rounded min-h-40">
-                  <code className="text-sm block">
-                    <pre className="whitespace-pre-wrap">{responseJSON}</pre>
-                  </code>
-                </div>
-              </CardContent>
-            </div>
+                <CardContent>
+                  <TabsContent value="request" className="flex flex-col gap-2">
+                    <div className="p-3 bg-input rounded">
+                      <code className="text-sm block">
+                        <pre className="whitespace-pre-wrap">{requestJSON}</pre>
+                      </code>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="response" className="flex flex-col gap-2">
+                    <div className="p-3 bg-input rounded min-h-40">
+                      <code className="text-sm block">
+                        <pre className="whitespace-pre-wrap">
+                          {responseJSON}
+                        </pre>
+                      </code>
+                    </div>
+                  </TabsContent>
+                </CardContent>
+              </Tabs>
+            </Card>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );
