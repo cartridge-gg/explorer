@@ -16,10 +16,38 @@ export function Editor({
         monaco.editor.defineTheme("cartridge-dark", {
           base: "vs-dark",
           inherit: true,
-          rules: [],
+          rules: [
+            {
+              token: "key",
+              foreground:
+                getComputedStyle(dark).getPropertyValue("--foreground-200"),
+            },
+            {
+              token: "string.key.json",
+              foreground:
+                getComputedStyle(dark).getPropertyValue("--foreground-200"),
+            },
+            {
+              token: "string.value.json",
+              foreground:
+                getComputedStyle(dark).getPropertyValue("--foreground-200"),
+            },
+            {
+              token: "keyword.json",
+              foreground:
+                getComputedStyle(dark).getPropertyValue("--foreground-200"),
+            },
+            {
+              token: "number",
+              foreground:
+                getComputedStyle(dark).getPropertyValue("--foreground-200"),
+            },
+          ],
           colors: {
             "editor.background":
-              getComputedStyle(dark).getPropertyValue("--background-200"),
+              getComputedStyle(dark).getPropertyValue("--spacer-100"),
+            "editor.foreground":
+              getComputedStyle(dark).getPropertyValue("--foreground-200"),
           },
         });
       }
@@ -33,6 +61,14 @@ export function Editor({
     <MonacoEditor
       beforeMount={beforeMount}
       theme={dark ? "cartridge-dark" : "vs-light"}
+      options={{
+        minimap: {
+          enabled: false,
+        },
+        bracketPairColorization: {
+          enabled: false,
+        },
+      }}
       {...props}
     />
   );
