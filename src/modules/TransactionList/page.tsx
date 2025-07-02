@@ -149,7 +149,9 @@ export function TransactionList() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Transactions</BreadcrumbPage>
+            <BreadcrumbPage className="text-foreground-400 text-[12px]/[16px] font-normal">
+              Transactions
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

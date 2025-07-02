@@ -53,7 +53,7 @@ export function Event() {
           <BreadcrumbItem>Events</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>
+            <BreadcrumbPage className="text-foreground-400 text-[12px]/[16px] font-normal">
               {isMobile && eventId ? truncateString(eventId) : eventId}
             </BreadcrumbPage>
           </BreadcrumbItem>

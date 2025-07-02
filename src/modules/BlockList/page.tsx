@@ -128,7 +128,9 @@ export function BlockList() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Blocks</BreadcrumbPage>
+            <BreadcrumbPage className="text-foreground-400 text-[12px]/[16px] font-normal">
+              Blocks
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

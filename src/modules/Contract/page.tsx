@@ -120,7 +120,7 @@ export function Contract() {
           <BreadcrumbItem>Contracts</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>
+            <BreadcrumbPage className="text-foreground-400 text-[12px]/[16px] font-normal">
               {isMobile && contractAddress
                 ? truncateString(contractAddress)
                 : contractAddress}
