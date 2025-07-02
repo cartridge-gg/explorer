@@ -51,7 +51,7 @@ import dayjs from "dayjs";
 import { getFinalityStatus } from "@/shared/utils/receipt";
 import { Badge } from "@/shared/components/badge";
 import { DataTable } from "@/shared/components/data-table";
-import { MultiFilterTransaction } from "@/shared/components/filter";
+import { MultiFilter } from "@/shared/components/filter";
 import { memo, useCallback } from "react";
 import { truncateString } from "@/shared/utils/string";
 import { useScreen } from "@/shared/hooks/useScreen";
@@ -462,7 +462,7 @@ export function Block() {
                     value="transactions"
                     className="flex flex-col gap-2 w-full flex-1"
                   >
-                    <MultiFilterTransaction
+                    <MultiFilter
                       placeholder="Type"
                       value={
                         (txs.getColumn("type")?.getFilterValue() as string[]) ??
