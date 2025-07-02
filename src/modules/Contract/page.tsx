@@ -141,9 +141,9 @@ export function Contract() {
       ) : error ? (
         <NotFound />
       ) : (
-        <div className="flex flex-col sl:flex-row sl:h-[76vh] gap-[3px] sl:w-[1134px]">
+        <div className="flex flex-col gap-[3px] sl:w-[1134px]">
           {/* Contract Info Section */}
-          <div className="sl:w-[468px] flex flex-col gap-[6px] sl:overflow-y-scroll">
+          <div className="flex flex-col gap-[6px]">
             <Card>
               <CardContent>
                 <div className="flex justify-between gap-2">
@@ -190,9 +190,9 @@ export function Contract() {
             </Card>
           </div>
 
-          <Card className="h-full flex-grow grid grid-rows-[min-content_1fr]">
-            <Tabs value={tab.selected} onValueChange={tab.onChange}>
-              <CardContent>
+          <Card className="h-full flex-grow grid grid-rows-[min-content_1fr] mt-[6px]">
+            <CardContent>
+              <Tabs value={tab.selected} onValueChange={tab.onChange}>
                 <TabsList>
                   <TabsTrigger value="read">
                     <BookIcon variant="solid" />
@@ -207,23 +207,23 @@ export function Contract() {
                     <div>Code</div>
                   </TabsTrigger>
                 </TabsList>
-              </CardContent>
-              <CardSeparator />
+                <CardSeparator />
 
-              <CardContent>
-                <TabsContent value="read">
-                  <ContractForm functions={readFuncs} contract={contract} />
-                </TabsContent>
+                <CardContent>
+                  <TabsContent value="read">
+                    <ContractForm functions={readFuncs} contract={contract} />
+                  </TabsContent>
 
-                <TabsContent value="write">
-                  <ContractForm functions={writeFuncs} contract={contract} />
-                </TabsContent>
+                  <TabsContent value="write">
+                    <ContractForm functions={writeFuncs} contract={contract} />
+                  </TabsContent>
 
-                <TabsContent value="code">
-                  <CodeCard abi={code.abi} sierra={code.sierra} />
-                </TabsContent>
-              </CardContent>
-            </Tabs>
+                  <TabsContent value="code">
+                    <CodeCard abi={code.abi} sierra={code.sierra} />
+                  </TabsContent>
+                </CardContent>
+              </Tabs>
+            </CardContent>
           </Card>
         </div>
       )}
