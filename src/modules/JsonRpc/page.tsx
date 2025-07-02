@@ -420,7 +420,7 @@ export function JsonRpcPlayground() {
                 </div>
               </CardContent>
 
-              <div className="flex flex-col p-[15px] gap-[30px] justify-between h-auto">
+              <form className="flex flex-col p-[15px] gap-[30px] justify-between h-auto">
                 <CardContent className="p-0">
                   {/* New custom parameters implementation */}
                   {parametersSection}
@@ -428,6 +428,7 @@ export function JsonRpcPlayground() {
 
                 <Button
                   onClick={onExecute}
+                  type="submit"
                   variant="primary"
                   className="self-end bg-foreground-100 px-[10px] h-[25px] rounded-sm w-full lg:w-fit"
                   isLoading={form[selected?.name ?? ""]?.loading}
@@ -436,7 +437,7 @@ export function JsonRpcPlayground() {
                     Send
                   </span>
                 </Button>
-              </div>
+              </form>
             </Card>
 
             {/* Request and Response Card */}
