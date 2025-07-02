@@ -51,7 +51,9 @@ export function World() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>World</BreadcrumbPage>
+            <BreadcrumbPage className="text-foreground-400 text-[12px]/[16px] font-normal">
+              World
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

@@ -139,7 +139,7 @@ export function Transaction() {
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             {txHash ? (
-              <BreadcrumbPage>
+              <BreadcrumbPage className="text-foreground-400 text-[12px]/[16px] font-normal">
                 {isMobile && txHash ? truncateString(txHash) : txHash}
               </BreadcrumbPage>
             ) : (

@@ -150,7 +150,7 @@ export function ClassHash() {
           <BreadcrumbItem>Class</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>
+            <BreadcrumbPage className="text-foreground-400 text-[12px]/[16px] font-normal">
               {isMobile && classHash ? truncateString(classHash) : classHash}
             </BreadcrumbPage>
           </BreadcrumbItem>

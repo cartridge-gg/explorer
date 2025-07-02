@@ -93,15 +93,13 @@ export function Block() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>
-              {blockId ? (
-                <BreadcrumbPage>
-                  {isMobile && blockId ? truncateString(blockId) : blockId}
-                </BreadcrumbPage>
-              ) : (
-                <Skeleton className="h-4 w-[400px] rounded-sm" />
-              )}
-            </BreadcrumbPage>
+            {blockId ? (
+              <BreadcrumbPage className="text-foreground-400 text-[12px]/[16px] font-normal">
+                {isMobile && blockId ? truncateString(blockId) : blockId}
+              </BreadcrumbPage>
+            ) : (
+              <Skeleton className="h-4 w-[400px] rounded-sm" />
+            )}
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
