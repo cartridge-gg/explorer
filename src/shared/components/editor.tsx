@@ -1,15 +1,16 @@
 import {
   Editor as MonacoEditor,
-  EditorProps,
-  Monaco,
+  type EditorProps,
+  type Monaco,
 } from "@monaco-editor/react";
 import { useCallback } from "react";
 
 export function Editor({
   beforeMount: beforeMountProp,
-  options: optionsProp,
   ...props
 }: EditorProps) {
+  // Extract options from props to prevent complete override
+  const { options: propsOptions, ...otherProps } = props;
   const dark = document.querySelector(".dark");
   const beforeMount = useCallback(
     (monaco: Monaco) => {
@@ -62,20 +63,24 @@ export function Editor({
     [dark, beforeMountProp],
   );
 
+  const defaultOptions = {
+    guides: {
+      indentation: false,
+    },
+    bracketPairColorization: {
+      enabled: false,
+    },
+  };
+
   return (
     <MonacoEditor
       beforeMount={beforeMount}
       theme={dark ? "cartridge-dark" : "vs-light"}
       options={{
-        ...optionsProp,
-        guides: {
-          indentation: false,
-        },
-        bracketPairColorization: {
-          enabled: false,
-        },
+        ...defaultOptions,
+        ...propsOptions,
       }}
-      {...props}
+      {...otherProps}
     />
   );
 }
