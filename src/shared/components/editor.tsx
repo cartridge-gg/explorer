@@ -7,6 +7,7 @@ import { useCallback } from "react";
 
 export function Editor({
   beforeMount: beforeMountProp,
+  options: optionsProp,
   ...props
 }: EditorProps) {
   const dark = document.querySelector(".dark");
@@ -48,6 +49,10 @@ export function Editor({
               getComputedStyle(dark).getPropertyValue("--spacer-100"),
             "editor.foreground":
               getComputedStyle(dark).getPropertyValue("--foreground-200"),
+            "editor.indentGuide.background":
+              getComputedStyle(dark).getPropertyValue("--spacer-100"),
+            "editor.indentGuide.activeBackground":
+              getComputedStyle(dark).getPropertyValue("--spacer-100"),
           },
         });
       }
@@ -62,8 +67,9 @@ export function Editor({
       beforeMount={beforeMount}
       theme={dark ? "cartridge-dark" : "vs-light"}
       options={{
-        minimap: {
-          enabled: false,
+        ...optionsProp,
+        guides: {
+          indentation: false,
         },
         bracketPairColorization: {
           enabled: false,
