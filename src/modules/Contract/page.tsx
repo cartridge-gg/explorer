@@ -12,6 +12,7 @@ import {
   Input,
   Skeleton,
   SearchIcon,
+  Button,
 } from "@cartridge/ui";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { useBalances } from "@/shared/hooks/useBalances";
@@ -20,7 +21,6 @@ import {
   ContractClassInfo,
   isValidAddress,
 } from "@/shared/utils/contract";
-import { CodeCard } from "@/shared/components/contract/Code";
 import { useQuery } from "@tanstack/react-query";
 import { useHashLinkTabs } from "@/shared/hooks/useHashLinkTabs";
 import { Loading } from "@/shared/components/Loading";
@@ -50,13 +50,17 @@ import {
 } from "@/shared/components/breadcrumb";
 import { Hash } from "@/shared/components/hash";
 import { Badge } from "@/shared/components/badge";
-import { FunctionAbiWithAst } from "@/shared/utils/abi";
-import { useEffect, useMemo, useState } from "react";
+import { FunctionAbiWithAst, isReadFunction, toCalldata } from "@/shared/utils/abi";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { useScrollTo } from "@/shared/hooks/useScrollTo";
 import { CopyIcon } from "@cartridge/ui";
 import { MultiFilter } from "@/shared/components/filter";
+import { useAccount } from "@starknet-react/core";
+import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
+import { ParamForm } from "@/shared/components/form";
+import AddIcon from "@/shared/icons/Add";
 
 interface FunctionWithType extends FunctionAbiWithAst {
   functionType: "read" | "write";
@@ -84,7 +88,7 @@ export function Contract() {
   const tab = useHashLinkTabs("interact");
 
   const {
-    data: { classHash, contract, readFuncs, writeFuncs, code },
+    data: { classHash, contract, readFuncs, writeFuncs },
     isLoading,
     error,
   } = useQuery({
@@ -125,6 +129,15 @@ export function Contract() {
 
   const [search, setSearch] = useState("");
   const [functionTypeFilter, setFunctionTypeFilter] = useState<string[]>([]);
+  const [form, setForm] = useState<{
+    [key: string]: {
+      inputs: { value: string }[];
+      result?: any;
+      error?: Error | string;
+      hasCalled: boolean;
+      loading: boolean;
+    };
+  }>({});
 
   const allFunctions = useMemo((): FunctionWithType[] => {
     const functions = [
@@ -193,6 +206,107 @@ export function Contract() {
       }
     }
   });
+
+  const { account } = useAccount();
+  const { addCall } = useCallCartDispatch();
+
+  const onUpdate = useCallback(
+    (name: string, value: Partial<(typeof form)[string]>) => {
+      setForm((prev) => ({
+        ...prev,
+        [name]: {
+          ...(prev[name] || { inputs: [], hasCalled: false, loading: false }),
+          ...value,
+        },
+      }));
+    },
+    [],
+  );
+
+  const onCallOrExecute = useCallback(async (f: FunctionWithType) => {
+    if (!contract || (!isReadFunction(f) && !account)) {
+      onUpdate(f.name, {
+        error: "Please connect your wallet first",
+        result: undefined,
+        hasCalled: true,
+      });
+      return;
+    }
+
+    onUpdate(f.name, { loading: true });
+
+    try {
+      const currentForm = form[f.name] || { inputs: [] };
+      const calldata = currentForm.inputs.flatMap((input, idx) => {
+        let value;
+        try {
+          value = JSON.parse(input.value);
+        } catch {
+          value = input.value;
+        }
+        return toCalldata(f.inputs[idx].type, value);
+      });
+
+      if (isReadFunction(f)) {
+        const result = await contract.call(f.name, calldata, {
+          parseRequest: false,
+          parseResponse: false,
+        });
+        onUpdate(f.name, { result: result, error: undefined });
+      } else {
+        const result = await account!.execute([
+          {
+            calldata: calldata,
+            entrypoint: f.name,
+            contractAddress: contract.address,
+          },
+        ]);
+        onUpdate(f.name, { result: result, error: undefined });
+      }
+    } catch (error) {
+      console.error("failed to call contract", error);
+      onUpdate(f.name, { error: error as Error, result: undefined });
+    } finally {
+      onUpdate(f.name, { hasCalled: true, loading: false });
+    }
+  }, [contract, account, form, onUpdate]);
+
+  const onAddToCart = useCallback((f: FunctionWithType) => {
+    if (!contract || isReadFunction(f) || !account) {
+      return;
+    }
+
+    const currentForm = form[f.name] || { inputs: [] };
+    const calldata = currentForm.inputs.flatMap((input, idx) => {
+      let value;
+      try {
+        value = JSON.parse(input.value);
+      } catch {
+        value = input.value;
+      }
+      return toCalldata(f.inputs[idx].type, value);
+    });
+
+    addCall({
+      calldata: calldata,
+      entrypoint: f.name,
+      contractAddress: contract.address,
+    });
+    toast.success(`Function call added: ${f.name}`);
+  }, [contract, form, addCall, account]);
+
+  const onChange = useCallback(
+    (f: FunctionWithType, inputIndex: number, value: string) => {
+      const currentForm = form[f.name] || { inputs: [] };
+      const newInputs = [...currentForm.inputs];
+      newInputs[inputIndex] = {
+        ...newInputs[inputIndex],
+        value,
+      };
+      onUpdate(f.name, { inputs: newInputs });
+    },
+    [form, onUpdate],
+  );
 
   return (
     <div className="w-full flex flex-col gap-[3px] sl:w-[1134px]">
@@ -275,7 +389,7 @@ export function Contract() {
             </Card>
           </div>
 
-          <Card className="h-full flex-grow grid grid-rows-[min-content_1fr] mt-[6px]">
+          <Card className="h-[640px] flex-grow grid grid-rows-[min-content_1fr] mt-[6px]">
             <CardContent>
               <Tabs value={tab.selected} onValueChange={tab.onChange}>
                 <TabsList>
@@ -283,16 +397,12 @@ export function Contract() {
                     <BookIcon variant="solid" />
                     <div>Interact</div>
                   </TabsTrigger>
-                  <TabsTrigger value="code">
-                    <CodeIcon variant="solid" />
-                    <div>Code</div>
-                  </TabsTrigger>
                 </TabsList>
                 <CardSeparator />
 
-                <CardContent>
-                  <TabsContent value="interact" className="h-[640px]">
-                    <div className="flex flex-col gap-2 w-full flex-1">
+                <CardContent className="h-full max-h-[640px] overflow-y-auto">
+                  <TabsContent value="interact" className="h-full">
+                    <div className="flex flex-col gap-2 w-full h-full">
                       <MultiFilter
                         placeholder="Type"
                         value={functionTypeFilter}
@@ -304,8 +414,8 @@ export function Contract() {
                           { key: "write", value: "Write" },
                         ]}
                       />
-                      <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] divide-y md:divide-y-0 md:divide-x divide-background-300 h-full">
-                        <div className="flex flex-col justify-start gap-[15px] p-[15px] h-full">
+                      <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] divide-y md:divide-y-0 md:divide-x divide-background-300 h-full flex-1 overflow-hidden">
+                        <div className="flex flex-col justify-start gap-[15px] p-[15px] h-full overflow-y-auto">
                           <div className="relative">
                             <Input
                               value={search}
@@ -367,7 +477,7 @@ export function Contract() {
                           </div>
                         </div>
 
-                        <div className="w-full h-full flex flex-col justify-start gap-2">
+                        <div className="w-full h-full flex flex-col justify-start gap-2 overflow-y-auto">
                           <div className="flex flex-col divide-y divide-background-300 h-full">
                             <div className="py-[10px] px-[15px] flex flex-col gap-[10px]">
                               {!!selected?.interface && (
@@ -434,21 +544,73 @@ export function Contract() {
 
                             <div className="flex-1 p-[15px] space-y-[10px]">
                               {selected?.inputs.length ? (
-                                selected?.inputs.map((input) => (
-                                  <div
-                                    key={input.name}
-                                    className="flex flex-col gap-[6px]"
-                                  >
-                                    <CardLabel className="lowercase">
-                                      {input.name}
-                                    </CardLabel>
-                                    <Input
-                                      value={input.type.name}
-                                      disabled
-                                      className="bg-input focus-visible:bg-input border-none disabled:bg-input px-[10px] py-[7px]"
-                                    />
+                                <div className="space-y-[10px]">
+                                  <ParamForm
+                                    params={selected.inputs.map((input, i) => ({
+                                      ...input,
+                                      id: `${selected.name}-${input.name}`,
+                                      value: (form[selected.name]?.inputs[i]?.value ?? 
+                                        (input.type.type === "struct" ? "{\n\t\n}" :
+                                         input.type.type === "array" ? "[\n\t\n]" : "")),
+                                    }))}
+                                    onChange={(i, value) => onChange(selected, i, value)}
+                                    disabled={!contract || (!isReadFunction(selected) && !account)}
+                                  />
+                                  
+                                  <div className="flex flex-col gap-[10px] items-end">
+                                    {!!contract && selected &&
+                                      (isReadFunction(selected) ? (
+                                        <Button
+                                          variant="secondary"
+                                          isLoading={form[selected.name]?.loading}
+                                          onClick={() => onCallOrExecute(selected)}
+                                        >
+                                          call
+                                        </Button>
+                                      ) : (
+                                        <div className="flex gap-2">
+                                          <Button
+                                            variant="secondary"
+                                            size="icon"
+                                            onClick={() => onAddToCart(selected)}
+                                            disabled={!account}
+                                          >
+                                            <AddIcon />
+                                          </Button>
+
+                                          <Button
+                                            variant="secondary"
+                                            disabled={!account || form[selected.name]?.loading}
+                                            onClick={() => onCallOrExecute(selected)}
+                                          >
+                                            {form[selected.name]?.loading ? "Executing..." : "Execute"}
+                                          </Button>
+                                        </div>
+                                      ))}
+
+                                    {selected && form[selected.name]?.hasCalled && (
+                                      <div className="w-full flex flex-col gap-1">
+                                        <p className="font-bold text-sm uppercase">Result</p>
+                                        <div className="bg-white">
+                                          {form[selected.name]?.loading ? (
+                                            <div className="text-gray-600">Loading...</div>
+                                          ) : form[selected.name]?.error ? (
+                                            <div className="text-red-500 p-3 bg-red-50 border border-red-200">
+                                              <p className="font-medium">Error:</p>
+                                              <p className="text-sm">{form[selected.name]?.error.toString()}</p>
+                                            </div>
+                                          ) : form[selected.name]?.result ? (
+                                            <div className="px-3 py-2 border border-borderGray">
+                                              <pre className="text-sm overflow-x-auto">
+                                                {JSON.stringify(form[selected.name]?.result, null, 2)}
+                                              </pre>
+                                            </div>
+                                          ) : null}
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
-                                ))
+                                </div>
                               ) : (
                                 <div className="h-full flex items-center justify-center text-foreground-300">
                                   No inputs
@@ -459,10 +621,6 @@ export function Contract() {
                         </div>
                       </div>
                     </div>
-                  </TabsContent>
-
-                  <TabsContent value="code">
-                    <CodeCard abi={code.abi} sierra={code.sierra} />
                   </TabsContent>
                 </CardContent>
               </Tabs>

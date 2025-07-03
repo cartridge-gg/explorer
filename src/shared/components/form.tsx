@@ -5,6 +5,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  Badge,
 } from "@cartridge/ui";
 import { Monaco } from "@monaco-editor/react";
 import { InfoIcon } from "lucide-react";
@@ -37,68 +38,70 @@ export function ParamForm({
   if (params.length === 0) return null;
 
   return (
-    <table className="w-full overflow-x-auto max-h-[200px]">
-      <tbody>
-        {params.map((p, i) => (
-          <tr key={i} className={"group"}>
-            <td className="px-2 py-1 text-left align-top w-[90px] italic">
-              <div className="flex items-center gap-2">
-                <span>{p.name}</span>
-                {(p.description || p.summary) && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <InfoIcon className="size-3" />
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="right"
-                        className="bg-[#F3F3F3] p-2 max-w-[300px]"
-                      >
-                        <div>{p.description ?? p.summary}</div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
-            </td>
-
-            <td className="text-left align-top p-0">
-              {isPrimitive(p.schema) ? (
-                <Input
-                  type="text"
-                  className={cn(
-                    "px-2 py-1 text-left w-full rounded-none group-first:rounded-t group-last:rounded-b",
-                    disabled && "cursor-not-allowed",
-                  )}
-                  value={p.value}
-                  onChange={(e) => onChange(i, e.target.value)}
-                  disabled={disabled}
-                  onKeyDown={(e) => {
-                    switch (e.key) {
-                      case "Enter":
-                        onSubmit?.(i, p.value);
-                        break;
-                    }
-                  }}
-                  placeholder={p.type?.name}
-                />
-              ) : (
-                <ParamEditor
-                  id={p.id}
-                  name={p.name}
-                  schema={p.schema}
-                  className="group-first:rounded-t group-last:rounded-b"
-                  value={p.value}
-                  onChange={(value) => onChange(i, value ?? "")}
-                  onSubmit={(value) => onSubmit?.(i, value ?? "")}
-                  readOnly={disabled}
-                />
+    <div className="flex flex-col gap-[10px] w-full">
+      {params.map((p, i) => (
+        <div key={i} className="flex flex-col gap-[10px]">
+          <div className="flex items-center gap-[7px]">
+            <span className="text-[12px]/[16px] font-semibold text-foreground-400">
+              {p.name}
+            </span>
+            {p.type?.name && (
+              <Badge className="px-[7px] py-[2px] rounded-sm">
+                <span className="text-[10px] text-foreground-200">
+                  {p.type.name}
+                </span>
+              </Badge>
+            )}
+            {(p.description || p.summary) && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <InfoIcon className="size-3" />
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    className="bg-[#F3F3F3] p-2 max-w-[300px]"
+                  >
+                    <div>{p.description ?? p.summary}</div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
+          {isPrimitive(p.schema) ? (
+            <Input
+              type="text"
+              className={cn(
+                "bg-input focus-visible:bg-input caret-foreground placeholder:text-[#262A27] px-[10px] py-[7px] border-none",
+                disabled && "cursor-not-allowed",
               )}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+              value={p.value}
+              onChange={(e) => onChange(i, e.target.value)}
+              disabled={disabled}
+              onKeyDown={(e) => {
+                switch (e.key) {
+                  case "Enter":
+                    onSubmit?.(i, p.value);
+                    break;
+                }
+              }}
+              placeholder=""
+            />
+          ) : (
+            <ParamEditor
+              id={p.id}
+              name={p.name}
+              schema={p.schema}
+              className="rounded-sm"
+              value={p.value}
+              onChange={(value) => onChange(i, value ?? "")}
+              onSubmit={(value) => onSubmit?.(i, value ?? "")}
+              readOnly={disabled}
+            />
+          )}
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -172,6 +175,9 @@ function ParamEditor({
           selectOnLineNumbers: true,
           snippetSuggestions: "inline",
           suggestOnTriggerCharacters: true,
+          minimap: {
+            enabled: false,
+          },
           scrollbar: {
             arrowSize: 10,
             useShadows: false,
