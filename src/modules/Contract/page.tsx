@@ -6,7 +6,6 @@ import { Contract as StarknetContract } from "starknet";
 import {
   BookIcon,
   CoinsIcon,
-  CodeIcon,
   ScrollIcon,
   cn,
   Input,
@@ -50,7 +49,11 @@ import {
 } from "@/shared/components/breadcrumb";
 import { Hash } from "@/shared/components/hash";
 import { Badge } from "@/shared/components/badge";
-import { FunctionAbiWithAst, isReadFunction, toCalldata } from "@/shared/utils/abi";
+import {
+  FunctionAbiWithAst,
+  isReadFunction,
+  toCalldata,
+} from "@/shared/utils/abi";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
@@ -223,19 +226,63 @@ export function Contract() {
     [],
   );
 
-  const onCallOrExecute = useCallback(async (f: FunctionWithType) => {
-    if (!contract || (!isReadFunction(f) && !account)) {
-      onUpdate(f.name, {
-        error: "Please connect your wallet first",
-        result: undefined,
-        hasCalled: true,
-      });
-      return;
-    }
+  const onCallOrExecute = useCallback(
+    async (f: FunctionWithType) => {
+      if (!contract || (!isReadFunction(f) && !account)) {
+        onUpdate(f.name, {
+          error: "Please connect your wallet first",
+          result: undefined,
+          hasCalled: true,
+        });
+        return;
+      }
 
-    onUpdate(f.name, { loading: true });
+      onUpdate(f.name, { loading: true });
 
-    try {
+      try {
+        const currentForm = form[f.name] || { inputs: [] };
+        const calldata = currentForm.inputs.flatMap((input, idx) => {
+          let value;
+          try {
+            value = JSON.parse(input.value);
+          } catch {
+            value = input.value;
+          }
+          return toCalldata(f.inputs[idx].type, value);
+        });
+
+        if (isReadFunction(f)) {
+          const result = await contract.call(f.name, calldata, {
+            parseRequest: false,
+            parseResponse: false,
+          });
+          onUpdate(f.name, { result: result, error: undefined });
+        } else {
+          const result = await account!.execute([
+            {
+              calldata: calldata,
+              entrypoint: f.name,
+              contractAddress: contract.address,
+            },
+          ]);
+          onUpdate(f.name, { result: result, error: undefined });
+        }
+      } catch (error) {
+        console.error("failed to call contract", error);
+        onUpdate(f.name, { error: error as Error, result: undefined });
+      } finally {
+        onUpdate(f.name, { hasCalled: true, loading: false });
+      }
+    },
+    [contract, account, form, onUpdate],
+  );
+
+  const onAddToCart = useCallback(
+    (f: FunctionWithType) => {
+      if (!contract || isReadFunction(f) || !account) {
+        return;
+      }
+
       const currentForm = form[f.name] || { inputs: [] };
       const calldata = currentForm.inputs.flatMap((input, idx) => {
         let value;
@@ -247,53 +294,15 @@ export function Contract() {
         return toCalldata(f.inputs[idx].type, value);
       });
 
-      if (isReadFunction(f)) {
-        const result = await contract.call(f.name, calldata, {
-          parseRequest: false,
-          parseResponse: false,
-        });
-        onUpdate(f.name, { result: result, error: undefined });
-      } else {
-        const result = await account!.execute([
-          {
-            calldata: calldata,
-            entrypoint: f.name,
-            contractAddress: contract.address,
-          },
-        ]);
-        onUpdate(f.name, { result: result, error: undefined });
-      }
-    } catch (error) {
-      console.error("failed to call contract", error);
-      onUpdate(f.name, { error: error as Error, result: undefined });
-    } finally {
-      onUpdate(f.name, { hasCalled: true, loading: false });
-    }
-  }, [contract, account, form, onUpdate]);
-
-  const onAddToCart = useCallback((f: FunctionWithType) => {
-    if (!contract || isReadFunction(f) || !account) {
-      return;
-    }
-
-    const currentForm = form[f.name] || { inputs: [] };
-    const calldata = currentForm.inputs.flatMap((input, idx) => {
-      let value;
-      try {
-        value = JSON.parse(input.value);
-      } catch {
-        value = input.value;
-      }
-      return toCalldata(f.inputs[idx].type, value);
-    });
-
-    addCall({
-      calldata: calldata,
-      entrypoint: f.name,
-      contractAddress: contract.address,
-    });
-    toast.success(`Function call added: ${f.name}`);
-  }, [contract, form, addCall, account]);
+      addCall({
+        calldata: calldata,
+        entrypoint: f.name,
+        contractAddress: contract.address,
+      });
+      toast.success(`Function call added: ${f.name}`);
+    },
+    [contract, form, addCall, account],
+  );
 
   const onChange = useCallback(
     (f: FunctionWithType, inputIndex: number, value: string) => {
@@ -340,7 +349,7 @@ export function Contract() {
       ) : error ? (
         <NotFound />
       ) : (
-        <div className="flex flex-col gap-[3px] sl:w-[1134px]">
+        <div className="flex flex-col gap-[20px] sm:gap-[40px] sl:w-[1134px]">
           {/* Contract Info Section */}
           <div className="flex flex-col gap-[6px]">
             <Card>
@@ -389,8 +398,8 @@ export function Contract() {
             </Card>
           </div>
 
-          <Card className="h-[640px] flex-grow grid grid-rows-[min-content_1fr] mt-[6px]">
-            <CardContent>
+          <Card className="h-[640px] flex-grow grid grid-rows-[min-content_1fr] mt-[6px] rounded-[12px] p-0 mb-[20px]">
+            <CardContent className="p-0 pt-[3px]">
               <Tabs value={tab.selected} onValueChange={tab.onChange}>
                 <TabsList>
                   <TabsTrigger value="interact">
@@ -398,225 +407,260 @@ export function Contract() {
                     <div>Interact</div>
                   </TabsTrigger>
                 </TabsList>
-                <CardSeparator />
+                <CardSeparator className="my-0 relative left-[-15px] w-[calc(100%+30px)]" />
 
-                <CardContent className="h-full max-h-[640px] overflow-y-auto">
-                  <TabsContent value="interact" className="h-full">
-                    <div className="flex flex-col gap-2 w-full h-full">
-                      <MultiFilter
-                        placeholder="Type"
-                        value={functionTypeFilter}
-                        onValueChange={(values) => {
-                          setFunctionTypeFilter(values);
-                        }}
-                        items={[
-                          { key: "read", value: "Read" },
-                          { key: "write", value: "Write" },
-                        ]}
-                      />
-                      <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] divide-y md:divide-y-0 md:divide-x divide-background-300 h-full flex-1 overflow-hidden">
-                        <div className="flex flex-col justify-start gap-[15px] p-[15px] h-full overflow-y-auto">
-                          <div className="relative">
-                            <Input
-                              value={search}
-                              onChange={(e) => setSearch(e.target.value)}
-                              placeholder="Function name / selector / interface"
-                              className="bg-input focus-visible:bg-input caret-foreground placeholder:text-[#262A27] px-[10px] py-[7px] focus-visible:border-background-400"
-                            />
-                            <SearchIcon
-                              className={cn(
-                                "absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none",
-                                search
-                                  ? "text-foreground"
-                                  : "text-foreground-400",
-                              )}
-                            />
-                          </div>
-                          <div
-                            ref={scrollContainerRef}
-                            className="flex flex-col gap-2 overflow-y-auto flex-1"
-                          >
-                            <CardLabel>Functions</CardLabel>
-                            <div className="flex flex-col gap-1">
-                              {filtered.length ? (
-                                filtered.map((f) => (
-                                  <div
-                                    key={f.name}
-                                    ref={(el) => setItemRef(f, el)}
-                                    className={cn(
-                                      "flex items-center justify-between gap-2 rounded-md px-[8px] border transition-all h-[35px]",
-                                      selected?.name === f.name
-                                        ? "border-primary"
-                                        : "border-transparent hover:border-background-300 cursor-pointer ",
-                                    )}
-                                    onClick={() => setSelected(f)}
-                                  >
-                                    <p className="text-[13px]/[16px] font-semibold tracking-[0.26px] truncate">
-                                      {f.name}
-                                    </p>
-                                    <Badge className="px-[8px] py-[2px]">
-                                      <span className="text-[12px]/[16px] font-medium">
-                                        {f.functionType === "read"
-                                          ? "Read"
-                                          : "Write"}
-                                      </span>
-                                    </Badge>
-                                  </div>
-                                ))
-                              ) : (
-                                <>
-                                  {Array.from({ length: 9 }).map((_, i) => (
-                                    <Skeleton
-                                      key={i}
-                                      className="rounded-sm h-11 w-full"
-                                    />
-                                  ))}
-                                </>
-                              )}
-                            </div>
+                <CardContent className="h-full max-h-[640px] overflow-y-auto p-0">
+                  <TabsContent
+                    value="interact"
+                    className="h-full data-[state=active]:mt-0"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] divide-y md:divide-y-0 md:divide-x divide-background-300 h-full flex-1 overflow-hidden">
+                      <div className="flex flex-col justify-start gap-[15px] p-[15px] h-full overflow-y-auto">
+                        <MultiFilter
+                          placeholder="Mutability"
+                          value={functionTypeFilter}
+                          onValueChange={(values) => {
+                            setFunctionTypeFilter(values);
+                          }}
+                          items={[
+                            { key: "read", value: "Read" },
+                            { key: "write", value: "Write" },
+                          ]}
+                        />
+                        <div className="relative">
+                          <Input
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Function name / selector / interface"
+                            className="bg-input focus-visible:bg-input caret-foreground placeholder:text-[#262A27] px-[10px] py-[7px] focus-visible:border-background-400"
+                          />
+                          <SearchIcon
+                            className={cn(
+                              "absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none",
+                              search
+                                ? "text-foreground"
+                                : "text-foreground-400",
+                            )}
+                          />
+                        </div>
+                        <div
+                          ref={scrollContainerRef}
+                          className="flex flex-col gap-2 overflow-y-auto flex-1"
+                        >
+                          <CardLabel>Functions</CardLabel>
+                          <div className="flex flex-col gap-1">
+                            {filtered.length ? (
+                              filtered.map((f) => (
+                                <div
+                                  key={f.name}
+                                  ref={(el) => setItemRef(f, el)}
+                                  className={cn(
+                                    "flex items-center justify-between gap-2 rounded-md px-[8px] border transition-all h-[35px]",
+                                    selected?.name === f.name
+                                      ? "border-primary"
+                                      : "border-transparent hover:border-background-300 cursor-pointer ",
+                                  )}
+                                  onClick={() => setSelected(f)}
+                                >
+                                  <p className="text-[13px]/[16px] font-semibold tracking-[0.26px] truncate">
+                                    {f.name}
+                                  </p>
+                                  <Badge className="px-[8px] py-[2px]">
+                                    <span className="text-[12px]/[16px] font-medium">
+                                      {f.functionType === "read"
+                                        ? "Read"
+                                        : "Write"}
+                                    </span>
+                                  </Badge>
+                                </div>
+                              ))
+                            ) : (
+                              <>
+                                {Array.from({ length: 9 }).map((_, i) => (
+                                  <Skeleton
+                                    key={i}
+                                    className="rounded-sm h-11 w-full"
+                                  />
+                                ))}
+                              </>
+                            )}
                           </div>
                         </div>
+                      </div>
 
-                        <div className="w-full h-full flex flex-col justify-start gap-2 overflow-y-auto">
-                          <div className="flex flex-col divide-y divide-background-300 h-full">
-                            <div className="py-[10px] px-[15px] flex flex-col gap-[10px]">
-                              {!!selected?.interface && (
-                                <div className="flex items-center justify-between gap-2">
-                                  <CardLabel className="text-[13px]/[16px] font-normal">
-                                    interface
-                                  </CardLabel>
-                                  <div
-                                    onClick={() => {
-                                      navigator.clipboard.writeText(
-                                        selected?.interface ?? "",
-                                      );
-                                      toast.success(
-                                        "Interface name is copied to clipboard",
-                                      );
-                                    }}
-                                    className="flex items-center gap-2 cursor-pointer overflow-x-auto group"
-                                  >
-                                    <p className="text-[13px]/[16px] font-semibold text-foreground group-hover:text-foreground-200">
-                                      {selected?.interface}
-                                    </p>
-                                    <CopyIcon
-                                      size="sm"
-                                      className="text-foreground-400"
-                                    />
-                                  </div>
-                                </div>
-                              )}
+                      <div className="w-full h-full flex flex-col justify-start gap-2 overflow-y-auto">
+                        <div className="flex flex-col divide-y divide-background-300 h-full">
+                          <div className="py-[10px] px-[15px] flex flex-col gap-[10px]">
+                            {!!selected?.interface && (
                               <div className="flex items-center justify-between gap-2">
                                 <CardLabel className="text-[13px]/[16px] font-normal">
-                                  function
+                                  interface
                                 </CardLabel>
-                                {selected ? (
-                                  <div
-                                    onClick={() => {
-                                      navigator.clipboard.writeText(
-                                        selected?.name ?? "",
-                                      );
-                                      toast.success(
-                                        "Function name is copied to clipboard",
-                                      );
-                                    }}
-                                    className="flex items-center gap-2 cursor-pointer overflow-x-auto group"
-                                  >
-                                    <p className="text-[13px]/[16px] font-semibold text-foreground group-hover:text-foreground-200">
-                                      {selected?.name}
-                                    </p>
-                                    <CopyIcon
-                                      size="sm"
-                                      className="text-foreground-400"
-                                    />
-                                  </div>
-                                ) : (
-                                  <Skeleton className="rounded-sm h-6 w-40" />
-                                )}
-                              </div>
-                              <div className="flex items-center justify-between gap-2">
-                                <CardLabel className="text-[13px]/[16px] font-normal">
-                                  selector
-                                </CardLabel>
-                                <Hash value={selected?.selector} />
-                              </div>
-                            </div>
-
-                            <div className="flex-1 p-[15px] space-y-[10px]">
-                              {selected?.inputs.length ? (
-                                <div className="space-y-[10px]">
-                                  <ParamForm
-                                    params={selected.inputs.map((input, i) => ({
-                                      ...input,
-                                      id: `${selected.name}-${input.name}`,
-                                      value: (form[selected.name]?.inputs[i]?.value ?? 
-                                        (input.type.type === "struct" ? "{\n\t\n}" :
-                                         input.type.type === "array" ? "[\n\t\n]" : "")),
-                                    }))}
-                                    onChange={(i, value) => onChange(selected, i, value)}
-                                    disabled={!contract || (!isReadFunction(selected) && !account)}
+                                <div
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(
+                                      selected?.interface ?? "",
+                                    );
+                                    toast.success(
+                                      "Interface name is copied to clipboard",
+                                    );
+                                  }}
+                                  className="flex items-center gap-2 cursor-pointer overflow-x-auto group"
+                                >
+                                  <p className="text-[13px]/[16px] font-semibold text-foreground group-hover:text-foreground-200">
+                                    {selected?.interface}
+                                  </p>
+                                  <CopyIcon
+                                    size="sm"
+                                    className="text-foreground-400"
                                   />
-                                  
-                                  <div className="flex flex-col gap-[10px] items-end">
-                                    {!!contract && selected &&
-                                      (isReadFunction(selected) ? (
+                                </div>
+                              </div>
+                            )}
+                            <div className="flex items-center justify-between gap-2">
+                              <CardLabel className="text-[13px]/[16px] font-normal">
+                                function
+                              </CardLabel>
+                              {selected ? (
+                                <div
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(
+                                      selected?.name ?? "",
+                                    );
+                                    toast.success(
+                                      "Function name is copied to clipboard",
+                                    );
+                                  }}
+                                  className="flex items-center gap-2 cursor-pointer overflow-x-auto group"
+                                >
+                                  <p className="text-[13px]/[16px] font-semibold text-foreground group-hover:text-foreground-200">
+                                    {selected?.name}
+                                  </p>
+                                  <CopyIcon
+                                    size="sm"
+                                    className="text-foreground-400"
+                                  />
+                                </div>
+                              ) : (
+                                <Skeleton className="rounded-sm h-6 w-40" />
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              <CardLabel className="text-[13px]/[16px] font-normal">
+                                selector
+                              </CardLabel>
+                              <Hash value={selected?.selector} />
+                            </div>
+                          </div>
+
+                          <div className="flex-1 p-[15px] space-y-[10px]">
+                            {selected?.inputs.length ? (
+                              <div className="space-y-[10px]">
+                                <ParamForm
+                                  params={selected.inputs.map((input, i) => ({
+                                    ...input,
+                                    id: `${selected.name}-${input.name}`,
+                                    value:
+                                      form[selected.name]?.inputs[i]?.value ??
+                                      (input.type.type === "struct"
+                                        ? "{\n\t\n}"
+                                        : input.type.type === "array"
+                                          ? "[\n\t\n]"
+                                          : ""),
+                                  }))}
+                                  onChange={(i, value) =>
+                                    onChange(selected, i, value)
+                                  }
+                                  disabled={
+                                    !contract ||
+                                    (!isReadFunction(selected) && !account)
+                                  }
+                                />
+
+                                <div className="flex flex-col gap-[10px] items-end">
+                                  {!!contract &&
+                                    selected &&
+                                    (isReadFunction(selected) ? (
+                                      <Button
+                                        variant="secondary"
+                                        isLoading={form[selected.name]?.loading}
+                                        onClick={() =>
+                                          onCallOrExecute(selected)
+                                        }
+                                      >
+                                        call
+                                      </Button>
+                                    ) : (
+                                      <div className="flex gap-2">
                                         <Button
                                           variant="secondary"
-                                          isLoading={form[selected.name]?.loading}
-                                          onClick={() => onCallOrExecute(selected)}
+                                          size="icon"
+                                          onClick={() => onAddToCart(selected)}
+                                          disabled={!account}
                                         >
-                                          call
+                                          <AddIcon />
                                         </Button>
-                                      ) : (
-                                        <div className="flex gap-2">
-                                          <Button
-                                            variant="secondary"
-                                            size="icon"
-                                            onClick={() => onAddToCart(selected)}
-                                            disabled={!account}
-                                          >
-                                            <AddIcon />
-                                          </Button>
 
-                                          <Button
-                                            variant="secondary"
-                                            disabled={!account || form[selected.name]?.loading}
-                                            onClick={() => onCallOrExecute(selected)}
-                                          >
-                                            {form[selected.name]?.loading ? "Executing..." : "Execute"}
-                                          </Button>
-                                        </div>
-                                      ))}
+                                        <Button
+                                          variant="secondary"
+                                          disabled={
+                                            !account ||
+                                            form[selected.name]?.loading
+                                          }
+                                          onClick={() =>
+                                            onCallOrExecute(selected)
+                                          }
+                                        >
+                                          {form[selected.name]?.loading
+                                            ? "Executing..."
+                                            : "Execute"}
+                                        </Button>
+                                      </div>
+                                    ))}
 
-                                    {selected && form[selected.name]?.hasCalled && (
+                                  {selected &&
+                                    form[selected.name]?.hasCalled && (
                                       <div className="w-full flex flex-col gap-1">
-                                        <p className="font-bold text-sm uppercase">Result</p>
+                                        <p className="font-bold text-sm uppercase">
+                                          Result
+                                        </p>
                                         <div className="bg-white">
                                           {form[selected.name]?.loading ? (
-                                            <div className="text-gray-600">Loading...</div>
+                                            <div className="text-gray-600">
+                                              Loading...
+                                            </div>
                                           ) : form[selected.name]?.error ? (
                                             <div className="text-red-500 p-3 bg-red-50 border border-red-200">
-                                              <p className="font-medium">Error:</p>
-                                              <p className="text-sm">{form[selected.name]?.error.toString()}</p>
+                                              <p className="font-medium">
+                                                Error:
+                                              </p>
+                                              <p className="text-sm">
+                                                {form[
+                                                  selected.name
+                                                ]?.error.toString()}
+                                              </p>
                                             </div>
                                           ) : form[selected.name]?.result ? (
                                             <div className="px-3 py-2 border border-borderGray">
                                               <pre className="text-sm overflow-x-auto">
-                                                {JSON.stringify(form[selected.name]?.result, null, 2)}
+                                                {JSON.stringify(
+                                                  form[selected.name]?.result,
+                                                  null,
+                                                  2,
+                                                )}
                                               </pre>
                                             </div>
                                           ) : null}
                                         </div>
                                       </div>
                                     )}
-                                  </div>
                                 </div>
-                              ) : (
-                                <div className="h-full flex items-center justify-center text-foreground-300">
-                                  No inputs
-                                </div>
-                              )}
-                            </div>
+                              </div>
+                            ) : (
+                              <div className="h-full flex items-center justify-center text-foreground-300">
+                                No inputs
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
