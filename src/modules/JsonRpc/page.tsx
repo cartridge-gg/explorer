@@ -356,7 +356,7 @@ export function JsonRpcPlayground() {
             {/* Desktop List */}
             <CardContent
               ref={scrollContainerRef}
-              className="overflow-y-auto max-h-[200px] lg:max-h-[calc(100vh-200px)] px-0 space-y-[3px]"
+              className="overflow-y-auto max-h-[200px] lg:max-h-[calc(100vh-200px)] px-0 space-y-[3px] select-none"
             >
               {methods?.length > 0 ? (
                 methods.map((method) => (

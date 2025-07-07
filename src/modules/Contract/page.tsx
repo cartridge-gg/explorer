@@ -757,7 +757,7 @@ export function Contract() {
                           </div>
                           <div
                             ref={scrollContainerRef}
-                            className="flex flex-col min-h-0 gap-[8px]"
+                            className="flex flex-col min-h-0 gap-[8px] select-none"
                           >
                             <CardLabel>Functions</CardLabel>
                             <div className="flex flex-col gap-1">
