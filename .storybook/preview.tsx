@@ -30,6 +30,20 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    layout: "fullscreen",
+    preset: "cartridge",
+    colorMode: "dark",
+    backgrounds: {
+      initialGlobals: {
+        backgrounds: { value: "dark" },
+      },
+      options: {
+        dark: {
+          name: "dark",
+          value: "#161a17", // background-100
+        },
+      },
+    },
   },
   decorators: [providerDecorator],
 };
