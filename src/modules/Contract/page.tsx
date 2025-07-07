@@ -312,7 +312,7 @@ export function Contract() {
       const currentForm = form[f.name] || { inputs: [] };
       const newInputs = [...currentForm.inputs];
       newInputs[inputIndex] = {
-        ...newInputs[inputIndex],
+        ...(newInputs[inputIndex] || {}),
         value,
       };
       onUpdate(f.name, { inputs: newInputs });
