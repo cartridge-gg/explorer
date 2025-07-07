@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { BoltIcon, cn, Skeleton } from "@cartridge/ui";
+import { cn, Skeleton } from "@cartridge/ui";
 import { formatNumber } from "../utils/number";
 import { formatSnakeCaseToDisplayValue } from "../utils/string";
 

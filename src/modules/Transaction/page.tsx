@@ -186,8 +186,9 @@ export function Transaction() {
       ) : (
         <div className="flex flex-col gap-[20px] lg:gap-[40px] pb-8">
           <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-[3px]">
+            {/* sidebar */}
             <div className="sl:min-w-[337px] flex flex-col gap-[3px] sl:overflow-y-scroll">
-              <Card className="rounded-sm p-0">
+              <Card className="rounded-sm p-0 sl:min-w-[337px] flex flex-col gap-[3px] sl:overflow-y-scroll">
                 <CardContent className="flex-row justify-between">
                   <div className="flex flex-col gap-[6px]">
                     <CardLabel>Status</CardLabel>
