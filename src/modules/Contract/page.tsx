@@ -62,7 +62,6 @@ import { MultiFilter } from "@/shared/components/filter";
 import { useAccount } from "@starknet-react/core";
 import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
 import { ParamForm } from "@/shared/components/form";
-import AddIcon from "@/shared/icons/Add";
 
 interface FunctionWithType extends FunctionAbiWithAst {
   functionType: "read" | "write";
@@ -90,7 +89,7 @@ export function Contract() {
   const tab = useHashLinkTabs("interact");
 
   const {
-    data: { classHash, contract, readFuncs, writeFuncs },
+    data: { classHash, contract, readFuncs, writeFuncs, nonce },
     isLoading,
     error,
   } = useQuery({
@@ -100,9 +99,10 @@ export function Contract() {
         throw new Error("Invalid contract address");
       }
 
-      const [classHash, contractClass] = await Promise.all([
+      const [classHash, contractClass, nonce] = await Promise.all([
         RPC_PROVIDER.getClassHashAt(contractAddress),
         RPC_PROVIDER.getClassAt(contractAddress),
+        RPC_PROVIDER.getNonceForAddress(contractAddress),
       ]);
       const { readFuncs, writeFuncs, code } =
         getContractClassInfo(contractClass);
@@ -119,6 +119,7 @@ export function Contract() {
         readFuncs,
         writeFuncs,
         code,
+        nonce,
       };
     },
     initialData,
@@ -316,6 +317,20 @@ export function Contract() {
     [form, onUpdate],
   );
 
+  const onCopyClassHash = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+
+      if (!classHash) {
+        return;
+      }
+
+      navigator.clipboard.writeText(classHash);
+      toast.success("Address copied to clipboard");
+    },
+    [classHash],
+  );
+
   return (
     <div className="w-full flex flex-col gap-[3px] sl:w-[1134px]">
       <Breadcrumb>
@@ -355,16 +370,36 @@ export function Contract() {
           {/* Contract Info Section */}
           <div className="flex flex-col gap-[3px]">
             {/* Address Card */}
-            <Card>
-              <CardContent>
-                <div className="flex justify-between gap-2">
-                  <CardLabel>Address</CardLabel>
-                  <Hash value={contractAddress} />
+            <Card className="p-0 rounded-sm">
+              <CardContent className="flex flex-row p-0 gap-0">
+                <div className="flex-1 flex flex-row items-center gap-[40px] p-[15px] border-r border-background-200">
+                  <div className="flex flex-col gap-[6px]">
+                    <CardLabel className="text-[12px]/[16px] tracking-[0.24px]">
+                      Address
+                    </CardLabel>
+                    <Hash value={contractAddress} length={12} />
+                  </div>
+
+                  <div className="flex flex-col gap-[6px]">
+                    <CardLabel className="text-[12px]/[16px] tracking-[0.24px]">
+                      Nonce
+                    </CardLabel>
+                    <p className="text-foreground-100 text-[13px] font-semibold">
+                      {Number(nonce)}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex justify-between gap-2">
-                  <CardLabel>Class Hash</CardLabel>
-                  <Hash value={classHash} to={`../class/${classHash}`} />
+                <div className="flex flex-col gap-[6px] p-[15px]">
+                  <CardLabel className="text-[12px]/[16px] tracking-[0.24px]">
+                    Class Hash
+                  </CardLabel>
+                  <div
+                    className="bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
+                    onClick={onCopyClassHash}
+                  >
+                    <Hash value={classHash} length={12} />
+                  </div>
                 </div>
               </CardContent>
             </Card>
