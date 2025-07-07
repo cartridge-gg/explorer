@@ -462,38 +462,42 @@ export function Contract() {
                 <div className="h-full max-h-[640px] overflow-y-auto p-0">
                   <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] divide-y md:divide-y-0 md:divide-x divide-background-300 h-full">
                     {/* sidebar */}
-                    <div className="flex flex-col justify-start gap-[15px] p-[15px] h-full overflow-y-auto">
-                      <MultiFilter
-                        placeholder="Mutability"
-                        value={functionTypeFilter}
-                        onValueChange={(values) => {
-                          setFunctionTypeFilter(values);
-                        }}
-                        items={[
-                          { key: "read", value: "Read" },
-                          { key: "write", value: "Write" },
-                        ]}
-                      />
-                      <div className="relative">
-                        <Input
-                          value={search}
-                          onChange={(e) => setSearch(e.target.value)}
-                          placeholder="Function name / selector / interface"
-                          className="bg-input focus-visible:bg-input caret-foreground placeholder:text-[#262A27] px-[10px] py-[7px] focus-visible:border-background-400"
+                    <div className="relative flex flex-col justify-start h-[239px] overflow-y-auto">
+                      <div className="sticky top-0 bg-background space-y-[15px] p-[15px]">
+                        <MultiFilter
+                          placeholder="Mutability"
+                          value={functionTypeFilter}
+                          onValueChange={(values) => {
+                            setFunctionTypeFilter(values);
+                          }}
+                          items={[
+                            { key: "read", value: "Read" },
+                            { key: "write", value: "Write" },
+                          ]}
                         />
-                        <SearchIcon
-                          className={cn(
-                            "absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none",
-                            search ? "text-foreground" : "text-foreground-400",
-                          )}
-                        />
+                        <div className="relative">
+                          <Input
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Function name / selector / interface"
+                            className="bg-input focus-visible:bg-input caret-foreground placeholder:text-[#262A27] px-[10px] py-[7px] focus-visible:border-background-400"
+                          />
+                          <SearchIcon
+                            className={cn(
+                              "absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none",
+                              search
+                                ? "text-foreground"
+                                : "text-foreground-400",
+                            )}
+                          />
+                        </div>
+                        <CardLabel>Functions</CardLabel>
                       </div>
                       <div
                         ref={scrollContainerRef}
                         className="flex flex-col min-h-0 gap-[8px]"
                       >
-                        <CardLabel>Functions</CardLabel>
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-[3px] p-[15px] pt-0">
                           {filtered.length ? (
                             filtered.map((f) => (
                               <div
@@ -599,113 +603,108 @@ export function Contract() {
 
                       <div className="flex flex-col gap-[10px] h-[400px] md:h-full justify-between p-[15px]">
                         {selected?.inputs.length ? (
-                          <>
-                            <ParamForm
-                              params={selected.inputs.map((input, i) => ({
-                                ...input,
-                                id: `${selected.name}-${input.name}`,
-                                value:
-                                  form[selected.name]?.inputs[i]?.value ??
-                                  (input.type.type === "struct"
-                                    ? "{\n\t\n}"
-                                    : input.type.type === "array"
-                                      ? "[\n\t\n]"
-                                      : ""),
-                              }))}
-                              onChange={(i, value) =>
-                                onChange(selected, i, value)
-                              }
-                              disabled={
-                                !contract ||
-                                (!isReadFunction(selected) && !account)
-                              }
-                            />
-
-                            <div className="flex flex-col gap-[10px]">
-                              {!!contract &&
-                                selected &&
-                                (isReadFunction(selected) ? (
-                                  <Button
-                                    variant="secondary"
-                                    isLoading={form[selected.name]?.loading}
-                                    onClick={() => onCallOrExecute(selected)}
-                                  >
-                                    call
-                                  </Button>
-                                ) : (
-                                  <div className="flex items-center justify-between w-full">
-                                    <Button
-                                      variant="secondary"
-                                      onClick={() => onAddToCart(selected)}
-                                      disabled={!account}
-                                      className="h-[30px] gap-[7px] px-[10px] py-[6px] normal-case font-sans bg-background-200 border border-[#454B46]"
-                                    >
-                                      <PlusIcon
-                                        variant="solid"
-                                        className="!w-[19px] !h-[19px]"
-                                      />
-                                      <span className="text-[13px]/[16px] font-semibold">
-                                        Add to queue
-                                      </span>
-                                    </Button>
-
-                                    <Button
-                                      variant="primary"
-                                      className="h-[30px] px-[10px] py-[6px] bg-foreground-100 text-background-100"
-                                      disabled={
-                                        !account || form[selected.name]?.loading
-                                      }
-                                      onClick={() => onCallOrExecute(selected)}
-                                    >
-                                      <span className="text-[13px]/[16px] font-semibold uppercase">
-                                        {form[selected.name]?.loading
-                                          ? "Executing..."
-                                          : "Execute"}
-                                      </span>
-                                    </Button>
-                                  </div>
-                                ))}
-
-                              {selected && form[selected.name]?.hasCalled && (
-                                <div className="w-full flex flex-col gap-1">
-                                  <p className="font-bold text-sm uppercase">
-                                    Result
-                                  </p>
-                                  <div className="bg-white">
-                                    {form[selected.name]?.loading ? (
-                                      <div className="text-gray-600">
-                                        Loading...
-                                      </div>
-                                    ) : form[selected.name]?.error ? (
-                                      <div className="text-red-500 p-3 bg-red-50 border border-red-200">
-                                        <p className="font-medium">Error:</p>
-                                        <p className="text-sm">
-                                          {form[
-                                            selected.name
-                                          ]?.error?.toString()}
-                                        </p>
-                                      </div>
-                                    ) : form[selected.name]?.result ? (
-                                      <div className="px-3 py-2 border border-borderGray">
-                                        <pre className="text-sm overflow-x-auto">
-                                          {JSON.stringify(
-                                            form[selected.name]?.result,
-                                            null,
-                                            2,
-                                          )}
-                                        </pre>
-                                      </div>
-                                    ) : null}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </>
+                          <ParamForm
+                            params={selected.inputs.map((input, i) => ({
+                              ...input,
+                              id: `${selected.name}-${input.name}`,
+                              value:
+                                form[selected.name]?.inputs[i]?.value ??
+                                (input.type.type === "struct"
+                                  ? "{\n\t\n}"
+                                  : input.type.type === "array"
+                                    ? "[\n\t\n]"
+                                    : ""),
+                            }))}
+                            onChange={(i, value) =>
+                              onChange(selected, i, value)
+                            }
+                            disabled={
+                              !contract ||
+                              (!isReadFunction(selected) && !account)
+                            }
+                          />
                         ) : (
-                          <div className="h-full flex items-center justify-center text-foreground-300">
+                          <p className="h-full flex items-center justify-center text-foreground-300">
                             No inputs
-                          </div>
+                          </p>
                         )}
+                        <div className="flex flex-col gap-[10px]">
+                          {!!contract &&
+                            selected &&
+                            (isReadFunction(selected) ? (
+                              <Button
+                                variant="secondary"
+                                isLoading={form[selected.name]?.loading}
+                                onClick={() => onCallOrExecute(selected)}
+                              >
+                                call
+                              </Button>
+                            ) : (
+                              <div className="flex items-center justify-between w-full">
+                                <Button
+                                  variant="secondary"
+                                  onClick={() => onAddToCart(selected)}
+                                  disabled={!account}
+                                  className="h-[30px] gap-[7px] px-[10px] py-[6px] normal-case font-sans bg-background-200 border border-[#454B46]"
+                                >
+                                  <PlusIcon
+                                    variant="solid"
+                                    className="!w-[19px] !h-[19px]"
+                                  />
+                                  <span className="text-[13px]/[16px] font-semibold">
+                                    Add to queue
+                                  </span>
+                                </Button>
+
+                                <Button
+                                  variant="primary"
+                                  className="h-[30px] px-[10px] py-[6px] bg-foreground-100 text-background-100"
+                                  disabled={
+                                    !account || form[selected.name]?.loading
+                                  }
+                                  onClick={() => onCallOrExecute(selected)}
+                                >
+                                  <span className="text-[13px]/[16px] font-semibold uppercase">
+                                    {form[selected.name]?.loading
+                                      ? "Executing..."
+                                      : "Execute"}
+                                  </span>
+                                </Button>
+                              </div>
+                            ))}
+
+                          {selected && form[selected.name]?.hasCalled && (
+                            <div className="w-full flex flex-col gap-1">
+                              <p className="font-bold text-sm uppercase">
+                                Result
+                              </p>
+                              <div className="bg-white">
+                                {form[selected.name]?.loading ? (
+                                  <div className="text-gray-600">
+                                    Loading...
+                                  </div>
+                                ) : form[selected.name]?.error ? (
+                                  <div className="text-red-500 p-3 bg-red-50 border border-red-200">
+                                    <p className="font-medium">Error:</p>
+                                    <p className="text-sm">
+                                      {form[selected.name]?.error?.toString()}
+                                    </p>
+                                  </div>
+                                ) : form[selected.name]?.result ? (
+                                  <div className="px-3 py-2 border border-borderGray">
+                                    <pre className="text-sm overflow-x-auto">
+                                      {JSON.stringify(
+                                        form[selected.name]?.result,
+                                        null,
+                                        2,
+                                      )}
+                                    </pre>
+                                  </div>
+                                ) : null}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -727,40 +726,42 @@ export function Contract() {
                     >
                       <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] divide-y md:divide-y-0 md:divide-x divide-background-300 h-full">
                         {/* sidebar */}
-                        <div className="flex flex-col justify-start gap-[15px] p-[15px] h-full overflow-y-auto">
-                          <MultiFilter
-                            placeholder="Mutability"
-                            value={functionTypeFilter}
-                            onValueChange={(values) => {
-                              setFunctionTypeFilter(values);
-                            }}
-                            items={[
-                              { key: "read", value: "Read" },
-                              { key: "write", value: "Write" },
-                            ]}
-                          />
-                          <div className="relative">
-                            <Input
-                              value={search}
-                              onChange={(e) => setSearch(e.target.value)}
-                              placeholder="Function name / selector / interface"
-                              className="bg-input focus-visible:bg-input caret-foreground placeholder:text-[#262A27] px-[10px] py-[7px] focus-visible:border-background-400"
+                        <div className="relative flex flex-col justify-start h-full overflow-y-auto">
+                          <div className="sticky top-0 bg-background space-y-[15px] p-[15px]">
+                            <MultiFilter
+                              placeholder="Mutability"
+                              value={functionTypeFilter}
+                              onValueChange={(values) => {
+                                setFunctionTypeFilter(values);
+                              }}
+                              items={[
+                                { key: "read", value: "Read" },
+                                { key: "write", value: "Write" },
+                              ]}
                             />
-                            <SearchIcon
-                              className={cn(
-                                "absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none",
-                                search
-                                  ? "text-foreground"
-                                  : "text-foreground-400",
-                              )}
-                            />
+                            <div className="relative">
+                              <Input
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Function name / selector / interface"
+                                className="bg-input focus-visible:bg-input caret-foreground placeholder:text-[#262A27] px-[10px] py-[7px] focus-visible:border-background-400"
+                              />
+                              <SearchIcon
+                                className={cn(
+                                  "absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none",
+                                  search
+                                    ? "text-foreground"
+                                    : "text-foreground-400",
+                                )}
+                              />
+                            </div>
+                            <CardLabel>Functions</CardLabel>
                           </div>
                           <div
                             ref={scrollContainerRef}
                             className="flex flex-col min-h-0 gap-[8px] select-none"
                           >
-                            <CardLabel>Functions</CardLabel>
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col gap-[3px] p-[15px] pt-0">
                               {filtered.length ? (
                                 filtered.map((f) => (
                                   <div
@@ -866,121 +867,110 @@ export function Contract() {
 
                           <div className="flex flex-col h-full justify-between p-[15px]">
                             {selected?.inputs.length ? (
-                              <>
-                                <ParamForm
-                                  params={selected.inputs.map((input, i) => ({
-                                    ...input,
-                                    id: `${selected.name}-${input.name}`,
-                                    value:
-                                      form[selected.name]?.inputs[i]?.value ??
-                                      (input.type.type === "struct"
-                                        ? "{\n\t\n}"
-                                        : input.type.type === "array"
-                                          ? "[\n\t\n]"
-                                          : ""),
-                                  }))}
-                                  onChange={(i, value) =>
-                                    onChange(selected, i, value)
-                                  }
-                                  disabled={
-                                    !contract ||
-                                    (!isReadFunction(selected) && !account)
-                                  }
-                                />
-
-                                <div className="flex flex-col gap-[10px]">
-                                  {!!contract &&
-                                    selected &&
-                                    (isReadFunction(selected) ? (
-                                      <Button
-                                        variant="secondary"
-                                        isLoading={form[selected.name]?.loading}
-                                        onClick={() =>
-                                          onCallOrExecute(selected)
-                                        }
-                                      >
-                                        call
-                                      </Button>
-                                    ) : (
-                                      <div className="flex items-center justify-between w-full">
-                                        <Button
-                                          variant="secondary"
-                                          onClick={() => onAddToCart(selected)}
-                                          disabled={!account}
-                                          className="h-[30px] gap-[7px] px-[10px] py-[6px] normal-case font-sans bg-background-200 border border-[#454B46]"
-                                        >
-                                          <PlusIcon
-                                            variant="solid"
-                                            className="!w-[19px] !h-[19px]"
-                                          />
-                                          <span className="text-[13px]/[16px] font-semibold">
-                                            Add to queue
-                                          </span>
-                                        </Button>
-
-                                        <Button
-                                          variant="primary"
-                                          className="h-[30px] px-[10px] py-[6px] bg-foreground-100 text-background-100"
-                                          disabled={
-                                            !account ||
-                                            form[selected.name]?.loading
-                                          }
-                                          onClick={() =>
-                                            onCallOrExecute(selected)
-                                          }
-                                        >
-                                          <span className="text-[13px]/[16px] font-semibold uppercase">
-                                            {form[selected.name]?.loading
-                                              ? "Executing..."
-                                              : "Execute"}
-                                          </span>
-                                        </Button>
-                                      </div>
-                                    ))}
-
-                                  {selected &&
-                                    form[selected.name]?.hasCalled && (
-                                      <div className="w-full flex flex-col gap-1">
-                                        <p className="font-bold text-sm uppercase">
-                                          Result
-                                        </p>
-                                        <div className="bg-white">
-                                          {form[selected.name]?.loading ? (
-                                            <div className="text-gray-600">
-                                              Loading...
-                                            </div>
-                                          ) : form[selected.name]?.error ? (
-                                            <div className="text-red-500 p-3 bg-red-50 border border-red-200">
-                                              <p className="font-medium">
-                                                Error:
-                                              </p>
-                                              <p className="text-sm">
-                                                {form[
-                                                  selected.name
-                                                ]?.error?.toString()}
-                                              </p>
-                                            </div>
-                                          ) : form[selected.name]?.result ? (
-                                            <div className="px-3 py-2 border border-borderGray">
-                                              <pre className="text-sm overflow-x-auto">
-                                                {JSON.stringify(
-                                                  form[selected.name]?.result,
-                                                  null,
-                                                  2,
-                                                )}
-                                              </pre>
-                                            </div>
-                                          ) : null}
-                                        </div>
-                                      </div>
-                                    )}
-                                </div>
-                              </>
+                              <ParamForm
+                                params={selected.inputs.map((input, i) => ({
+                                  ...input,
+                                  id: `${selected.name}-${input.name}`,
+                                  value:
+                                    form[selected.name]?.inputs[i]?.value ??
+                                    (input.type.type === "struct"
+                                      ? "{\n\t\n}"
+                                      : input.type.type === "array"
+                                        ? "[\n\t\n]"
+                                        : ""),
+                                }))}
+                                onChange={(i, value) =>
+                                  onChange(selected, i, value)
+                                }
+                                disabled={
+                                  !contract ||
+                                  (!isReadFunction(selected) && !account)
+                                }
+                              />
                             ) : (
                               <div className="h-full flex items-center justify-center text-foreground-300">
                                 No inputs
                               </div>
                             )}
+                            <div className="flex flex-col gap-[10px]">
+                              {!!contract &&
+                                selected &&
+                                (isReadFunction(selected) ? (
+                                  <Button
+                                    variant="secondary"
+                                    isLoading={form[selected.name]?.loading}
+                                    onClick={() => onCallOrExecute(selected)}
+                                  >
+                                    call
+                                  </Button>
+                                ) : (
+                                  <div className="flex items-center justify-between w-full">
+                                    <Button
+                                      variant="secondary"
+                                      onClick={() => onAddToCart(selected)}
+                                      disabled={!account}
+                                      className="h-[30px] gap-[7px] px-[10px] py-[6px] normal-case font-sans bg-background-200 border border-[#454B46]"
+                                    >
+                                      <PlusIcon
+                                        variant="solid"
+                                        className="!w-[19px] !h-[19px]"
+                                      />
+                                      <span className="text-[13px]/[16px] font-semibold">
+                                        Add to queue
+                                      </span>
+                                    </Button>
+
+                                    <Button
+                                      variant="primary"
+                                      className="h-[30px] px-[10px] py-[6px] bg-foreground-100 text-background-100"
+                                      disabled={
+                                        !account || form[selected.name]?.loading
+                                      }
+                                      onClick={() => onCallOrExecute(selected)}
+                                    >
+                                      <span className="text-[13px]/[16px] font-semibold uppercase">
+                                        {form[selected.name]?.loading
+                                          ? "Executing..."
+                                          : "Execute"}
+                                      </span>
+                                    </Button>
+                                  </div>
+                                ))}
+
+                              {selected && form[selected.name]?.hasCalled && (
+                                <div className="w-full flex flex-col gap-1">
+                                  <p className="font-bold text-sm uppercase">
+                                    Result
+                                  </p>
+                                  <div className="bg-white">
+                                    {form[selected.name]?.loading ? (
+                                      <div className="text-gray-600">
+                                        Loading...
+                                      </div>
+                                    ) : form[selected.name]?.error ? (
+                                      <div className="text-red-500 p-3 bg-red-50 border border-red-200">
+                                        <p className="font-medium">Error:</p>
+                                        <p className="text-sm">
+                                          {form[
+                                            selected.name
+                                          ]?.error?.toString()}
+                                        </p>
+                                      </div>
+                                    ) : form[selected.name]?.result ? (
+                                      <div className="px-3 py-2 border border-borderGray">
+                                        <pre className="text-sm overflow-x-auto">
+                                          {JSON.stringify(
+                                            form[selected.name]?.result,
+                                            null,
+                                            2,
+                                          )}
+                                        </pre>
+                                      </div>
+                                    ) : null}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
