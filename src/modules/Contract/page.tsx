@@ -339,7 +339,7 @@ export function Contract() {
       }
 
       navigator.clipboard.writeText(classHash);
-      toast.success("Address copied to clipboard");
+      toast.success("Class hash copied to clipboard");
     },
     [classHash],
   );
