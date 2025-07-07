@@ -1,5 +1,5 @@
-import React from "react";
-import { BoltIcon, cn, Skeleton } from "@cartridge/ui";
+import React, { memo } from "react";
+import { cn, Skeleton } from "@cartridge/ui";
 import { formatNumber } from "../utils/number";
 import { formatSnakeCaseToDisplayValue } from "../utils/string";
 
@@ -126,9 +126,9 @@ export function ExecutionResourcesCard({
   };
 }) {
   return (
-    <Card className="gap-0 pb-0">
-      <CardHeader className="pb-3 border-b border-background-200">
-        <CardIcon icon={<BoltIcon variant="solid" />} />
+    <Card className="gap-0 p-0 rounded-[12px]">
+      <CardHeader className="px-[17px] py-[4px] h-[32px] gap-[10px] border-b border-background-200">
+        <FireIcon className="!w-[9px] !h-[12px]" />
         <CardTitle className="font-bold text-[12px]">
           Execution resources
         </CardTitle>
@@ -195,3 +195,14 @@ export function ExecutionResourcesCard({
     </Card>
   );
 }
+
+const FireIcon = memo(({ className }: { className?: string }) => {
+  return (
+    <svg viewBox="0 0 9 12" fill="none" className={className}>
+      <path
+        d="M8.70951 6.35208C7.82618 3.96435 4.68108 3.8356 5.44063 0.365209C5.49689 0.107709 5.23246 -0.091268 5.01866 0.0433341C2.97631 1.29572 1.50785 3.80634 2.74001 7.09531C2.84128 7.36452 2.53746 7.61617 2.31803 7.4406C1.29967 6.63884 1.19278 5.48594 1.2828 4.66077C1.31655 4.35645 0.933965 4.21015 0.770803 4.46179C0.388214 5.07043 0 6.05361 0 7.53423C0.213799 10.8115 2.87504 11.8181 3.83151 11.9468C5.1987 12.1283 6.67842 11.8649 7.74179 10.8525C8.91206 9.72298 9.33965 7.92048 8.70951 6.35208ZM3.4883 9.29577C4.29849 9.09094 4.71484 8.4823 4.82736 7.94389C5.01303 7.10702 4.28724 6.2877 4.77673 4.96509C4.96239 6.05946 6.61653 6.74418 6.61653 7.93804C6.66154 9.41866 5.11993 10.6886 3.4883 9.29577Z"
+        fill="white"
+      />
+    </svg>
+  );
+});

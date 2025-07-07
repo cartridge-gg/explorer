@@ -22,7 +22,7 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  CardContent,
+  CardContent as CardContentOld,
   CardLabel,
   CardSeparator,
   ExecutionResourcesCard,
@@ -150,7 +150,7 @@ export function Transaction() {
       </Breadcrumb>
 
       <PageHeader
-        containerClassName="rounded-t-[12px] rounded-b-[4px]"
+        containerClassName="rounded-t-[12px] rounded-b-sm"
         className="px-[15px] py-[8px]"
       >
         <PageHeaderTitle className="gap-[12px]">
@@ -186,9 +186,10 @@ export function Transaction() {
       ) : (
         <div className="flex flex-col gap-[20px] lg:gap-[40px] pb-8">
           <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-[3px]">
+            {/* sidebar */}
             <div className="sl:min-w-[337px] flex flex-col gap-[3px] sl:overflow-y-scroll">
-              <Card className="py-[10px] px-[15px]">
-                <CardContent className="flex-row justify-between px-0">
+              <Card className="rounded-sm p-0 sl:min-w-[337px] flex flex-col gap-[3px] sl:overflow-y-scroll">
+                <CardContent className="flex-row justify-between">
                   <div className="flex flex-col gap-[6px]">
                     <CardLabel>Status</CardLabel>
                     {block ? (
@@ -220,8 +221,8 @@ export function Transaction() {
                 </CardContent>
               </Card>
 
-              <Card className="flex-1 overflow-y-scroll scrollbar-none py-[10px] px-[15px] gap-0">
-                <CardContent className="px-0 gap-[8px]">
+              <Card className="flex-1 overflow-y-scroll scrollbar-none gap-0 rounded-sm rounded-bl-[12px] p-0">
+                <CardContent className="gap-[8px]">
                   <div className="flex justify-between items-center">
                     <CardLabel>Hash</CardLabel>
                     <div>
@@ -238,7 +239,7 @@ export function Transaction() {
                 {(!!tx?.sender_address || !!tx?.nonce) && (
                   <>
                     <Separator />
-                    <CardContent className="px-0 gap-[8px]">
+                    <CardContent className="gap-[8px]">
                       {!!tx?.sender_address && (
                         <div className="flex flex-col justify-between gap-[8px]">
                           <CardLabel>Sender</CardLabel>
@@ -263,7 +264,7 @@ export function Transaction() {
                 )}
 
                 <Separator />
-                <CardContent className="px-0 gap-[8px]">
+                <CardContent className="gap-[8px]">
                   <div className="flex justify-between items-center">
                     <CardLabel>Tip</CardLabel>
                     <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
@@ -290,12 +291,12 @@ export function Transaction() {
                 {Number(tx?.version) === 3 && (
                   <>
                     <Separator />
-                    <CardHeader className="px-0 mb-[15px]">
-                      <GasIcon />
-                      <CardTitle>Resource Bounds</CardTitle>
-                    </CardHeader>
+                    <CardContent className="gap-[15px]">
+                      <CardHeader className="px-0">
+                        <GasIcon />
+                        <CardTitle>Resource Bounds</CardTitle>
+                      </CardHeader>
 
-                    <CardContent className="gap-[15px] px-0">
                       <div className="space-y-[8px]">
                         <CardLabel>L1 execution gas</CardLabel>
 
@@ -424,41 +425,42 @@ export function Transaction() {
                 ) && (
                   <>
                     <Separator />
+                    <CardContent>
+                      <div className="space-y-[13px]">
+                        <CardHeader className="px-0">
+                          <ServerIcon />
+                          <CardTitle>Data Availability Mode</CardTitle>
+                        </CardHeader>
 
-                    <div className="space-y-[13px]">
-                      <CardHeader className="px-0">
-                        <ServerIcon />
-                        <CardTitle>Data Availability Mode</CardTitle>
-                      </CardHeader>
-
-                      <CardContent className="px-0">
-                        <div className="flex justify-between gap-2">
-                          <CardLabel>Nonce</CardLabel>
-                          <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                            {tx.nonce_data_availability_mode}
-                          </p>
+                        <div className="space-y-[8px]">
+                          <div className="flex justify-between gap-2">
+                            <CardLabel>Nonce</CardLabel>
+                            <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+                              {tx.nonce_data_availability_mode}
+                            </p>
+                          </div>
+                          <div className="flex justify-between gap-2">
+                            <CardLabel>Fee</CardLabel>
+                            <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+                              {tx.fee_data_availability_mode}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex justify-between gap-2">
-                          <CardLabel>Fee</CardLabel>
-                          <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                            {tx.fee_data_availability_mode}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </div>
+                      </div>
+                    </CardContent>
                   </>
                 )}
               </Card>
             </div>
 
-            <Card className="h-full flex-grow grid grid-rows-[min-content_1fr] overflow-x-scroll sl:min-w-[794px]">
+            <Card className="p-0 h-full flex-grow grid grid-rows-[min-content_1fr] overflow-x-scroll sl:min-w-[794px] rounded-sm rounded-br-[12px]">
               {tx ? (
                 <Tabs
                   value={tab.selected}
                   onValueChange={tab.onChange}
                   className="h-full"
                 >
-                  <CardContent>
+                  <CardContent className="pb-0 pt-[3px]">
                     <TabsList className="gap-[12px] p-0">
                       {tx?.type === "INVOKE" && (
                         <TabsTrigger
@@ -509,9 +511,9 @@ export function Transaction() {
                       </TabsTrigger>
                     </TabsList>
                   </CardContent>
-                  <Separator className="mt-1 mb-0" />
+                  <Separator className="mt-[1px]" />
 
-                  <CardContent className="p-[15px] pt-[5px]">
+                  <CardContent className="p-[15px]">
                     {tx?.type === "INVOKE" && (
                       <TabsContent value="calldata" className="mt-0">
                         <Calldata tx={tx} />
@@ -609,9 +611,26 @@ export function Transaction() {
   );
 }
 
-const Separator = memo(() => (
+// since all card content will inherit the same padding layout
+const CardContent = memo(
+  ({
+    className,
+    children,
+  }: {
+    className?: string;
+    children?: React.ReactNode;
+  }) => (
+    <CardContentOld className={cn("px-[15px] py-[10px]", className)}>
+      {children}
+    </CardContentOld>
+  ),
+);
+
+// workaround for missing/inconsistent separator on certain condition
+// https://github.com/shadcn-ui/ui/discussions/3870#discussioncomment-12632106
+const Separator = memo(({ className }: { className?: string }) => (
   <span>
-    <CardSeparator className="my-[10px] relative left-[-15px] w-[calc(100%+30px)]" />
+    <CardSeparator className={cn("m-0", className)} />
   </span>
 ));
 
