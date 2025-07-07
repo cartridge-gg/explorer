@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { MultiFilterTransaction } from "./multiple-filter";
+import { MultiFilter } from "./multiple-filter";
 import { useState } from "react";
 
-const meta: Meta<typeof MultiFilterTransaction> = {
+const meta: Meta<typeof MultiFilter> = {
   tags: ["autodocs"],
   title: "Filter/Multiple",
-  component: MultiFilterTransaction,
+  component: MultiFilter,
 };
 
 export default meta;
@@ -20,12 +20,6 @@ export const Default: Story = {
       { key: "DECLARE", value: "Declare" },
     ];
 
-    return (
-      <MultiFilterTransaction
-        value={value}
-        onValueChange={setValue}
-        items={items}
-      />
-    );
+    return <MultiFilter value={value} onValueChange={setValue} items={items} />;
   },
 };

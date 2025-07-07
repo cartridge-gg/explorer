@@ -18,7 +18,7 @@ interface MultiSelectProps {
   onValueChange?: (value: string[]) => void;
 }
 
-export const MultiFilterTransaction = ({
+export const MultiFilter = ({
   buttonClassName,
   placeholder,
   items,
