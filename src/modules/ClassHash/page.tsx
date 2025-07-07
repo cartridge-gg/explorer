@@ -224,7 +224,7 @@ export function ClassHash() {
                         className="flex flex-col gap-2 overflow-y-auto flex-1"
                       >
                         <CardLabel>Functions</CardLabel>
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-[3px] select-none">
                           {filtered.length ? (
                             filtered.map((f) => (
                               <div
