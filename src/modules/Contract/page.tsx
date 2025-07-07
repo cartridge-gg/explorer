@@ -245,6 +245,11 @@ export function Contract() {
       try {
         const currentForm = form[f.name] || { inputs: [] };
         const calldata = currentForm.inputs.flatMap((input, idx) => {
+          // Ensure the input index is within bounds of function inputs
+          if (idx >= f.inputs.length) {
+            return [];
+          }
+          
           let value;
           try {
             value = JSON.parse(input.value);
@@ -288,6 +293,11 @@ export function Contract() {
 
       const currentForm = form[f.name] || { inputs: [] };
       const calldata = currentForm.inputs.flatMap((input, idx) => {
+        // Ensure the input index is within bounds of function inputs
+        if (idx >= f.inputs.length) {
+          return [];
+        }
+        
         let value;
         try {
           value = JSON.parse(input.value);
