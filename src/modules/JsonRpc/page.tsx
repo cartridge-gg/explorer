@@ -272,15 +272,13 @@ export function JsonRpcPlayground() {
     if (currentIndex === -1) return;
 
     switch (e.key) {
-      case "ArrowDown":
-      case "j": {
+      case "ArrowDown": {
         e.preventDefault();
         const newIndex = Math.min(methods.length - 1, currentIndex + 1);
         onMethodChange(methods[newIndex]);
         break;
       }
-      case "ArrowUp":
-      case "k": {
+      case "ArrowUp": {
         e.preventDefault();
         const newIndex = Math.max(0, currentIndex - 1);
         onMethodChange(methods[newIndex]);
