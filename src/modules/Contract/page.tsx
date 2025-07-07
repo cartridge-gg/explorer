@@ -5,14 +5,13 @@ import { RPC_PROVIDER } from "@/services/rpc";
 import { Contract as StarknetContract } from "starknet";
 import {
   BookIcon,
-  CoinsIcon,
-  ScrollIcon,
   cn,
   Input,
   Skeleton,
   SearchIcon,
   Button,
   PlusIcon,
+  ListIcon,
 } from "@cartridge/ui";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { useBalances } from "@/shared/hooks/useBalances";
@@ -29,7 +28,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardIcon,
   CardLabel,
   CardSeparator,
   CardTitle,
@@ -338,10 +336,13 @@ export function Contract() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader>
-        <PageHeaderTitle>
-          <ScrollIcon variant="solid" />
-          <div>Contract</div>
+      <PageHeader
+        containerClassName="px-[15px] py-[8px] rounded-t-[12px] rounded-b-sm"
+        className="p-0"
+      >
+        <PageHeaderTitle className="gap-[12px]">
+          <ListIcon variant="solid" />
+          <h1 className="text-[14px]/[20px] font-medium">Contract</h1>
         </PageHeaderTitle>
       </PageHeader>
 
@@ -352,7 +353,8 @@ export function Contract() {
       ) : (
         <div className="flex flex-col gap-[20px] sm:gap-[40px] sl:w-[1134px]">
           {/* Contract Info Section */}
-          <div className="flex flex-col gap-[6px]">
+          <div className="flex flex-col gap-[3px]">
+            {/* Address Card */}
             <Card>
               <CardContent>
                 <div className="flex justify-between gap-2">
@@ -365,42 +367,45 @@ export function Contract() {
                   <Hash value={classHash} to={`../class/${classHash}`} />
                 </div>
               </CardContent>
+            </Card>
 
-              <CardSeparator />
-
-              <CardHeader>
-                <CardIcon icon={<CoinsIcon variant="solid" />} />
-                <CardTitle>Balances</CardTitle>
+            {/* Balances Card */}
+            <Card className="p-[15px] rounded-t-sm rounded-b-[12px]">
+              <CardHeader className="p-0">
+                <CardTitle className="text-[12px] p-0">Balances</CardTitle>
               </CardHeader>
 
-              <CardContent>
-                <div className="flex justify-between gap-2">
-                  <CardLabel>STRK</CardLabel>
-                  <div>
+              <CardContent className="flex flex-row gap-[1px] p-0">
+                <div className="bg-background-200 hover:bg-background-300 flex flex-col justify-between p-[12px] h-[64px] min-w-[150px]">
+                  <CardLabel className="text-[12px]/[16px] tracking-[0.24px]">
+                    Starknet Token
+                  </CardLabel>
+                  <p className="text-[13px]/[16px] tracking-[0.26px] font-mono text-foreground-100">
                     {isStrkLoading
                       ? "0.00"
                       : balances.strk !== undefined
                         ? (Number(balances.strk) / 10 ** 18).toString()
                         : "N/A"}
-                  </div>
+                  </p>
                 </div>
-
-                <div className="flex justify-between gap-2">
-                  <CardLabel>ETH</CardLabel>
-                  <div>
+                <div className="bg-background-200 hover:bg-background-300 flex flex-col justify-between p-[12px] h-[64px] min-w-[150px]">
+                  <CardLabel className="text-[12px]/[16px] tracking-[0.24px]">
+                    Ether
+                  </CardLabel>
+                  <p className="text-[13px]/[16px] tracking-[0.26px] font-mono text-foreground-100">
                     {isEthLoading
                       ? "0.00"
                       : balances.eth !== undefined
                         ? (Number(balances.eth) / 10 ** 18).toString()
                         : "N/A"}
-                  </div>
+                  </p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           <Card className="max-h-[640px] flex-grow grid grid-rows-[min-content_1fr] rounded-[12px] p-0 mb-[20px] gap-0">
-            <CardContent className="max-h-[640px] p-0 pt-[3px] gap-0">
+            <CardContent className="max-h-[640px] p-0 pt-[3px] px-[15px] gap-0">
               <Tabs value={tab.selected} onValueChange={tab.onChange}>
                 <TabsList>
                   <TabsTrigger value="interact">
@@ -447,7 +452,7 @@ export function Contract() {
                         </div>
                         <div
                           ref={scrollContainerRef}
-                          className="flex flex-col min-h-0"
+                          className="flex flex-col min-h-0 gap-[8px]"
                         >
                           <CardLabel>Functions</CardLabel>
                           <div className="flex flex-col gap-1">
