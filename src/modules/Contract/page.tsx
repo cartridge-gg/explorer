@@ -249,7 +249,7 @@ export function Contract() {
           if (idx >= f.inputs.length) {
             return [];
           }
-          
+
           let value;
           try {
             value = JSON.parse(input.value);
@@ -297,7 +297,7 @@ export function Contract() {
         if (idx >= f.inputs.length) {
           return [];
         }
-        
+
         let value;
         try {
           value = JSON.parse(input.value);
