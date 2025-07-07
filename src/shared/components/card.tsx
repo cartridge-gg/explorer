@@ -127,7 +127,7 @@ export function ExecutionResourcesCard({
 }) {
   return (
     <Card className="gap-0 p-0 rounded-[12px]">
-      <CardHeader className="px-[17px] py-[4px] border-b border-background-200">
+      <CardHeader className="px-[17px] py-[4px] h-[32px] gap-[10px] border-b border-background-200">
         <FireIcon className="!w-[9px] !h-[12px]" />
         <CardTitle className="font-bold text-[12px]">
           Execution resources
