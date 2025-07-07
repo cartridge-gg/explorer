@@ -70,6 +70,7 @@ interface FunctionWithType extends FunctionAbiWithAst {
 const initialData: Omit<ContractClassInfo, "constructor"> & {
   classHash?: string;
   contract?: StarknetContract;
+  nonce?: string;
 } = {
   classHash: undefined,
   contract: undefined,
@@ -79,6 +80,7 @@ const initialData: Omit<ContractClassInfo, "constructor"> & {
     abi: "",
     sierra: undefined,
   },
+  nonce: undefined,
 };
 
 export function Contract() {
@@ -135,6 +137,7 @@ export function Contract() {
   const [form, setForm] = useState<{
     [key: string]: {
       inputs: { value: string }[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       result?: any;
       error?: Error | string;
       hasCalled: boolean;
