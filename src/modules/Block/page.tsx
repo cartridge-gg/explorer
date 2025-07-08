@@ -75,7 +75,9 @@ export function Block() {
     navigate(`../contract/${block?.sequencer_address}`);
   }, [block?.sequencer_address, navigate]);
 
-  const onCopyValue = useCallback((value: string) => {
+  const onCopyValue = useCallback((value: string | undefined) => {
+    if (!value) return;
+
     navigator.clipboard.writeText(value);
     toast.success("Value copied to clipboard");
   }, []);
@@ -191,15 +193,15 @@ export function Block() {
                 <CardContent className="px-0 gap-[8px]">
                   <div className="flex items-center justify-between">
                     <CardLabel>Hash</CardLabel>
-                    <Hash value={block?.block_hash} />
+                    <Hash length={1} value={block?.block_hash} />
                   </div>
                   <div className="flex items-center justify-between">
                     <CardLabel>State root</CardLabel>
-                    <Hash value={block?.new_root} />
+                    <Hash length={1} value={block?.new_root} />
                   </div>
                   <div className="flex items-center justify-between">
                     <CardLabel>Parent hash</CardLabel>
-                    <Hash value={block?.parent_hash} />
+                    <Hash length={1} value={block?.parent_hash} />
                   </div>
                 </CardContent>
 
@@ -212,30 +214,14 @@ export function Block() {
                       className="flex flex-row items-center justify-between bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
                       onClick={onClickSequencerAddress}
                     >
-                      {(() => {
-                        const [first, last] = truncateString(
-                          block?.sequencer_address ?? "",
-                          12,
-                        ).split("...");
-
-                        return (
-                          <div className="flex items-center gap-1 font-mono font-bold text-foreground">
-                            <span>{first}</span>
-                            {!!last?.length && (
-                              <>
-                                <DotsIcon className="text-foreground-400 hover:text-foreground-500" />
-                                <span>{last}</span>
-                              </>
-                            )}
-                          </div>
-                        );
-                      })()}
-                      <CopyIcon
-                        size="sm"
-                        className="text-foreground-400 hover:text-foreground-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onCopyValue(block?.sequencer_address || "");
+                      <Hash
+                        containerClassName="w-full justify-between"
+                        length={3}
+                        value={block?.sequencer_address}
+                        onClick={() => {}}
+                        onIconClick={(e) => {
+                          e?.stopPropagation();
+                          onCopyValue(block?.sequencer_address);
                         }}
                       />
                     </div>

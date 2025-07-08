@@ -226,7 +226,7 @@ export function Transaction() {
                   <div className="flex justify-between items-center">
                     <CardLabel>Hash</CardLabel>
                     <div>
-                      <Hash value={receipt?.transaction_hash} />
+                      <Hash length={1} value={receipt?.transaction_hash} />
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
@@ -247,7 +247,7 @@ export function Transaction() {
                             className="bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
                             onClick={onCopySenderAddress}
                           >
-                            <Hash value={tx?.sender_address} />
+                            <Hash length={2} value={tx?.sender_address} />
                           </div>
                         </div>
                       )}
@@ -528,13 +528,17 @@ export function Transaction() {
                           <div className="flex items-center justify-between gap-2">
                             <CardLabel>Class Hash</CardLabel>
                             <Hash
+                              length={isMobile ? 1 : 3}
                               value={tx.class_hash}
                               to={`../class/${tx.class_hash}`}
                             />
                           </div>
                           <div className="flex items-center justify-between gap-2">
                             <CardLabel>Compiled Class Hash</CardLabel>
-                            <Hash value={tx.compiled_class_hash} />
+                            <Hash
+                              length={isMobile ? 1 : 3}
+                              value={tx.compiled_class_hash}
+                            />
                           </div>
                         </div>
 
