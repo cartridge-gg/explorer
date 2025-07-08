@@ -394,7 +394,6 @@ export function Contract() {
                       length={isMobile ? 1 : 4}
                       className="px-0"
                       value={contractAddress}
-                      length={isMobile ? 4 : 12}
                     />
                   </div>
 
