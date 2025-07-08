@@ -56,6 +56,7 @@ import dayjs from "dayjs";
 import { getFinalityStatus } from "@/shared/utils/receipt";
 import FeltList from "@/shared/components/FeltList";
 import { Editor } from "@/shared/components/editor";
+import { AccountAddressV2 } from "@/shared/components/account-address-v2";
 
 /**
  *
@@ -243,12 +244,10 @@ export function Transaction() {
                       {!!tx?.sender_address && (
                         <div className="flex flex-col justify-between gap-[8px]">
                           <CardLabel>Sender</CardLabel>
-                          <div
-                            className="bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
-                            onClick={onCopySenderAddress}
-                          >
-                            <Hash length={2} value={tx?.sender_address} />
-                          </div>
+                          <AccountAddressV2
+                            address={tx.sender_address!}
+                            to={`../contract/${tx.sender_address}`}
+                          />
                         </div>
                       )}
                       {!!tx?.nonce && (
@@ -292,9 +291,11 @@ export function Transaction() {
                   <>
                     <Separator />
                     <CardContent className="gap-[15px]">
-                      <CardHeader className="px-0">
+                      <CardHeader className="px-0 gap-[12px] text-foreground-100">
                         <GasIcon />
-                        <CardTitle>Resource Bounds</CardTitle>
+                        <CardTitle className="text-[12px] font-semibold p-0">
+                          Resource Bounds
+                        </CardTitle>
                       </CardHeader>
 
                       <div className="space-y-[8px]">
@@ -427,9 +428,11 @@ export function Transaction() {
                     <Separator />
                     <CardContent>
                       <div className="space-y-[13px]">
-                        <CardHeader className="px-0">
+                        <CardHeader className="px-0 gap-[12px] text-foreground-100">
                           <ServerIcon />
-                          <CardTitle>Data Availability Mode</CardTitle>
+                          <CardTitle className="text-[12px] font-semibold p-0">
+                            Data Availability Mode
+                          </CardTitle>
                         </CardHeader>
 
                         <div className="space-y-[8px]">
@@ -673,9 +676,9 @@ const PriceCard = ({
   );
 };
 
-const ServerIcon = memo(() => {
+const ServerIcon = memo(({ className }: { className?: string }) => {
   return (
-    <svg viewBox="0 0 11 11" fill="none" className="w-[11px] h-[11px]">
+    <svg viewBox="0 0 11 11" className={cn("!w-[11px] !h-[11px]", className)}>
       <path
         d="M9.77778 6.11111H1.22222C0.55 6.11111 0 6.66111 0 7.33333V9.77778C0 10.45 0.55 11 1.22222 11H9.77778C10.45 11 11 10.45 11 9.77778V7.33333C11 6.66111 10.45 6.11111 9.77778 6.11111ZM2.44444 9.77778C1.77222 9.77778 1.22222 9.22778 1.22222 8.55556C1.22222 7.88333 1.77222 7.33333 2.44444 7.33333C3.11667 7.33333 3.66667 7.88333 3.66667 8.55556C3.66667 9.22778 3.11667 9.77778 2.44444 9.77778ZM9.77778 0H1.22222C0.55 0 0 0.55 0 1.22222V3.66667C0 4.33889 0.55 4.88889 1.22222 4.88889H9.77778C10.45 4.88889 11 4.33889 11 3.66667V1.22222C11 0.55 10.45 0 9.77778 0ZM2.44444 3.66667C1.77222 3.66667 1.22222 3.11667 1.22222 2.44444C1.22222 1.77222 1.77222 1.22222 2.44444 1.22222C3.11667 1.22222 3.66667 1.77222 3.66667 2.44444C3.66667 3.11667 3.11667 3.66667 2.44444 3.66667Z"
         fill="white"
