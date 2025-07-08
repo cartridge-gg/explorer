@@ -15,7 +15,7 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  CardContent,
+  CardContent as CardContentOld,
   CardLabel,
   CardSeparator,
   ExecutionResourcesCard,
@@ -81,7 +81,7 @@ export function Block() {
   }, []);
 
   return (
-    <div className="w-full flex flex-col gap-[3px] sl:w-[1134px]">
+    <div className="w-full flex flex-col gap-[4px] sl:w-[1134px]">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -105,7 +105,7 @@ export function Block() {
       </Breadcrumb>
 
       <PageHeader
-        containerClassName="rounded-t-[12px] rounded-b-[4px]"
+        containerClassName="rounded-t-[12px] rounded-b-sm"
         className="px-[15px] py-[8px]"
       >
         <PageHeaderTitle>
@@ -152,9 +152,9 @@ export function Block() {
         <NotFound />
       ) : (
         <div className="flex flex-col gap-[40px] pb-8">
-          <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-[3px]">
-            <div className="sl:min-w-[337px] flex flex-col gap-[6px] sl:overflow-y-scroll">
-              <Card>
+          <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-[4px]">
+            <div className="sl:min-w-[337px] flex flex-col gap-[4px] sl:overflow-y-scroll">
+              <Card className="p-0 rounded-sm">
                 <CardContent className="flex-row justify-between">
                   <div className="flex flex-col gap-2">
                     <CardLabel>Status</CardLabel>
@@ -187,8 +187,8 @@ export function Block() {
                 </CardContent>
               </Card>
 
-              <Card className="flex-1 overflow-y-scroll scrollbar-none py-[10px] px-[15px] gap-0">
-                <CardContent className="px-0 gap-[8px]">
+              <Card className="flex-1 overflow-y-scroll scrollbar-none p-0 gap-0 rounded-sm rounded-bl-[12px]">
+                <CardContent className="gap-[8px]">
                   <div className="flex items-center justify-between">
                     <CardLabel>Hash</CardLabel>
                     <Hash length={1} value={block?.block_hash} />
@@ -205,50 +205,46 @@ export function Block() {
 
                 <Separator />
 
-                <CardContent className="px-0">
-                  <div className="flex flex-col justify-between gap-[8px]">
-                    <CardLabel>Sequencer</CardLabel>
-                    <div
-                      className="flex flex-row items-center justify-between bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
-                      onClick={onClickSequencerAddress}
-                    >
-                      <Hash
-                        containerClassName="w-full justify-between"
-                        length={3}
-                        value={block?.sequencer_address}
-                        onClick={() => {}}
-                        onIconClick={(e) => {
-                          e?.stopPropagation();
-                          onCopyValue(block?.sequencer_address);
-                        }}
-                      />
-                    </div>
+                <CardContent className="justify-between gap-[8px]">
+                  <CardLabel>Sequencer</CardLabel>
+                  <div
+                    className="flex flex-row items-center justify-between bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
+                    onClick={onClickSequencerAddress}
+                  >
+                    <Hash
+                      containerClassName="w-full justify-between"
+                      length={3}
+                      value={block?.sequencer_address}
+                      onClick={() => {}}
+                      onIconClick={(e) => {
+                        e?.stopPropagation();
+                        onCopyValue(block?.sequencer_address);
+                      }}
+                    />
                   </div>
                 </CardContent>
 
                 <Separator />
 
-                <CardContent className="px-0">
-                  <div className="flex items-center justify-between">
-                    <CardLabel>Starknet version</CardLabel>
-                    <div className="font-mono text-foreground font-semibold">
-                      {block ? (
-                        block.starknet_version
-                      ) : (
-                        <Skeleton className="h-6 w-40" />
-                      )}
-                    </div>
+                <CardContent className="items-center flex-row justify-between">
+                  <CardLabel>Starknet version</CardLabel>
+                  <div className="font-mono text-foreground font-semibold">
+                    {block ? (
+                      block.starknet_version
+                    ) : (
+                      <Skeleton className="h-6 w-40" />
+                    )}
                   </div>
                 </CardContent>
 
                 <Separator />
 
-                <CardHeader className="px-0 mb-[15px]">
-                  <GasIcon />
-                  <CardTitle>gas prices</CardTitle>
-                </CardHeader>
+                <CardContent className="gap-[15px]">
+                  <CardHeader className="px-0 gap-[12px] text-foreground-100">
+                    <GasIcon />
+                    <CardTitle className="p-0">gas prices</CardTitle>
+                  </CardHeader>
 
-                <CardContent className="gap-[15px] px-0">
                   <div className="space-y-[8px]">
                     <CardLabel>L1 execution gas</CardLabel>
 
@@ -424,10 +420,10 @@ export function Block() {
               </Card>
             </div>
 
-            <Card className="flex-1">
+            <Card className="flex-1 p-0 rounded-sm rounded-br-[12px] gap-0">
               <Tabs value={tab.selected} onValueChange={tab.onChange}>
-                <CardContent>
-                  <TabsList>
+                <CardContent className="pb-0 pt-[3px]">
+                  <TabsList className="gap-[12px] p-0">
                     <TabsTrigger value="transactions">
                       <ListIcon variant="solid" />
                       <div>Transactions</div>
@@ -441,10 +437,10 @@ export function Block() {
 
                 <Separator />
 
-                <CardContent className="h-full">
+                <CardContent className="h-full py-[15px] gap-0">
                   <TabsContent
                     value="transactions"
-                    className="flex flex-col gap-2 w-full flex-1"
+                    className="flex flex-col gap-[15px] w-full flex-1 m-0"
                   >
                     <MultiFilter
                       placeholder="Type"
@@ -470,15 +466,17 @@ export function Block() {
                     <DataTable
                       table={txs}
                       onRowClick={(row) => navigate(`../tx/${row.hash}`)}
+                      className="max-h-[630px]"
                     />
                   </TabsContent>
 
-                  <TabsContent value="events" className="h-full">
+                  <TabsContent value="events" className="m-0 h-full">
                     <DataTable
                       table={events}
                       onRowClick={(row) =>
                         navigate(`../event/${row.txn_hash}-${row.id}`)
                       }
+                      className="max-h-[666px]"
                     />
                   </TabsContent>
                 </CardContent>
@@ -496,6 +494,23 @@ export function Block() {
   );
 }
 
-const Separator = memo(() => (
-  <CardSeparator className="my-[10px] relative left-[-15px] w-[calc(100%+30px)]" />
+const Separator = memo(({ className }: { className?: string }) => (
+  <span>
+    <CardSeparator className={cn("m-0", className)} />
+  </span>
 ));
+
+// since all card content will inherit the same padding layout
+const CardContent = memo(
+  ({
+    className,
+    children,
+  }: {
+    className?: string;
+    children?: React.ReactNode;
+  }) => (
+    <CardContentOld className={cn("px-[15px] py-[10px]", className)}>
+      {children}
+    </CardContentOld>
+  ),
+);
