@@ -9,8 +9,6 @@ import {
   ListIcon,
   PulseIcon,
   WedgeIcon,
-  DotsIcon,
-  CopyIcon,
 } from "@cartridge/ui";
 import { toast } from "sonner";
 import {
