@@ -420,7 +420,7 @@ export function Block() {
               </Card>
             </div>
 
-            <Card className="flex-1 p-0 rounded-sm rounded-br-[12px]">
+            <Card className="flex-1 p-0 rounded-sm rounded-br-[12px] gap-0">
               <Tabs value={tab.selected} onValueChange={tab.onChange}>
                 <CardContent className="pb-0 pt-[3px]">
                   <TabsList className="gap-[12px] p-0">
@@ -466,7 +466,7 @@ export function Block() {
                     <DataTable
                       table={txs}
                       onRowClick={(row) => navigate(`../tx/${row.hash}`)}
-                      className="max-h-[63vh]"
+                      className="max-h-[630px]"
                     />
                   </TabsContent>
 
@@ -476,7 +476,7 @@ export function Block() {
                       onRowClick={(row) =>
                         navigate(`../event/${row.txn_hash}-${row.id}`)
                       }
-                      className="max-h-[66vh]"
+                      className="max-h-[666px]"
                     />
                   </TabsContent>
                 </CardContent>
