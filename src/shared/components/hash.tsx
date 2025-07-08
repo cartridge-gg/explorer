@@ -12,24 +12,35 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+interface HashProps {
+  value: string | undefined;
+  length?: number;
+  to?: string;
+  containerClassName?: string;
+  className?: string;
+  onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void;
+  onIconClick?: (e?: React.MouseEvent<HTMLDivElement>) => void;
+}
+
 export function Hash({
   value,
   length = 4,
   to,
   containerClassName,
   className,
-}: {
-  value: string | undefined;
-  length?: number;
-  to?: string;
-  containerClassName?: string;
-  className?: string;
-}) {
+  onClick,
+  onIconClick,
+}: HashProps) {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
 
   const onCopy = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
+      if (onClick) {
+        onClick();
+        return;
+      }
+
       e.stopPropagation();
 
       if (!value) {
@@ -39,7 +50,7 @@ export function Hash({
       navigator.clipboard.writeText(value);
       toast.success("Address copied to clipboard");
     },
-    [value],
+    [value, onClick],
   );
 
   const onNavigate = useCallback(() => {
@@ -127,9 +138,13 @@ export function Hash({
           </div>
 
           {to ? (
-            <ExternalIcon className="text-foreground-400 !w-[18px] !h-[18px]" />
+            <ExternalIcon
+              onClick={onIconClick}
+              className="text-foreground-400 !w-[18px] !h-[18px]"
+            />
           ) : (
             <CloneIcon
+              onClick={onIconClick}
               variant={isHovered ? "solid" : "line"}
               className="text-foreground-400 w-[18px] h-[18px]"
             />
