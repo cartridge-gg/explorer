@@ -107,20 +107,6 @@ export function Transaction() {
   );
   const { isMobile } = useScreen();
 
-  const onCopySenderAddress = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-
-      if (!tx?.sender_address) {
-        return;
-      }
-
-      navigator.clipboard.writeText(tx.sender_address);
-      toast.success("Address copied to clipboard");
-    },
-    [tx?.sender_address],
-  );
-
   const onCopyValue = useCallback((value: string) => {
     navigator.clipboard.writeText(value);
     toast.success("Value copied to clipboard");
