@@ -23,9 +23,11 @@ import { useCalldata } from "./hooks";
 import { GetTransactionResponse } from "starknet";
 import { decodeCalldata } from "@/shared/utils/rpc";
 import { Editor } from "@/shared/components/editor";
+import { useScreen } from "@/shared/hooks/useScreen";
 
 export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
+  const { isMobile } = useScreen();
 
   return (
     <Tabs defaultValue="decoded" className="space-y-[15px]">
@@ -54,7 +56,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
             <Dialog key={i}>
               <DialogTrigger asChild>
                 <div className="w-full bg-background-200 p-2 first:rounded-t last:rounded-b flex items-center gap-4">
-                  <Hash value={c.contract} />
+                  <Hash length={1} value={c.contract} />
                   <div className="flex items-center gap-2 text-foreground-200">
                     <FnIcon className="text-foreground-400" />
                     <span className="font-semibold">{c.function_name}</span>
@@ -82,7 +84,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                     <p className="capitalize text-foreground-400 text-[12px]/[16px] font-normal">
                       contract
                     </p>
-                    <Hash value={c.contract} />
+                    <Hash length={isMobile ? 1 : 3} value={c.contract} />
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="capitalize text-foreground-400 text-[12px]/[16px] font-normal">

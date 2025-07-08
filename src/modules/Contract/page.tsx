@@ -391,9 +391,9 @@ export function Contract() {
                       Address
                     </CardLabel>
                     <Hash
+                      length={isMobile ? 1 : 4}
                       className="px-0"
                       value={contractAddress}
-                      length={isMobile ? 4 : 12}
                     />
                   </div>
 
@@ -415,7 +415,7 @@ export function Contract() {
                     className="bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
                     onClick={onCopyClassHash}
                   >
-                    <Hash value={classHash} length={12} />
+                    <Hash length={3} value={classHash} />
                   </div>
                 </div>
               </CardContent>
@@ -597,7 +597,10 @@ export function Contract() {
                           <CardLabel className="text-[13px]/[16px] font-normal">
                             selector
                           </CardLabel>
-                          <Hash value={selected?.selector} />
+                          <Hash
+                            length={isMobile ? 1 : 3}
+                            value={selected?.selector}
+                          />
                         </div>
                       </div>
 
@@ -861,7 +864,10 @@ export function Contract() {
                               <CardLabel className="text-[13px]/[16px] font-normal">
                                 selector
                               </CardLabel>
-                              <Hash value={selected?.selector} />
+                              <Hash
+                                length={isMobile ? 1 : 3}
+                                value={selected?.selector}
+                              />
                             </div>
                           </div>
 

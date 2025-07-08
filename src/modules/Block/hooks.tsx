@@ -121,7 +121,7 @@ export function useBlock() {
     () =>
       txColumnHelper.accessor("hash", {
         header: "Hash",
-        cell: (info) => <Hash value={info.renderValue()} />,
+        cell: (info) => <Hash length={2} value={info.renderValue()} />,
         filterFn: (row, columnId, filterValue) => {
           const rowValue: string = row.getValue(columnId);
           if (filterValue === undefined || filterValue === "All") return true;

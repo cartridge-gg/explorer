@@ -28,6 +28,20 @@ export const ShortHash: Story = {
   },
 };
 
+export const CustomLength2: Story = {
+  args: {
+    value: "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D",
+    length: 2,
+  },
+};
+
+export const CustomLength3: Story = {
+  args: {
+    value: "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D",
+    length: 3,
+  },
+};
+
 export const Link: Story = {
   args: {
     value: "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D",

@@ -170,7 +170,12 @@ export function ClassHash() {
       <Card className="p-[15px] rounded-t-sm rounded-b-[12px] h-[72px]">
         <CardContent className="gap-[6px] px-0">
           <CardLabel className="text-[12px]/[16px] font-normal">Hash</CardLabel>
-          <Hash value={classHash} containerClassName="w-fit" className="px-0" />
+          <Hash
+            length={3}
+            value={classHash}
+            containerClassName="w-fit"
+            className="px-0"
+          />
         </CardContent>
       </Card>
 
@@ -323,7 +328,10 @@ export function ClassHash() {
                             <CardLabel className="text-[13px]/[16px] font-normal">
                               selector
                             </CardLabel>
-                            <Hash value={selected?.selector} />
+                            <Hash
+                              length={isMobile ? 1 : 3}
+                              value={selected?.selector}
+                            />
                           </div>
                         </div>
 
