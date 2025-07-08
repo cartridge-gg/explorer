@@ -476,7 +476,7 @@ export function Block() {
                       onRowClick={(row) =>
                         navigate(`../event/${row.txn_hash}-${row.id}`)
                       }
-                      className="max-h-[666px]"
+                      className="max-h-[667px]"
                     />
                   </TabsContent>
                 </CardContent>
