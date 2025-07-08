@@ -456,10 +456,10 @@ export function Contract() {
             </Card>
           </div>
 
-          <Card className="max-h-[640px] flex-grow grid grid-rows-[min-content_1fr] rounded-[12px] p-0 mb-[20px] gap-0">
-            <CardContent className="max-h-[640px] p-0 pt-[5px] gap-0">
+          <Card className="h-[640px] flex-grow grid grid-rows-[min-content_1fr] rounded-[12px] p-0 mb-[20px] gap-0">
+            <CardContent className="h-[640px] p-0 pt-[5px] gap-0">
               {isMobile ? (
-                <div className="h-full max-h-[640px] overflow-y-auto p-0">
+                <div className="h-[640px] overflow-y-auto p-0">
                   <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] divide-y md:divide-y-0 md:divide-x divide-background-300 h-full">
                     {/* sidebar */}
                     <div className="relative flex flex-col justify-start h-[239px] overflow-y-auto">
