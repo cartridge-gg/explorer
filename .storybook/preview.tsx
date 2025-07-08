@@ -5,9 +5,8 @@ import { SonnerToaster } from "@cartridge/ui";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { themes } from "storybook/theming";
-import { withThemeByClassName } from "@storybook/addon-themes";
 
-import type { Decorator, Preview, ReactRenderer } from "@storybook/react-vite";
+import type { Decorator, Preview } from "@storybook/react-vite";
 
 const providerDecorator: Decorator = (Story) => {
   const queryClient = new QueryClient();

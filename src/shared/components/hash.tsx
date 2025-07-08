@@ -1,7 +1,6 @@
 import {
   CloneIcon,
   cn,
-  DotsIcon,
   ExternalIcon,
   Skeleton,
   Tooltip,
