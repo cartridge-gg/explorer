@@ -7,6 +7,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  DotsIcon,
 } from "@cartridge/ui";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -121,9 +122,7 @@ export function CopyableInteger({
 
             {/* Render dots if there's a last part */}
             {lastChunks.length > 0 && (
-              <span className="text-foreground-200 font-mono text-[12px]/[16px] font-normal">
-                ...
-              </span>
+              <DotsIcon className="text-foreground-200" />
             )}
 
             {/* Render last part chunks */}
