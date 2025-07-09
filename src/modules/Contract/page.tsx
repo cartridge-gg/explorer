@@ -437,7 +437,7 @@ export function Contract() {
                       ? "0.00"
                       : balances.strk !== undefined
                         ? (Number(balances.strk) / 10 ** 18)
-                            .toFixed(6)
+                            .toPrecision(6)
                             .toString()
                         : "-"}
                   </p>
@@ -451,7 +451,7 @@ export function Contract() {
                       ? "0.00"
                       : balances.eth !== undefined
                         ? (Number(balances.eth) / 10 ** 18)
-                            .toFixed(6)
+                            .toPrecision(6)
                             .toString()
                         : "-"}
                   </p>
