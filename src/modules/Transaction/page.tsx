@@ -13,8 +13,6 @@ import {
   PulseIcon,
   PencilIcon,
   Tabs as UITabs,
-  TabsList as UITabsList,
-  TabsTrigger as UITabsTrigger,
   TabsContent as UITabsContent,
   cn,
 } from "@cartridge/ui";
