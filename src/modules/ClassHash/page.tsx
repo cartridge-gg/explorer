@@ -194,9 +194,9 @@ export function ClassHash() {
         {error ? (
           <NotFound />
         ) : (
-          <Card className="h-[640px] flex-grow grid grid-rows-[min-content_1fr] rounded-[12px] p-0 mb-[20px] gap-0">
+          <Card className="relative h-[640px] flex-grow grid grid-rows-[min-content_1fr] rounded-[12px] p-0 mb-[20px] gap-0">
             <Tabs defaultValue="abi" className="h-full">
-              <CardContent className="px-[15px] py-[3px]">
+              <CardContent className="px-[15px] pt-[3px] h-[43px] gap-0 pb-0">
                 <TabsList className="gap-[12px] p-0">
                   <TabsTrigger
                     value="abi"
@@ -217,7 +217,7 @@ export function ClassHash() {
 
               <Separator />
 
-              <CardContent className="h-[640px] p-0 gap-0">
+              <CardContent className="h-[597px] p-0 gap-0 relative">
                 <TabsContent
                   value="abi"
                   className="data-[state=inactive]:hidden mt-0 grid grid-cols-1 md:grid-cols-[340px_1fr] divide-y md:divide-y-0 md:divide-x divide-background-200 h-full"
@@ -410,7 +410,7 @@ export function ClassHash() {
 }
 
 const Separator = memo(({ className }: { className?: string }) => (
-  <CardSeparator
-    className={cn("my-0 left-[-15px] w-[calc(100%+30px)]", className)}
-  />
+  <span>
+    <CardSeparator className={cn("my-0", className)} />
+  </span>
 ));
