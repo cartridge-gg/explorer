@@ -7,7 +7,6 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-  DotsIcon,
 } from "@cartridge/ui";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
