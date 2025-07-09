@@ -57,6 +57,7 @@ import { getFinalityStatus } from "@/shared/utils/receipt";
 import FeltList from "@/shared/components/FeltList";
 import { Editor } from "@/shared/components/editor";
 import { AccountAddressV2 } from "@/shared/components/account-address-v2";
+import { Selector } from "@/shared/components/Selector";
 
 /**
  *
@@ -549,10 +550,12 @@ export function Transaction() {
                     )}
                     <TabsContent value="signature" className="mt-0">
                       <UITabs defaultValue="hex">
-                        <UITabsList>
-                          <UITabsTrigger value="decoded">Dec</UITabsTrigger>
-                          <UITabsTrigger value="hex">Hex</UITabsTrigger>
-                        </UITabsList>
+                        <Selector
+                          items={[
+                            { value: "dec", label: "Dec" },
+                            { value: "hex", label: "Hex" },
+                          ]}
+                        />
                         <UITabsContent value="hex" className="mt-[15px]">
                           <Editor
                             className="min-h-[80vh]"

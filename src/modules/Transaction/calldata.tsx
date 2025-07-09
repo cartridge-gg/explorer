@@ -37,7 +37,6 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
           { label: "Decoded", value: "decoded" },
         ]}
       />
-
       <TabsContent value="decoded" className="mt-[15px]">
         {!tx ? (
           <>
