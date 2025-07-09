@@ -5,17 +5,28 @@ export interface SelectorKV {
   label: string;
 }
 
+// Helper type to enforce minimum array length
+type MinLength<T, N extends number> = T[] & { length: N } & T[];
+
 export interface SelectorProps {
   containerClassName?: string;
   className?: string;
-  items: Array<SelectorKV>;
+  items: MinLength<SelectorKV, 2>; // Minimum 2 items
 }
 
+/**
+ *
+ * @param item - Minimum 2 items
+ */
 export const Selector = ({
   containerClassName,
   className,
   items,
 }: SelectorProps) => {
+  if (items.length < 2) {
+    throw new Error("Selector requires at least 2 items");
+  }
+
   return (
     <TabsList className={cn("h-auto p-0 select-none", containerClassName)}>
       {items.map((item, i) => (
