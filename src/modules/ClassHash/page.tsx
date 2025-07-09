@@ -196,7 +196,7 @@ export function ClassHash() {
         ) : (
           <Card className="relative h-[640px] flex-grow grid grid-rows-[min-content_1fr] rounded-[12px] p-0 mb-[20px] gap-0">
             <Tabs defaultValue="abi" className="h-full">
-              <CardContent className="px-[15px] pt-[3px] h-[43px] gap-0 pb-0">
+              <CardContent className="px-[15px] pt-[3px] h-[43px] gap-0 pb-0 border-b border-background-200">
                 <TabsList className="gap-[12px] p-0">
                   <TabsTrigger
                     value="abi"
@@ -214,8 +214,6 @@ export function ClassHash() {
                   </TabsTrigger>
                 </TabsList>
               </CardContent>
-
-              <Separator />
 
               <CardContent className="h-[597px] p-0 gap-0 relative">
                 <TabsContent
