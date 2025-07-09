@@ -23,6 +23,7 @@ import { decodeCalldata } from "@/shared/utils/rpc";
 import { Editor } from "@/shared/components/editor";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { CopyableText } from "@/shared/components/copyable-text";
+import { Selector } from "@/shared/components/Selector";
 
 export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
@@ -30,20 +31,12 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
 
   return (
     <Tabs defaultValue="decoded" className="space-y-[15px]">
-      <TabsList className="h-auto p-0 select-none">
-        <TabsTrigger
-          value="raw"
-          className="data-[state=active]:shadow-none py-[2px] pr-[8px] pl-[10px] rounded-sm data-[state=active]:bg-background-200 data-[state=inactive]:bg-background-100 data-[state=inactive]:rounded-r-none data-[state=inactive]:text-foreground-400 data-[state=active]:text-foreground-100 box-border border border-background-200 border-r-0 h-[20px]"
-        >
-          <span className="text-[12px]/[16px] font-medium">Raw</span>
-        </TabsTrigger>
-        <TabsTrigger
-          value="decoded"
-          className="data-[state=active]:shadow-none py-[2px] px-[8px] rounded-sm data-[state=active]:bg-background-200 data-[state=inactive]:bg-background-100 data-[state=inactive]:rounded-l-none data-[state=inactive]:text-foreground-400 data-[state=active]:text-foreground-100 box-border border border-background-200 border-l-0 h-[20px]"
-        >
-          <span className="text-[12px]/[16px] font-medium">Decoded</span>
-        </TabsTrigger>
-      </TabsList>
+      <Selector
+        items={[
+          { label: "Raw", value: "raw" },
+          { label: "Decoded", value: "decoded" },
+        ]}
+      />
 
       <TabsContent value="decoded" className="mt-[15px]">
         {!tx ? (
