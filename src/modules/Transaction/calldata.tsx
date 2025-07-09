@@ -1,6 +1,5 @@
 import { CopyableInteger } from "@/shared/components/copyable-integer";
 import {
-  CopyIcon,
   DialogClose,
   FnIcon,
   Input,
@@ -17,7 +16,6 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/shared/components/dialog";
-import { toast } from "sonner";
 import { Badge } from "@/shared/components/badge";
 import { useCalldata } from "./hooks";
 import { GetTransactionResponse } from "starknet";
