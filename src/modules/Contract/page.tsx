@@ -436,8 +436,10 @@ export function Contract() {
                     {isStrkLoading
                       ? "0.00"
                       : balances.strk !== undefined
-                        ? (Number(balances.strk) / 10 ** 18).toString()
-                        : "N/A"}
+                        ? (Number(balances.strk) / 10 ** 18)
+                            .toPrecision(6)
+                            .toString()
+                        : "-"}
                   </p>
                 </div>
                 <div className="bg-background-200 hover:bg-background-300 flex flex-col justify-between p-[12px] h-[64px] min-w-[150px] md:w-[150px] w-full">
@@ -448,8 +450,10 @@ export function Contract() {
                     {isEthLoading
                       ? "0.00"
                       : balances.eth !== undefined
-                        ? (Number(balances.eth) / 10 ** 18).toString()
-                        : "N/A"}
+                        ? (Number(balances.eth) / 10 ** 18)
+                            .toPrecision(6)
+                            .toString()
+                        : "-"}
                   </p>
                 </div>
               </CardContent>
