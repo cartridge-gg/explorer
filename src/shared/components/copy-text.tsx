@@ -48,7 +48,7 @@ export function CopyableText({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        "flex items-center gap-[6px] font-mono font-bold text-foreground cursor-pointer transition-all",
+        "flex items-center gap-[6px] font-bold text-foreground cursor-pointer transition-all",
         containerClassName,
       )}
     >

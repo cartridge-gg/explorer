@@ -24,6 +24,7 @@ import { GetTransactionResponse } from "starknet";
 import { decodeCalldata } from "@/shared/utils/rpc";
 import { Editor } from "@/shared/components/editor";
 import { useScreen } from "@/shared/hooks/useScreen";
+import { CopyableText } from "@/shared/components/copy-text";
 
 export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
@@ -90,18 +91,10 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                     <p className="capitalize text-foreground-400 text-[12px]/[16px] font-normal">
                       function
                     </p>
-                    <div
-                      className="flex items-center gap-2 cursor-pointer group"
-                      onClick={() => {
-                        navigator.clipboard.writeText(c.function_name);
-                        toast.success("Function name copied to clipboard");
-                      }}
-                    >
-                      <span className="text-[13px]/[16px] tracking-[0.26px] font-semibold text-foreground-100 group-hover:text-foreground-200">
-                        {c.function_name}
-                      </span>
-                      <CopyIcon size="sm" className="text-foreground-400" />
-                    </div>
+                    <CopyableText
+                      value={c.function_name}
+                      title="Function name"
+                    />
                   </div>
                 </div>
 
