@@ -1,6 +1,6 @@
 import { RPC_PROVIDER } from "@/services/rpc";
 import { Badge } from "@/shared/components/badge";
-import { Hash } from "@/shared/components/hash";
+import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { isValidAddress } from "@/shared/utils/contract";
 import {
@@ -121,7 +121,9 @@ export function useBlock() {
     () =>
       txColumnHelper.accessor("hash", {
         header: "Hash",
-        cell: (info) => <Hash length={2} value={info.renderValue()} />,
+        cell: (info) => (
+          <CopyableInteger length={2} value={info.renderValue()} />
+        ),
         filterFn: (row, columnId, filterValue) => {
           const rowValue: string = row.getValue(columnId);
           if (filterValue === undefined || filterValue === "All") return true;
@@ -226,13 +228,16 @@ export function useBlock() {
       eventColumnHelper.accessor("txn_hash", {
         header: "Transaction",
         cell: (info) => (
-          <Hash value={info.renderValue()} to={`../tx/${info.renderValue()}`} />
+          <CopyableInteger
+            value={info.renderValue()}
+            to={`../tx/${info.renderValue()}`}
+          />
         ),
       }),
       eventColumnHelper.accessor("from", {
         header: "From Address",
         cell: (info) => (
-          <Hash
+          <CopyableInteger
             value={info.renderValue()}
             to={`../contract/${info.renderValue()}`}
           />

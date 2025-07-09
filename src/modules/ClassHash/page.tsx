@@ -28,7 +28,7 @@ import {
   isValidAddress,
 } from "@/shared/utils/contract";
 import { NotFound } from "@/modules/NotFound/page";
-import { Hash } from "@/shared/components/hash";
+import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { Badge } from "@/shared/components/badge";
 import { FunctionAbiWithAst, isReadFunction } from "@/shared/utils/abi";
 import { useEffect, useMemo, useState } from "react";
@@ -42,7 +42,7 @@ import {
 } from "@/shared/components/tabs";
 import { Editor } from "@/shared/components/editor";
 import { MultiFilter } from "@/shared/components/filter";
-import { CopyableText } from "@/shared/components/copy-text";
+import { CopyableText } from "@/shared/components/copyable-text";
 
 const initialData: ContractClassInfo = {
   constructor: {
@@ -176,7 +176,7 @@ export function ClassHash() {
             <CardLabel className="text-[12px]/[16px] font-normal">
               Hash
             </CardLabel>
-            <Hash
+            <CopyableInteger
               length={3}
               value={classHash}
               containerClassName="w-fit"
@@ -313,7 +313,7 @@ export function ClassHash() {
                         <CardLabel className="text-[13px]/[16px] font-normal">
                           selector
                         </CardLabel>
-                        <Hash
+                        <CopyableInteger
                           length={isMobile ? 1 : 3}
                           value={selected?.selector}
                         />
