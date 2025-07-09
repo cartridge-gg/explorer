@@ -17,12 +17,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumb";
-import {
-  Card,
-  CardSeparator,
-  CardContent,
-  CardLabel,
-} from "@/shared/components/card";
+import { Card, CardContent, CardLabel } from "@/shared/components/card";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
@@ -37,7 +32,7 @@ import { NotFound } from "@/modules/NotFound/page";
 import { Hash } from "@/shared/components/hash";
 import { Badge } from "@/shared/components/badge";
 import { FunctionAbiWithAst, isReadFunction } from "@/shared/utils/abi";
-import { memo, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { useScrollTo } from "@/shared/hooks/useScrollTo";
@@ -406,9 +401,3 @@ export function ClassHash() {
     </div>
   );
 }
-
-const Separator = memo(({ className }: { className?: string }) => (
-  <span>
-    <CardSeparator className={cn("my-0", className)} />
-  </span>
-));
