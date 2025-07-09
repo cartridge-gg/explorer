@@ -1,145 +1,51 @@
-import React, {
-  useCallback,
-  useState,
-  createContext,
-  useContext,
-  useEffect,
-} from "react";
+import { cn, TabsList, TabsTrigger } from "@cartridge/ui";
 
-/**
- * Selector Component Set
- *
- * This module provides a tab/selector component system with the following parts:
- *
- * 1. SelectorContext - Shares state between parent and child components
- * 2. Selector - Selector component that manages selection state
- * 3. SelectorItem - Individual tab items that can be selected
- *
- * These components work together through React's Context API to create
- * a cohesive tab selection interface without prop drilling.
- */
+export interface SelectorKV {
+  value: string;
+  label: string;
+}
 
-interface SelectorContextType {
-  selected?: string;
-  setSelected: (tab: string) => void;
-  selectedStyled?: React.CSSProperties;
+// Helper type to enforce minimum array length
+type MinLength<T, N extends number> = T[] & { length: N } & T[];
+
+export interface SelectorProps {
+  containerClassName?: string;
+  className?: string;
+  items: MinLength<SelectorKV, 2>; // Minimum 2 items
 }
 
 /**
- * Context that allows SelectorItem components to access and modify
- * the currently selected tab state from their parent Container
- */
-const SelectorContext = createContext<SelectorContextType | undefined>(
-  undefined,
-);
-
-export interface SelectorProps extends React.HTMLAttributes<HTMLDivElement> {
-  selected?: string; // Initial selected tab
-  onTabSelect?: (tab: string) => void; // Callback when selection changes
-  selectedStyled?: React.CSSProperties; // Style to apply to selected tabs
-}
-
-/**
- * The container component that manages tab selection state
  *
- * Wraps Item components and provides them with selection context
- * through SelectorContext.Provider
+ * @param item - Minimum 2 items
  */
-export function Selector({
-  selected: initialSelectedTab,
-  onTabSelect: onSelect,
-  selectedStyled,
-  children,
+export const Selector = ({
+  containerClassName,
   className,
-  ...props
-}: SelectorProps) {
-  const [selected, setSelected] = useState<string | undefined>(
-    initialSelectedTab,
-  );
-
-  // Notify parent component of initial selection
-  useEffect(() => {
-    if (initialSelectedTab && onSelect) {
-      onSelect(initialSelectedTab);
-    }
-  }, [initialSelectedTab, onSelect]);
-
-  // Handle tab selection and propagate changes to parent component
-  const handleTabSelect = useCallback(
-    (tab: string) => {
-      setSelected(tab);
-      if (onSelect) {
-        onSelect(tab);
-      }
-    },
-    [onSelect],
-  );
-
-  return (
-    <SelectorContext.Provider
-      value={{ selected, setSelected: handleTabSelect, selectedStyled }}
-    >
-      <div
-        className={`border border-borderGray flex ${className || ""}`}
-        {...props}
-      >
-        {children}
-      </div>
-    </SelectorContext.Provider>
-  );
-}
-
-export interface SelectItemProps extends React.HTMLAttributes<HTMLDivElement> {
-  name: string; // Display name
-  value: string; // The actual value
-}
-
-const defaultSelectedStyle: React.CSSProperties = {
-  color: "#ffff",
-  backgroundColor: "#B0B0B0",
-  boxShadow: "inset 0px 1px 3px rgba(0, 0, 0, 0.25)",
-};
-
-/**
- * Individual tab component that can be selected
- *
- * Must be used as a child of Selector to function properly
- * as it relies on SelectorContext to access selection state
- */
-export function SelectorItem({
-  name,
-  value,
-  className,
-  ...props
-}: SelectItemProps) {
-  const context = useContext(SelectorContext);
-  if (!context) {
-    throw new Error("SelectorItem must be used within a Selector");
+  items,
+}: SelectorProps) => {
+  if (items.length < 2) {
+    throw new Error("Selector requires at least 2 items");
   }
 
-  const { selected, setSelected, selectedStyled } = context;
-  const isSelected = selected === value;
-
-  const onClick = useCallback(() => {
-    setSelected(value);
-  }, [value, setSelected]);
-
-  const computedSelectedStyle = React.useMemo<React.CSSProperties>(
-    () => selectedStyled || defaultSelectedStyle,
-    [selectedStyled],
-  );
-
   return (
-    <div
-      onClick={onClick}
-      style={isSelected ? computedSelectedStyle : undefined}
-      // `margin-right: -1px;` to simulate `border-collapse`
-      className={`bg-white text-center ${
-        className || ""
-      } ml-[-1px] border-l border-l-borderGray w-full px-2 uppercase cursor-pointer`}
-      {...props}
-    >
-      {name}
-    </div>
+    <TabsList className={cn("h-auto p-0 select-none", containerClassName)}>
+      {items.map((item, i) => (
+        <TabsTrigger
+          key={i}
+          value={item.value}
+          className={cn(
+            "data-[state=active]:shadow-none py-[2px] pr-[8px] pl-[10px] rounded-sm data-[state=active]:bg-background-200 data-[state=inactive]:bg-background-100 data-[state=inactive]:text-foreground-400 data-[state=active]:text-foreground-100 box-border border border-background-200 h-[20px]",
+            i === 0
+              ? "data-[state=inactive]:rounded-r-none border-r-0" // first item
+              : i === items.length - 1
+                ? "data-[state=inactive]:rounded-l-none border-l-0" // last item
+                : "data-[state=inactive]:rounded-l-none data-[state=inactive]:rounded-r-none border-x-0", // middle item
+            className,
+          )}
+        >
+          <span className="text-[12px]/[16px] font-medium">{item.label}</span>
+        </TabsTrigger>
+      ))}
+    </TabsList>
   );
-}
+};

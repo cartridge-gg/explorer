@@ -6,8 +6,6 @@ import {
   Skeleton,
   Tabs,
   TabsContent,
-  TabsList,
-  TabsTrigger,
   TimesIcon,
 } from "@cartridge/ui";
 import { FeltDisplayer } from "@/shared/components/felt-displayer";
@@ -23,6 +21,7 @@ import { decodeCalldata } from "@/shared/utils/rpc";
 import { Editor } from "@/shared/components/editor";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { CopyableText } from "@/shared/components/copyable-text";
+import { Selector } from "@/shared/components/Selector";
 
 export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
@@ -30,15 +29,12 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
 
   return (
     <Tabs defaultValue="decoded" className="space-y-[15px]">
-      <TabsList className="h-auto rounded-sm p-[2px]">
-        <TabsTrigger value="raw" className="py-[2px] px-[8px] rounded-sm">
-          <span className="text-[12px]/[16px] font-medium">Raw</span>
-        </TabsTrigger>
-        <TabsTrigger value="decoded" className="py-[2px] px-[8px] rounded-sm">
-          <span className="text-[12px]/[16px] font-medium">Decoded</span>
-        </TabsTrigger>
-      </TabsList>
-
+      <Selector
+        items={[
+          { label: "Raw", value: "raw" },
+          { label: "Decoded", value: "decoded" },
+        ]}
+      />
       <TabsContent value="decoded" className="mt-[15px]">
         {!tx ? (
           <>
@@ -103,25 +99,13 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                   defaultValue="decoded"
                   className="flex flex-col gap-[13px] p-[15px]"
                 >
-                  <TabsList className="self-start h-auto rounded-sm p-[2px]">
-                    <TabsTrigger
-                      value="raw"
-                      className="py-[2px] px-[8px] rounded-sm"
-                    >
-                      <span className="text-[12px]/[16px] font-medium">
-                        Raw
-                      </span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="decoded"
-                      className="py-[2px] px-[8px] rounded-sm"
-                    >
-                      <span className="text-[12px]/[16px] font-medium">
-                        Decoded
-                      </span>
-                    </TabsTrigger>
-                  </TabsList>
-
+                  <Selector
+                    containerClassName="self-start"
+                    items={[
+                      { value: "raw", label: "Raw" },
+                      { value: "decoded", label: "Decoded" },
+                    ]}
+                  />
                   <TabsContent value="raw" className="mt-0">
                     <FeltDisplayer
                       value={c.raw_args}
