@@ -12,7 +12,7 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-interface HashProps {
+export interface CopyableIntegerProps {
   value: string | undefined;
   length?: number;
   to?: string;
@@ -22,7 +22,7 @@ interface HashProps {
   onIconClick?: (e?: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-export function Hash({
+export function CopyableInteger({
   value,
   length = 4,
   to,
@@ -30,7 +30,7 @@ export function Hash({
   className,
   onClick,
   onIconClick,
-}: HashProps) {
+}: CopyableIntegerProps) {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
 

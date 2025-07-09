@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { CopyableText } from "./copy-text";
+import { CopyableText } from "./copyable-text";
 
 const meta = {
   tags: ["autodocs"],
-  title: "CopyableText",
+  title: "Copyable/Copyable Text",
   component: CopyableText,
 } satisfies Meta<typeof CopyableText>;
 

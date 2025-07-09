@@ -2,7 +2,7 @@ import { CloneIcon, cn, Skeleton } from "@cartridge/ui";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
-interface CopyableTextProps {
+export interface CopyableTextProps {
   title?: string;
   value: string | undefined;
   containerClassName?: string;
