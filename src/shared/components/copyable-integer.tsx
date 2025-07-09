@@ -122,7 +122,9 @@ export function CopyableInteger({
 
             {/* Render dots if there's a last part */}
             {lastChunks.length > 0 && (
-              <DotsIcon className="text-foreground-200" />
+              <span className="text-foreground-200 font-mono text-[12px]/[16px] font-normal">
+                •••
+              </span>
             )}
 
             {/* Render last part chunks */}
