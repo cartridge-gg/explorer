@@ -9,8 +9,6 @@ import {
   SearchIcon,
   Badge,
   Tabs,
-  TabsList,
-  TabsTrigger,
   TabsContent,
   CopyIcon,
 } from "@cartridge/ui";
