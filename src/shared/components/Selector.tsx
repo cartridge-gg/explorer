@@ -28,7 +28,7 @@ export const Selector = ({
               ? "data-[state=inactive]:rounded-r-none border-r-0" // first item
               : i === items.length - 1
                 ? "data-[state=inactive]:rounded-l-none border-l-0" // last item
-                : "data-[state=inactive]:rounded-l-none border-x-0", // middle item
+                : "data-[state=inactive]:rounded-l-none data-[state=inactive]:rounded-r-none border-x-0", // middle item
             className,
           )}
         >
