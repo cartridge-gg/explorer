@@ -51,7 +51,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/shared/components/breadcrumb";
-import { Hash } from "@/shared/components/hash";
+import { CopyableInteger } from "@/shared/components/copyable-integer";
 import dayjs from "dayjs";
 import { getFinalityStatus } from "@/shared/utils/receipt";
 import FeltList from "@/shared/components/FeltList";
@@ -213,7 +213,10 @@ export function Transaction() {
                   <div className="flex justify-between items-center">
                     <CardLabel>Hash</CardLabel>
                     <div>
-                      <Hash length={1} value={receipt?.transaction_hash} />
+                      <CopyableInteger
+                        length={1}
+                        value={receipt?.transaction_hash}
+                      />
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
@@ -516,7 +519,7 @@ export function Transaction() {
                         <div className="flex flex-col gap-2">
                           <div className="flex items-center justify-between gap-2">
                             <CardLabel>Class Hash</CardLabel>
-                            <Hash
+                            <CopyableInteger
                               length={isMobile ? 1 : 3}
                               value={tx.class_hash}
                               to={`../class/${tx.class_hash}`}
@@ -524,7 +527,7 @@ export function Transaction() {
                           </div>
                           <div className="flex items-center justify-between gap-2">
                             <CardLabel>Compiled Class Hash</CardLabel>
-                            <Hash
+                            <CopyableInteger
                               length={isMobile ? 1 : 3}
                               value={tx.compiled_class_hash}
                             />

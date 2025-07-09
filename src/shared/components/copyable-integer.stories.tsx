@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Hash } from "./hash";
+import { CopyableInteger } from "./copyable-integer";
 
 const meta = {
   tags: ["autodocs"],
-  title: "Hash",
-  component: Hash,
-} satisfies Meta<typeof Hash>;
+  title: "Copyable/Copyable Integer",
+  component: CopyableInteger,
+} satisfies Meta<typeof CopyableInteger>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

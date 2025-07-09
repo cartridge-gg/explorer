@@ -22,7 +22,7 @@ import {
   BreadcrumbPage,
 } from "@/shared/components/breadcrumb";
 import { DataTable } from "@/shared/components/data-table";
-import { Hash } from "@/shared/components/hash";
+import { CopyableInteger } from "@/shared/components/copyable-integer";
 
 const ROWS_TO_RENDER = 20;
 const BLOCKS_BATCH_SIZE = 5; // Number of blocks to fetch at once
@@ -116,7 +116,7 @@ export function TransactionList() {
       }),
       columnHelper.accessor("hash", {
         header: "Transaction Hash",
-        cell: (info) => <Hash value={info.renderValue()} />,
+        cell: (info) => <CopyableInteger value={info.renderValue()} />,
       }),
       columnHelper.accessor("age", {
         header: "Age",

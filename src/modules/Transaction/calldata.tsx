@@ -1,6 +1,5 @@
-import { Hash } from "@/shared/components/hash";
+import { CopyableInteger } from "@/shared/components/copyable-integer";
 import {
-  CopyIcon,
   DialogClose,
   FnIcon,
   Input,
@@ -17,13 +16,13 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/shared/components/dialog";
-import { toast } from "sonner";
 import { Badge } from "@/shared/components/badge";
 import { useCalldata } from "./hooks";
 import { GetTransactionResponse } from "starknet";
 import { decodeCalldata } from "@/shared/utils/rpc";
 import { Editor } from "@/shared/components/editor";
 import { useScreen } from "@/shared/hooks/useScreen";
+import { CopyableText } from "@/shared/components/copyable-text";
 
 export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
@@ -56,7 +55,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
             <Dialog key={i}>
               <DialogTrigger asChild>
                 <div className="w-full bg-background-200 p-2 first:rounded-t last:rounded-b flex items-center gap-4">
-                  <Hash length={1} value={c.contract} />
+                  <CopyableInteger length={1} value={c.contract} />
                   <div className="flex items-center gap-2 text-foreground-200">
                     <FnIcon className="text-foreground-400" />
                     <span className="font-semibold">{c.function_name}</span>
@@ -84,24 +83,19 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                     <p className="capitalize text-foreground-400 text-[12px]/[16px] font-normal">
                       contract
                     </p>
-                    <Hash length={isMobile ? 1 : 3} value={c.contract} />
+                    <CopyableInteger
+                      length={isMobile ? 1 : 3}
+                      value={c.contract}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="capitalize text-foreground-400 text-[12px]/[16px] font-normal">
                       function
                     </p>
-                    <div
-                      className="flex items-center gap-2 cursor-pointer group"
-                      onClick={() => {
-                        navigator.clipboard.writeText(c.function_name);
-                        toast.success("Function name copied to clipboard");
-                      }}
-                    >
-                      <span className="text-[13px]/[16px] tracking-[0.26px] font-semibold text-foreground-100 group-hover:text-foreground-200">
-                        {c.function_name}
-                      </span>
-                      <CopyIcon size="sm" className="text-foreground-400" />
-                    </div>
+                    <CopyableText
+                      value={c.function_name}
+                      title="Function name"
+                    />
                   </div>
                 </div>
 

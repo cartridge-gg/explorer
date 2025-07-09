@@ -42,7 +42,7 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@/shared/components/tabs";
-import { Hash } from "@/shared/components/hash";
+import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useBlockNumber } from "@/shared/hooks/useBlockNumber";
 import dayjs from "dayjs";
@@ -191,15 +191,15 @@ export function Block() {
                 <CardContent className="gap-[8px]">
                   <div className="flex items-center justify-between">
                     <CardLabel>Hash</CardLabel>
-                    <Hash length={1} value={block?.block_hash} />
+                    <CopyableInteger length={1} value={block?.block_hash} />
                   </div>
                   <div className="flex items-center justify-between">
                     <CardLabel>State root</CardLabel>
-                    <Hash length={1} value={block?.new_root} />
+                    <CopyableInteger length={1} value={block?.new_root} />
                   </div>
                   <div className="flex items-center justify-between">
                     <CardLabel>Parent hash</CardLabel>
-                    <Hash length={1} value={block?.parent_hash} />
+                    <CopyableInteger length={1} value={block?.parent_hash} />
                   </div>
                 </CardContent>
 
@@ -211,7 +211,7 @@ export function Block() {
                     className="flex flex-row items-center justify-between bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
                     onClick={onClickSequencerAddress}
                   >
-                    <Hash
+                    <CopyableInteger
                       containerClassName="w-full justify-between"
                       length={3}
                       value={block?.sequencer_address}

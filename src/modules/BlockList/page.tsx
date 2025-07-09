@@ -24,7 +24,7 @@ import { StackDiamondIcon } from "@cartridge/ui";
 import { DataTable } from "@/shared/components/data-table";
 import { Card, CardContent } from "@/shared/components/card";
 import { getFinalityStatus } from "@/shared/utils/receipt";
-import { Hash } from "@/shared/components/hash";
+import { CopyableInteger } from "@/shared/components/copyable-integer";
 
 const columnHelper = createColumnHelper();
 
@@ -92,7 +92,7 @@ export function BlockList() {
       }),
       columnHelper.accessor("hash", {
         header: "Block Hash",
-        cell: (info) => <Hash value={info.renderValue()} />,
+        cell: (info) => <CopyableInteger value={info.renderValue()} />,
       }),
       columnHelper.accessor("age", {
         header: "Age",

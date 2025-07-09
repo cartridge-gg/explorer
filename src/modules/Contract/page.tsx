@@ -46,7 +46,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/shared/components/breadcrumb";
-import { Hash } from "@/shared/components/hash";
+import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { Badge } from "@/shared/components/badge";
 import {
   FunctionAbiWithAst,
@@ -57,11 +57,11 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { useScrollTo } from "@/shared/hooks/useScrollTo";
-import { CopyIcon } from "@cartridge/ui";
 import { MultiFilter } from "@/shared/components/filter";
 import { useAccount } from "@starknet-react/core";
 import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
 import { ParamForm } from "@/shared/components/form";
+import { CopyableText } from "@/shared/components/copyable-text";
 
 interface FunctionWithType extends FunctionAbiWithAst {
   functionType: "read" | "write";
@@ -390,7 +390,7 @@ export function Contract() {
                     <CardLabel className="text-[12px]/[16px] tracking-[0.24px]">
                       Address
                     </CardLabel>
-                    <Hash
+                    <CopyableInteger
                       length={isMobile ? 1 : 4}
                       className="px-0"
                       value={contractAddress}
@@ -415,7 +415,7 @@ export function Contract() {
                     className="bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
                     onClick={onCopyClassHash}
                   >
-                    <Hash length={3} value={classHash} />
+                    <CopyableInteger length={3} value={classHash} />
                   </div>
                 </div>
               </CardContent>
@@ -544,25 +544,10 @@ export function Contract() {
                             <CardLabel className="text-[13px]/[16px] font-normal">
                               interface
                             </CardLabel>
-                            <div
-                              onClick={() => {
-                                navigator.clipboard.writeText(
-                                  selected?.interface ?? "",
-                                );
-                                toast.success(
-                                  "Interface name is copied to clipboard",
-                                );
-                              }}
-                              className="flex items-center gap-2 cursor-pointer overflow-x-auto group"
-                            >
-                              <p className="text-[13px]/[16px] font-semibold text-foreground group-hover:text-foreground-200">
-                                {selected?.interface}
-                              </p>
-                              <CopyIcon
-                                size="sm"
-                                className="text-foreground-400"
-                              />
-                            </div>
+                            <CopyableText
+                              title="Interface name"
+                              value={selected.interface}
+                            />
                           </div>
                         )}
                         <div className="flex items-center justify-between gap-2">
@@ -570,25 +555,10 @@ export function Contract() {
                             function
                           </CardLabel>
                           {selected ? (
-                            <div
-                              onClick={() => {
-                                navigator.clipboard.writeText(
-                                  selected?.name ?? "",
-                                );
-                                toast.success(
-                                  "Function name is copied to clipboard",
-                                );
-                              }}
-                              className="flex items-center gap-2 cursor-pointer overflow-x-auto group"
-                            >
-                              <p className="text-[13px]/[16px] font-semibold text-foreground group-hover:text-foreground-200">
-                                {selected?.name}
-                              </p>
-                              <CopyIcon
-                                size="sm"
-                                className="text-foreground-400"
-                              />
-                            </div>
+                            <CopyableText
+                              title="Function name"
+                              value={selected.name}
+                            />
                           ) : (
                             <Skeleton className="rounded-sm h-6 w-40" />
                           )}
@@ -597,7 +567,7 @@ export function Contract() {
                           <CardLabel className="text-[13px]/[16px] font-normal">
                             selector
                           </CardLabel>
-                          <Hash
+                          <CopyableInteger
                             length={isMobile ? 1 : 3}
                             value={selected?.selector}
                           />
@@ -805,25 +775,10 @@ export function Contract() {
                             <CardLabel className="text-[13px]/[16px] font-normal">
                               interface
                             </CardLabel>
-                            <div
-                              onClick={() => {
-                                navigator.clipboard.writeText(
-                                  selected?.interface ?? "",
-                                );
-                                toast.success(
-                                  "Interface name is copied to clipboard",
-                                );
-                              }}
-                              className="flex items-center gap-2 cursor-pointer overflow-x-auto group"
-                            >
-                              <p className="text-[13px]/[16px] font-semibold text-foreground group-hover:text-foreground-200">
-                                {selected?.interface}
-                              </p>
-                              <CopyIcon
-                                size="sm"
-                                className="text-foreground-400"
-                              />
-                            </div>
+                            <CopyableText
+                              title="Interface name"
+                              value={selected.interface}
+                            />
                           </div>
                         )}
                         <div className="flex items-center justify-between gap-2">
@@ -831,25 +786,10 @@ export function Contract() {
                             function
                           </CardLabel>
                           {selected ? (
-                            <div
-                              onClick={() => {
-                                navigator.clipboard.writeText(
-                                  selected?.name ?? "",
-                                );
-                                toast.success(
-                                  "Function name is copied to clipboard",
-                                );
-                              }}
-                              className="flex items-center gap-2 cursor-pointer overflow-x-auto group"
-                            >
-                              <p className="text-[13px]/[16px] font-semibold text-foreground group-hover:text-foreground-200">
-                                {selected?.name}
-                              </p>
-                              <CopyIcon
-                                size="sm"
-                                className="text-foreground-400"
-                              />
-                            </div>
+                            <CopyableText
+                              title="Function name"
+                              value={selected.name}
+                            />
                           ) : (
                             <Skeleton className="rounded-sm h-6 w-40" />
                           )}
@@ -858,7 +798,7 @@ export function Contract() {
                           <CardLabel className="text-[13px]/[16px] font-normal">
                             selector
                           </CardLabel>
-                          <Hash
+                          <CopyableInteger
                             length={isMobile ? 1 : 3}
                             value={selected?.selector}
                           />
