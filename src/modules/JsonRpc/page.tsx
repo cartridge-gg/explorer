@@ -42,6 +42,7 @@ import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { useScrollTo } from "@/shared/hooks/useScrollTo";
 import { toast } from "sonner";
 import { Editor } from "@/shared/components/editor";
+import { Selector } from "@/shared/components/Selector";
 
 interface FormState {
   inputs: { name: string; value: string }[];
@@ -446,24 +447,18 @@ export function JsonRpcPlayground() {
                 className="space-y-0 h-full flex flex-col"
               >
                 <CardContent className="p-0 flex flex-col gap-[20px] lg:flex-row items-center justify-between">
-                  <TabsList className="self-start h-auto rounded-sm p-[2px] w-full lg:w-fit">
-                    <TabsTrigger
-                      value="request"
-                      className="py-[2px] px-[8px] rounded-sm w-full"
-                    >
-                      <span className="text-[12px]/[16px] font-medium">
-                        Request
-                      </span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="response"
-                      className="py-[2px] px-[8px] rounded-sm w-full"
-                    >
-                      <span className="text-[12px]/[16px] font-medium">
-                        Response
-                      </span>
-                    </TabsTrigger>
-                  </TabsList>
+                  <Selector
+                    items={[
+                      {
+                        label: "Request",
+                        value: "request",
+                      },
+                      {
+                        label: "Response",
+                        value: "response",
+                      },
+                    ]}
+                  />
                   <div className="flex flex-row items-center self-start gap-[6px]">
                     <button
                       type="button"
