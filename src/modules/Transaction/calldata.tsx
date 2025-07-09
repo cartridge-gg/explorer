@@ -6,8 +6,6 @@ import {
   Skeleton,
   Tabs,
   TabsContent,
-  TabsList,
-  TabsTrigger,
   TimesIcon,
 } from "@cartridge/ui";
 import { FeltDisplayer } from "@/shared/components/felt-displayer";
@@ -101,25 +99,13 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                   defaultValue="decoded"
                   className="flex flex-col gap-[13px] p-[15px]"
                 >
-                  <TabsList className="self-start h-auto rounded-sm p-[2px]">
-                    <TabsTrigger
-                      value="raw"
-                      className="py-[2px] px-[8px] rounded-sm"
-                    >
-                      <span className="text-[12px]/[16px] font-medium">
-                        Raw
-                      </span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="decoded"
-                      className="py-[2px] px-[8px] rounded-sm"
-                    >
-                      <span className="text-[12px]/[16px] font-medium">
-                        Decoded
-                      </span>
-                    </TabsTrigger>
-                  </TabsList>
-
+                  <Selector
+                    containerClassName="self-start"
+                    items={[
+                      { value: "raw", label: "Raw" },
+                      { value: "decoded", label: "Decoded" },
+                    ]}
+                  />
                   <TabsContent value="raw" className="mt-0">
                     <FeltDisplayer
                       value={c.raw_args}
