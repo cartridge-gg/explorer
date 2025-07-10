@@ -60,7 +60,7 @@ import { Selector } from "@/shared/components/Selector";
 /**
  *
  * @param input - raw value
- * @returns converted value in 18 decimal places
+ * @returns converted value in 6 decimal places
  */
 function ConvertToSTRK(input: BigNumberish) {
   const value = Number(input) / 1e18;
