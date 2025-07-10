@@ -1,7 +1,6 @@
 import React, { memo } from "react";
 import { cn, Skeleton } from "@cartridge/ui";
 import { formatNumber } from "../utils/number";
-import { formatSnakeCaseToDisplayValue } from "../utils/string";
 
 export const Card = React.forwardRef<
   HTMLDivElement,
@@ -112,7 +111,6 @@ CardContent.displayName = "CardContent";
 
 export function ExecutionResourcesCard({
   blockComputeData,
-  executions,
 }: {
   blockComputeData?: { l1_gas: number; l2_gas: number; l1_data_gas: number };
   executions?: {
