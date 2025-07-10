@@ -1,7 +1,7 @@
 import { truncateString } from "@/shared/utils/string";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
-import { cairo } from "starknet";
+import { BigNumberish, cairo } from "starknet";
 import { memo, useCallback } from "react";
 import { toast } from "sonner";
 import { Calldata } from "./calldata";
@@ -62,23 +62,11 @@ import { Selector } from "@/shared/components/Selector";
  * @param input - raw value
  * @returns converted value in 18 decimal places
  */
-function ConvertToSTRK(input: number | bigint) {
+function ConvertToSTRK(input: BigNumberish) {
   const value = Number(input) / 1e18;
   if (value === 0) return "-";
 
-  // Convert to string without exponential notation
-  const valueStr = value.toFixed(18);
-
-  // For small numbers, keep only 1 significant digit
-  if (value < 1 && value > 0) {
-    // Match pattern: 0.000...1234567 and keep only first 1 digit after leading zeros
-    const match = valueStr.match(/^(0\.0*)(\d{1})/);
-    if (match) {
-      return match[1] + match[2];
-    }
-  }
-
-  return valueStr;
+  return value.toFixed(6);
 }
 
 export function Transaction() {
