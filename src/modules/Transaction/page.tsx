@@ -72,6 +72,7 @@ function ConvertToSTRK(input: BigNumberish) {
 export function Transaction() {
   const { txHash } = useParams<{ txHash: string }>();
   const {
+    isLoading,
     error,
     data: {
       tx,
@@ -587,6 +588,7 @@ export function Transaction() {
           </div>
 
           <ExecutionResourcesCard
+            isLoading={isLoading}
             blockComputeData={blockComputeData}
             executions={executions}
           />

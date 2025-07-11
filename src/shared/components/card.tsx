@@ -138,9 +138,18 @@ export function ExecutionResourcesCard({
       <CardContent className="pt-[10px] pb-[15px] px-[11px] gap-[13px]">
         <CardLabel>gas</CardLabel>
         <div className="flex flex-row gap-px">
-          <ResourceCard label="L1" value={blockComputeData?.l1_gas} />
-          <ResourceCard label="L2" value={blockComputeData?.l2_gas} />
           <ResourceCard
+            isLoading={isLoading}
+            label="L1"
+            value={blockComputeData?.l1_gas}
+          />
+          <ResourceCard
+            isLoading={isLoading}
+            label="L2"
+            value={blockComputeData?.l2_gas}
+          />
+          <ResourceCard
+            isLoading={isLoading}
             label="L1 Data Gas"
             value={blockComputeData?.l1_data_gas}
           />
