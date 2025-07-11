@@ -1,6 +1,7 @@
-import React, { memo } from "react";
+import React, { memo, useCallback } from "react";
 import { cn, Skeleton } from "@cartridge/ui";
 import { formatNumber } from "../utils/number";
+import { toast } from "sonner";
 
 export const Card = React.forwardRef<
   HTMLDivElement,
@@ -111,6 +112,7 @@ CardContent.displayName = "CardContent";
 
 export function ExecutionResourcesCard({
   blockComputeData,
+  isLoading,
 }: {
   blockComputeData?: { l1_gas: number; l2_gas: number; l1_data_gas: number };
   executions?: {
@@ -122,6 +124,7 @@ export function ExecutionResourcesCard({
     range_check: number;
     segment_arena: number;
   };
+  isLoading?: boolean;
 }) {
   return (
     <Card className="gap-0 p-0 rounded-[12px]">
@@ -134,37 +137,13 @@ export function ExecutionResourcesCard({
 
       <CardContent className="pt-[10px] pb-[15px] px-[11px] gap-[13px]">
         <CardLabel>gas</CardLabel>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-px">
-          <div className="bg-background-200 flex flex-col p-[10px]">
-            <CardLabel>l1</CardLabel>
-            {blockComputeData ? (
-              <div className="font-mono text-foreground font-semibold">
-                {formatNumber(blockComputeData.l1_gas)}
-              </div>
-            ) : (
-              <Skeleton className="h-6 w-full" />
-            )}
-          </div>
-          <div className="bg-background-200 flex flex-col p-[10px]">
-            <CardLabel>l2</CardLabel>
-            {blockComputeData ? (
-              <div className="font-mono text-foreground font-semibold">
-                {formatNumber(blockComputeData.l2_gas)}
-              </div>
-            ) : (
-              <Skeleton className="h-6 w-full" />
-            )}
-          </div>
-          <div className="bg-background-200 flex flex-col p-[10px]">
-            <CardLabel>l1 data</CardLabel>
-            {blockComputeData ? (
-              <div className="font-mono text-foreground font-semibold">
-                {formatNumber(blockComputeData.l1_data_gas)}
-              </div>
-            ) : (
-              <Skeleton className="h-6 w-full" />
-            )}
-          </div>
+        <div className="flex flex-row gap-px">
+          <ResourceCard label="L1" value={blockComputeData?.l1_gas} />
+          <ResourceCard label="L2" value={blockComputeData?.l2_gas} />
+          <ResourceCard
+            label="L1 Data Gas"
+            value={blockComputeData?.l1_data_gas}
+          />
         </div>
       </CardContent>
     </Card>
@@ -181,3 +160,42 @@ const FireIcon = memo(({ className }: { className?: string }) => {
     </svg>
   );
 });
+
+const ResourceCard = memo(
+  ({
+    className,
+    label,
+    value,
+    isLoading,
+  }: {
+    className?: string;
+    label: string;
+    value?: number;
+    isLoading?: boolean;
+  }) => {
+    const onCopyValue = useCallback(() => {
+      navigator.clipboard.writeText(value?.toString() || "0");
+      toast.success(`${label} value copied to clipboard`);
+    }, [label, value]);
+
+    return (
+      <button
+        type="button"
+        className={cn(
+          "bg-background-200 hover:bg-background-300 flex flex-col items-start justify-between p-[10px] w-[120px] h-[64px] select-none",
+          className,
+        )}
+        onClick={onCopyValue}
+      >
+        <CardLabel>{label}</CardLabel>
+        {!isLoading ? (
+          <div className="font-mono text-foreground font-semibold">
+            {formatNumber(value || 0)}
+          </div>
+        ) : (
+          <Skeleton className="h-6 w-full" />
+        )}
+      </button>
+    );
+  },
+);
