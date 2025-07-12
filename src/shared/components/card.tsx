@@ -1,7 +1,7 @@
-import React, { memo } from "react";
+import React, { memo, useCallback } from "react";
 import { cn, Skeleton } from "@cartridge/ui";
 import { formatNumber } from "../utils/number";
-import { formatSnakeCaseToDisplayValue } from "../utils/string";
+import { toast } from "sonner";
 
 export const Card = React.forwardRef<
   HTMLDivElement,
@@ -112,9 +112,9 @@ CardContent.displayName = "CardContent";
 
 export function ExecutionResourcesCard({
   blockComputeData,
-  executions,
+  isLoading,
 }: {
-  blockComputeData?: { gas: number; data_gas: number; steps: number };
+  blockComputeData?: { l1_gas: number; l2_gas: number; l1_data_gas: number };
   executions?: {
     ecdsa: number;
     keccak: number;
@@ -124,6 +124,7 @@ export function ExecutionResourcesCard({
     range_check: number;
     segment_arena: number;
   };
+  isLoading?: boolean;
 }) {
   return (
     <Card className="gap-0 p-0 rounded-[12px]">
@@ -134,64 +135,26 @@ export function ExecutionResourcesCard({
         </CardTitle>
       </CardHeader>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_3fr] divide-y lg:divide-y-0 lg:divide-x divide-background-200">
-        {/* Steps Section */}
-        <CardContent className="py-[10px] px-[14px] gap-[10px]">
-          <CardLabel>steps</CardLabel>
-          {blockComputeData ? (
-            <div className="font-mono text-foreground font-semibold overflow-auto">
-              {formatNumber(blockComputeData.steps)}
-            </div>
-          ) : (
-            <Skeleton className="h-6 w-40" />
-          )}
-        </CardContent>
-
-        {/* Gas Section */}
-        <CardContent className="py-[10px] px-[11px] gap-[13px]">
-          <CardLabel>gas</CardLabel>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-px">
-            <div className="bg-background-200 flex flex-col p-[10px]">
-              <CardLabel>l1</CardLabel>
-              {blockComputeData ? (
-                <div className="font-mono text-foreground font-semibold">
-                  {formatNumber(blockComputeData.gas)}
-                </div>
-              ) : (
-                <Skeleton className="h-6 w-full" />
-              )}
-            </div>
-            <div className="bg-background-200 flex flex-col p-[10px]">
-              <CardLabel>l1 data</CardLabel>
-              {blockComputeData ? (
-                <div className="font-mono text-foreground font-semibold">
-                  {formatNumber(blockComputeData.data_gas)}
-                </div>
-              ) : (
-                <Skeleton className="h-6 w-full" />
-              )}
-            </div>
-          </div>
-        </CardContent>
-
-        {/* Builtins Counter Section */}
-        <CardContent className="py-[10px] px-[11px] gap-[13px]">
-          <CardLabel>builtins counter</CardLabel>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-px">
-            {Object.entries(executions ?? {}).map(([key, value]) => (
-              <div
-                key={key}
-                className="bg-background-200 flex flex-col p-[10px]"
-              >
-                <CardLabel>{formatSnakeCaseToDisplayValue(key)}</CardLabel>
-                <div className="font-mono text-foreground font-semibold overflow-auto">
-                  {formatNumber(value)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </div>
+      <CardContent className="pt-[10px] pb-[15px] px-[11px] gap-[13px]">
+        <CardLabel>gas</CardLabel>
+        <div className="flex flex-row gap-px">
+          <ResourceCard
+            isLoading={isLoading}
+            label="L1"
+            value={blockComputeData?.l1_gas}
+          />
+          <ResourceCard
+            isLoading={isLoading}
+            label="L2"
+            value={blockComputeData?.l2_gas}
+          />
+          <ResourceCard
+            isLoading={isLoading}
+            label="L1 Data Gas"
+            value={blockComputeData?.l1_data_gas}
+          />
+        </div>
+      </CardContent>
     </Card>
   );
 }
@@ -206,3 +169,42 @@ const FireIcon = memo(({ className }: { className?: string }) => {
     </svg>
   );
 });
+
+const ResourceCard = memo(
+  ({
+    className,
+    label,
+    value,
+    isLoading,
+  }: {
+    className?: string;
+    label: string;
+    value?: number;
+    isLoading?: boolean;
+  }) => {
+    const onCopyValue = useCallback(() => {
+      navigator.clipboard.writeText(value?.toString() || "0");
+      toast.success(`${label} value copied to clipboard`);
+    }, [label, value]);
+
+    return (
+      <button
+        type="button"
+        className={cn(
+          "bg-background-200 hover:bg-background-300 flex flex-col items-start justify-between p-[10px] w-[120px] h-[64px] select-none",
+          className,
+        )}
+        onClick={onCopyValue}
+      >
+        <CardLabel>{label}</CardLabel>
+        {!isLoading ? (
+          <div className="font-mono text-foreground font-semibold">
+            {formatNumber(value || 0)}
+          </div>
+        ) : (
+          <Skeleton className="h-6 w-full" />
+        )}
+      </button>
+    );
+  },
+);
