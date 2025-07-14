@@ -65,7 +65,7 @@ export function useBlock() {
       const block = await RPC_PROVIDER.getBlockWithReceipts(blockId);
       const txs = block.transactions.map(({ transaction, receipt }, id) => ({
         id,
-        type: transaction.type || "INVOKE",
+        type: transaction.type,
         hash: receipt.transaction_hash,
         status: receipt.execution_status,
       }));
