@@ -64,7 +64,9 @@ export function DataTable<T>({
                     key={cell.id}
                     className={cn(
                       "text-sm p-0",
-                      i === 0 ? "pl-[15px]" : "",
+                      i === 0
+                        ? "pl-[15px] w-[40.885px] px-[15px] font-mono text-right" // first column: numbers
+                        : "",
                       i === row.getVisibleCells().length - 1 ? "pr-[15px]" : "",
                     )}
                   >
