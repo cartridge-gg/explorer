@@ -17,14 +17,22 @@ export function getPaginatedBlockNumbers(block_number: number, limit: number) {
   return blockNumbers;
 }
 
+export interface DecodedCallData {
+  contract: string;
+  selector: string;
+  args: string[];
+}
+
 // Function to decode Starknet calldata
-export function decodeCalldata(tx: GetTransactionResponse) {
+export function decodeCalldata(
+  tx: GetTransactionResponse,
+): DecodedCallData[] | undefined {
   if (tx.version === "0x0" || !("calldata" in tx)) {
     return;
   }
 
   const numTxns = Number(cairo.felt(tx.calldata[0])); // Number of transactions in batch
-  const transactions = [];
+  const transactions: DecodedCallData[] = [];
   let index = 1; // Start after batch size
 
   for (let i = 0; i < numTxns; i++) {
