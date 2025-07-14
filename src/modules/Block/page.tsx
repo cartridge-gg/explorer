@@ -422,22 +422,30 @@ export function Block() {
 
             <Card className="flex-1 p-0 rounded-sm rounded-br-[12px] gap-0">
               <Tabs value={tab.selected} onValueChange={tab.onChange}>
-                <CardContent className="pb-0 pt-[3px]">
+                <CardContent className="pb-0 pt-[3px] gap-0">
                   <TabsList className="gap-[12px] p-0">
-                    <TabsTrigger value="transactions">
+                    <TabsTrigger
+                      className="data-[state=active]:shadow-none gap-[4px] p-[8px]"
+                      value="transactions"
+                    >
                       <ListIcon variant="solid" />
-                      <div>Transactions</div>
+                      <p className="text-[13px]/[20px] font-normal">
+                        Transactions
+                      </p>
                     </TabsTrigger>
-                    <TabsTrigger value="events">
+                    <TabsTrigger
+                      className="data-[state=active]:shadow-none gap-[4px] p-[8px]"
+                      value="events"
+                    >
                       <PulseIcon variant="solid" />
-                      <div>Events</div>
+                      <p className="text-[13px]/[20px] font-normal">Events</p>
                     </TabsTrigger>
                   </TabsList>
                 </CardContent>
 
                 <Separator />
 
-                <CardContent className="h-full py-[15px] gap-0">
+                <CardContent className="h-full py-[15px] gap-0 min-h-[577px]">
                   <TabsContent
                     value="transactions"
                     className="flex flex-col gap-[15px] w-full flex-1 m-0"
@@ -466,7 +474,7 @@ export function Block() {
                     <DataTable
                       table={txs}
                       onRowClick={(row) => navigate(`../tx/${row.hash}`)}
-                      className="max-h-[630px]"
+                      className="max-h-[515px] md:min-h-[515px]"
                     />
                   </TabsContent>
 
@@ -476,7 +484,7 @@ export function Block() {
                       onRowClick={(row) =>
                         navigate(`../event/${row.txn_hash}-${row.id}`)
                       }
-                      className="max-h-[667px]"
+                      className="max-h-[547px] md:min-h-[547px]"
                     />
                   </TabsContent>
                 </CardContent>
