@@ -422,7 +422,7 @@ export function Block() {
 
             <Card className="flex-1 p-0 rounded-sm rounded-br-[12px] gap-0">
               <Tabs value={tab.selected} onValueChange={tab.onChange}>
-                <CardContent className="pb-0 pt-[3px]">
+                <CardContent className="pb-0 pt-[3px] gap-0">
                   <TabsList className="gap-[12px] p-0">
                     <TabsTrigger
                       className="data-[state=active]:shadow-none gap-[4px] p-[8px]"
