@@ -35,7 +35,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
           { label: "Decoded", value: "decoded" },
         ]}
       />
-      <TabsContent value="decoded" className="mt-[15px]">
+      <TabsContent value="decoded" className="mt-[15px] space-y-px">
         {!tx ? (
           <>
             {Array.from({ length: 4 }).map((_, i) => (
@@ -50,7 +50,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
           decoded.map((c, i) => (
             <Dialog key={i}>
               <DialogTrigger asChild>
-                <div className="w-full bg-background-200 p-2 first:rounded-t last:rounded-b flex items-center gap-4">
+                <div className="h-[35px] w-full bg-background-200 hover:bg-background-300 px-[15px] py-[5.5px] first:rounded-t-sm last:rounded-b-sm flex items-center gap-4">
                   <CopyableInteger length={1} value={c.contract} />
                   <div className="flex items-center gap-2 text-foreground-200">
                     <FnIcon className="text-foreground-400" />
