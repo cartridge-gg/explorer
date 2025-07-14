@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AbiEntry, CallData, events as eventsLib, hash } from "starknet";
+import { Abi, AbiEntry, CallData, events as eventsLib, hash } from "starknet";
 import { FunctionAbi } from "starknet";
 import {
   getEventName,
@@ -463,7 +463,11 @@ export function useCalldata(calldata: Calldata[] | undefined) {
 
             const formattedParams = d.args;
 
-            const myCallData = new CallData(abi);
+            let sortedAbi: Abi = [];
+            if (Array.isArray(abi)) {
+              sortedAbi = abi.sort((a, b) => a.name.localeCompare(b.name));
+            }
+            const myCallData = new CallData(sortedAbi);
 
             const { inputs } = myCallData.parser
               .getLegacyFormat()
@@ -508,7 +512,10 @@ export function useCalldata(calldata: Calldata[] | undefined) {
               params: inputs.map((inp) => inp?.name),
               raw_args: d.args,
             };
-          } catch {
+          } catch (e) {
+            console.log("error decoding: ", e);
+            console.log("typeof error: ", typeof e);
+            console.log("full error", JSON.stringify(e));
             return {
               contract: d.contract,
               function_name: "Error",
