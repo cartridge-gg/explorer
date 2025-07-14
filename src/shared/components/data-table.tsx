@@ -29,10 +29,14 @@ export function DataTable<T>({
           <TableHeader className="sticky top-0 bg-background z-10 h-[1px]">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-background-200">
-                {headerGroup.headers.map((header) => (
+                {headerGroup.headers.map((header, i) => (
                   <TableHead
                     key={header.id}
-                    className="p-2 font-bold text-left text-sm"
+                    className={cn(
+                      "p-0 font-bold align-baseline text-sm h-[30px] pt-[5px] pb-[10px]",
+                      i === 0 ? "pl-[15px]" : "",
+                      i === headerGroup.headers.length - 1 ? "pr-[15px]" : "",
+                    )}
                   >
                     {header.isPlaceholder
                       ? null
@@ -50,13 +54,20 @@ export function DataTable<T>({
               <TableRow
                 key={row.id}
                 className={cn(
-                  "border-none",
+                  "border-none h-[35px]",
                   onRowClick && "cursor-pointer hover:bg-background-200",
                 )}
                 onClick={() => onRowClick?.(row.original)}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="p-2 text-sm">
+                {row.getVisibleCells().map((cell, i) => (
+                  <TableCell
+                    key={cell.id}
+                    className={cn(
+                      "text-sm p-0",
+                      i === 0 ? "pl-[15px]" : "",
+                      i === row.getVisibleCells().length - 1 ? "pr-[15px]" : "",
+                    )}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

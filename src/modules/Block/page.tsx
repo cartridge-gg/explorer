@@ -445,10 +445,10 @@ export function Block() {
 
                 <Separator />
 
-                <CardContent className="h-full py-[15px] gap-0">
+                <CardContent className="h-full py-[15px] gap-0 min-h-[577px]">
                   <TabsContent
                     value="transactions"
-                    className="flex flex-col gap-[15px] w-full flex-1 m-0"
+                    className="flex flex-col gap-[10px] w-full flex-1 m-0"
                   >
                     <MultiFilter
                       placeholder="Type"
@@ -474,7 +474,7 @@ export function Block() {
                     <DataTable
                       table={txs}
                       onRowClick={(row) => navigate(`../tx/${row.hash}`)}
-                      className="max-h-[510px]"
+                      className="min-h-[515px]"
                     />
                   </TabsContent>
 
@@ -484,7 +484,7 @@ export function Block() {
                       onRowClick={(row) =>
                         navigate(`../event/${row.txn_hash}-${row.id}`)
                       }
-                      className="max-h-[547px]"
+                      className="min-h-[547px]"
                     />
                   </TabsContent>
                 </CardContent>
