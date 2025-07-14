@@ -26,14 +26,14 @@ export function DataTable<T>({
     <div className={cn("h-full flex flex-col", className)}>
       <div className="flex-1 overflow-auto min-h-0">
         <Table className="table-auto w-full">
-          <TableHeader className="sticky top-0 bg-background z-10 h-[1px]">
+          <TableHeader className="sticky top-0 bg-background z-10 !h-[30px]">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-background-200">
                 {headerGroup.headers.map((header, i) => (
                   <TableHead
                     key={header.id}
                     className={cn(
-                      "p-0 font-bold align-baseline text-sm h-[30px] pt-[5px] pb-[10px]",
+                      "p-0 align-top text-left text-[12px]/[16px] font-semibold tracking-[0.24px] !h-[30px] pt-[5px]",
                       i === 0 ? "pl-[15px]" : "",
                       i === headerGroup.headers.length - 1 ? "pr-[15px]" : "",
                     )}
