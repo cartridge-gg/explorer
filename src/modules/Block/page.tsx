@@ -424,13 +424,21 @@ export function Block() {
               <Tabs value={tab.selected} onValueChange={tab.onChange}>
                 <CardContent className="pb-0 pt-[3px]">
                   <TabsList className="gap-[12px] p-0">
-                    <TabsTrigger value="transactions">
+                    <TabsTrigger
+                      className="data-[state=active]:shadow-none gap-[4px] p-[8px]"
+                      value="transactions"
+                    >
                       <ListIcon variant="solid" />
-                      <div>Transactions</div>
+                      <p className="text-[13px]/[20px] font-normal">
+                        Transactions
+                      </p>
                     </TabsTrigger>
-                    <TabsTrigger value="events">
+                    <TabsTrigger
+                      className="data-[state=active]:shadow-none gap-[4px] p-[8px]"
+                      value="events"
+                    >
                       <PulseIcon variant="solid" />
-                      <div>Events</div>
+                      <p className="text-[13px]/[20px] font-normal">Events</p>
                     </TabsTrigger>
                   </TabsList>
                 </CardContent>
@@ -466,7 +474,7 @@ export function Block() {
                     <DataTable
                       table={txs}
                       onRowClick={(row) => navigate(`../tx/${row.hash}`)}
-                      className="max-h-[630px]"
+                      className="max-h-[510px]"
                     />
                   </TabsContent>
 
@@ -476,7 +484,7 @@ export function Block() {
                       onRowClick={(row) =>
                         navigate(`../event/${row.txn_hash}-${row.id}`)
                       }
-                      className="max-h-[667px]"
+                      className="max-h-[547px]"
                     />
                   </TabsContent>
                 </CardContent>

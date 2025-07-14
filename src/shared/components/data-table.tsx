@@ -26,7 +26,7 @@ export function DataTable<T>({
     <div className={cn("h-full flex flex-col", className)}>
       <div className="flex-1 overflow-auto min-h-0">
         <Table className="table-auto w-full">
-          <TableHeader className="sticky top-0 bg-background z-10">
+          <TableHeader className="sticky top-0 bg-background z-10 h-[1px]">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-background-200">
                 {headerGroup.headers.map((header) => (
