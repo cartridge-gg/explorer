@@ -621,7 +621,6 @@ export function Contract() {
                                 <Button
                                   variant="secondary"
                                   onClick={() => onAddToCart(selected)}
-                                  disabled={!account}
                                   className="h-[30px] gap-[7px] px-[10px] py-[6px] normal-case font-sans bg-background-200 border border-[#454B46]"
                                 >
                                   <PlusIcon
@@ -636,9 +635,7 @@ export function Contract() {
                                 <Button
                                   variant="primary"
                                   className="h-[30px] px-[10px] py-[6px] bg-foreground-100 text-background-100"
-                                  disabled={
-                                    !account || form[selected.name]?.loading
-                                  }
+                                  disabled={form[selected.name]?.loading}
                                   onClick={() => onCallOrExecute(selected)}
                                 >
                                   <span className="text-[13px]/[16px] font-semibold uppercase">
@@ -852,7 +849,6 @@ export function Contract() {
                                 <Button
                                   variant="secondary"
                                   onClick={() => onAddToCart(selected)}
-                                  disabled={!account}
                                   className="h-[30px] gap-[7px] px-[10px] py-[6px] normal-case font-sans bg-background-200 border border-[#454B46]"
                                 >
                                   <PlusIcon
@@ -867,9 +863,7 @@ export function Contract() {
                                 <Button
                                   variant="primary"
                                   className="h-[30px] px-[10px] py-[6px] bg-foreground-100 text-background-100"
-                                  disabled={
-                                    !account || form[selected.name]?.loading
-                                  }
+                                  disabled={form[selected.name]?.loading}
                                   onClick={() => onCallOrExecute(selected)}
                                 >
                                   <span className="text-[13px]/[16px] font-semibold uppercase">
