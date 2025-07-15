@@ -102,13 +102,22 @@ export function parseExecutionResources(
   return Object.entries(execution_resources).reduce(
     (acc, [key, value]) => {
       switch (key) {
-        case "steps": {
-          acc.blockComputeData.steps += Number(value);
+        case "l1_gas": {
+          acc.blockComputeData.l1_gas += Number(value);
+          break;
+        }
+        case "l2_gas": {
+          acc.blockComputeData.l2_gas += Number(value);
+          break;
+        }
+        case "l1_data_gas": {
+          acc.blockComputeData.l1_data_gas += Number(value);
           break;
         }
         case "data_availability": {
-          acc.blockComputeData.gas += value.l1_gas;
-          acc.blockComputeData.data_gas += value.l1_data_gas;
+          // Handle legacy format for backward compatibility
+          acc.blockComputeData.l1_gas += value.l1_gas;
+          acc.blockComputeData.l1_data_gas += value.l1_data_gas;
           break;
         }
         default: {
@@ -144,7 +153,7 @@ export const initExecutions = {
 };
 
 export const initBlockComputeData = {
-  gas: 0,
-  steps: 0,
-  data_gas: 0,
+  l1_gas: 0,
+  l2_gas: 0,
+  l1_data_gas: 0,
 };
