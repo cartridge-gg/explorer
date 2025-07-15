@@ -463,8 +463,6 @@ export function useCalldata(calldata: Calldata[] | undefined) {
 
             const formattedParams = d.args;
 
-            console.log("abi: ", abi);
-
             // const testSubject = abi.find(
             //   (it) =>
             //     it.type === "function" ||
@@ -503,14 +501,20 @@ export function useCalldata(calldata: Calldata[] | undefined) {
                 (abiItem: AbiEntry) => abiItem.name === matchingFunction?.name,
               ) as FunctionAbi;
 
-            const inputsTypes = inputs.map((inp: { type: string }) => {
-              return inp.type as string;
+            console.log("inputs: ", inputs);
+
+            const inputsTypes = inputs.map((inp) => {
+              return inp.type;
             });
+
+            console.log("inputTypes: ", inputsTypes);
 
             const decoded = myCallData.decodeParameters(
               inputsTypes,
               formattedParams,
             );
+
+            console.log("decoded: ", decoded);
 
             const formattedResponse: DecodedArg[] = [];
 
@@ -530,6 +534,12 @@ export function useCalldata(calldata: Calldata[] | undefined) {
                   });
                 });
               }
+            } else {
+              formattedResponse.push({
+                value: decoded,
+                name: inputs[0]?.name,
+                type: inputs[0]?.type,
+              });
             }
 
             return {

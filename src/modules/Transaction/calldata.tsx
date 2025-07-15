@@ -132,6 +132,13 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                                 : value,
                             )
                           : input.value.toString();
+
+                      console.log("c.data: ", c.data);
+
+                      if (!input.name) {
+                        return null;
+                      }
+
                       return (
                         <div key={i} className="flex flex-col gap-[10px]">
                           <div className="flex items-center gap-[7px]">
@@ -140,7 +147,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                             </p>
                             <Badge className="px-[7px] py-[2px]">
                               <span className="text-[10px] font-semibold">
-                                {input.type}
+                                {input.type || "Unknown"}
                               </span>
                             </Badge>
                           </div>
