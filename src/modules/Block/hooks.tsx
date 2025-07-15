@@ -152,23 +152,13 @@ export function useBlock() {
                 </Badge>
               ),
               filterFn: (row, columnId, filterValue) => {
-                const rowValue: string = row.getValue(columnId);
-                if (filterValue === undefined || filterValue === "All")
-                  return true;
-                return rowValue.includes(filterValue.toUpperCase());
-              },
-            }),
-            {
-              accessorKey: "type",
-              header: "Type",
-              filterFn: (row, columnId, filterValue) => {
                 if (!filterValue || filterValue.length === 0) return true;
                 const rowValue = row.getValue(columnId);
                 return Array.isArray(filterValue)
                   ? filterValue.includes(rowValue)
                   : filterValue === rowValue;
               },
-            },
+            }),
             txColumnHelper.accessor("status", {
               header: "Status",
               cell: (info) => {

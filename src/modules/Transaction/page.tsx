@@ -440,7 +440,7 @@ export function Transaction() {
                   onValueChange={tab.onChange}
                   className="h-full"
                 >
-                  <CardContent className="pb-0 pt-[3px]">
+                  <CardContent className="pb-0 pt-[3px] gap-0">
                     <TabsList className="gap-[12px] p-0">
                       {tx?.type === "INVOKE" && (
                         <TabsTrigger
