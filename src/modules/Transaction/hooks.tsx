@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AbiEntry, CallData, events as eventsLib, hash } from "starknet";
+import { Abi, AbiEntry, CallData, events as eventsLib, hash } from "starknet";
 import { FunctionAbi } from "starknet";
 import {
   getEventName,
@@ -408,13 +408,15 @@ export interface Calldata {
 interface DecodedArg {
   name: string;
   type: string;
-  value: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value: any;
 }
 
 interface AbiItem {
   type: string;
   name?: string;
   inputs?: Array<{ name: string; type: string }>;
+  outputs?: Array<{ name: string; type: string }>;
   selector?: string;
   items?: AbiItem[];
   state_mutability?: string;
@@ -439,9 +441,7 @@ export function useCalldata(calldata: Calldata[] | undefined) {
             // First check interfaces
             abi.forEach((item: AbiItem) => {
               if (item.type === "function") {
-                const funcNameSelector = hash.getSelectorFromName(
-                  item.name || "",
-                );
+                const funcNameSelector = hash.getSelector(item.name || "");
                 if (funcNameSelector === d.selector) {
                   matchingFunction = item;
                 }
@@ -450,9 +450,7 @@ export function useCalldata(calldata: Calldata[] | undefined) {
               if (item.type === "interface") {
                 item.items?.forEach((func: AbiItem) => {
                   if (func.type === "function") {
-                    const funcNameSelector = hash.getSelectorFromName(
-                      func.name || "",
-                    );
+                    const funcNameSelector = hash.getSelector(func.name || "");
                     if (funcNameSelector === d.selector) {
                       matchingFunction = func;
                     }
@@ -463,7 +461,18 @@ export function useCalldata(calldata: Calldata[] | undefined) {
 
             const formattedParams = d.args;
 
-            const myCallData = new CallData(abi);
+            let sortedAbi: Abi = [];
+
+            // prioritize function type first
+            if (Array.isArray(abi)) {
+              sortedAbi = abi.sort((a, b) => {
+                if (a.type === "function" && b.type !== "function") return -1;
+                if (a.type !== "function" && b.type === "function") return 1;
+                return (a.name || "").localeCompare(b.name || "");
+              });
+            }
+
+            const myCallData = new CallData(sortedAbi);
 
             const { inputs } = myCallData.parser
               .getLegacyFormat()
@@ -471,8 +480,8 @@ export function useCalldata(calldata: Calldata[] | undefined) {
                 (abiItem: AbiEntry) => abiItem.name === matchingFunction?.name,
               ) as FunctionAbi;
 
-            const inputsTypes = inputs.map((inp: { type: string }) => {
-              return inp.type as string;
+            const inputsTypes = inputs.map((inp) => {
+              return inp.type;
             });
 
             const decoded = myCallData.decodeParameters(
@@ -498,6 +507,12 @@ export function useCalldata(calldata: Calldata[] | undefined) {
                   });
                 });
               }
+            } else {
+              formattedResponse.push({
+                value: decoded,
+                name: inputs[0]?.name,
+                type: inputs[0]?.type,
+              });
             }
 
             return {
@@ -508,7 +523,8 @@ export function useCalldata(calldata: Calldata[] | undefined) {
               params: inputs.map((inp) => inp?.name),
               raw_args: d.args,
             };
-          } catch {
+          } catch (e) {
+            console.log("error decoding: ", e);
             return {
               contract: d.contract,
               function_name: "Error",
