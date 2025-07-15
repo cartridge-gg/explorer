@@ -22,16 +22,10 @@ import { Editor } from "@/shared/components/editor";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { CopyableText } from "@/shared/components/copyable-text";
 import { Selector } from "@/shared/components/Selector";
-import { useEffect } from "react";
 
 export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
   const { isMobile } = useScreen();
-
-  useEffect(() => {
-    console.log("decoded before: ", decodeCalldata(tx));
-    console.log("decoded after: ", decoded);
-  }, [decoded, tx]);
 
   return (
     <Tabs defaultValue="decoded" className="space-y-[15px]">
@@ -132,8 +126,6 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                                 : value,
                             )
                           : input.value.toString();
-
-                      console.log("c.data: ", c.data);
 
                       if (!input.name) {
                         return null;

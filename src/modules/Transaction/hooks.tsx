@@ -443,7 +443,6 @@ export function useCalldata(calldata: Calldata[] | undefined) {
               if (item.type === "function") {
                 const funcNameSelector = hash.getSelector(item.name || "");
                 if (funcNameSelector === d.selector) {
-                  console.log("item from function: ", item);
                   matchingFunction = item;
                 }
               }
@@ -453,7 +452,6 @@ export function useCalldata(calldata: Calldata[] | undefined) {
                   if (func.type === "function") {
                     const funcNameSelector = hash.getSelector(func.name || "");
                     if (funcNameSelector === d.selector) {
-                      console.log("item from interface: ", func);
                       matchingFunction = func;
                     }
                   }
@@ -462,15 +460,6 @@ export function useCalldata(calldata: Calldata[] | undefined) {
             });
 
             const formattedParams = d.args;
-
-            // const testSubject = abi.find(
-            //   (it) =>
-            //     it.type === "function" ||
-            //     (it.type === "constructor" &&
-            //       (it.inputs.length || it.outputs.length)),
-            // );
-
-            // console.log("testSubject: ", testSubject);
 
             let sortedAbi: Abi = [];
 
@@ -481,17 +470,7 @@ export function useCalldata(calldata: Calldata[] | undefined) {
                 if (a.type !== "function" && b.type === "function") return 1;
                 return (a.name || "").localeCompare(b.name || "");
               });
-              console.log("sorted abi: ", sortedAbi);
             }
-
-            // const testSubject2 = sortedAbi.find(
-            //   (it) =>
-            //     it.type === "function" ||
-            //     (it.type === "constructor" &&
-            //       (it.inputs.length || it.outputs.length)),
-            // );
-
-            // console.log("testSubject2: ", testSubject2);
 
             const myCallData = new CallData(sortedAbi);
 
@@ -501,20 +480,14 @@ export function useCalldata(calldata: Calldata[] | undefined) {
                 (abiItem: AbiEntry) => abiItem.name === matchingFunction?.name,
               ) as FunctionAbi;
 
-            console.log("inputs: ", inputs);
-
             const inputsTypes = inputs.map((inp) => {
               return inp.type;
             });
-
-            console.log("inputTypes: ", inputsTypes);
 
             const decoded = myCallData.decodeParameters(
               inputsTypes,
               formattedParams,
             );
-
-            console.log("decoded: ", decoded);
 
             const formattedResponse: DecodedArg[] = [];
 
