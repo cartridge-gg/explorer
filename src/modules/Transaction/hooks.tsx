@@ -408,13 +408,15 @@ export interface Calldata {
 interface DecodedArg {
   name: string;
   type: string;
-  value: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value: any;
 }
 
 interface AbiItem {
   type: string;
   name?: string;
   inputs?: Array<{ name: string; type: string }>;
+  outputs?: Array<{ name: string; type: string }>;
   selector?: string;
   items?: AbiItem[];
   state_mutability?: string;
@@ -439,10 +441,9 @@ export function useCalldata(calldata: Calldata[] | undefined) {
             // First check interfaces
             abi.forEach((item: AbiItem) => {
               if (item.type === "function") {
-                const funcNameSelector = hash.getSelectorFromName(
-                  item.name || "",
-                );
+                const funcNameSelector = hash.getSelector(item.name || "");
                 if (funcNameSelector === d.selector) {
+                  console.log("item from function: ", item);
                   matchingFunction = item;
                 }
               }
@@ -450,10 +451,9 @@ export function useCalldata(calldata: Calldata[] | undefined) {
               if (item.type === "interface") {
                 item.items?.forEach((func: AbiItem) => {
                   if (func.type === "function") {
-                    const funcNameSelector = hash.getSelectorFromName(
-                      func.name || "",
-                    );
+                    const funcNameSelector = hash.getSelector(func.name || "");
                     if (funcNameSelector === d.selector) {
+                      console.log("item from interface: ", func);
                       matchingFunction = func;
                     }
                   }
@@ -463,10 +463,38 @@ export function useCalldata(calldata: Calldata[] | undefined) {
 
             const formattedParams = d.args;
 
+            console.log("abi: ", abi);
+
+            // const testSubject = abi.find(
+            //   (it) =>
+            //     it.type === "function" ||
+            //     (it.type === "constructor" &&
+            //       (it.inputs.length || it.outputs.length)),
+            // );
+
+            // console.log("testSubject: ", testSubject);
+
             let sortedAbi: Abi = [];
+
+            // prioritize function type first
             if (Array.isArray(abi)) {
-              sortedAbi = abi.sort((a, b) => a.name.localeCompare(b.name));
+              sortedAbi = abi.sort((a, b) => {
+                if (a.type === "function" && b.type !== "function") return -1;
+                if (a.type !== "function" && b.type === "function") return 1;
+                return (a.name || "").localeCompare(b.name || "");
+              });
+              console.log("sorted abi: ", sortedAbi);
             }
+
+            // const testSubject2 = sortedAbi.find(
+            //   (it) =>
+            //     it.type === "function" ||
+            //     (it.type === "constructor" &&
+            //       (it.inputs.length || it.outputs.length)),
+            // );
+
+            // console.log("testSubject2: ", testSubject2);
+
             const myCallData = new CallData(sortedAbi);
 
             const { inputs } = myCallData.parser
@@ -514,8 +542,6 @@ export function useCalldata(calldata: Calldata[] | undefined) {
             };
           } catch (e) {
             console.log("error decoding: ", e);
-            console.log("typeof error: ", typeof e);
-            console.log("full error", JSON.stringify(e));
             return {
               contract: d.contract,
               function_name: "Error",
