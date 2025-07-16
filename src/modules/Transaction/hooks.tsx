@@ -9,7 +9,14 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Abi, AbiEntry, CallData, events as eventsLib, hash } from "starknet";
+import {
+  Abi,
+  AbiEntry,
+  CallData,
+  events as eventsLib,
+  hash,
+  SuccessfulTransactionReceiptResponse,
+} from "starknet";
 import { FunctionAbi } from "starknet";
 import {
   getEventName,
@@ -19,19 +26,24 @@ import {
 
 import { useBlock } from "@starknet-react/core";
 import { isValidAddress } from "@/shared/utils/contract";
+import { EVENT } from "@starknet-io/starknet-types-08";
 
-interface ParsedEvent {
-  transaction_hash: string;
-  [key: string]: string | number;
-}
+// interface ParsedEvent {
+//   transaction_hash: string;
+//   [key: string]: string | number;
+// }
 
-interface EventData {
+type EventData = {
   id: string;
-  from: string;
-  event_name: string;
-  block: number;
-  data?: ParsedEvent;
-}
+} & EVENT;
+
+// interface EventData {
+//   id: string;
+//   from: string;
+//   event_name: string;
+//   block: number;
+//   data?: ParsedEvent;
+// }
 
 interface StorageDiffData {
   contract_address: string;
@@ -91,80 +103,96 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
   } = useQuery({
     queryKey: ["transaction-sammary", txHash],
     queryFn: async () => {
-      const receipt = await RPC_PROVIDER.getTransactionReceipt(txHash || "");
-      const { blockComputeData } = parseExecutionResources(
-        receipt.execution_resources,
+      const receiptResult = await RPC_PROVIDER.getTransactionReceipt(
+        txHash || ""
+      );
+
+      const receipt =
+        receiptResult.value as SuccessfulTransactionReceiptResponse;
+      const { executions, blockComputeData } = parseExecutionResources(
+        receipt.execution_resources
       );
 
       // Group events by contract address while preserving original indices
-      const eventsByContract: Record<
-        string,
-        Array<{ event: EventData; originalIndex: number }>
-      > = receipt?.events.reduce((acc, event, originalIndex) => {
+      const eventsByContract = receipt.events.reduce<
+        Record<string, Array<{ event: EventData; originalIndex: number }>>
+      >((acc, event, originalIndex) => {
         const address = event.from_address;
         if (!acc[address]) {
           acc[address] = [];
         }
-        acc[address].push({ event, originalIndex });
+        acc[address].push({
+          event: {
+            id: `${receipt.transaction_hash}-${originalIndex}`,
+            // from: address,
+            // event_name: getEventName(event.keys[0]),
+            // block: receipt.block_number,
+            from_address: address,
+            data: event.data,
+            keys: event.keys,
+          },
+          originalIndex,
+        });
         return acc;
       }, {});
-      const events: EventData[] = (
-        await Promise.all(
-          Object.entries(eventsByContract).map(
-            async ([address, eventEntries]) => {
-              // Fetch contract ABI once per contract
-              const { abi: contract_abi } =
-                await RPC_PROVIDER.getClassAt(address);
 
-              // Get all events for this contract in one call
-              const eventsResponse = await RPC_PROVIDER.getEvents({
-                address,
-                chunk_size: 100,
-                keys: [eventEntries.map(({ event }) => event.keys).flat()],
-                from_block: { block_number: receipt.block_number },
-                to_block: { block_number: receipt.block_number },
-              });
+      const eventsWithIndices = await Promise.all(
+        Object.entries(eventsByContract).map(
+          async ([address, eventEntries]) => {
+            // Fetch contract ABI once per contract
+            const { abi: contract_abi } =
+              await RPC_PROVIDER.getClassAt(address);
 
-              // Parse events once per contract
-              const abiEvents = eventsLib.getAbiEvents(contract_abi);
-              const abiStructs = CallData.getAbiStruct(contract_abi);
-              const abiEnums = CallData.getAbiEnum(contract_abi);
+            // Get all events for this contract in one call
+            const eventsResponse = await RPC_PROVIDER.getEvents({
+              address,
+              chunk_size: 100,
+              keys: [eventEntries.map(({ event }) => event.keys).flat()],
+              from_block: { block_number: receipt.block_number },
+              to_block: { block_number: receipt.block_number },
+            });
 
-              // Map events while preserving original indices
-              return eventEntries?.map(({ originalIndex }) => {
-                const matchingParsedEvent = eventsLib
-                  .parseEvents(
-                    eventsResponse.events,
-                    abiEvents,
-                    abiStructs,
-                    abiEnums,
-                  )
-                  .find(
-                    (e: ParsedEvent) =>
-                      e.transaction_hash === receipt.transaction_hash,
-                  );
+            // Parse events once per contract
+            const abiEvents = eventsLib.getAbiEvents(contract_abi);
+            const abiStructs = CallData.getAbiStruct(contract_abi);
+            const abiEnums = CallData.getAbiEnum(contract_abi);
 
-                const eventKey: string = matchingParsedEvent
-                  ? (Object.keys(matchingParsedEvent).find((key) =>
-                      key.includes("::"),
-                    ) ?? "")
-                  : "";
+            // Map events while preserving original indices
 
-                return {
-                  originalIndex,
-                  eventData: {
-                    id: `${receipt.transaction_hash}-${originalIndex}`,
-                    from: address,
-                    event_name: getEventName(eventKey),
-                    block: receipt.block_number,
-                    data: matchingParsedEvent,
-                  },
-                };
-              });
-            },
-          ),
+            const parsedEvents = eventsLib.parseEvents(
+              eventsResponse.events,
+              abiEvents,
+              abiStructs,
+              abiEnums
+            );
+
+            return eventEntries.map(({ originalIndex }) => {
+              const matchingParsedEvent = parsedEvents.find(
+                (e) => e.transaction_hash === receipt.transaction_hash
+              );
+
+              const eventKey = matchingParsedEvent
+                ? (Object.keys(matchingParsedEvent).find((key) =>
+                    key.includes("::")
+                  ) ?? "")
+                : "";
+
+              return {
+                originalIndex,
+                eventData: {
+                  id: `${receipt.transaction_hash}-${originalIndex}`,
+                  from: address,
+                  event_name: getEventName(eventKey),
+                  block: receipt.block_number,
+                  data: matchingParsedEvent,
+                },
+              };
+            });
+          }
         )
-      )
+      );
+
+      const events = eventsWithIndices
         .flat()
         .sort((a, b) => b.originalIndex - a.originalIndex)
         .map(({ eventData }) => eventData);
@@ -177,7 +205,8 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     },
     enabled: typeof txHash === "string",
     initialData: {
-      receipt: undefined,
+      // Re-check if this is correct
+      receipt: {} as SuccessfulTransactionReceiptResponse,
       events: [],
       blockComputeData: initBlockComputeData,
     },
