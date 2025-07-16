@@ -21,9 +21,10 @@ export function DataTable<T>({
   table,
   onRowClick,
   className,
+  ...props
 }: DataTableProps<T>) {
   return (
-    <div className={cn("h-full flex flex-col", className)}>
+    <div {...props} className={cn("h-full flex flex-col", className)}>
       <div className="flex-1 overflow-auto min-h-0">
         <Table className="table-auto w-full">
           <TableHeader className="sticky top-0 bg-background z-10 !h-[30px]">
