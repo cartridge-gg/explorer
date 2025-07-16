@@ -94,12 +94,15 @@ export function DataTable<T>({
             />
           </Button>
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
             className="bg-background-200 hover:bg-[#2B2F2C] disabled:bg-background-100 border border-solid border-[#454B46] rounded-sm w-[28px] h-[21px] px-[6px] py-[7px] text-foreground-200 disabled:text-[#454B46]"
           >
-            <ArrowIcon variant="left" />
+            <ArrowIcon
+              variant="left"
+              className="!w-[16px] !h-[16px] aspect-square"
+            />
           </Button>
         </div>
 
@@ -116,20 +119,26 @@ export function DataTable<T>({
 
         <div className="flex items-center gap-[5px]">
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
             className="bg-background-200 hover:bg-[#2B2F2C] disabled:bg-background-100 border border-solid border-[#454B46] rounded-sm w-[28px] h-[21px] px-[6px] py-[7px] text-foreground-200 disabled:text-[#454B46]"
           >
-            <ArrowIcon variant="right" />
+            <ArrowIcon
+              variant="right"
+              className="!w-[16px] !h-[16px] aspect-square"
+            />
           </Button>
           <Button
-            variant="outline"
+            variant="secondary"
             disabled={!table.getCanNextPage()}
             onClick={() => table.lastPage()}
             className="bg-background-200 hover:bg-[#2B2F2C] disabled:bg-background-100 border border-solid border-[#454B46] rounded-sm w-[28px] h-[21px] px-[6px] py-[7px] text-foreground-200 disabled:text-[#454B46]"
           >
-            <ArrowToLineIcon variant="right" />
+            <ArrowToLineIcon
+              variant="right"
+              className="!w-[16px] !h-[16px] aspect-square"
+            />
           </Button>
         </div>
       </div>
