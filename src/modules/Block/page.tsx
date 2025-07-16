@@ -54,16 +54,15 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { truncateString } from "@/shared/utils/string";
 import { useScreen } from "@/shared/hooks/useScreen";
 
+const TXN_OFFSET = 150; // Offset for the transaction table
+const EVENT_OFFSET = 100; // Offset for the event table
+
 export function Block() {
   const tab = useHashLinkTabs("transactions");
-  const {
-    data: { blockId, block, txs, events, executions, blockComputeData },
-    error,
-  } = useBlock();
-  const { blockNumber: latestBlockNumber } = useBlockNumber();
   const { hash } = useLocation();
   const navigate = useNavigate();
   const { isMobile } = useScreen();
+  const rowHeight = 35;
   const [tableContainerHeight, setTableContainerHeight] = useState(0);
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -84,7 +83,37 @@ export function Block() {
     return () => {
       resizeObserver.disconnect();
     };
-  }, []); // Empty dependency array since we handle the ref inside
+  }, []);
+
+  const txnItemPerPage = useMemo(() => {
+    if (isMobile) return undefined
+
+    if (tableContainerHeight > 0) {
+      const calculatedHeight = tableContainerHeight - TXN_OFFSET;
+      return Math.max(1, Math.floor(calculatedHeight / rowHeight));
+    }
+    return undefined;
+  }, [tableContainerHeight, tab.selected]);
+
+  const eventsItemPerPage = useMemo(() => {
+    if (isMobile) return undefined
+
+    if (tableContainerHeight > 0) {
+      const calculatedHeight = tableContainerHeight - EVENT_OFFSET;
+      return Math.max(1, Math.floor(calculatedHeight / rowHeight));
+    }
+    return undefined;
+  }, [tableContainerHeight, tab.selected]);
+
+  const {
+    data: { blockId, block, txs, events, executions, blockComputeData },
+    error,
+  } = useBlock({
+    txnPageSize: txnItemPerPage,
+    eventPageSize: eventsItemPerPage,
+    enabled: !!txnItemPerPage && !!eventsItemPerPage,
+  });
+  const { blockNumber: latestBlockNumber } = useBlockNumber();
 
   const isLatestBlock = useMemo(() => {
     return (
@@ -147,7 +176,7 @@ export function Block() {
             className={cn(
               "bg-background border-l border-background-200 text-foreground size-12 flex items-center justify-center cursor-pointer hover:bg-background-200",
               !block?.block_number &&
-                "cursor-not-allowed pointer-events-none text-foreground-300",
+              "cursor-not-allowed pointer-events-none text-foreground-300",
             )}
             to={{
               pathname: `../block/${block?.block_number - 1}`,
@@ -160,7 +189,7 @@ export function Block() {
             className={cn(
               "bg-background border-l border-background-200 text-foreground size-12 flex items-center justify-center hover:bg-background-200",
               (!block || isLatestBlock) &&
-                "cursor-not-allowed pointer-events-none text-foreground-300",
+              "cursor-not-allowed pointer-events-none text-foreground-300",
             )}
             to={{
               pathname: `../block/${block?.block_number + 1}`,
@@ -239,7 +268,7 @@ export function Block() {
                       containerClassName="w-full justify-between"
                       length={3}
                       value={block?.sequencer_address}
-                      onClick={() => {}}
+                      onClick={() => { }}
                       onIconClick={(e) => {
                         e?.stopPropagation();
                         onCopyValue(block?.sequencer_address);
@@ -498,13 +527,17 @@ export function Block() {
                         { key: "DECLARE", value: "Declare" },
                       ]}
                     />
-                    <DataTable
-                      table={txs}
-                      onRowClick={(row) => navigate(`../tx/${row.hash}`)}
-                      style={{
-                        height: isMobile ? "auto" : tableContainerHeight - 100,
-                      }}
-                    />
+                    {tableContainerHeight > 0 && (
+                      <DataTable
+                        table={txs}
+                        onRowClick={(row) => navigate(`../tx/${row.hash}`)}
+                        style={{
+                          height: isMobile
+                            ? "auto"
+                            : tableContainerHeight - 100,
+                        }}
+                      />
+                    )}
                   </TabsContent>
 
                   <TabsContent value="events" className="m-0 h-full">

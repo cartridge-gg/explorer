@@ -11,7 +11,7 @@ import {
 import { isNumber } from "@/shared/utils/string";
 import { EventTableData, TransactionTableData } from "@/types/types";
 import { CircleCheckIcon, TimesCircleIcon } from "@cartridge/ui";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import {
   ColumnDef,
   createColumnHelper,
@@ -20,7 +20,7 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 interface BlockData {
@@ -53,16 +53,29 @@ const initialData: BlockData = {
 const txColumnHelper = createColumnHelper<TransactionTableData>();
 const eventColumnHelper = createColumnHelper<EventTableData>();
 
-export function useBlock() {
+export interface TUseBlockProps {
+  pageSize?: number;
+  txnPageSize?: number;
+  eventPageSize?: number;
+  enabled?: boolean;
+}
+
+export function useBlock({
+  pageSize: externalPageSize = 20,
+  txnPageSize = externalPageSize,
+  eventPageSize = externalPageSize,
+  enabled: externalBoolean = true,
+}: TUseBlockProps = {}) {
   const { blockId } = useParams<{ blockId: string }>();
   const { data, isLoading, error } = useQuery({
-    queryKey: ["block", blockId],
+    queryKey: ["block", blockId, externalPageSize],
     queryFn: async () => {
       if (!blockId || !isNumber(blockId) || !isValidAddress(blockId)) {
         throw new Error("Invalid block identifier");
       }
 
       const block = await RPC_PROVIDER.getBlockWithReceipts(blockId);
+
       const txs = block.transactions.map(({ transaction, receipt }, id) => ({
         id,
         type: transaction.type,
@@ -109,13 +122,23 @@ export function useBlock() {
     },
     initialData,
     retry: false,
+    enabled: externalBoolean,
   });
 
   const { isMobile } = useScreen();
   const [txPagination, setTxPagination] = useState({
     pageIndex: 0,
-    pageSize: 20,
+    pageSize: txnPageSize,
   });
+
+  // Update pagination when externalPageSize changes
+  useEffect(() => {
+    setTxPagination((prev) => ({
+      ...prev,
+      pageSize: txnPageSize,
+      pageIndex: 0, // Reset to first page when page size changes
+    }));
+  }, [txnPageSize]);
 
   const hashColumn = useMemo(
     () =>
@@ -139,55 +162,55 @@ export function useBlock() {
       isMobile
         ? [hashColumn]
         : [
-            txColumnHelper.accessor("id", {
-              header: "No",
-              cell: (info) => info.renderValue(),
-            }),
-            hashColumn,
-            txColumnHelper.accessor("type", {
-              header: "Type",
-              cell: (info) => (
-                <Badge className="capitalize">
-                  {info.renderValue().replace(/_/g, " ").toLowerCase()}
-                </Badge>
-              ),
-              filterFn: (row, columnId, filterValue) => {
-                if (!filterValue || filterValue.length === 0) return true;
-                const rowValue = row.getValue(columnId);
-                return Array.isArray(filterValue)
-                  ? filterValue.includes(rowValue)
-                  : filterValue === rowValue;
-              },
-            }),
-            txColumnHelper.accessor("status", {
-              header: "Status",
-              cell: (info) => {
-                return (
-                  <div className="flex items-center gap-2">
-                    {(function () {
-                      switch (info.renderValue()) {
-                        case "REVERTED":
-                          return (
-                            <TimesCircleIcon className="size-[10px] text-[#ED9733]" />
-                          );
-                        case "REJECTED":
-                          return (
-                            <TimesCircleIcon className="size-[10px] text-destructive" />
-                          );
-                        case "SUCCEEDED":
-                          return (
-                            <CircleCheckIcon className="size-[10px] text-constructive" />
-                          );
-                      }
-                    })()}
-                    <div className="capitalize">
-                      {info.renderValue().toLowerCase()}
-                    </div>
+          txColumnHelper.accessor("id", {
+            header: "No",
+            cell: (info) => info.renderValue(),
+          }),
+          hashColumn,
+          txColumnHelper.accessor("type", {
+            header: "Type",
+            cell: (info) => (
+              <Badge className="capitalize">
+                {info.renderValue().replace(/_/g, " ").toLowerCase()}
+              </Badge>
+            ),
+            filterFn: (row, columnId, filterValue) => {
+              if (!filterValue || filterValue.length === 0) return true;
+              const rowValue = row.getValue(columnId);
+              return Array.isArray(filterValue)
+                ? filterValue.includes(rowValue)
+                : filterValue === rowValue;
+            },
+          }),
+          txColumnHelper.accessor("status", {
+            header: "Status",
+            cell: (info) => {
+              return (
+                <div className="flex items-center gap-2">
+                  {(function () {
+                    switch (info.renderValue()) {
+                      case "REVERTED":
+                        return (
+                          <TimesCircleIcon className="size-[10px] text-[#ED9733]" />
+                        );
+                      case "REJECTED":
+                        return (
+                          <TimesCircleIcon className="size-[10px] text-destructive" />
+                        );
+                      case "SUCCEEDED":
+                        return (
+                          <CircleCheckIcon className="size-[10px] text-constructive" />
+                        );
+                    }
+                  })()}
+                  <div className="capitalize">
+                    {info.renderValue().toLowerCase()}
                   </div>
-                );
-              },
-            }),
-          ],
+                </div>
+              );
+            },
+          }),
+        ],
     [isMobile, hashColumn],
   );
 
@@ -205,8 +228,17 @@ export function useBlock() {
 
   const [eventPagination, setEventPagination] = useState({
     pageIndex: 0,
-    pageSize: 20,
+    pageSize: eventPageSize,
   });
+
+  // Update event pagination when externalPageSize changes
+  useEffect(() => {
+    setEventPagination((prev) => ({
+      ...prev,
+      pageSize: eventPageSize,
+      pageIndex: 0, // Reset to first page when page size changes
+    }));
+  }, [eventPageSize]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const eventColumns = useMemo<ColumnDef<EventTableData, any>[]>(
