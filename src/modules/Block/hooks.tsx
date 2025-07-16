@@ -162,55 +162,55 @@ export function useBlock({
       isMobile
         ? [hashColumn]
         : [
-          txColumnHelper.accessor("id", {
-            header: "No",
-            cell: (info) => info.renderValue(),
-          }),
-          hashColumn,
-          txColumnHelper.accessor("type", {
-            header: "Type",
-            cell: (info) => (
-              <Badge className="capitalize">
-                {info.renderValue().replace(/_/g, " ").toLowerCase()}
-              </Badge>
-            ),
-            filterFn: (row, columnId, filterValue) => {
-              if (!filterValue || filterValue.length === 0) return true;
-              const rowValue = row.getValue(columnId);
-              return Array.isArray(filterValue)
-                ? filterValue.includes(rowValue)
-                : filterValue === rowValue;
-            },
-          }),
-          txColumnHelper.accessor("status", {
-            header: "Status",
-            cell: (info) => {
-              return (
-                <div className="flex items-center gap-2">
-                  {(function () {
-                    switch (info.renderValue()) {
-                      case "REVERTED":
-                        return (
-                          <TimesCircleIcon className="size-[10px] text-[#ED9733]" />
-                        );
-                      case "REJECTED":
-                        return (
-                          <TimesCircleIcon className="size-[10px] text-destructive" />
-                        );
-                      case "SUCCEEDED":
-                        return (
-                          <CircleCheckIcon className="size-[10px] text-constructive" />
-                        );
-                    }
-                  })()}
-                  <div className="capitalize">
-                    {info.renderValue().toLowerCase()}
+            txColumnHelper.accessor("id", {
+              header: "No",
+              cell: (info) => info.renderValue(),
+            }),
+            hashColumn,
+            txColumnHelper.accessor("type", {
+              header: "Type",
+              cell: (info) => (
+                <Badge className="capitalize">
+                  {info.renderValue().replace(/_/g, " ").toLowerCase()}
+                </Badge>
+              ),
+              filterFn: (row, columnId, filterValue) => {
+                if (!filterValue || filterValue.length === 0) return true;
+                const rowValue = row.getValue(columnId);
+                return Array.isArray(filterValue)
+                  ? filterValue.includes(rowValue)
+                  : filterValue === rowValue;
+              },
+            }),
+            txColumnHelper.accessor("status", {
+              header: "Status",
+              cell: (info) => {
+                return (
+                  <div className="flex items-center gap-2">
+                    {(function () {
+                      switch (info.renderValue()) {
+                        case "REVERTED":
+                          return (
+                            <TimesCircleIcon className="size-[10px] text-[#ED9733]" />
+                          );
+                        case "REJECTED":
+                          return (
+                            <TimesCircleIcon className="size-[10px] text-destructive" />
+                          );
+                        case "SUCCEEDED":
+                          return (
+                            <CircleCheckIcon className="size-[10px] text-constructive" />
+                          );
+                      }
+                    })()}
+                    <div className="capitalize">
+                      {info.renderValue().toLowerCase()}
+                    </div>
                   </div>
-                </div>
-              );
-            },
-          }),
-        ],
+                );
+              },
+            }),
+          ],
     [isMobile, hashColumn],
   );
 
