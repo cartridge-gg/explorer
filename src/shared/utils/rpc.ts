@@ -7,6 +7,7 @@ import {
 import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
 import { EXECUTION_RESOURCES_KEY_MAP } from "@/services/rpc";
+import * as RPCSPEC07 from "@starknet-io/starknet-types-07";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
@@ -31,17 +32,23 @@ export function decodeCalldata(
     return;
   }
 
-  const numTxns = Number(cairo.felt(tx.calldata[0])); // Number of transactions in batch
+  const calldata = tx.calldata ?? [];
+
+  if (calldata.length === 0) {
+    return [];
+  }
+
+  const numTxns = Number(cairo.felt(calldata[0])); // Number of transactions in batch
   const transactions: DecodedCallData[] = [];
   let index = 1; // Start after batch size
 
   for (let i = 0; i < numTxns; i++) {
-    const contract = tx.calldata[index]; // Contract address
-    const sender = tx.calldata[index + 1]; // Sender address
-    const numArgs = Number(cairo.felt(tx.calldata[index + 2])); // Number of arguments
+    const contract = calldata[index]; // Contract address
+    const sender = calldata[index + 1]; // Sender address
+    const numArgs = Number(cairo.felt(calldata[index + 2])); // Number of arguments
 
     // Extract arguments dynamically
-    const args = tx.calldata.slice(index + 3, index + 3 + numArgs);
+    const args = calldata.slice(index + 3, index + 3 + numArgs);
 
     transactions.push({
       contract: contract,
@@ -90,7 +97,7 @@ export const convertValue = (value: string | number) => {
 export const convertObjectValuesToDisplayValues = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   obj: any,
-  type: Exclude<FeltDisplayVariants[number], "string">,
+  type: Exclude<FeltDisplayVariants[number], "string">
 ) => {
   for (const key in obj) {
     if (typeof obj[key] === "object") {
@@ -105,7 +112,9 @@ export const convertObjectValuesToDisplayValues = (
 };
 
 export function parseExecutionResources(
-  execution_resources: GetTransactionReceiptResponse["execution_resources"],
+  execution_resources:
+    | GetTransactionReceiptResponse<"success">["value"]["execution_resources"]
+    | RPCSPEC07.API.SPEC.EXECUTION_RESOURCES
 ) {
   return Object.entries(execution_resources).reduce(
     (acc, [key, value]) => {
@@ -123,6 +132,10 @@ export function parseExecutionResources(
           break;
         }
         case "data_availability": {
+          if (typeof value === "number") {
+            break;
+          }
+
           // Handle legacy format for backward compatibility
           acc.blockComputeData.l1_gas += value.l1_gas;
           acc.blockComputeData.l1_data_gas += value.l1_data_gas;
