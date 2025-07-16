@@ -50,7 +50,7 @@ import { getFinalityStatus } from "@/shared/utils/receipt";
 import { Badge } from "@/shared/components/badge";
 import { DataTable } from "@/shared/components/data-table";
 import { MultiFilter } from "@/shared/components/filter";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { truncateString } from "@/shared/utils/string";
 import { useScreen } from "@/shared/hooks/useScreen";
 
@@ -64,10 +64,34 @@ export function Block() {
   const { hash } = useLocation();
   const navigate = useNavigate();
   const { isMobile } = useScreen();
+  const [tableContainerHeight, setTableContainerHeight] = useState(0);
 
-  const isLatestBlock =
-    latestBlockNumber !== undefined &&
-    block?.block_number >= Number(latestBlockNumber);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = tableContainerRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { height } = entry.contentRect;
+        setTableContainerHeight(Math.max(height, 0)); // Ensure non-negative
+      }
+    });
+
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []); // Empty dependency array since we handle the ref inside
+
+  const isLatestBlock = useMemo(() => {
+    return (
+      latestBlockNumber !== undefined &&
+      block?.block_number >= Number(latestBlockNumber)
+    );
+  }, [latestBlockNumber, block?.block_number]);
 
   const onClickSequencerAddress = useCallback(() => {
     navigate(`../contract/${block?.sequencer_address}`);
@@ -420,7 +444,10 @@ export function Block() {
               </Card>
             </div>
 
-            <Card className="flex-1 p-0 rounded-sm rounded-br-[12px] gap-0">
+            <Card
+              ref={tableContainerRef}
+              className="flex-1 p-0 rounded-sm rounded-br-[12px] gap-0"
+            >
               <Tabs value={tab.selected} onValueChange={tab.onChange}>
                 <CardContent className="pb-0 pt-[3px] gap-0">
                   <TabsList className="gap-[12px] p-0">
@@ -445,10 +472,10 @@ export function Block() {
 
                 <Separator />
 
-                <CardContent className="h-full py-[15px] gap-0 min-h-[577px]">
+                <CardContent className="h-full py-[15px] gap-0 md:min-h-[577px]">
                   <TabsContent
                     value="transactions"
-                    className="flex flex-col gap-[15px] w-full flex-1 m-0"
+                    className="flex flex-col gap-[15px] w-full flex-1 m-0 relative"
                   >
                     <MultiFilter
                       placeholder="Type"
@@ -474,7 +501,9 @@ export function Block() {
                     <DataTable
                       table={txs}
                       onRowClick={(row) => navigate(`../tx/${row.hash}`)}
-                      className="max-h-[515px] md:min-h-[515px]"
+                      style={{
+                        height: isMobile ? "auto" : tableContainerHeight - 100,
+                      }}
                     />
                   </TabsContent>
 
@@ -484,7 +513,9 @@ export function Block() {
                       onRowClick={(row) =>
                         navigate(`../event/${row.txn_hash}-${row.id}`)
                       }
-                      className="max-h-[547px] md:min-h-[547px]"
+                      style={{
+                        height: isMobile ? "auto" : tableContainerHeight - 63,
+                      }}
                     />
                   </TabsContent>
                 </CardContent>
