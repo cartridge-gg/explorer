@@ -11,7 +11,7 @@ import {
 import { isNumber } from "@/shared/utils/string";
 import { EventTableData, TransactionTableData } from "@/types/types";
 import { CircleCheckIcon, TimesCircleIcon } from "@cartridge/ui";
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   ColumnDef,
   createColumnHelper,
