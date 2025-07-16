@@ -18,7 +18,7 @@
     "storybook:build": "storybook build"
   },
   "dependencies": {
-    "@cartridge/connector": "^0.7.13",
+    "@cartridge/connector": "^0.9.0",
     "@cartridge/presets": "github:cartridge-gg/presets#2373780",
     "@cartridge/ui": "github:cartridge-gg/ui#79f946c",
     "@cartridge/utils": "^0.7.13",
@@ -27,6 +27,7 @@
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-tabs": "^1.1.3",
+    "@starknet-io/types-js": "^0.8.4",
     "@starknet-react/chains": "^3.1.3",
     "@starknet-react/core": "^3.7.4",
     "@tanstack/react-query": "^5.64.2",
@@ -48,6 +49,7 @@
     "react-dom": "18.2.0",
     "react-router-dom": "^7.1.3",
     "react-virtuoso": "^4.13.0",
+    "sonner": "^2.0.6",
     "starknet": "7.6.2",
     "starknetkit": "2.12.1",
     "tailwind-merge": "^3.0.2"
