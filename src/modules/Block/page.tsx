@@ -472,10 +472,10 @@ export function Block() {
 
                 <Separator />
 
-                <CardContent className="h-full py-[15px] gap-0 min-h-[577px]">
+                <CardContent className="h-full py-[15px] gap-0 md:min-h-[577px]">
                   <TabsContent
                     value="transactions"
-                    className="flex flex-col gap-[15px] w-full flex-1 m-0"
+                    className="flex flex-col gap-[15px] w-full flex-1 m-0 relative"
                   >
                     <MultiFilter
                       placeholder="Type"
