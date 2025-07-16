@@ -24,7 +24,10 @@ export function DataTable<T>({
   ...props
 }: DataTableProps<T>) {
   return (
-    <div {...props} className={cn("h-full flex flex-col", className)}>
+    <div
+      {...props}
+      className={cn("h-full flex flex-col justify-between", className)}
+    >
       <Table className="relative table-auto w-full flex-1 overflow-auto min-h-0 ">
         <TableHeader className="sticky top-0 z-[20] bg-background !h-[30px]">
           {table.getHeaderGroups().map((headerGroup) => (
