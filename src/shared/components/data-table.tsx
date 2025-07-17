@@ -24,7 +24,13 @@ export function DataTable<T>({
   ...props
 }: DataTableProps<T>) {
   return (
-    <div {...props} className={cn("h-full flex flex-col", className)}>
+    <div
+      {...props}
+      className={cn(
+        "h-full flex flex-col gap-[15px] justify-between",
+        className,
+      )}
+    >
       <Table className="relative table-auto w-full flex-1 overflow-auto min-h-0 ">
         <TableHeader className="sticky top-0 z-[20] bg-background !h-[30px]">
           {table.getHeaderGroups().map((headerGroup) => (
@@ -74,46 +80,65 @@ export function DataTable<T>({
         </TableBody>
       </Table>
 
-      <div className="flex items-center justify-end mt-4 gap-4 flex-shrink-0">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-end gap-[3px] flex-shrink-0">
+        <div className="flex items-center gap-[5px]">
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={() => table.firstPage()}
             disabled={!table.getCanPreviousPage()}
-            className="disabled:opacity-30"
+            className="bg-background-200 hover:bg-[#2B2F2C] disabled:bg-background-100 border border-solid border-[#454B46] rounded-sm w-[28px] h-[21px] px-[6px] py-[7px] text-foreground-200 disabled:text-[#454B46]"
           >
-            <ArrowToLineIcon variant="left" />
+            <ArrowToLineIcon
+              variant="left"
+              className="!w-[16px] !h-[16px] aspect-square"
+            />
           </Button>
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="disabled:opacity-30"
+            className="bg-background-200 hover:bg-[#2B2F2C] disabled:bg-background-100 border border-solid border-[#454B46] rounded-sm w-[28px] h-[21px] px-[6px] py-[7px] text-foreground-200 disabled:text-[#454B46]"
           >
-            <ArrowIcon variant="left" />
+            <ArrowIcon
+              variant="left"
+              className="!w-[16px] !h-[16px] aspect-square"
+            />
           </Button>
-        </div>
-        <div className="text-sm text-foreground-300 font-medium">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount() || 1}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="px-[8px] py-[2px] space-x-[4px] text-[12px]/[16px] text-foreground-400 ">
+          <span className="font-normal">Page</span>
+          <span className="tracking-[0.24px] font-semibold">
+            {table.getState().pagination.pageIndex + 1}
+          </span>
+          <span className="font-normal">of</span>
+          <span className="tracking-[0.24px] font-semibold">
+            {table.getPageCount() || 1}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-[5px]">
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="disabled:opacity-30"
+            className="bg-background-200 hover:bg-[#2B2F2C] disabled:bg-background-100 border border-solid border-[#454B46] rounded-sm w-[28px] h-[21px] px-[6px] py-[7px] text-foreground-200 disabled:text-[#454B46]"
           >
-            <ArrowIcon variant="right" />
+            <ArrowIcon
+              variant="right"
+              className="!w-[16px] !h-[16px] aspect-square"
+            />
           </Button>
           <Button
-            variant="outline"
+            variant="secondary"
             disabled={!table.getCanNextPage()}
             onClick={() => table.lastPage()}
-            className="disabled:opacity-30"
+            className="bg-background-200 hover:bg-[#2B2F2C] disabled:bg-background-100 border border-solid border-[#454B46] rounded-sm w-[28px] h-[21px] px-[6px] py-[7px] text-foreground-200 disabled:text-[#454B46]"
           >
-            <ArrowToLineIcon variant="right" />
+            <ArrowToLineIcon
+              variant="right"
+              className="!w-[16px] !h-[16px] aspect-square"
+            />
           </Button>
         </div>
       </div>

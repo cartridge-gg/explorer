@@ -54,16 +54,15 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { truncateString } from "@/shared/utils/string";
 import { useScreen } from "@/shared/hooks/useScreen";
 
+const TXN_OFFSET = 150; // Offset for the transaction table
+const EVENT_OFFSET = 100; // Offset for the event table
+
 export function Block() {
   const tab = useHashLinkTabs("transactions");
-  const {
-    data: { blockId, block, txs, events, executions, blockComputeData },
-    error,
-  } = useBlock();
-  const { blockNumber: latestBlockNumber } = useBlockNumber();
   const { hash } = useLocation();
   const navigate = useNavigate();
   const { isMobile } = useScreen();
+  const rowHeight = 35;
   const [tableContainerHeight, setTableContainerHeight] = useState(0);
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -84,7 +83,37 @@ export function Block() {
     return () => {
       resizeObserver.disconnect();
     };
-  }, []); // Empty dependency array since we handle the ref inside
+  }, []);
+
+  const txnItemPerPage = useMemo(() => {
+    if (isMobile) return 5;
+
+    if (tableContainerHeight > 0) {
+      const calculatedHeight = tableContainerHeight - TXN_OFFSET;
+      return Math.max(1, Math.floor(calculatedHeight / rowHeight));
+    }
+    return undefined;
+  }, [tableContainerHeight, isMobile]);
+
+  const eventsItemPerPage = useMemo(() => {
+    if (isMobile) return 5;
+
+    if (tableContainerHeight > 0) {
+      const calculatedHeight = tableContainerHeight - EVENT_OFFSET;
+      return Math.max(1, Math.floor(calculatedHeight / rowHeight));
+    }
+    return undefined;
+  }, [tableContainerHeight, isMobile]);
+
+  const {
+    data: { blockId, block, txs, events, executions, blockComputeData },
+    error,
+  } = useBlock({
+    txnPageSize: txnItemPerPage,
+    eventPageSize: eventsItemPerPage,
+    enabled: !!txnItemPerPage && !!eventsItemPerPage,
+  });
+  const { blockNumber: latestBlockNumber } = useBlockNumber();
 
   const isLatestBlock = useMemo(() => {
     return (
@@ -446,7 +475,7 @@ export function Block() {
 
             <Card
               ref={tableContainerRef}
-              className="flex-1 p-0 rounded-sm rounded-br-[12px] gap-0"
+              className="flex-1 p-0 rounded-sm rounded-br-[12px] gap-0 h-[388px] md:h-auto"
             >
               <Tabs value={tab.selected} onValueChange={tab.onChange}>
                 <CardContent className="pb-0 pt-[3px] gap-0">
@@ -498,25 +527,31 @@ export function Block() {
                         { key: "DECLARE", value: "Declare" },
                       ]}
                     />
-                    <DataTable
-                      table={txs}
-                      onRowClick={(row) => navigate(`../tx/${row.hash}`)}
-                      style={{
-                        height: isMobile ? "auto" : tableContainerHeight - 100,
-                      }}
-                    />
+                    {tableContainerHeight > 0 && (
+                      <DataTable
+                        table={txs}
+                        onRowClick={(row) => navigate(`../tx/${row.hash}`)}
+                        style={{
+                          height: isMobile
+                            ? "auto"
+                            : tableContainerHeight - 100,
+                        }}
+                      />
+                    )}
                   </TabsContent>
 
                   <TabsContent value="events" className="m-0 h-full">
-                    <DataTable
-                      table={events}
-                      onRowClick={(row) =>
-                        navigate(`../event/${row.txn_hash}-${row.id}`)
-                      }
-                      style={{
-                        height: isMobile ? "auto" : tableContainerHeight - 63,
-                      }}
-                    />
+                    {tableContainerHeight > 0 && (
+                      <DataTable
+                        table={events}
+                        onRowClick={(row) =>
+                          navigate(`../event/${row.txn_hash}-${row.id}`)
+                        }
+                        style={{
+                          height: isMobile ? "auto" : tableContainerHeight - 63,
+                        }}
+                      />
+                    )}
                   </TabsContent>
                 </CardContent>
               </Tabs>
