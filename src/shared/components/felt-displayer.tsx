@@ -1,4 +1,5 @@
 import { cn } from "@cartridge/ui";
+import { useMemo } from "react";
 import { Virtuoso } from "react-virtuoso";
 
 interface FeltDisplayerProps {
@@ -32,6 +33,12 @@ export function FeltDisplayer({ value, className }: FeltDisplayerProps) {
     lines = ["No data to display"];
   }
 
+  // Calculate the number of digits in the total line count for consistent width
+  const lineNumberWidth = useMemo(() => {
+    const totalDigits = lines.length.toString().length;
+    return `${totalDigits}ch`;
+  }, [lines]);
+
   return (
     <div
       className={cn(
@@ -46,8 +53,11 @@ export function FeltDisplayer({ value, className }: FeltDisplayerProps) {
         data={lines}
         itemContent={(index, line) => (
           <div className="flex gap-[10px]">
-            <div className="bg-spacer select-none space-y-[5px]">
-              <p className="text-right text-[12px] font-normal text-foreground-400 ">
+            <div
+              className="bg-spacer select-none space-y-[5px]"
+              style={{ minWidth: lineNumberWidth }}
+            >
+              <p className="text-right text-[12px] font-normal text-foreground-400">
                 {index}
               </p>
             </div>
