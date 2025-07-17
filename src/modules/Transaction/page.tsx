@@ -274,7 +274,7 @@ export function Transaction() {
                     <div className="flex justify-between items-center">
                       <CardLabel>Tip</CardLabel>
                       <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                        {tx.tip ? Number(tx.tip).toLocaleString() : "-"}
+                        {Number(tx.tip) ? Number(tx.tip).toLocaleString() : "-"}
                       </p>
                     </div>
                   )}
