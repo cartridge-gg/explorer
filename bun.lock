@@ -4,8 +4,8 @@
     "": {
       "name": "@cartridge/explorer",
       "dependencies": {
-        "@cartridge/connector": "^0.7.13",
-        "@cartridge/presets": "github:cartridge-gg/presets#2373780",
+        "@cartridge/connector": "^0.9.0",
+        "@cartridge/presets": "github:cartridge-gg/presets#d246ec1",
         "@cartridge/ui": "github:cartridge-gg/ui#79f946c",
         "@cartridge/utils": "^0.7.13",
         "@monaco-editor/loader": "^1.5.0",
@@ -40,6 +40,7 @@
       },
       "devDependencies": {
         "@eslint/js": "^9.17.0",
+        "@starknet-io/types-js": "^0.8.4",
         "@storybook/addon-docs": "^9.0.4",
         "@storybook/react-vite": "^9.0.4",
         "@tanstack/eslint-plugin-query": "^5.64.2",
@@ -154,15 +155,15 @@
 
     "@babel/types": ["@babel/types@7.28.0", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.27.1" } }, "sha512-jYnje+JyZG5YThjHiF28oT4SIZLnYOcSBb6+SDaFIyzDVSkXQmQQYclJ2R+YxcdmK0AX6x1E5OQNtuh3jHDrUg=="],
 
-    "@cartridge/account-wasm": ["@cartridge/account-wasm@0.7.13", "", {}, "sha512-2/cFS96jN31N9piK2Hs/Egxz6cstJ9gV8pgBrqo5vSPckFv2yD9u/8euqDD26MJtLnDa59OYefNJBbKgsK9vHg=="],
+    "@cartridge/connector": ["@cartridge/connector@0.9.0", "", { "dependencies": { "@cartridge/controller": "0.9.0" }, "peerDependencies": { "@starknet-react/core": "4.0.1-beta.4" } }, "sha512-DIAkuJBYMF64e3DBllijdZElmTEb+wc1fFX4FWMYcvUJ07l32pxquBG5G/1IMd8Mzj3Xwwc7NkMVZ6TJAtl9RQ=="],
 
-    "@cartridge/connector": ["@cartridge/connector@0.7.13", "", { "dependencies": { "@cartridge/controller": "0.7.13" }, "peerDependencies": { "@starknet-react/core": "^3.7.3" } }, "sha512-OSlWo5mXiO0WLvHUddnO7Uvx/PlVJcKfkttJgOM4kQz3iSar8B2QlYPXQQ6uqIBFzJ4Pep5E5E3tpUbGNA9BFQ=="],
+    "@cartridge/controller": ["@cartridge/controller@0.9.0", "", { "dependencies": { "@cartridge/controller-wasm": "0.2.1", "@cartridge/penpal": "^6.2.4", "@starknet-io/types-js": "^0.8.4", "@telegram-apps/sdk": "^2.4.0", "@turnkey/sdk-browser": "^4.0.0", "@walletconnect/ethereum-provider": "^2.20.0", "cbor-x": "^1.5.0", "ethers": "^6.13.5", "mipd": "^0.0.7" }, "peerDependencies": { "@metamask/sdk": "^0.32.1", "@solana/web3.js": "^1.98.0", "open": "^10.1.0", "starknet": "^7.6.2", "starknetkit": "^2.6.1" } }, "sha512-bIikpiIR+N16MaEyxjab/AN3uDvOj+pdixWbJLSVqGpItpUq58AiQ0GFwPKXnpAwKVT66aqNrVBINSuMWemRhQ=="],
 
-    "@cartridge/controller": ["@cartridge/controller@0.7.13", "", { "dependencies": { "@cartridge/account-wasm": "0.7.13", "@cartridge/penpal": "^6.2.4", "@cartridge/utils": "0.7.13", "@starknet-io/types-js": "^0.7.7", "@telegram-apps/sdk": "^2.4.0", "@turnkey/sdk-browser": "^4.0.0", "@walletconnect/ethereum-provider": "^2.20.0", "cbor-x": "^1.5.0", "ethers": "^6.13.5", "mipd": "^0.0.7" }, "peerDependencies": { "@metamask/sdk": "^0.32.1", "@solana/web3.js": "^1.98.0", "open": "^10.1.0", "starknet": "^6.21.0", "starknetkit": "^2.6.1" } }, "sha512-LBor+FxYtAETgj8+m+23BDVhwXEZ+FqtwaLAVBEen6oz4//o3pU+wP2xBl8YAtcAL6mJ8gYcOhfqdHK/Ux5rwQ=="],
+    "@cartridge/controller-wasm": ["@cartridge/controller-wasm@0.2.1", "", {}, "sha512-uB0ffQEHAlu7+2E4Y/EoWUgbIYNrjMXks2FYHS8lg9ngaFwETvrUFI5Y+Pp71VQTthEnuwVcNKBqluO5TSPAug=="],
 
     "@cartridge/penpal": ["@cartridge/penpal@6.2.4", "", {}, "sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA=="],
 
-    "@cartridge/presets": ["@cartridge/presets@github:cartridge-gg/presets#2373780", { "dependencies": { "@starknet-io/types-js": "0.7.7" } }, "cartridge-gg-presets-2373780"],
+    "@cartridge/presets": ["@cartridge/presets@github:cartridge-gg/presets#d246ec1", { "dependencies": { "@starknet-io/types-js": "0.7.7" } }, "cartridge-gg-presets-d246ec1"],
 
     "@cartridge/ui": ["@cartridge/ui@github:cartridge-gg/ui#79f946c", { "dependencies": { "@cartridge/presets": "github:cartridge-gg/presets#11ee3b8", "@radix-ui/react-accordion": "^1.2.6", "@radix-ui/react-alert-dialog": "^1.1.9", "@radix-ui/react-aspect-ratio": "^1.1.4", "@radix-ui/react-checkbox": "^1.2.1", "@radix-ui/react-dialog": "^1.1.9", "@radix-ui/react-dropdown-menu": "^2.1.9", "@radix-ui/react-hover-card": "^1.1.9", "@radix-ui/react-label": "^2.1.4", "@radix-ui/react-menubar": "^1.1.9", "@radix-ui/react-popover": "^1.1.9", "@radix-ui/react-progress": "^1.1.4", "@radix-ui/react-radio-group": "^1.3.1", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.1", "@radix-ui/react-separator": "^1.1.4", "@radix-ui/react-slot": "^1.2.0", "@radix-ui/react-switch": "^1.2.1", "@radix-ui/react-tabs": "^1.1.6", "@radix-ui/react-toast": "^1.2.9", "@radix-ui/react-toggle": "^1.1.5", "@radix-ui/react-toggle-group": "^1.1.5", "@radix-ui/react-tooltip": "^1.2.2", "class-variance-authority": "^0.7.0", "clsx": "^1.2.1", "cmdk": "^1.0.0", "posthog-js-lite": "3.2.1", "react": "^18.2.0", "react-query": "^3.39.2", "starknet": "^6.21.0", "swr": "^2.2.5", "tailwind-merge": "^2.2.1", "tailwindcss-animate": "^1.0.7", "vaul": "^0.9.0", "viem": "^2.21.32" }, "peerDependencies": { "react": "^18.2.0", "react-dom": "^18.2.0", "sonner": "^1.4.41", "starknet": "^6.21.0", "viem": "^2.21.32" } }, "cartridge-gg-ui-79f946c"],
 
@@ -674,7 +675,7 @@
 
     "@starknet-io/starknet-types-08": ["@starknet-io/types-js@0.8.4", "", {}, "sha512-0RZ3TZHcLsUTQaq1JhDSCM8chnzO4/XNsSCozwDET64JK5bjFDIf2ZUkta+tl5Nlbf4usoU7uZiDI/Q57kt2SQ=="],
 
-    "@starknet-io/types-js": ["@starknet-io/types-js@0.7.7", "", {}, "sha512-WLrpK7LIaIb8Ymxu6KF/6JkGW1sso988DweWu7p5QY/3y7waBIiPvzh27D9bX5KIJNRDyOoOVoHVEKYUYWZ/RQ=="],
+    "@starknet-io/types-js": ["@starknet-io/types-js@0.8.4", "", {}, "sha512-0RZ3TZHcLsUTQaq1JhDSCM8chnzO4/XNsSCozwDET64JK5bjFDIf2ZUkta+tl5Nlbf4usoU7uZiDI/Q57kt2SQ=="],
 
     "@starknet-react/chains": ["@starknet-react/chains@3.1.3", "", {}, "sha512-b16VQyxqZXfiVmlKEkjfg+Oj8fdSnGWh1KU87O/unn6NpmaD9h511az1Cs6aW/j3qCIF1o5CrqfEnU1NWV7MVA=="],
 
@@ -2402,7 +2403,7 @@
 
     "@babel/helper-compilation-targets/semver": ["semver@6.3.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
 
-    "@cartridge/controller/@starknet-io/types-js": ["@starknet-io/types-js@0.7.10", "", {}, "sha512-1VtCqX4AHWJlRRSYGSn+4X1mqolI1Tdq62IwzoU2vUuEE72S1OlEeGhpvd6XsdqXcfHmVzYfj8k1XtKBQqwo9w=="],
+    "@cartridge/presets/@starknet-io/types-js": ["@starknet-io/types-js@0.7.7", "", {}, "sha512-WLrpK7LIaIb8Ymxu6KF/6JkGW1sso988DweWu7p5QY/3y7waBIiPvzh27D9bX5KIJNRDyOoOVoHVEKYUYWZ/RQ=="],
 
     "@cartridge/ui/@cartridge/presets": ["@cartridge/presets@github:cartridge-gg/presets#11ee3b8", { "dependencies": { "@starknet-io/types-js": "0.7.7" } }, "cartridge-gg-presets-11ee3b8"],
 
@@ -2787,6 +2788,8 @@
     "@argent/x-shared/starknet/@scure/base": ["@scure/base@1.1.9", "", {}, "sha512-8YKhl8GHiNI/pU2VMaofa2Tor7PJRAjwQLBBuilkJ9L5+13yVbC7JO/wS7piioAvPSwR3JKM1IJ/u4xQzbcXKg=="],
 
     "@argent/x-shared/starknet/@scure/starknet": ["@scure/starknet@1.0.0", "", { "dependencies": { "@noble/curves": "~1.3.0", "@noble/hashes": "~1.3.3" } }, "sha512-o5J57zY0f+2IL/mq8+AYJJ4Xpc1fOtDhr+mFQKbHnYFmm3WQrC+8zj2HEgxak1a+x86mhmBC1Kq305KUpVf0wg=="],
+
+    "@cartridge/ui/@cartridge/presets/@starknet-io/types-js": ["@starknet-io/types-js@0.7.7", "", {}, "sha512-WLrpK7LIaIb8Ymxu6KF/6JkGW1sso988DweWu7p5QY/3y7waBIiPvzh27D9bX5KIJNRDyOoOVoHVEKYUYWZ/RQ=="],
 
     "@ethereumjs/tx/ethereum-cryptography/@noble/curves": ["@noble/curves@1.4.2", "", { "dependencies": { "@noble/hashes": "1.4.0" } }, "sha512-TavHr8qycMChk8UwMld0ZDRvatedkzWfH8IiaeGCfymOP5i0hSCozz9vHOL0nkwk7HRMlFnAiKpS2jrUmSybcw=="],
 
