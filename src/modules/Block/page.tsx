@@ -56,13 +56,13 @@ import { useScreen } from "@/shared/hooks/useScreen";
 
 const TXN_OFFSET = 150; // Offset for the transaction table
 const EVENT_OFFSET = 115; // Offset for the event table
+const ROW_HEIGHT = 35; // Height of each row in the table
 
 export function Block() {
   const tab = useHashLinkTabs("transactions");
   const { hash } = useLocation();
   const navigate = useNavigate();
   const { isMobile } = useScreen();
-  const rowHeight = 35;
   const [tableContainerHeight, setTableContainerHeight] = useState(0);
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -91,7 +91,7 @@ export function Block() {
 
     if (tableContainerHeight > 0) {
       const calculatedHeight = tableContainerHeight - TXN_OFFSET;
-      return Math.max(1, Math.floor(calculatedHeight / rowHeight));
+      return Math.max(1, Math.floor(calculatedHeight / ROW_HEIGHT));
     }
     return undefined;
   }, [tableContainerHeight, isMobile]);
@@ -101,7 +101,7 @@ export function Block() {
 
     if (tableContainerHeight > 0) {
       const calculatedHeight = tableContainerHeight - EVENT_OFFSET;
-      return Math.max(1, Math.floor(calculatedHeight / rowHeight));
+      return Math.max(1, Math.floor(calculatedHeight / ROW_HEIGHT));
     }
     return undefined;
   }, [tableContainerHeight, isMobile]);
