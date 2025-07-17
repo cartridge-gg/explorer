@@ -56,6 +56,7 @@ import FeltList from "@/shared/components/FeltList";
 import { Editor } from "@/shared/components/editor";
 import { AccountAddressV2 } from "@/shared/components/account-address-v2";
 import { Selector } from "@/shared/components/Selector";
+import { FeltDisplayer } from "@/shared/components/felt-displayer";
 
 /**
  *
@@ -547,16 +548,9 @@ export function Transaction() {
                           ]}
                         />
                         <UITabsContent value="hex" className="mt-[15px]">
-                          <Editor
+                          <FeltDisplayer
                             className="min-h-[80vh]"
-                            defaultLanguage="json"
-                            value={JSON.stringify(tx?.signature ?? [], null, 2)}
-                            options={{
-                              readOnly: true,
-                              scrollbar: {
-                                alwaysConsumeMouseWheel: false,
-                              },
-                            }}
+                            value={tx?.signature ?? []}
                           />
                         </UITabsContent>
                         <UITabsContent value="dec">
