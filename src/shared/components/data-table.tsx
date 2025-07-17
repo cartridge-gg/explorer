@@ -4,22 +4,26 @@ import {
   ArrowToLineIcon,
   Button,
   cn,
-  Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@cartridge/ui";
+import { Table } from "./primitives/table";
 
 interface DataTableProps<T> extends React.HTMLAttributes<HTMLDivElement> {
   table: TableType<T>;
   onRowClick?: (row: T) => void;
+  containerClassName?: string;
+  tableClassName?: string;
 }
 
 export function DataTable<T>({
   table,
   onRowClick,
+  containerClassName,
+  tableClassName,
   className,
   ...props
 }: DataTableProps<T>) {
@@ -31,7 +35,13 @@ export function DataTable<T>({
         className,
       )}
     >
-      <Table className="relative table-auto w-full flex-1 overflow-auto min-h-0 ">
+      <Table
+        containerClassName={cn(containerClassName)}
+        className={cn(
+          "relative table-auto w-full flex-1 overflow-auto min-h-0",
+          tableClassName,
+        )}
+      >
         <TableHeader className="sticky top-0 z-[20] bg-background !h-[30px]">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="border-background-200">
