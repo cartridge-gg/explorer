@@ -104,6 +104,7 @@ export function Transaction() {
   useEffect(() => {
     const container = tabsContentRef.current;
     if (!container) return;
+    if (tabsContentHeight !== 0) return;
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -118,7 +119,7 @@ export function Transaction() {
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [tabsContentHeight]);
 
   const { isMobile } = useScreen();
 
