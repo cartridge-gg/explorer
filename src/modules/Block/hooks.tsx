@@ -253,7 +253,8 @@ export function useBlock({
           <CopyableInteger
             title="Transaction Hash"
             value={info.renderValue()}
-            to={`../tx/${info.renderValue()}`}
+            // to={`../tx/${info.renderValue()}`}
+            length={3}
           />
         ),
       }),
@@ -263,7 +264,8 @@ export function useBlock({
           <CopyableInteger
             title="From Address"
             value={info.renderValue()}
-            to={`../contract/${info.renderValue()}`}
+            // to={`../contract/${info.renderValue()}`}
+            length={3}
           />
         ),
       }),
