@@ -92,7 +92,9 @@ export function BlockList() {
       }),
       columnHelper.accessor("hash", {
         header: "Block Hash",
-        cell: (info) => <CopyableInteger value={info.renderValue()} />,
+        cell: (info) => (
+          <CopyableInteger title="Block Hash" value={info.renderValue()} />
+        ),
       }),
       columnHelper.accessor("age", {
         header: "Age",

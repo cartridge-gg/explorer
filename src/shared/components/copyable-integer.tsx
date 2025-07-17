@@ -12,8 +12,11 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+type Nullable<T> = T | null | undefined;
+
 export interface CopyableIntegerProps {
-  value: string | undefined;
+  value: Nullable<string>;
+  title: string;
   length?: number;
   to?: string;
   containerClassName?: string;
@@ -24,6 +27,7 @@ export interface CopyableIntegerProps {
 
 export function CopyableInteger({
   value,
+  title,
   length = 4,
   to,
   containerClassName,
@@ -48,9 +52,9 @@ export function CopyableInteger({
       }
 
       navigator.clipboard.writeText(value);
-      toast.success("Address copied to clipboard");
+      toast.success(`${title} copied to clipboard`);
     },
-    [value, onClick],
+    [value, onClick, title],
   );
 
   const onNavigate = useCallback(() => {

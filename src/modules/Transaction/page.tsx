@@ -56,6 +56,7 @@ import FeltList from "@/shared/components/FeltList";
 import { Editor } from "@/shared/components/editor";
 import { AccountAddressV2 } from "@/shared/components/account-address-v2";
 import { Selector } from "@/shared/components/Selector";
+import { FeltDisplayer } from "@/shared/components/felt-displayer";
 
 /**
  *
@@ -202,6 +203,7 @@ export function Transaction() {
                     <CardLabel>Hash</CardLabel>
                     <div>
                       <CopyableInteger
+                        title="Transaction Hash"
                         length={1}
                         value={receipt?.transaction_hash}
                       />
@@ -508,6 +510,7 @@ export function Transaction() {
                           <div className="flex items-center justify-between gap-2">
                             <CardLabel>Class Hash</CardLabel>
                             <CopyableInteger
+                              title="Class Hash"
                               length={isMobile ? 1 : 3}
                               value={tx.class_hash}
                               to={`../class/${tx.class_hash}`}
@@ -516,6 +519,7 @@ export function Transaction() {
                           <div className="flex items-center justify-between gap-2">
                             <CardLabel>Compiled Class Hash</CardLabel>
                             <CopyableInteger
+                              title="Compiled Class Hash"
                               length={isMobile ? 1 : 3}
                               value={tx.compiled_class_hash}
                             />
@@ -544,16 +548,9 @@ export function Transaction() {
                           ]}
                         />
                         <UITabsContent value="hex" className="mt-[15px]">
-                          <Editor
+                          <FeltDisplayer
                             className="min-h-[80vh]"
-                            defaultLanguage="json"
-                            value={JSON.stringify(tx?.signature ?? [], null, 2)}
-                            options={{
-                              readOnly: true,
-                              scrollbar: {
-                                alwaysConsumeMouseWheel: false,
-                              },
-                            }}
+                            value={tx?.signature ?? []}
                           />
                         </UITabsContent>
                         <UITabsContent value="dec">

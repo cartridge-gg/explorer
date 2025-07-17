@@ -12,24 +12,28 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
+    title: "Address",
     value: "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D",
   },
 };
 
 export const Skeleton: Story = {
   args: {
+    title: "Address",
     value: undefined,
   },
 };
 
 export const ShortHash: Story = {
   args: {
+    title: "Address",
     value: "0x1",
   },
 };
 
 export const CustomLength2: Story = {
   args: {
+    title: "Address",
     value: "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D",
     length: 2,
   },
@@ -37,6 +41,7 @@ export const CustomLength2: Story = {
 
 export const CustomLength3: Story = {
   args: {
+    title: "Address",
     value: "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D",
     length: 3,
   },
@@ -44,6 +49,7 @@ export const CustomLength3: Story = {
 
 export const Link: Story = {
   args: {
+    title: "Address",
     value: "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D",
     to: "../contract/0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D",
   },

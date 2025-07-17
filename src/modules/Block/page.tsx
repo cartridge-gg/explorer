@@ -55,7 +55,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useScreen } from "@/shared/hooks/useScreen";
 
 const TXN_OFFSET = 150; // Offset for the transaction table
-const EVENT_OFFSET = 100; // Offset for the event table
+const EVENT_OFFSET = 115; // Offset for the event table
 
 export function Block() {
   const tab = useHashLinkTabs("transactions");
@@ -70,6 +70,7 @@ export function Block() {
   useEffect(() => {
     const container = tableContainerRef.current;
     if (!container) return;
+    if (tableContainerHeight !== 0) return;
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -83,7 +84,7 @@ export function Block() {
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [tableContainerHeight]);
 
   const txnItemPerPage = useMemo(() => {
     if (isMobile) return 5;
@@ -244,15 +245,27 @@ export function Block() {
                 <CardContent className="gap-[8px]">
                   <div className="flex items-center justify-between">
                     <CardLabel>Hash</CardLabel>
-                    <CopyableInteger length={1} value={block?.block_hash} />
+                    <CopyableInteger
+                      title="Hash"
+                      length={1}
+                      value={block?.block_hash}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <CardLabel>State root</CardLabel>
-                    <CopyableInteger length={1} value={block?.new_root} />
+                    <CopyableInteger
+                      title="State root"
+                      length={1}
+                      value={block?.new_root}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <CardLabel>Parent hash</CardLabel>
-                    <CopyableInteger length={1} value={block?.parent_hash} />
+                    <CopyableInteger
+                      title="Parent hash"
+                      length={1}
+                      value={block?.parent_hash}
+                    />
                   </div>
                 </CardContent>
 
@@ -265,6 +278,7 @@ export function Block() {
                     onClick={onClickSequencerAddress}
                   >
                     <CopyableInteger
+                      title="Sequencer address"
                       containerClassName="w-full justify-between"
                       length={3}
                       value={block?.sequencer_address}
@@ -530,6 +544,8 @@ export function Block() {
                     {tableContainerHeight > 0 && (
                       <DataTable
                         table={txs}
+                        tableClassName="overflow-hidden"
+                        containerClassName="overflow-hidden"
                         onRowClick={(row) => navigate(`../tx/${row.hash}`)}
                         style={{
                           height: isMobile
@@ -544,6 +560,8 @@ export function Block() {
                     {tableContainerHeight > 0 && (
                       <DataTable
                         table={events}
+                        tableClassName="overflow-hidden"
+                        containerClassName="overflow-hidden"
                         onRowClick={(row) =>
                           navigate(`../event/${row.txn_hash}-${row.id}`)
                         }
