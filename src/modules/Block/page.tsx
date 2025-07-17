@@ -70,6 +70,7 @@ export function Block() {
   useEffect(() => {
     const container = tableContainerRef.current;
     if (!container) return;
+    if (tableContainerHeight !== 0) return;
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -83,7 +84,7 @@ export function Block() {
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [tableContainerHeight]);
 
   const txnItemPerPage = useMemo(() => {
     if (isMobile) return 5;
@@ -530,6 +531,8 @@ export function Block() {
                     {tableContainerHeight > 0 && (
                       <DataTable
                         table={txs}
+                        tableClassName="overflow-hidden"
+                        containerClassName="overflow-hidden"
                         onRowClick={(row) => navigate(`../tx/${row.hash}`)}
                         style={{
                           height: isMobile
@@ -544,6 +547,8 @@ export function Block() {
                     {tableContainerHeight > 0 && (
                       <DataTable
                         table={events}
+                        tableClassName="overflow-hidden"
+                        containerClassName="overflow-hidden"
                         onRowClick={(row) =>
                           navigate(`../event/${row.txn_hash}-${row.id}`)
                         }
