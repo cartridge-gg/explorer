@@ -2,7 +2,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { BigNumberish, cairo } from "starknet";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Calldata } from "./calldata";
 import {
@@ -56,6 +56,8 @@ import FeltList from "@/shared/components/FeltList";
 import { Editor } from "@/shared/components/editor";
 import { AccountAddressV2 } from "@/shared/components/account-address-v2";
 import { Selector } from "@/shared/components/Selector";
+import { FeltDisplayer } from "@/shared/components/felt-displayer";
+import { EmptySignature } from "@/shared/components/empty/empty-signature";
 
 /**
  *
@@ -69,7 +71,10 @@ function ConvertToSTRK(input: BigNumberish) {
   return value.toFixed(6);
 }
 
+const OFFSET = 65;
+
 export function Transaction() {
+  const [tabsContentHeight, setTabsContentHeight] = useState(0);
   const { txHash } = useParams<{ txHash: string }>();
   const {
     isLoading,
@@ -86,6 +91,8 @@ export function Transaction() {
     },
   } = useTransaction({ txHash });
 
+  const tabsContentRef = useRef<HTMLDivElement>(null);
+
   const tab = useHashLinkTabs(
     tx?.type === "INVOKE"
       ? "calldata"
@@ -93,6 +100,27 @@ export function Transaction() {
         ? "class"
         : "signature",
   );
+
+  useEffect(() => {
+    const container = tabsContentRef.current;
+    if (!container) return;
+    if (tabsContentHeight !== 0) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { height } = entry.contentRect;
+        const calculatedHeight = height - OFFSET;
+        setTabsContentHeight(Math.max(calculatedHeight, 0)); // Ensure non-negative
+      }
+    });
+
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [tabsContentHeight]);
+
   const { isMobile } = useScreen();
 
   const onCopyValue = useCallback((value: string) => {
@@ -202,6 +230,7 @@ export function Transaction() {
                     <CardLabel>Hash</CardLabel>
                     <div>
                       <CopyableInteger
+                        title="Transaction Hash"
                         length={1}
                         value={receipt?.transaction_hash}
                       />
@@ -433,7 +462,10 @@ export function Transaction() {
               </Card>
             </div>
 
-            <Card className="p-0 h-full flex-grow grid grid-rows-[min-content_1fr] overflow-x-scroll sl:min-w-[794px] rounded-sm rounded-br-[12px]">
+            <Card
+              ref={tabsContentRef}
+              className="p-0 h-full flex-grow grid grid-rows-[min-content_1fr] overflow-x-scroll sl:min-w-[794px] rounded-sm rounded-br-[12px]"
+            >
               {tx ? (
                 <Tabs
                   value={tab.selected}
@@ -508,6 +540,7 @@ export function Transaction() {
                           <div className="flex items-center justify-between gap-2">
                             <CardLabel>Class Hash</CardLabel>
                             <CopyableInteger
+                              title="Class Hash"
                               length={isMobile ? 1 : 3}
                               value={tx.class_hash}
                               to={`../class/${tx.class_hash}`}
@@ -516,6 +549,7 @@ export function Transaction() {
                           <div className="flex items-center justify-between gap-2">
                             <CardLabel>Compiled Class Hash</CardLabel>
                             <CopyableInteger
+                              title="Compiled Class Hash"
                               length={isMobile ? 1 : 3}
                               value={tx.compiled_class_hash}
                             />
@@ -536,34 +570,35 @@ export function Transaction() {
                       </TabsContent>
                     )}
                     <TabsContent value="signature" className="mt-0">
-                      <UITabs defaultValue="hex">
-                        <Selector
-                          items={[
-                            { value: "dec", label: "Dec" },
-                            { value: "hex", label: "Hex" },
-                          ]}
-                        />
-                        <UITabsContent value="hex" className="mt-[15px]">
-                          <Editor
-                            className="min-h-[80vh]"
-                            defaultLanguage="json"
-                            value={JSON.stringify(tx?.signature ?? [], null, 2)}
-                            options={{
-                              readOnly: true,
-                              scrollbar: {
-                                alwaysConsumeMouseWheel: false,
-                              },
-                            }}
+                      {tx?.signature && tx?.signature?.length > 0 ? (
+                        <UITabs defaultValue="hex">
+                          <Selector
+                            items={[
+                              { value: "dec", label: "Dec" },
+                              { value: "hex", label: "Hex" },
+                            ]}
                           />
-                        </UITabsContent>
-                        <UITabsContent value="dec">
-                          {tx ? (
-                            <FeltList list={tx?.signature} displayAs="dec" />
-                          ) : (
-                            <Skeleton className="h-4 w-full" />
-                          )}
-                        </UITabsContent>
-                      </UITabs>
+                          <UITabsContent value="hex" className="mt-[15px]">
+                            <FeltDisplayer
+                              className="min-h-[80vh]"
+                              value={tx?.signature ?? []}
+                            />
+                          </UITabsContent>
+                          <UITabsContent value="dec">
+                            {tx ? (
+                              <FeltList list={tx?.signature} displayAs="dec" />
+                            ) : (
+                              <Skeleton className="h-4 w-full" />
+                            )}
+                          </UITabsContent>
+                        </UITabs>
+                      ) : (
+                        <EmptySignature
+                          style={{
+                            height: tabsContentHeight,
+                          }}
+                        />
+                      )}
                     </TabsContent>
                     <TabsContent value="events" className="mt-0">
                       <DataTable table={events} />
@@ -577,7 +612,10 @@ export function Transaction() {
                 <Tabs>
                   <TabsList className="border-b border-background-200 animate-pulse pointer-events-none">
                     {Array.from({ length: 3 }).map((_, i) => (
-                      <TabsTrigger value={`dummy-tab-${i}`}>
+                      <TabsTrigger
+                        key={`dummy-tab-${i}`}
+                        value={`dummy-tab-${i}`}
+                      >
                         <Skeleton className="h-4 w-40" />
                       </TabsTrigger>
                     ))}

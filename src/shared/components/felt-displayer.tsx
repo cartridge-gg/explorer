@@ -1,4 +1,5 @@
 import { cn } from "@cartridge/ui";
+import { useMemo } from "react";
 import { Virtuoso } from "react-virtuoso";
 
 interface FeltDisplayerProps {
@@ -8,29 +9,39 @@ interface FeltDisplayerProps {
 }
 
 export function FeltDisplayer({ value, className }: FeltDisplayerProps) {
-  let lines: string[] = [];
+  const lines = useMemo(() => {
+    let _lines: string[] = [];
 
-  if (Array.isArray(value)) {
-    // If it's an array, display each item on its own line
-    lines = value.map((item) => String(item));
-  } else if (typeof value === "string") {
-    // If it's a string, try to parse as JSON first
-    try {
-      const parsed = JSON.parse(value);
-      // If it's valid JSON, format it nicely and split by lines
-      lines = JSON.stringify(parsed, null, 2).split("\n");
-    } catch {
-      // If not valid JSON, split by newlines
-      lines = value.split("\n");
+    if (Array.isArray(value)) {
+      // If it's an array, display each item on its own line
+      _lines = value.map((item) => String(item));
+    } else if (typeof value === "string") {
+      // If it's a string, try to parse as JSON first
+      try {
+        const parsed = JSON.parse(value);
+        // If it's valid JSON, format it nicely and split by lines
+        _lines = JSON.stringify(parsed, null, 2).split("\n");
+      } catch {
+        // If not valid JSON, split by newlines
+        _lines = value.split("\n");
+      }
+    } else {
+      _lines = [String(value)];
     }
-  } else {
-    lines = [String(value)];
-  }
 
-  // If no data, show placeholder
-  if (lines.length === 0) {
-    lines = ["No data to display"];
-  }
+    // If no data, show placeholder
+    if (_lines.length === 0) {
+      _lines = ["No data to display"];
+    }
+
+    return _lines;
+  }, [value]);
+
+  // Calculate the number of digits in the total line count for consistent width
+  const lineNumberWidth = useMemo(() => {
+    const totalDigits = lines.length.toString().length;
+    return `${totalDigits}ch`;
+  }, [lines]);
 
   return (
     <div
@@ -46,8 +57,11 @@ export function FeltDisplayer({ value, className }: FeltDisplayerProps) {
         data={lines}
         itemContent={(index, line) => (
           <div className="flex gap-[10px]">
-            <div className="bg-spacer select-none space-y-[5px]">
-              <p className="text-right text-[12px] font-normal text-foreground-400 ">
+            <div
+              className="bg-spacer select-none space-y-[5px]"
+              style={{ minWidth: lineNumberWidth }}
+            >
+              <p className="text-right text-[12px] font-normal text-foreground-400">
                 {index}
               </p>
             </div>
