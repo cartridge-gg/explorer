@@ -116,7 +116,12 @@ export function TransactionList() {
       }),
       columnHelper.accessor("hash", {
         header: "Transaction Hash",
-        cell: (info) => <CopyableInteger value={info.renderValue()} />,
+        cell: (info) => (
+          <CopyableInteger
+            title="Transaction Hash"
+            value={info.renderValue()}
+          />
+        ),
       }),
       columnHelper.accessor("age", {
         header: "Age",

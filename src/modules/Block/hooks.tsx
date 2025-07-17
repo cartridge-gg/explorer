@@ -145,7 +145,7 @@ export function useBlock({
       txColumnHelper.accessor("hash", {
         header: "Hash",
         cell: (info) => (
-          <CopyableInteger length={2} value={info.renderValue()} />
+          <CopyableInteger title="Hash" length={2} value={info.renderValue()} />
         ),
         filterFn: (row, columnId, filterValue) => {
           const rowValue: string = row.getValue(columnId);
@@ -251,6 +251,7 @@ export function useBlock({
         header: "Transaction",
         cell: (info) => (
           <CopyableInteger
+            title="Transaction Hash"
             value={info.renderValue()}
             to={`../tx/${info.renderValue()}`}
           />
@@ -260,6 +261,7 @@ export function useBlock({
         header: "From Address",
         cell: (info) => (
           <CopyableInteger
+            title="From Address"
             value={info.renderValue()}
             to={`../contract/${info.renderValue()}`}
           />

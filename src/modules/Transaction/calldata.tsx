@@ -54,7 +54,11 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                   type="button"
                   className="h-[35px] w-full bg-background-200 hover:bg-background-300 px-[15px] py-[5.5px] first:rounded-t-sm last:rounded-b-sm flex items-center gap-4"
                 >
-                  <CopyableInteger length={1} value={c.contract} />
+                  <CopyableInteger
+                    title="Contract address"
+                    length={1}
+                    value={c.contract}
+                  />
                   <div className="flex items-center gap-2 text-foreground-200">
                     <FnIcon className="text-foreground-400" />
                     <span className="font-semibold">{c.function_name}</span>
@@ -83,6 +87,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                       contract
                     </p>
                     <CopyableInteger
+                      title="Contract Address"
                       length={isMobile ? 1 : 3}
                       value={c.contract}
                     />

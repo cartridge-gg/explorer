@@ -177,6 +177,7 @@ export function ClassHash() {
               Hash
             </CardLabel>
             <CopyableInteger
+              title="Class Hash"
               length={3}
               value={classHash}
               containerClassName="w-fit"
@@ -314,6 +315,7 @@ export function ClassHash() {
                           selector
                         </CardLabel>
                         <CopyableInteger
+                          title="Function selector"
                           length={isMobile ? 1 : 3}
                           value={selected?.selector}
                         />

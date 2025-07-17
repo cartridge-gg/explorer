@@ -245,15 +245,27 @@ export function Block() {
                 <CardContent className="gap-[8px]">
                   <div className="flex items-center justify-between">
                     <CardLabel>Hash</CardLabel>
-                    <CopyableInteger length={1} value={block?.block_hash} />
+                    <CopyableInteger
+                      title="Hash"
+                      length={1}
+                      value={block?.block_hash}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <CardLabel>State root</CardLabel>
-                    <CopyableInteger length={1} value={block?.new_root} />
+                    <CopyableInteger
+                      title="State root"
+                      length={1}
+                      value={block?.new_root}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <CardLabel>Parent hash</CardLabel>
-                    <CopyableInteger length={1} value={block?.parent_hash} />
+                    <CopyableInteger
+                      title="Parent hash"
+                      length={1}
+                      value={block?.parent_hash}
+                    />
                   </div>
                 </CardContent>
 
@@ -266,6 +278,7 @@ export function Block() {
                     onClick={onClickSequencerAddress}
                   >
                     <CopyableInteger
+                      title="Sequencer address"
                       containerClassName="w-full justify-between"
                       length={3}
                       value={block?.sequencer_address}

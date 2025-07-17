@@ -391,6 +391,7 @@ export function Contract() {
                       Address
                     </CardLabel>
                     <CopyableInteger
+                      title="Contract address"
                       length={isMobile ? 1 : 4}
                       className="px-0"
                       value={contractAddress}
@@ -415,7 +416,11 @@ export function Contract() {
                     className="bg-background-200 hover:bg-[#2B2F2C] rounded-sm py-[4px] px-[10px] border border-[#454B46] cursor-pointer"
                     onClick={onCopyClassHash}
                   >
-                    <CopyableInteger length={3} value={classHash} />
+                    <CopyableInteger
+                      title="Class hash"
+                      length={3}
+                      value={classHash}
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -572,6 +577,7 @@ export function Contract() {
                             selector
                           </CardLabel>
                           <CopyableInteger
+                            title="Selector"
                             length={isMobile ? 1 : 3}
                             value={selected?.selector}
                           />
@@ -803,6 +809,7 @@ export function Contract() {
                             selector
                           </CardLabel>
                           <CopyableInteger
+                            title="Selector"
                             length={isMobile ? 1 : 3}
                             value={selected?.selector}
                           />
