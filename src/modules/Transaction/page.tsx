@@ -512,7 +512,6 @@ export function Transaction() {
                               title="Class Hash"
                               length={isMobile ? 1 : 3}
                               value={tx.class_hash}
-                              title="Compiled Class Hash"
                               to={`../class/${tx.class_hash}`}
                             />
                           </div>
