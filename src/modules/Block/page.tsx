@@ -55,7 +55,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useScreen } from "@/shared/hooks/useScreen";
 
 const TXN_OFFSET = 150; // Offset for the transaction table
-const EVENT_OFFSET = 100; // Offset for the event table
+const EVENT_OFFSET = 115; // Offset for the event table
 
 export function Block() {
   const tab = useHashLinkTabs("transactions");
