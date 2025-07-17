@@ -93,7 +93,7 @@ export function Block() {
       return Math.max(1, Math.floor(calculatedHeight / rowHeight));
     }
     return undefined;
-  }, [tableContainerHeight, tab.selected]);
+  }, [tableContainerHeight, isMobile]);
 
   const eventsItemPerPage = useMemo(() => {
     if (isMobile) return 5;
@@ -103,7 +103,7 @@ export function Block() {
       return Math.max(1, Math.floor(calculatedHeight / rowHeight));
     }
     return undefined;
-  }, [tableContainerHeight, tab.selected]);
+  }, [tableContainerHeight, isMobile]);
 
   const {
     data: { blockId, block, txs, events, executions, blockComputeData },
@@ -176,7 +176,7 @@ export function Block() {
             className={cn(
               "bg-background border-l border-background-200 text-foreground size-12 flex items-center justify-center cursor-pointer hover:bg-background-200",
               !block?.block_number &&
-              "cursor-not-allowed pointer-events-none text-foreground-300",
+                "cursor-not-allowed pointer-events-none text-foreground-300",
             )}
             to={{
               pathname: `../block/${block?.block_number - 1}`,
@@ -189,7 +189,7 @@ export function Block() {
             className={cn(
               "bg-background border-l border-background-200 text-foreground size-12 flex items-center justify-center hover:bg-background-200",
               (!block || isLatestBlock) &&
-              "cursor-not-allowed pointer-events-none text-foreground-300",
+                "cursor-not-allowed pointer-events-none text-foreground-300",
             )}
             to={{
               pathname: `../block/${block?.block_number + 1}`,
@@ -268,7 +268,7 @@ export function Block() {
                       containerClassName="w-full justify-between"
                       length={3}
                       value={block?.sequencer_address}
-                      onClick={() => { }}
+                      onClick={() => {}}
                       onIconClick={(e) => {
                         e?.stopPropagation();
                         onCopyValue(block?.sequencer_address);
@@ -541,15 +541,17 @@ export function Block() {
                   </TabsContent>
 
                   <TabsContent value="events" className="m-0 h-full">
-                    <DataTable
-                      table={events}
-                      onRowClick={(row) =>
-                        navigate(`../event/${row.txn_hash}-${row.id}`)
-                      }
-                      style={{
-                        height: isMobile ? "auto" : tableContainerHeight - 63,
-                      }}
-                    />
+                    {tableContainerHeight > 0 && (
+                      <DataTable
+                        table={events}
+                        onRowClick={(row) =>
+                          navigate(`../event/${row.txn_hash}-${row.id}`)
+                        }
+                        style={{
+                          height: isMobile ? "auto" : tableContainerHeight - 63,
+                        }}
+                      />
+                    )}
                   </TabsContent>
                 </CardContent>
               </Tabs>
