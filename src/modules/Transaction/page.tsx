@@ -202,6 +202,7 @@ export function Transaction() {
                     <CardLabel>Hash</CardLabel>
                     <div>
                       <CopyableInteger
+                        title="Transaction Hash"
                         length={1}
                         value={receipt?.transaction_hash}
                       />
@@ -508,14 +509,17 @@ export function Transaction() {
                           <div className="flex items-center justify-between gap-2">
                             <CardLabel>Class Hash</CardLabel>
                             <CopyableInteger
+                              title="Class Hash"
                               length={isMobile ? 1 : 3}
                               value={tx.class_hash}
+                              title="Compiled Class Hash"
                               to={`../class/${tx.class_hash}`}
                             />
                           </div>
                           <div className="flex items-center justify-between gap-2">
                             <CardLabel>Compiled Class Hash</CardLabel>
                             <CopyableInteger
+                              title="Compiled Class Hash"
                               length={isMobile ? 1 : 3}
                               value={tx.compiled_class_hash}
                             />
