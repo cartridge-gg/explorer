@@ -50,13 +50,16 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
           decoded.map((c, i) => (
             <Dialog key={i}>
               <DialogTrigger asChild>
-                <div className="h-[35px] w-full bg-background-200 hover:bg-background-300 px-[15px] py-[5.5px] first:rounded-t-sm last:rounded-b-sm flex items-center gap-4">
+                <button
+                  type="button"
+                  className="h-[35px] w-full bg-background-200 hover:bg-background-300 px-[15px] py-[5.5px] first:rounded-t-sm last:rounded-b-sm flex items-center gap-4"
+                >
                   <CopyableInteger length={1} value={c.contract} />
                   <div className="flex items-center gap-2 text-foreground-200">
                     <FnIcon className="text-foreground-400" />
                     <span className="font-semibold">{c.function_name}</span>
                   </div>
-                </div>
+                </button>
               </DialogTrigger>
 
               <DialogContent
