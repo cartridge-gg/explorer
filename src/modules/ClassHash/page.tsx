@@ -355,7 +355,27 @@ export function ClassHash() {
                   <Editor
                     className="min-h-[80vh] p-[15px]"
                     defaultLanguage="json"
-                    value={code.abi}
+                    value={JSON.stringify(
+                      {
+                        ...code,
+                        abi: (() => {
+                          try {
+                            return JSON.parse(code.abi);
+                          } catch {
+                            return code.abi;
+                          }
+                        })(),
+                        sierra: (() => {
+                          try {
+                            return JSON.parse(code.sierra || "");
+                          } catch {
+                            return code.sierra;
+                          }
+                        })(),
+                      },
+                      null,
+                      2,
+                    )}
                     options={{
                       readOnly: true,
                       scrollbar: {
