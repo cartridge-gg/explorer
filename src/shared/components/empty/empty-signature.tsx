@@ -9,7 +9,7 @@ export const EmptySignature = React.forwardRef<
   <Card
     ref={ref}
     className={cn(
-      "border-dashed min-h-[100px] flex items-center justify-center",
+      "border-dashed min-h-[100px] flex items-center justify-center rounded-[5px]",
       className,
     )}
     {...props}
