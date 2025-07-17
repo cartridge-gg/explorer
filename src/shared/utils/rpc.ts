@@ -3,6 +3,7 @@ import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
 import { EXECUTION_RESOURCES_KEY_MAP } from "@/services/rpc";
 import * as RPCSPEC07 from "@starknet-io/starknet-types-07";
+import * as RPCSPEC08 from "@starknet-io/starknet-types-08";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
@@ -92,7 +93,7 @@ export const convertValue = (value: string | number) => {
 export const convertObjectValuesToDisplayValues = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   obj: any,
-  type: Exclude<FeltDisplayVariants[number], "string">
+  type: Exclude<FeltDisplayVariants[number], "string">,
 ) => {
   for (const key in obj) {
     if (typeof obj[key] === "object") {
@@ -108,8 +109,8 @@ export const convertObjectValuesToDisplayValues = (
 
 export function parseExecutionResources(
   execution_resources:
-    | GetTransactionReceiptResponse<"success">["value"]["execution_resources"]
-    | RPCSPEC07.API.SPEC.EXECUTION_RESOURCES
+    | RPCSPEC08.API.EXECUTION_RESOURCES
+    | RPCSPEC07.API.SPEC.EXECUTION_RESOURCES,
 ) {
   return Object.entries(execution_resources).reduce(
     (acc, [key, value]) => {
