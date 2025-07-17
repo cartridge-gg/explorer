@@ -270,12 +270,14 @@ export function Transaction() {
 
                 <Separator />
                 <CardContent className="gap-[8px]">
-                  <div className="flex justify-between items-center">
-                    <CardLabel>Tip</CardLabel>
-                    <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                      {tx?.tip ? Number(tx?.tip).toLocaleString() : "-"}
-                    </p>
-                  </div>
+                  {!!tx?.tip && (
+                    <div className="flex justify-between items-center">
+                      <CardLabel>Tip</CardLabel>
+                      <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+                        {tx.tip ? Number(tx.tip).toLocaleString() : "-"}
+                      </p>
+                    </div>
+                  )}
                   <div className="flex justify-between items-center">
                     <CardLabel>Fee</CardLabel>
                     <div className="flex flex-row items-center gap-[10px]">
