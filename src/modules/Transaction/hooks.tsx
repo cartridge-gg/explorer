@@ -105,13 +105,13 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     queryKey: ["transaction-sammary", txHash],
     queryFn: async () => {
       const receiptResult = await RPC_PROVIDER.getTransactionReceipt(
-        txHash || ""
+        txHash || "",
       );
 
       const receipt =
         receiptResult.value as SuccessfulTransactionReceiptResponse;
       const { executions, blockComputeData } = parseExecutionResources(
-        receipt.execution_resources
+        receipt.execution_resources,
       );
 
       // Group events by contract address while preserving original indices
@@ -164,17 +164,17 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
               eventsResponse.events,
               abiEvents,
               abiStructs,
-              abiEnums
+              abiEnums,
             );
 
             return eventEntries.map(({ originalIndex }) => {
               const matchingParsedEvent = parsedEvents.find(
-                (e) => e.transaction_hash === receipt.transaction_hash
+                (e) => e.transaction_hash === receipt.transaction_hash,
               );
 
               const eventKey = matchingParsedEvent
                 ? (Object.keys(matchingParsedEvent).find((key) =>
-                    key.includes("::")
+                    key.includes("::"),
                   ) ?? "")
                 : "";
 
@@ -189,8 +189,8 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
                 },
               };
             });
-          }
-        )
+          },
+        ),
       );
 
       const events = eventsWithIndices
