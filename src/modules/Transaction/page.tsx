@@ -570,7 +570,7 @@ export function Transaction() {
                       </TabsContent>
                     )}
                     <TabsContent value="signature" className="mt-0">
-                      {tx?.signature ? (
+                      {tx?.signature && tx?.signature?.length > 0 ? (
                         <UITabs defaultValue="hex">
                           <Selector
                             items={[
