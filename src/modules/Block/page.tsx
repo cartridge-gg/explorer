@@ -59,14 +59,6 @@ const TXN_OFFSET = 150; // Offset for the transaction table
 const EVENT_OFFSET = 115; // Offset for the event table
 const ROW_HEIGHT = 35; // Height of each row in the table
 
-const formatType = <T extends string>(s: T): string => {
-  return s
-    .toLowerCase()
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ") as Capitalize<typeof s>;
-};
-
 export function Block() {
   const tab = useHashLinkTabs("transactions");
   const { hash } = useLocation();
@@ -125,22 +117,27 @@ export function Block() {
   });
   const { blockNumber: latestBlockNumber } = useBlockNumber();
 
-  const filterItems = useMemo(() => {
-    const types: Array<TransactionType> = [
-      "INVOKE",
-      "L1_HANDLER",
-      "DECLARE",
-      "DEPLOY",
-      "DEPLOY_ACCOUNT",
-    ];
+  const filterItems: Array<{ key: TransactionType; value: string }> =
+    useMemo(() => {
+      const types: Array<TransactionType> = [
+        "INVOKE",
+        "L1_HANDLER",
+        "DECLARE",
+        "DEPLOY",
+        "DEPLOY_ACCOUNT",
+      ];
 
-    return types.map((type) => {
-      return {
-        key: type,
-        value: formatType(type),
-      };
-    });
-  }, []);
+      return types.map((type) => {
+        return {
+          key: type,
+          value: type
+            .toLowerCase()
+            .split("_")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ") as Capitalize<typeof type>,
+        };
+      });
+    }, []);
 
   const isLatestBlock = useMemo(() => {
     return (
