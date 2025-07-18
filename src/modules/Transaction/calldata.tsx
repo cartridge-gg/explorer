@@ -27,7 +27,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { isMobile } = useScreen();
 
   return (
-    <Tabs defaultValue="decoded" className="space-y-[15px]">
+    <Tabs defaultValue="decoded" className="space-y-[15px] h-full">
       <Selector
         items={[
           { label: "Raw", value: "raw" },
@@ -166,19 +166,12 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
         )}
       </TabsContent>
 
-      <TabsContent value="raw">
-        <FeltDisplayer value={tx.calldata} />
-        {/* <Editor
-          className="min-h-[80vh]"
-          defaultLanguage="json"
-          value={JSON.stringify(tx.calldata, null, 2)}
-          options={{
-            readOnly: true,
-            scrollbar: {
-              alwaysConsumeMouseWheel: false,
-            },
-          }}
-        /> */}
+      <TabsContent value="raw" className="h-full">
+        <FeltDisplayer
+          height="100%"
+          // value={tx.calldata}
+          value={Array.from({ length: 1000 }, (_, i) => i + 1)}
+        />
       </TabsContent>
     </Tabs>
   );

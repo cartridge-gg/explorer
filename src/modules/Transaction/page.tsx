@@ -89,6 +89,29 @@ export function Transaction() {
     },
   } = useTransaction({ txHash });
 
+  // const [tabsContainerHeight, setTabsContainerHeight] = useState(0);
+
+  // const tabsContainerRef = useRef<HTMLDivElement>(null);
+
+  // useEffect(() => {
+  //   const container = tabsContainerRef.current;
+  //   if (!container) return;
+  //   if (tabsContainerHeight !== 0) return;
+
+  //   const resizeObserver = new ResizeObserver((entries) => {
+  //     for (const entry of entries) {
+  //       const { height } = entry.contentRect;
+  //       setTabsContainerHeight(Math.max(height, 0)); // Ensure non-negative
+  //     }
+  //   });
+
+  //   resizeObserver.observe(container);
+
+  //   return () => {
+  //     resizeObserver.disconnect();
+  //   };
+  // }, [tabsContainerHeight]);
+
   const tab = useHashLinkTabs(
     tx?.type === "INVOKE"
       ? "calldata"
@@ -502,7 +525,10 @@ export function Transaction() {
 
                   <CardContent className="p-[15px] h-full">
                     {tx?.type === "INVOKE" && (
-                      <TabsContent value="calldata" className="mt-0">
+                      <TabsContent
+                        value="calldata"
+                        className="mt-0 h-full overflow-hidden"
+                      >
                         <Calldata tx={tx} />
                       </TabsContent>
                     )}
@@ -561,8 +587,7 @@ export function Transaction() {
                             className="mt-[15px] data-[state=inactive]:hidden h-full relative"
                           >
                             <FeltDisplayer
-                              className="h-full"
-                              height={20}
+                              height="100%"
                               value={tx?.signature ?? []}
                               // simulate scrollable
                               // value={Array.from(
@@ -577,10 +602,7 @@ export function Transaction() {
                           >
                             {tx ? (
                               <FeltDisplayer
-                                className="h-full"
-                                // style={{
-                                //   height: tabsContentHeight - 35,
-                                // }}
+                                height="100%"
                                 value={tx.signature ?? []}
                                 displayAs="dec"
                               />
