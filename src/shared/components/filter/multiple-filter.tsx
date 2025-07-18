@@ -5,8 +5,9 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-  Checkbox,
   TimesCircleIcon,
+  CheckboxCheckedIcon,
+  CheckboxUncheckedIcon,
 } from "@cartridge/ui";
 import React, { useState } from "react";
 
@@ -88,17 +89,30 @@ export const MultiFilter = ({
         alignOffset={0}
         className="w-56 p-2 border-[#454B46]"
       >
-        <div className="space-y-2">
+        <div className="space-y-[5px]">
           {items.map((item) => (
-            <div key={item.key} className="flex items-center space-x-2">
-              <Checkbox
-                id={item.key}
-                checked={value.includes(item.key)}
-                onCheckedChange={() => handleToggle(item.key)}
-              />
+            <div
+              key={item.key}
+              className="flex items-center space-x-[5px] w-full p-[5px] rounded-sm cursor-pointer hover:bg-background-400 transition-colors duration-150"
+              onClick={() => handleToggle(item.key)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleToggle(item.key);
+                }
+              }}
+              aria-label={`Toggle ${item.value} filter`}
+            >
+              {value.includes(item.key) ? (
+                <CheckboxCheckedIcon className="w-[13px] h-[13px] text-foreground-100" />
+              ) : (
+                <CheckboxUncheckedIcon className="w-[13px] h-[13px] text-foreground-100" />
+              )}
               <label
                 htmlFor={item.key}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none flex-1"
               >
                 {item.value}
               </label>
