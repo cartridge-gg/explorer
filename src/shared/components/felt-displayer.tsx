@@ -1,14 +1,22 @@
 import { cn } from "@cartridge/ui";
 import { useMemo } from "react";
 import { Virtuoso } from "react-virtuoso";
+import { shortString } from "starknet";
+
+type FeltDisplayerType = "hex" | "dec" | "string";
 
 interface FeltDisplayerProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: string | any[];
   className?: string;
+  displayAs?: FeltDisplayerType;
 }
 
-export function FeltDisplayer({ value, className }: FeltDisplayerProps) {
+export function FeltDisplayer({
+  value,
+  className,
+  displayAs = "hex",
+}: FeltDisplayerProps) {
   const lines = useMemo(() => {
     let _lines: string[] = [];
 
@@ -55,25 +63,43 @@ export function FeltDisplayer({ value, className }: FeltDisplayerProps) {
         className="scrollbar-none"
         totalCount={lines.length}
         data={lines}
-        itemContent={(index, line) => (
-          <div className="flex gap-[10px]">
-            <div
-              className="bg-spacer select-none space-y-[5px]"
-              style={{ minWidth: lineNumberWidth }}
-            >
-              <p className="text-right text-[12px] font-normal text-foreground-400">
-                {index}
-              </p>
-            </div>
+        itemContent={(index, line) => {
+          const felt = BigInt(line);
+          const item =
+            displayAs === "dec"
+              ? felt.toString()
+              : displayAs === "string"
+                ? (() => {
+                    // Using the existing shortString utility from the codebase
+                    // We need to use toString(10) to get the decimal string representation
+                    try {
+                      shortString.decodeShortString(felt.toString(10));
+                    } catch {
+                      value.toString();
+                    }
+                  })()
+                : `0x${felt.toString(16)}`;
 
-            {/* Content */}
-            <div className="flex-1 space-y-[5px]">
-              <p className="text-[12px] font-normal whitespace-pre-wrap text-foreground-200">
-                {line}
-              </p>
+          return (
+            <div className="flex gap-[10px]">
+              <div
+                className="bg-spacer select-none space-y-[5px]"
+                style={{ minWidth: lineNumberWidth }}
+              >
+                <p className="text-right text-[12px] font-normal text-foreground-400">
+                  {index}
+                </p>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 space-y-[5px]">
+                <p className="text-[12px] font-normal whitespace-pre-wrap text-foreground-200">
+                  {item}
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        }}
       />
     </div>
   );
