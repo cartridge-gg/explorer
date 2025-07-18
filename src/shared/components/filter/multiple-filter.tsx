@@ -91,12 +91,11 @@ export const MultiFilter = ({
       >
         <div className="space-y-[5px]">
           {items.map((item) => (
-            <div
+            <button
               key={item.key}
               className="flex items-center space-x-[5px] w-full p-[5px] rounded-sm cursor-pointer hover:bg-background-400 transition-colors duration-150"
               onClick={() => handleToggle(item.key)}
-              role="button"
-              tabIndex={0}
+              type="button"
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
@@ -110,13 +109,10 @@ export const MultiFilter = ({
               ) : (
                 <CheckboxUncheckedIcon className="w-[13px] h-[13px] text-foreground-100" />
               )}
-              <label
-                htmlFor={item.key}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none flex-1"
-              >
+              <p className="text-left text-[12px]/[20px] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none flex-1">
                 {item.value}
-              </label>
-            </div>
+              </p>
+            </button>
           ))}
         </div>
       </PopoverContent>
