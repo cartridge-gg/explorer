@@ -52,7 +52,6 @@ import {
 import { CopyableInteger } from "@/shared/components/copyable-integer";
 import dayjs from "dayjs";
 import { getFinalityStatus } from "@/shared/utils/receipt";
-import FeltList from "@/shared/components/FeltList";
 import { Editor } from "@/shared/components/editor";
 import { AccountAddressV2 } from "@/shared/components/account-address-v2";
 import { Selector } from "@/shared/components/Selector";
@@ -585,8 +584,15 @@ export function Transaction() {
                             className="mt-[15px] data-[state=inactive]:hidden"
                           >
                             <FeltDisplayer
-                              className="min-h-[80vh]"
+                              style={{
+                                height: tabsContentHeight - 35,
+                              }}
                               value={tx?.signature ?? []}
+                              // simulate scrollable
+                              // value={Array.from(
+                              //   { length: 1000 },
+                              //   (_, i) => i + 1,
+                              // )}
                             />
                           </UITabsContent>
                           <UITabsContent
@@ -594,10 +600,11 @@ export function Transaction() {
                             className="mt-[15px] data-[state=inactive]:hidden"
                           >
                             {tx ? (
-                              // <FeltList list={tx?.signature} displayAs="dec" />
                               <FeltDisplayer
-                                className="min-h-[80vh]"
-                                value={tx?.signature ?? []}
+                                style={{
+                                  height: tabsContentHeight - 35,
+                                }}
+                                value={tx.signature ?? []}
                                 displayAs="dec"
                               />
                             ) : (

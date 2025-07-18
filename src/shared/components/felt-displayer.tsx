@@ -5,7 +5,7 @@ import { shortString } from "starknet";
 
 type FeltDisplayerType = "hex" | "dec" | "string";
 
-interface FeltDisplayerProps {
+interface FeltDisplayerProps extends React.HTMLAttributes<HTMLDivElement> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: string | any[];
   className?: string;
@@ -16,6 +16,7 @@ export function FeltDisplayer({
   value,
   className,
   displayAs = "hex",
+  ...props
 }: FeltDisplayerProps) {
   const lines = useMemo(() => {
     let _lines: string[] = [];
@@ -57,9 +58,14 @@ export function FeltDisplayer({
         "bg-spacer border border-background-200 rounded-[5px] overflow-auto font-mono px-[10px] py-[7px] h-full max-h-[80vh]",
         className,
       )}
+      {...props}
     >
       <Virtuoso
-        style={{ height: "100vh" }}
+        style={{
+          height: props.style?.height
+            ? Number(props.style?.height) - 20
+            : "40vh",
+        }}
         className="scrollbar-none"
         totalCount={lines.length}
         data={lines}
