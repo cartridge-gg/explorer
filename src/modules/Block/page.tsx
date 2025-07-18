@@ -53,10 +53,19 @@ import { MultiFilter } from "@/shared/components/filter";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { truncateString } from "@/shared/utils/string";
 import { useScreen } from "@/shared/hooks/useScreen";
+import { TransactionType } from "@/types/types";
 
 const TXN_OFFSET = 150; // Offset for the transaction table
 const EVENT_OFFSET = 115; // Offset for the event table
 const ROW_HEIGHT = 35; // Height of each row in the table
+
+const formatType = <T extends string>(s: T): string => {
+  return s
+    .toLowerCase()
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ") as Capitalize<typeof s>;
+};
 
 export function Block() {
   const tab = useHashLinkTabs("transactions");
@@ -115,6 +124,23 @@ export function Block() {
     enabled: !!txnItemPerPage && !!eventsItemPerPage,
   });
   const { blockNumber: latestBlockNumber } = useBlockNumber();
+
+  const filterItems = useMemo(() => {
+    const types: Array<TransactionType> = [
+      "INVOKE",
+      "L1_HANDLER",
+      "DECLARE",
+      "DEPLOY",
+      "DEPLOY_ACCOUNT",
+    ];
+
+    return types.map((type) => {
+      return {
+        key: type,
+        value: formatType(type),
+      };
+    });
+  }, []);
 
   const isLatestBlock = useMemo(() => {
     return (
@@ -535,11 +561,7 @@ export function Block() {
                           txs.getColumn("type")?.setFilterValue(values);
                         }
                       }}
-                      items={[
-                        { key: "INVOKE", value: "Invoke" },
-                        { key: "DEPLOY_ACCOUNT", value: "Deploy Account" },
-                        { key: "DECLARE", value: "Declare" },
-                      ]}
+                      items={filterItems}
                     />
                     {tableContainerHeight > 0 && (
                       <DataTable
