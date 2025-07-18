@@ -18,7 +18,6 @@ import { Badge } from "@/shared/components/badge";
 import { useCalldata } from "./hooks";
 import { GetTransactionResponse } from "starknet";
 import { decodeCalldata } from "@/shared/utils/rpc";
-import { Editor } from "@/shared/components/editor";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { CopyableText } from "@/shared/components/copyable-text";
 import { Selector } from "@/shared/components/Selector";
@@ -117,7 +116,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                   <TabsContent value="raw" className="mt-0">
                     <FeltDisplayer
                       value={c.raw_args}
-                      className="max-h-[400px]"
+                      className="max-h-[425px]"
                     />
                   </TabsContent>
 
@@ -168,7 +167,8 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
       </TabsContent>
 
       <TabsContent value="raw">
-        <Editor
+        <FeltDisplayer value={tx.calldata} />
+        {/* <Editor
           className="min-h-[80vh]"
           defaultLanguage="json"
           value={JSON.stringify(tx.calldata, null, 2)}
@@ -178,7 +178,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
               alwaysConsumeMouseWheel: false,
             },
           }}
-        />
+        /> */}
       </TabsContent>
     </Tabs>
   );

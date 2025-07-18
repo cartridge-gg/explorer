@@ -10,12 +10,14 @@ interface FeltDisplayerProps extends React.HTMLAttributes<HTMLDivElement> {
   value: string | any[];
   className?: string;
   displayAs?: FeltDisplayerType;
+  height?: React.CSSProperties["height"];
 }
 
 export function FeltDisplayer({
   value,
   className,
   displayAs = "hex",
+  height,
   ...props
 }: FeltDisplayerProps) {
   const lines = useMemo(() => {
@@ -62,9 +64,10 @@ export function FeltDisplayer({
     >
       <Virtuoso
         style={{
-          height: props.style?.height
-            ? Number(props.style?.height) - 20
-            : "40vh",
+          height: height || "100vh",
+          // height: props.style?.height
+          //   ? Number(props.style?.height) - 20
+          //   : "40vh",
         }}
         className="scrollbar-none"
         totalCount={lines.length}
