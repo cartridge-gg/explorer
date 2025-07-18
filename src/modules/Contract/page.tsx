@@ -196,15 +196,13 @@ export function Contract() {
     if (currentIndex === -1) return;
 
     switch (e.key) {
-      case "ArrowDown":
-      case "j": {
+      case "ArrowDown": {
         e.preventDefault();
         const newIndex = Math.min(filtered.length - 1, currentIndex + 1);
         setSelected(filtered[newIndex]);
         break;
       }
-      case "ArrowUp":
-      case "k": {
+      case "ArrowUp": {
         e.preventDefault();
         const newIndex = Math.max(0, currentIndex - 1);
         setSelected(filtered[newIndex]);
