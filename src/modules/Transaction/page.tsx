@@ -580,15 +580,26 @@ export function Transaction() {
                               { value: "hex", label: "Hex" },
                             ]}
                           />
-                          <UITabsContent value="hex" className="mt-[15px]">
+                          <UITabsContent
+                            value="hex"
+                            className="mt-[15px] data-[state=inactive]:hidden"
+                          >
                             <FeltDisplayer
                               className="min-h-[80vh]"
                               value={tx?.signature ?? []}
                             />
                           </UITabsContent>
-                          <UITabsContent value="dec">
+                          <UITabsContent
+                            value="dec"
+                            className="mt-[15px] data-[state=inactive]:hidden"
+                          >
                             {tx ? (
-                              <FeltList list={tx?.signature} displayAs="dec" />
+                              // <FeltList list={tx?.signature} displayAs="dec" />
+                              <FeltDisplayer
+                                className="min-h-[80vh]"
+                                value={tx?.signature ?? []}
+                                displayAs="dec"
+                              />
                             ) : (
                               <Skeleton className="h-4 w-full" />
                             )}
