@@ -468,9 +468,9 @@ export function Transaction() {
                 <Tabs
                   value={tab.selected}
                   onValueChange={tab.onChange}
-                  className="h-full"
+                  className="flex flex-col h-full"
                 >
-                  <CardContent className="pb-0 pt-[3px] gap-0">
+                  <CardContent className="pb-0 pt-[3px] gap-0 flex-shrink-0">
                     <TabsList className="gap-[12px] p-0">
                       {tx?.type === "INVOKE" && (
                         <TabsTrigger
@@ -575,19 +575,24 @@ export function Transaction() {
                       className="mt-0 h-full overflow-hidden"
                     >
                       {tx?.signature && tx?.signature?.length > 0 ? (
-                        <UITabs defaultValue="hex" className="h-full">
-                          <Selector
-                            items={[
-                              { value: "dec", label: "Dec" },
-                              { value: "hex", label: "Hex" },
-                            ]}
-                          />
+                        <UITabs
+                          defaultValue="hex"
+                          className="flex flex-col h-full"
+                        >
+                          <div className="mb-[15px]">
+                            <Selector
+                              items={[
+                                { value: "dec", label: "Dec" },
+                                { value: "hex", label: "Hex" },
+                              ]}
+                            />
+                          </div>
                           <UITabsContent
                             value="hex"
-                            className="mt-[15px] data-[state=inactive]:hidden h-full relative"
+                            className="flex-1 data-[state=inactive]:hidden relative"
                           >
                             <FeltDisplayer
-                              height="100%"
+                              height={isMobile ? "500px" : "100%"}
                               value={tx?.signature ?? []}
                               // simulate scrollable
                               // value={Array.from(
@@ -598,11 +603,11 @@ export function Transaction() {
                           </UITabsContent>
                           <UITabsContent
                             value="dec"
-                            className="mt-[15px] data-[state=inactive]:hidden h-full relative"
+                            className="flex-1 data-[state=inactive]:hidden relative"
                           >
                             {tx ? (
                               <FeltDisplayer
-                                height="100%"
+                                height={isMobile ? "500px" : "100%"}
                                 value={tx.signature ?? []}
                                 displayAs="dec"
                               />

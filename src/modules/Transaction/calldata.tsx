@@ -27,14 +27,19 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { isMobile } = useScreen();
 
   return (
-    <Tabs defaultValue="decoded" className="space-y-[15px] h-full">
-      <Selector
-        items={[
-          { label: "Raw", value: "raw" },
-          { label: "Decoded", value: "decoded" },
-        ]}
-      />
-      <TabsContent value="decoded" className="mt-[15px] space-y-px">
+    <Tabs defaultValue="decoded" className="flex flex-col h-full">
+      <div className="mb-[15px]">
+        <Selector
+          items={[
+            { label: "Raw", value: "raw" },
+            { label: "Decoded", value: "decoded" },
+          ]}
+        />
+      </div>
+      <TabsContent
+        value="decoded"
+        className="flex-1 space-y-px overflow-hidden"
+      >
         {!tx ? (
           <>
             {Array.from({ length: 4 }).map((_, i) => (
@@ -166,11 +171,11 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
         )}
       </TabsContent>
 
-      <TabsContent value="raw" className="h-full">
+      <TabsContent value="raw" className="flex-1 mt-0">
         <FeltDisplayer
-          height="100%"
-          // value={tx.calldata}
-          value={Array.from({ length: 1000 }, (_, i) => i + 1)}
+          height={isMobile ? "500px" : "100%"}
+          value={tx.calldata}
+          // value={Array.from({ length: 1000 }, (_, i) => i + 1)}
         />
       </TabsContent>
     </Tabs>
