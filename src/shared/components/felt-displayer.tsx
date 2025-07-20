@@ -73,21 +73,28 @@ export function FeltDisplayer({
         totalCount={lines.length}
         data={lines}
         itemContent={(index, line) => {
-          const felt = BigInt(line);
-          const item =
-            displayAs === "dec"
-              ? felt.toString()
-              : displayAs === "string"
-                ? (() => {
-                    // Using the existing shortString utility from the codebase
-                    // We need to use toString(10) to get the decimal string representation
-                    try {
-                      return shortString.decodeShortString(felt.toString(10));
-                    } catch {
-                      return value.toString();
-                    }
-                  })()
-                : `0x${felt.toString(16)}`;
+          let item: string;
+
+          try {
+            const felt = BigInt(line);
+            item =
+              displayAs === "dec"
+                ? felt.toString()
+                : displayAs === "string"
+                  ? (() => {
+                      // Using the existing shortString utility from the codebase
+                      // We need to use toString(10) to get the decimal string representation
+                      try {
+                        return shortString.decodeShortString(felt.toString(10));
+                      } catch {
+                        return value.toString();
+                      }
+                    })()
+                  : `0x${felt.toString(16)}`;
+          } catch (error) {
+            console.error(error);
+            item = line;
+          }
 
           return (
             <div className="flex gap-[10px]">
