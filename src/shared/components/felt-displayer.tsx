@@ -82,9 +82,9 @@ export function FeltDisplayer({
                     // Using the existing shortString utility from the codebase
                     // We need to use toString(10) to get the decimal string representation
                     try {
-                      shortString.decodeShortString(felt.toString(10));
+                      return shortString.decodeShortString(felt.toString(10));
                     } catch {
-                      value.toString();
+                      return value.toString();
                     }
                   })()
                 : `0x${felt.toString(16)}`;

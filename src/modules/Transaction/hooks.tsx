@@ -484,8 +484,6 @@ export function useCalldata(calldata: Calldata[] | undefined) {
               return inp.type;
             });
 
-            console.log("formattedParams: ", formattedParams);
-
             const decoded = myCallData.decodeParameters(
               inputsTypes,
               formattedParams,

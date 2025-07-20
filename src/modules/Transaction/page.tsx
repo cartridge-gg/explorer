@@ -70,8 +70,6 @@ function ConvertToSTRK(input: BigNumberish) {
   return value.toFixed(6);
 }
 
-const OFFSET = 65;
-
 export function Transaction() {
   const { txHash } = useParams<{ txHash: string }>();
   const {
@@ -88,29 +86,6 @@ export function Transaction() {
       storageDiff,
     },
   } = useTransaction({ txHash });
-
-  // const [tabsContainerHeight, setTabsContainerHeight] = useState(0);
-
-  // const tabsContainerRef = useRef<HTMLDivElement>(null);
-
-  // useEffect(() => {
-  //   const container = tabsContainerRef.current;
-  //   if (!container) return;
-  //   if (tabsContainerHeight !== 0) return;
-
-  //   const resizeObserver = new ResizeObserver((entries) => {
-  //     for (const entry of entries) {
-  //       const { height } = entry.contentRect;
-  //       setTabsContainerHeight(Math.max(height, 0)); // Ensure non-negative
-  //     }
-  //   });
-
-  //   resizeObserver.observe(container);
-
-  //   return () => {
-  //     resizeObserver.disconnect();
-  //   };
-  // }, [tabsContainerHeight]);
 
   const tab = useHashLinkTabs(
     tx?.type === "INVOKE"
