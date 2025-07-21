@@ -18,7 +18,6 @@ import { Badge } from "@/shared/components/badge";
 import { useCalldata } from "./hooks";
 import { GetTransactionResponse } from "starknet";
 import { decodeCalldata } from "@/shared/utils/rpc";
-import { Editor } from "@/shared/components/editor";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { CopyableText } from "@/shared/components/copyable-text";
 import { Selector } from "@/shared/components/Selector";
@@ -28,14 +27,19 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { isMobile } = useScreen();
 
   return (
-    <Tabs defaultValue="decoded" className="space-y-[15px]">
-      <Selector
-        items={[
-          { label: "Raw", value: "raw" },
-          { label: "Decoded", value: "decoded" },
-        ]}
-      />
-      <TabsContent value="decoded" className="mt-[15px] space-y-px">
+    <Tabs defaultValue="decoded" className="flex flex-col h-full">
+      <div className="mb-[15px]">
+        <Selector
+          items={[
+            { label: "Raw", value: "raw" },
+            { label: "Decoded", value: "decoded" },
+          ]}
+        />
+      </div>
+      <TabsContent
+        value="decoded"
+        className="flex-1 space-y-px overflow-hidden"
+      >
         {!tx ? (
           <>
             {Array.from({ length: 4 }).map((_, i) => (
@@ -117,7 +121,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                   <TabsContent value="raw" className="mt-0">
                     <FeltDisplayer
                       value={c.raw_args}
-                      className="max-h-[400px]"
+                      className="max-h-[425px]"
                     />
                   </TabsContent>
 
@@ -167,17 +171,11 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
         )}
       </TabsContent>
 
-      <TabsContent value="raw">
-        <Editor
-          className="min-h-[80vh]"
-          defaultLanguage="json"
-          value={JSON.stringify(tx.calldata, null, 2)}
-          options={{
-            readOnly: true,
-            scrollbar: {
-              alwaysConsumeMouseWheel: false,
-            },
-          }}
+      <TabsContent value="raw" className="flex-1 mt-0">
+        <FeltDisplayer
+          height={isMobile ? "500px" : "100%"}
+          value={tx.calldata}
+          // value={Array.from({ length: 1000 }, (_, i) => i + 1)}
         />
       </TabsContent>
     </Tabs>
