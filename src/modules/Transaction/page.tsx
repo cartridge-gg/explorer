@@ -198,7 +198,7 @@ export function Transaction() {
                 </CardContent>
               </Card>
 
-              <Card className="flex-1 overflow-y-scroll scrollbar-none gap-0 rounded-sm rounded-bl-[12px] p-0">
+              <Card className="flex-1 overflow-y-scroll scrollbar-none gap-0 rounded-sm sl:rounded-bl-[12px] p-0">
                 <CardContent className="gap-[8px]">
                   <div className="flex justify-between items-center">
                     <CardLabel>Hash</CardLabel>
@@ -438,7 +438,7 @@ export function Transaction() {
               </Card>
             </div>
 
-            <Card className="p-0 h-full overflow-x-scroll sl:min-w-[794px] rounded-sm rounded-br-[12px]">
+            <Card className="p-0 h-full overflow-x-scroll sl:min-w-[794px] rounded-sm rounded-b-[12px] sl:rounded-bl-sm rounded-br-[12px]">
               {tx ? (
                 <Tabs
                   value={tab.selected}
