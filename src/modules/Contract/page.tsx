@@ -229,7 +229,7 @@ export function Contract() {
 
   const onCallOrExecute = useCallback(
     async (f: FunctionWithType) => {
-      if (!contract || !isReadFunction(f)) {
+      if (!contract) {
         onUpdate(f.name, {
           error: "Please connect your wallet first",
           result: undefined,
@@ -599,7 +599,7 @@ export function Contract() {
                             onChange={(i, value) =>
                               onChange(selected, i, value)
                             }
-                            disabled={!contract || !isReadFunction(selected)}
+                            disabled={!contract}
                           />
                         ) : (
                           <p className="h-full flex items-center justify-center text-foreground-300">
