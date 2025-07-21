@@ -264,7 +264,7 @@ export function Block() {
                 </CardContent>
               </Card>
 
-              <Card className="flex-1 overflow-y-scroll scrollbar-none p-0 gap-0 rounded-sm rounded-bl-[12px]">
+              <Card className="flex-1 overflow-y-scroll scrollbar-none p-0 gap-0 rounded-sm sl:rounded-bl-[12px]">
                 <CardContent className="gap-[8px]">
                   <div className="flex items-center justify-between">
                     <CardLabel>Hash</CardLabel>
@@ -512,7 +512,7 @@ export function Block() {
 
             <Card
               ref={tableContainerRef}
-              className="flex-1 p-0 rounded-sm rounded-br-[12px] gap-0 h-[388px] md:h-auto"
+              className="flex-1 p-0 rounded-sm rounded-b-[12px] sl:rounded-bl-sm rounded-br-[12px] gap-0 h-[388px] md:h-auto"
             >
               <Tabs value={tab.selected} onValueChange={tab.onChange}>
                 <CardContent className="pb-0 pt-[3px] gap-0">
