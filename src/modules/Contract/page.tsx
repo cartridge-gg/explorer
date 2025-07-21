@@ -229,7 +229,7 @@ export function Contract() {
 
   const onCallOrExecute = useCallback(
     async (f: FunctionWithType) => {
-      if (!contract) {
+      if (!contract || !account) {
         onUpdate(f.name, {
           error: "Please connect your wallet first",
           result: undefined,
@@ -264,7 +264,7 @@ export function Contract() {
           });
           onUpdate(f.name, { result: result, error: undefined });
         } else {
-          const result = await account!.execute([
+          const result = await account.execute([
             {
               calldata: calldata,
               entrypoint: f.name,
