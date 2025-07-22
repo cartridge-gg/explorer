@@ -229,6 +229,10 @@ export function Contract() {
 
   const onCallOrExecute = useCallback(
     async (f: FunctionWithType) => {
+      console.log("contract: ", contract);
+      console.log("account: ", account);
+      console.log("executable: ", !isReadFunction(f) && !account);
+
       if (!contract || (!isReadFunction(f) && !account)) {
         onUpdate(f.name, {
           error: "Please connect your wallet first",

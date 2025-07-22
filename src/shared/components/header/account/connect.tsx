@@ -17,11 +17,11 @@ export function ConnectButton() {
   const [isLoading, setIsLoading] = useState(true);
 
   const onConnect = useCallback(
-    async (connector: Connector) => {
+    async (c: Connector) => {
       try {
-        setConnecting(connector.id);
-        await connectAsync({ connector });
-        localStorage.setItem("lastUsedConnector", connector.id);
+        setConnecting(c.id);
+        await connectAsync({ connector: c });
+        localStorage.setItem("lastUsedConnector", c.id);
       } catch (error) {
         console.error("Connection error:", error);
         localStorage.removeItem("lastUsedConnector");
