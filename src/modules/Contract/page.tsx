@@ -466,7 +466,7 @@ export function Contract() {
           <Card className="h-[640px] flex-grow grid grid-rows-[min-content_1fr] rounded-[12px] p-0 mb-[20px] gap-0">
             <CardContent className="h-[640px] p-0 md:pt-[5px] gap-0">
               <Tabs value={tab.selected} onValueChange={tab.onChange}>
-                <TabsList className="hidden sm:block">
+                <TabsList className="hidden sm:flex">
                   <TabsTrigger value="interact">
                     <BookIcon variant="solid" />
                     <p>Interact</p>
@@ -479,7 +479,7 @@ export function Contract() {
                   className="max-h-[640px] h-full data-[state=active]:mt-0 grid grid-cols-1 md:grid-cols-[340px_1fr] divide-y md:divide-y-0 md:divide-x divide-background-300"
                 >
                   {/* sidebar */}
-                  <div className="relative flex flex-col justify-start h-full overflow-y-auto">
+                  <div className="flex flex-col justify-start h-full overflow-y-auto">
                     <div className="sticky top-0 bg-background space-y-[15px] p-[15px]">
                       <MultiFilter
                         placeholder="Mutability"
@@ -586,29 +586,34 @@ export function Contract() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-[10px] h-full justify-between p-[15px]">
-                      {selected?.inputs.length ? (
-                        <ParamForm
-                          params={selected.inputs.map((input, i) => ({
-                            ...input,
-                            id: `${selected.name}-${input.name}`,
-                            value:
-                              form[selected.name]?.inputs[i]?.value ??
-                              (input.type.type === "struct"
-                                ? "{\n\t\n}"
-                                : input.type.type === "array"
-                                  ? "[\n\t\n]"
-                                  : ""),
-                          }))}
-                          onChange={(i, value) => onChange(selected, i, value)}
-                          disabled={!contract}
-                        />
-                      ) : (
-                        <div className="h-full flex items-center justify-center text-foreground-300">
-                          No inputs
-                        </div>
-                      )}
-                      <div className="flex flex-col gap-[10px]">
+                    {/* Refactored: split into scrollable input area and sticky button/result area */}
+                    <div className="flex flex-col h-full min-h-0 relative">
+                      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-[10px] p-[15px] pb-[0px]">
+                        {selected?.inputs.length ? (
+                          <ParamForm
+                            params={selected.inputs.map((input, i) => ({
+                              ...input,
+                              id: `${selected.name}-${input.name}`,
+                              value:
+                                form[selected.name]?.inputs[i]?.value ??
+                                (input.type.type === "struct"
+                                  ? "{\n\t\n}"
+                                  : input.type.type === "array"
+                                    ? "[\n\t\n]"
+                                    : ""),
+                            }))}
+                            onChange={(i, value) =>
+                              onChange(selected, i, value)
+                            }
+                            disabled={!contract}
+                          />
+                        ) : (
+                          <div className="h-full flex items-center justify-center text-foreground-300">
+                            No inputs
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-[10px] p-[15px] bg-background sticky bottom-0 z-10">
                         {!!contract &&
                           selected &&
                           (isReadFunction(selected) ? (
