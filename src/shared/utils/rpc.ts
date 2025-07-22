@@ -1,7 +1,6 @@
 import { cairo, GetTransactionResponse, shortString } from "starknet";
 import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
-import { EXECUTION_RESOURCES_KEY_MAP } from "@/services/rpc";
 import * as RPC08 from "@starknet-io/types-js";
 
 // paginated response for latest block_numbers
@@ -23,7 +22,7 @@ export interface DecodedCallData {
 export function decodeCalldata(
   tx: GetTransactionResponse,
 ): DecodedCallData[] | undefined {
-  if (tx.version === "0x0" || !("calldata" in tx)) {
+  if (tx.version === "0x0" || !("calldata" in tx) || !tx.calldata) {
     return;
   }
 
