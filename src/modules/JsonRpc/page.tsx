@@ -298,12 +298,6 @@ export function JsonRpcPlayground() {
     onMethodChange(method);
   }, [hash, methods, onMethodChange]);
 
-  // return (
-  //   <div className="bg-primary h-full">
-  //     <p>rpc page</p>
-  //   </div>
-  // );
-
   return (
     <div
       id="json-playground"
