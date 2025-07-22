@@ -81,7 +81,6 @@ export function Transaction() {
       declared,
       block,
       blockComputeData,
-      executions,
       events,
       storageDiff,
     },
@@ -623,7 +622,6 @@ export function Transaction() {
           <ExecutionResourcesCard
             isLoading={isLoading}
             blockComputeData={blockComputeData}
-            executions={executions}
           />
         </div>
       )}

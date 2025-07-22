@@ -1,9 +1,4 @@
-import {
-  cairo,
-  GetTransactionReceiptResponse,
-  GetTransactionResponse,
-  shortString,
-} from "starknet";
+import { cairo, GetTransactionResponse, shortString } from "starknet";
 import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
 import { EXECUTION_RESOURCES_KEY_MAP } from "@/services/rpc";
@@ -123,37 +118,15 @@ export function parseExecutionResources(
           acc.blockComputeData.l1_data_gas += Number(value);
           break;
         }
-        default: {
-          const _key = key as keyof typeof EXECUTION_RESOURCES_KEY_MAP;
-          const keyMap = EXECUTION_RESOURCES_KEY_MAP[
-            _key
-          ] as keyof typeof acc.executions;
-          if (!keyMap) return acc;
-
-          acc.executions[keyMap] += Number(value) || 0;
-        }
       }
 
       return acc;
     },
     {
-      executions: initExecutions,
       blockComputeData: initBlockComputeData,
     },
   );
 }
-
-export const initExecutions = {
-  ecdsa: 0,
-  keccak: 0,
-  bitwise: 0,
-  pedersen: 0,
-  poseidon: 0,
-  range_check: 0,
-  segment_arena: 0,
-  memory_holes: 0,
-  ec_op: 0,
-};
 
 export const initBlockComputeData = {
   l1_gas: 0,

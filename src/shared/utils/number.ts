@@ -18,38 +18,17 @@ export function formatNumber(num: number) {
  * abbreviateNumber(1234567890, 2); // Returns "1.23B"
  * abbreviateNumber(1234567890, 0); // Returns "1B"
  */
-export function abbreviateNumber(
-  num: number,
-  decimalPlaces: number = 1,
-): string {
-  const SI_SYMBOLS = ["", "K", "M", "B", "T"]; // K for thousands, M for millions, B for billions, T for trillions
-
-  // Handle negative numbers by converting to positive for calculation and adding a negative sign later
-  const isNegative = num < 0;
-  const absoluteNum = Math.abs(num);
-
-  // Determine the appropriate tier (thousands, millions, etc.)
-  const tier = Math.floor(Math.log10(absoluteNum) / 3);
-
-  // If the number is zero or smaller than 1000, no abbreviation is needed
-  if (tier === 0 || isNaN(tier) || !isFinite(tier)) {
-    return num.toString();
-  }
-
-  // Get the suffix based on the tier
-  const suffix = SI_SYMBOLS[tier] || "";
-
-  // Calculate the scaled number
-  const scale = Math.pow(10, tier * 3);
-  const scaledNum = absoluteNum / scale;
-
-  // Format the scaled number and append the suffix
-  let formattedNum = scaledNum.toFixed(decimalPlaces);
-
-  // Remove trailing .0 if present for whole numbers (e.g., 1.0K becomes 1K)
-  if (formattedNum.endsWith(".0")) {
-    formattedNum = formattedNum.slice(0, -2);
-  }
-
-  return (isNegative ? "-" : "") + formattedNum + suffix;
+export function abbreviateNumber(n: number, decimalPlaces: number = 1) {
+  return Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: decimalPlaces,
+  }).format(n);
+  // if (n < 1e3) return n;
+  // // Could use 'if (n < 1e6)' if you like
+  // if (n >= 1e3 && n < 1e6) return +(n / 1e3).toFixed(decimalPlaces) + "K";
+  // // Could use 'if (n < 1e9)' if you like
+  // if (n >= 1e6 && n < 1e9) return +(n / 1e6).toFixed(decimalPlaces) + "M";
+  // // Could use 'if (n < 1e12)' if you like
+  // if (n >= 1e9 && n < 1e12) return +(n / 1e9).toFixed(decimalPlaces) + "B";
+  // if (n >= 1e12) return +(n / 1e12).toFixed(decimalPlaces) + "T";
 }

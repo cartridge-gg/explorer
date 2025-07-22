@@ -14,7 +14,6 @@ import { FunctionAbi } from "starknet";
 import {
   getEventName,
   initBlockComputeData,
-  initExecutions,
   parseExecutionResources,
 } from "@/shared/utils/rpc";
 
@@ -88,12 +87,12 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
   });
 
   const {
-    data: { receipt, events: eventsData, executions, blockComputeData },
+    data: { receipt, events: eventsData, blockComputeData },
   } = useQuery({
     queryKey: ["transaction-sammary", txHash],
     queryFn: async () => {
       const receipt = await RPC_PROVIDER.getTransactionReceipt(txHash || "");
-      const { executions, blockComputeData } = parseExecutionResources(
+      const { blockComputeData } = parseExecutionResources(
         receipt.execution_resources,
       );
 
@@ -173,7 +172,6 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
       return {
         receipt,
         events,
-        executions,
         blockComputeData,
       };
     },
@@ -181,7 +179,6 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     initialData: {
       receipt: undefined,
       events: [],
-      executions: initExecutions,
       blockComputeData: initBlockComputeData,
     },
   });
@@ -393,7 +390,6 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
       calldata,
       block,
       blockComputeData,
-      executions,
       events,
       storageDiff,
     },
