@@ -465,350 +465,130 @@ export function Contract() {
 
           <Card className="h-[640px] flex-grow grid grid-rows-[min-content_1fr] rounded-[12px] p-0 mb-[20px] gap-0">
             <CardContent className="h-[640px] p-0 md:pt-[5px] gap-0">
-              {isMobile ? (
-                <div className="h-[640px] overflow-y-auto p-0">
-                  <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] divide-y md:divide-y-0 md:divide-x divide-background-300 h-full">
-                    {/* sidebar */}
-                    <div className="relative flex flex-col justify-start h-[239px] overflow-y-auto">
-                      <div className="sticky top-0 bg-background space-y-[15px] p-[15px]">
-                        <MultiFilter
-                          placeholder="Mutability"
-                          value={functionTypeFilter}
-                          onValueChange={(values) => {
-                            setFunctionTypeFilter(values);
-                          }}
-                          items={[
-                            { key: "read", value: "Read" },
-                            { key: "write", value: "Write" },
-                          ]}
+              <Tabs value={tab.selected} onValueChange={tab.onChange}>
+                <TabsList className="hidden sm:flex">
+                  <TabsTrigger value="interact">
+                    <BookIcon variant="solid" />
+                    <p>Interact</p>
+                  </TabsTrigger>
+                </TabsList>
+                <CardSeparator className="hidden sm:block mb-0 mt-px bg-background-300" />
+
+                <TabsContent
+                  value="interact"
+                  className="max-h-[640px] h-full data-[state=active]:mt-0 grid grid-cols-1 md:grid-cols-[340px_1fr] divide-y md:divide-y-0 md:divide-x divide-background-300"
+                >
+                  {/* sidebar */}
+                  <div className="flex flex-col justify-start h-full overflow-y-auto">
+                    <div className="sticky top-0 bg-background space-y-[15px] p-[15px]">
+                      <MultiFilter
+                        placeholder="Mutability"
+                        value={functionTypeFilter}
+                        onValueChange={(values) => {
+                          setFunctionTypeFilter(values);
+                        }}
+                        items={[
+                          { key: "read", value: "Read" },
+                          { key: "write", value: "Write" },
+                        ]}
+                      />
+                      <div className="relative">
+                        <Input
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                          placeholder="Function name / selector / interface"
+                          className="bg-input focus-visible:bg-input caret-foreground placeholder:text-[#262A27] px-[10px] py-[7px] focus-visible:border-background-400"
                         />
-                        <div className="relative">
-                          <Input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Function name / selector / interface"
-                            className="bg-input focus-visible:bg-input caret-foreground placeholder:text-[#262A27] px-[10px] py-[7px] focus-visible:border-background-400"
-                          />
-                          <SearchIcon
-                            className={cn(
-                              "absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none",
-                              search
-                                ? "text-foreground"
-                                : "text-foreground-400",
-                            )}
-                          />
-                        </div>
-                        <CardLabel>Functions</CardLabel>
-                      </div>
-                      <div
-                        ref={scrollContainerRef}
-                        className="flex flex-col min-h-0 gap-[8px]"
-                      >
-                        <div className="flex flex-col gap-[3px] p-[15px] pt-0">
-                          {filtered.length ? (
-                            filtered.map((f) => (
-                              <div
-                                key={f.name}
-                                ref={(el) => setItemRef(f, el)}
-                                className={cn(
-                                  "flex items-center justify-between gap-2 rounded-md px-[8px] border transition-all h-[35px]",
-                                  selected?.name === f.name
-                                    ? "border-primary"
-                                    : "border-transparent hover:border-background-300 cursor-pointer ",
-                                )}
-                                onClick={() => setSelected(f)}
-                              >
-                                <p className="text-[13px]/[16px] font-semibold tracking-[0.26px] truncate">
-                                  {f.name}
-                                </p>
-                                <Badge className="px-[8px] py-[2px]">
-                                  <span className="text-[12px]/[16px] font-medium">
-                                    {f.functionType === "read"
-                                      ? "Read"
-                                      : "Write"}
-                                  </span>
-                                </Badge>
-                              </div>
-                            ))
-                          ) : (
-                            <>
-                              {Array.from({ length: 9 }).map((_, i) => (
-                                <Skeleton
-                                  key={i}
-                                  className="rounded-sm h-11 w-full"
-                                />
-                              ))}
-                            </>
+                        <SearchIcon
+                          className={cn(
+                            "absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none",
+                            search ? "text-foreground" : "text-foreground-400",
                           )}
-                        </div>
+                        />
                       </div>
+                      <CardLabel>Functions</CardLabel>
                     </div>
-
-                    <div className="w-full h-full flex flex-col overflow-y-scroll divide-y divide-background-300">
-                      <div className="py-[10px] px-[15px] flex flex-col gap-[10px]">
-                        {!!selected?.interface && (
-                          <div className="flex items-center justify-between gap-2">
-                            <CardLabel className="text-[13px]/[16px] font-normal">
-                              interface
-                            </CardLabel>
-                            <CopyableText
-                              title="Interface name"
-                              value={selected.interface}
-                            />
+                    <div
+                      ref={scrollContainerRef}
+                      className="flex flex-col p-[15px] pt-0 gap-[3px] select-none"
+                    >
+                      {filtered.length ? (
+                        filtered.map((f) => (
+                          <div
+                            key={f.name}
+                            ref={(el) => setItemRef(f, el)}
+                            className={cn(
+                              "flex items-center justify-between gap-2 rounded-md px-[8px] border transition-all h-[35px]",
+                              selected?.name === f.name
+                                ? "border-primary"
+                                : "border-transparent hover:border-background-300 cursor-pointer ",
+                            )}
+                            onClick={() => setSelected(f)}
+                          >
+                            <p className="text-[13px]/[16px] font-semibold tracking-[0.26px] truncate">
+                              {f.name}
+                            </p>
+                            <Badge className="px-[8px] py-[2px]">
+                              <span className="text-[12px]/[16px] font-medium">
+                                {f.functionType === "read" ? "Read" : "Write"}
+                              </span>
+                            </Badge>
                           </div>
-                        )}
-                        <div className="flex items-center justify-between gap-2">
-                          <CardLabel className="text-[13px]/[16px] font-normal">
-                            function
-                          </CardLabel>
-                          {selected ? (
-                            <CopyableText
-                              title="Function name"
-                              value={selected.name}
+                        ))
+                      ) : (
+                        <>
+                          {Array.from({ length: 9 }).map((_, i) => (
+                            <Skeleton
+                              key={i}
+                              className="rounded-sm h-11 w-full"
                             />
-                          ) : (
-                            <Skeleton className="rounded-sm h-6 w-40" />
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between gap-2">
-                          <CardLabel className="text-[13px]/[16px] font-normal">
-                            selector
-                          </CardLabel>
-                          <CopyableInteger
-                            title="Selector"
-                            length={isMobile ? 1 : 3}
-                            value={selected?.selector}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-[10px] h-[400px] md:h-full justify-between p-[15px]">
-                        {selected?.inputs.length ? (
-                          <ParamForm
-                            params={selected.inputs.map((input, i) => ({
-                              ...input,
-                              id: `${selected.name}-${input.name}`,
-                              value:
-                                form[selected.name]?.inputs[i]?.value ??
-                                (input.type.type === "struct"
-                                  ? "{\n\t\n}"
-                                  : input.type.type === "array"
-                                    ? "[\n\t\n]"
-                                    : ""),
-                            }))}
-                            onChange={(i, value) =>
-                              onChange(selected, i, value)
-                            }
-                            disabled={!contract}
-                          />
-                        ) : (
-                          <p className="h-full flex items-center justify-center text-foreground-300">
-                            No inputs
-                          </p>
-                        )}
-                        <div className="flex flex-col gap-[10px]">
-                          {!!contract &&
-                            selected &&
-                            (isReadFunction(selected) ? (
-                              <Button
-                                variant="secondary"
-                                isLoading={form[selected.name]?.loading}
-                                onClick={() => onCallOrExecute(selected)}
-                              >
-                                call
-                              </Button>
-                            ) : (
-                              <div className="flex items-center justify-between w-full">
-                                <Button
-                                  variant="secondary"
-                                  onClick={() => onAddToCart(selected)}
-                                  className="h-[30px] gap-[7px] px-[10px] py-[6px] normal-case font-sans bg-background-200 border border-[#454B46]"
-                                >
-                                  <PlusIcon
-                                    variant="solid"
-                                    className="!w-[19px] !h-[19px]"
-                                  />
-                                  <span className="text-[13px]/[16px] font-semibold">
-                                    Add to queue
-                                  </span>
-                                </Button>
-
-                                <Button
-                                  variant="primary"
-                                  className="h-[30px] px-[10px] py-[6px] bg-foreground-100 text-background-100"
-                                  disabled={form[selected.name]?.loading}
-                                  onClick={() => onCallOrExecute(selected)}
-                                >
-                                  <span className="text-[13px]/[16px] font-semibold uppercase">
-                                    {form[selected.name]?.loading
-                                      ? "Executing..."
-                                      : "Execute"}
-                                  </span>
-                                </Button>
-                              </div>
-                            ))}
-
-                          {selected && form[selected.name]?.hasCalled && (
-                            <div className="w-full flex flex-col gap-1">
-                              <p className="font-bold text-sm uppercase">
-                                Result
-                              </p>
-                              <div className="bg-white">
-                                {form[selected.name]?.loading ? (
-                                  <div className="text-gray-600">
-                                    Loading...
-                                  </div>
-                                ) : form[selected.name]?.error ? (
-                                  <div className="text-red-500 p-3 bg-red-50 border border-red-200">
-                                    <p className="font-medium">Error:</p>
-                                    <p className="text-sm">
-                                      {form[selected.name]?.error?.toString()}
-                                    </p>
-                                  </div>
-                                ) : form[selected.name]?.result ? (
-                                  <div className="px-3 py-2 border border-borderGray">
-                                    <pre className="text-sm overflow-x-auto">
-                                      {JSON.stringify(
-                                        form[selected.name]?.result,
-                                        null,
-                                        2,
-                                      )}
-                                    </pre>
-                                  </div>
-                                ) : null}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                          ))}
+                        </>
+                      )}
                     </div>
                   </div>
-                </div>
-              ) : (
-                <Tabs value={tab.selected} onValueChange={tab.onChange}>
-                  <TabsList>
-                    <TabsTrigger value="interact">
-                      <BookIcon variant="solid" />
-                      <p>Interact</p>
-                    </TabsTrigger>
-                  </TabsList>
-                  <CardSeparator className="my-0 relative left-[-15px] w-[calc(100%+30px)]" />
 
-                  <TabsContent
-                    value="interact"
-                    className="max-h-[640px] h-full data-[state=active]:mt-0 grid grid-cols-1 md:grid-cols-[340px_1fr] divide-y md:divide-y-0 md:divide-x divide-background-300"
-                  >
-                    {/* sidebar */}
-                    <div className="relative flex flex-col justify-start h-full overflow-y-auto">
-                      <div className="sticky top-0 bg-background space-y-[15px] p-[15px]">
-                        <MultiFilter
-                          placeholder="Mutability"
-                          value={functionTypeFilter}
-                          onValueChange={(values) => {
-                            setFunctionTypeFilter(values);
-                          }}
-                          items={[
-                            { key: "read", value: "Read" },
-                            { key: "write", value: "Write" },
-                          ]}
-                        />
-                        <div className="relative">
-                          <Input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Function name / selector / interface"
-                            className="bg-input focus-visible:bg-input caret-foreground placeholder:text-[#262A27] px-[10px] py-[7px] focus-visible:border-background-400"
-                          />
-                          <SearchIcon
-                            className={cn(
-                              "absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none",
-                              search
-                                ? "text-foreground"
-                                : "text-foreground-400",
-                            )}
+                  <div className="w-full h-full flex flex-col overflow-y-scroll divide-y divide-background-300">
+                    <div className="py-[10px] px-[15px] flex flex-col gap-[10px]">
+                      {!!selected?.interface && (
+                        <div className="flex items-center justify-between gap-2">
+                          <CardLabel className="text-[13px]/[16px] font-normal">
+                            interface
+                          </CardLabel>
+                          <CopyableText
+                            title="Interface name"
+                            value={selected.interface}
                           />
                         </div>
-                        <CardLabel>Functions</CardLabel>
-                      </div>
-                      <div
-                        ref={scrollContainerRef}
-                        className="flex flex-col p-[15px] pt-0 gap-[3px] select-none"
-                      >
-                        {filtered.length ? (
-                          filtered.map((f) => (
-                            <div
-                              key={f.name}
-                              ref={(el) => setItemRef(f, el)}
-                              className={cn(
-                                "flex items-center justify-between gap-2 rounded-md px-[8px] border transition-all h-[35px]",
-                                selected?.name === f.name
-                                  ? "border-primary"
-                                  : "border-transparent hover:border-background-300 cursor-pointer ",
-                              )}
-                              onClick={() => setSelected(f)}
-                            >
-                              <p className="text-[13px]/[16px] font-semibold tracking-[0.26px] truncate">
-                                {f.name}
-                              </p>
-                              <Badge className="px-[8px] py-[2px]">
-                                <span className="text-[12px]/[16px] font-medium">
-                                  {f.functionType === "read" ? "Read" : "Write"}
-                                </span>
-                              </Badge>
-                            </div>
-                          ))
+                      )}
+                      <div className="flex items-center justify-between gap-2">
+                        <CardLabel className="text-[13px]/[16px] font-normal">
+                          function
+                        </CardLabel>
+                        {selected ? (
+                          <CopyableText
+                            title="Function name"
+                            value={selected.name}
+                          />
                         ) : (
-                          <>
-                            {Array.from({ length: 9 }).map((_, i) => (
-                              <Skeleton
-                                key={i}
-                                className="rounded-sm h-11 w-full"
-                              />
-                            ))}
-                          </>
+                          <Skeleton className="rounded-sm h-6 w-40" />
                         )}
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <CardLabel className="text-[13px]/[16px] font-normal">
+                          selector
+                        </CardLabel>
+                        <CopyableInteger
+                          title="Selector"
+                          length={isMobile ? 1 : 3}
+                          value={selected?.selector}
+                        />
                       </div>
                     </div>
 
-                    <div className="w-full h-full flex flex-col overflow-y-scroll divide-y divide-background-300">
-                      <div className="py-[10px] px-[15px] flex flex-col gap-[10px]">
-                        {!!selected?.interface && (
-                          <div className="flex items-center justify-between gap-2">
-                            <CardLabel className="text-[13px]/[16px] font-normal">
-                              interface
-                            </CardLabel>
-                            <CopyableText
-                              title="Interface name"
-                              value={selected.interface}
-                            />
-                          </div>
-                        )}
-                        <div className="flex items-center justify-between gap-2">
-                          <CardLabel className="text-[13px]/[16px] font-normal">
-                            function
-                          </CardLabel>
-                          {selected ? (
-                            <CopyableText
-                              title="Function name"
-                              value={selected.name}
-                            />
-                          ) : (
-                            <Skeleton className="rounded-sm h-6 w-40" />
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between gap-2">
-                          <CardLabel className="text-[13px]/[16px] font-normal">
-                            selector
-                          </CardLabel>
-                          <CopyableInteger
-                            title="Selector"
-                            length={isMobile ? 1 : 3}
-                            value={selected?.selector}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col h-full justify-between p-[15px]">
+                    {/* Refactored: split into scrollable input area and sticky button/result area */}
+                    <div className="flex flex-col h-full min-h-0 relative">
+                      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-[10px] p-[15px] pb-[0px]">
                         {selected?.inputs.length ? (
                           <ParamForm
                             params={selected.inputs.map((input, i) => ({
@@ -832,85 +612,83 @@ export function Contract() {
                             No inputs
                           </div>
                         )}
-                        <div className="flex flex-col gap-[10px]">
-                          {!!contract &&
-                            selected &&
-                            (isReadFunction(selected) ? (
+                      </div>
+                      <div className="flex flex-col gap-[10px] p-[15px] bg-background sticky bottom-0 z-10">
+                        {!!contract &&
+                          selected &&
+                          (isReadFunction(selected) ? (
+                            <Button
+                              variant="secondary"
+                              isLoading={form[selected.name]?.loading}
+                              onClick={() => onCallOrExecute(selected)}
+                            >
+                              call
+                            </Button>
+                          ) : (
+                            <div className="flex items-center justify-between w-full">
                               <Button
                                 variant="secondary"
-                                isLoading={form[selected.name]?.loading}
+                                onClick={() => onAddToCart(selected)}
+                                className="h-[30px] gap-[7px] px-[10px] py-[6px] normal-case font-sans bg-background-200 border border-[#454B46]"
+                              >
+                                <PlusIcon
+                                  variant="solid"
+                                  className="!w-[19px] !h-[19px]"
+                                />
+                                <span className="text-[13px]/[16px] font-semibold">
+                                  Add to queue
+                                </span>
+                              </Button>
+
+                              <Button
+                                variant="primary"
+                                className="h-[30px] px-[10px] py-[6px] bg-foreground-100 text-background-100"
+                                disabled={form[selected.name]?.loading}
                                 onClick={() => onCallOrExecute(selected)}
                               >
-                                call
+                                <span className="text-[13px]/[16px] font-semibold uppercase">
+                                  {form[selected.name]?.loading
+                                    ? "Executing..."
+                                    : "Execute"}
+                                </span>
                               </Button>
-                            ) : (
-                              <div className="flex items-center justify-between w-full">
-                                <Button
-                                  variant="secondary"
-                                  onClick={() => onAddToCart(selected)}
-                                  className="h-[30px] gap-[7px] px-[10px] py-[6px] normal-case font-sans bg-background-200 border border-[#454B46]"
-                                >
-                                  <PlusIcon
-                                    variant="solid"
-                                    className="!w-[19px] !h-[19px]"
-                                  />
-                                  <span className="text-[13px]/[16px] font-semibold">
-                                    Add to queue
-                                  </span>
-                                </Button>
-
-                                <Button
-                                  variant="primary"
-                                  className="h-[30px] px-[10px] py-[6px] bg-foreground-100 text-background-100"
-                                  disabled={form[selected.name]?.loading}
-                                  onClick={() => onCallOrExecute(selected)}
-                                >
-                                  <span className="text-[13px]/[16px] font-semibold uppercase">
-                                    {form[selected.name]?.loading
-                                      ? "Executing..."
-                                      : "Execute"}
-                                  </span>
-                                </Button>
-                              </div>
-                            ))}
-
-                          {selected && form[selected.name]?.hasCalled && (
-                            <div className="w-full flex flex-col gap-1">
-                              <p className="font-bold text-sm uppercase">
-                                Result
-                              </p>
-                              <div className="bg-white">
-                                {form[selected.name]?.loading ? (
-                                  <div className="text-gray-600">
-                                    Loading...
-                                  </div>
-                                ) : form[selected.name]?.error ? (
-                                  <div className="text-red-500 p-3 bg-red-50 border border-red-200">
-                                    <p className="font-medium">Error:</p>
-                                    <p className="text-sm">
-                                      {form[selected.name]?.error?.toString()}
-                                    </p>
-                                  </div>
-                                ) : form[selected.name]?.result ? (
-                                  <div className="px-3 py-2 border border-borderGray">
-                                    <pre className="text-sm overflow-x-auto">
-                                      {JSON.stringify(
-                                        form[selected.name]?.result,
-                                        null,
-                                        2,
-                                      )}
-                                    </pre>
-                                  </div>
-                                ) : null}
-                              </div>
                             </div>
-                          )}
-                        </div>
+                          ))}
+
+                        {selected && form[selected.name]?.hasCalled && (
+                          <div className="w-full flex flex-col gap-1">
+                            <p className="font-bold text-sm uppercase">
+                              Result
+                            </p>
+                            <div className="bg-white">
+                              {form[selected.name]?.loading ? (
+                                <div className="text-gray-600">Loading...</div>
+                              ) : form[selected.name]?.error ? (
+                                <div className="text-red-500 p-3 bg-red-50 border border-red-200">
+                                  <p className="font-medium">Error:</p>
+                                  <p className="text-sm">
+                                    {form[selected.name]?.error?.toString()}
+                                  </p>
+                                </div>
+                              ) : form[selected.name]?.result ? (
+                                <div className="px-3 py-2 border border-borderGray">
+                                  <pre className="text-sm overflow-x-auto">
+                                    {JSON.stringify(
+                                      form[selected.name]?.result,
+                                      null,
+                                      2,
+                                    )}
+                                  </pre>
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </TabsContent>
-                </Tabs>
-              )}
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>
