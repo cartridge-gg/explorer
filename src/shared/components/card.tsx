@@ -1,6 +1,6 @@
 import React, { memo, useCallback } from "react";
 import { cn, Skeleton } from "@cartridge/ui";
-import { formatNumber } from "../utils/number";
+import { abbreviateNumber, formatNumber } from "../utils/number";
 import { toast } from "sonner";
 
 export const Card = React.forwardRef<
@@ -199,7 +199,7 @@ const ResourceCard = memo(
         <CardLabel>{label}</CardLabel>
         {!isLoading ? (
           <div className="font-mono text-foreground font-semibold">
-            {formatNumber(value || 0)}
+            {abbreviateNumber(value || 0, 3)}
           </div>
         ) : (
           <Skeleton className="h-6 w-full" />
