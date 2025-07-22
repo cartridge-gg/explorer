@@ -7,6 +7,7 @@ import {
 import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
 import { EXECUTION_RESOURCES_KEY_MAP } from "@/services/rpc";
+import * as RPC08 from "@starknet-io/types-js";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
@@ -105,7 +106,7 @@ export const convertObjectValuesToDisplayValues = (
 };
 
 export function parseExecutionResources(
-  execution_resources: GetTransactionReceiptResponse["execution_resources"],
+  execution_resources: RPC08.EXECUTION_RESOURCES,
 ) {
   return Object.entries(execution_resources).reduce(
     (acc, [key, value]) => {
@@ -120,12 +121,6 @@ export function parseExecutionResources(
         }
         case "l1_data_gas": {
           acc.blockComputeData.l1_data_gas += Number(value);
-          break;
-        }
-        case "data_availability": {
-          // Handle legacy format for backward compatibility
-          acc.blockComputeData.l1_gas += value.l1_gas;
-          acc.blockComputeData.l1_data_gas += value.l1_data_gas;
           break;
         }
         default: {

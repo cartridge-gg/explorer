@@ -22,6 +22,7 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import * as RPC08 from "@starknet-io/types-js";
 
 interface BlockData {
   block?: Awaited<ReturnType<typeof RPC_PROVIDER.getBlockWithReceipts>>;
@@ -74,7 +75,10 @@ export function useBlock({
         throw new Error("Invalid block identifier");
       }
 
-      const block = await RPC_PROVIDER.getBlockWithReceipts(blockId);
+      const block: RPC08.BLOCK_WITH_RECEIPTS =
+        await RPC_PROVIDER.getBlockWithReceipts(blockId);
+
+      console.log("block: ", block);
 
       const txs = block.transactions.map(({ transaction, receipt }, id) => ({
         id,
@@ -101,9 +105,9 @@ export function useBlock({
           acc.executions.poseidon += r.executions.poseidon;
           acc.executions.range_check += r.executions.range_check;
           acc.executions.segment_arena += r.executions.segment_arena;
-          acc.blockComputeData.gas += r.blockComputeData.gas;
-          acc.blockComputeData.data_gas += r.blockComputeData.data_gas;
-          acc.blockComputeData.steps += r.blockComputeData.steps;
+          acc.blockComputeData.l1_gas += r.blockComputeData.l1_gas;
+          acc.blockComputeData.l2_gas += r.blockComputeData.l2_gas;
+          acc.blockComputeData.l1_data_gas += r.blockComputeData.l1_data_gas;
           return acc;
         },
         {
