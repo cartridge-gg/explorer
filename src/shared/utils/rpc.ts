@@ -1,12 +1,7 @@
-import {
-  cairo,
-  GetTransactionReceiptResponse,
-  GetTransactionResponse,
-  shortString,
-} from "starknet";
+import { cairo, GetTransactionResponse, shortString } from "starknet";
 import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
-import { EXECUTION_RESOURCES_KEY_MAP } from "@/services/rpc";
+import * as RPC08 from "@starknet-io/types-js";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
@@ -27,7 +22,7 @@ export interface DecodedCallData {
 export function decodeCalldata(
   tx: GetTransactionResponse,
 ): DecodedCallData[] | undefined {
-  if (tx.version === "0x0" || !("calldata" in tx)) {
+  if (tx.version === "0x0" || !("calldata" in tx) || !tx.calldata) {
     return;
   }
 
@@ -105,7 +100,7 @@ export const convertObjectValuesToDisplayValues = (
 };
 
 export function parseExecutionResources(
-  execution_resources: GetTransactionReceiptResponse["execution_resources"],
+  execution_resources: RPC08.EXECUTION_RESOURCES,
 ) {
   return Object.entries(execution_resources).reduce(
     (acc, [key, value]) => {
@@ -122,43 +117,15 @@ export function parseExecutionResources(
           acc.blockComputeData.l1_data_gas += Number(value);
           break;
         }
-        case "data_availability": {
-          // Handle legacy format for backward compatibility
-          acc.blockComputeData.l1_gas += value.l1_gas;
-          acc.blockComputeData.l1_data_gas += value.l1_data_gas;
-          break;
-        }
-        default: {
-          const _key = key as keyof typeof EXECUTION_RESOURCES_KEY_MAP;
-          const keyMap = EXECUTION_RESOURCES_KEY_MAP[
-            _key
-          ] as keyof typeof acc.executions;
-          if (!keyMap) return acc;
-
-          acc.executions[keyMap] += Number(value) || 0;
-        }
       }
 
       return acc;
     },
     {
-      executions: initExecutions,
       blockComputeData: initBlockComputeData,
     },
   );
 }
-
-export const initExecutions = {
-  ecdsa: 0,
-  keccak: 0,
-  bitwise: 0,
-  pedersen: 0,
-  poseidon: 0,
-  range_check: 0,
-  segment_arena: 0,
-  memory_holes: 0,
-  ec_op: 0,
-};
 
 export const initBlockComputeData = {
   l1_gas: 0,
