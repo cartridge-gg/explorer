@@ -9,7 +9,7 @@
 @layer base {
   html,
   body {
-    @apply text-foreground ring-foreground text-base;
+    @apply text-foreground ring-foreground text-base overscroll-y-none;
   }
 
   a {
