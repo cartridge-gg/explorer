@@ -307,7 +307,7 @@ export function JsonRpcPlayground() {
   return (
     <div
       id="json-playground"
-      className="flex-1 min-h-0 w-full max-w-full flex flex-col gap-[3px] lg:w-[1134px] pb-[20px]"
+      className="flex-1 min-h-0 w-full flex flex-col gap-[3px] lg:w-[1134px] pb-[20px]"
     >
       <Breadcrumb className="mb-[7px]">
         <BreadcrumbList>
@@ -451,6 +451,8 @@ export function JsonRpcPlayground() {
             >
               <CardContent className="p-0 flex flex-col gap-[20px] lg:flex-row items-center justify-between">
                 <Selector
+                  containerClassName="w-full lg:w-auto"
+                  className="w-full lg:w-auto"
                   items={[
                     {
                       label: "Request",
