@@ -520,7 +520,7 @@ export function useCalldata(calldata: Calldata[] | undefined) {
               raw_args: d.args,
             };
           } catch (e) {
-            console.log("error decoding: ", e);
+            console.error("error decoding: ", e);
             return {
               contract: d.contract,
               function_name: "Error",

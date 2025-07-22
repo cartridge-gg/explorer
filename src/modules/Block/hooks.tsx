@@ -74,8 +74,6 @@ export function useBlock({
       const block: RPC08.BLOCK_WITH_RECEIPTS =
         await RPC_PROVIDER.getBlockWithReceipts(blockId);
 
-      console.log("block: ", block);
-
       const txs = block.transactions.map(({ transaction, receipt }, id) => ({
         id,
         type: transaction.type,
