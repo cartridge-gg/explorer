@@ -171,7 +171,9 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                   >
                     <FeltDisplayer
                       value={c.raw_args}
-                      className="max-h-[425px]"
+                      // className="max-h-[425px]"
+                      className="h-[400px]"
+                      height="100%"
                     />
                   </TabsContent>
 
