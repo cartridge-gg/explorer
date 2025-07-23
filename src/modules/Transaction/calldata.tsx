@@ -23,6 +23,16 @@ import { CopyableText } from "@/shared/components/copyable-text";
 import { Selector } from "@/shared/components/Selector";
 import { Editor } from "@/shared/components/editor";
 
+// Helper to check if array is a felt252 array (all elements are hex or decimal strings)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isFeltArray(arr: Array<any>): boolean {
+  return arr.every(
+    (el) =>
+      typeof el === "string" &&
+      (/^0x[0-9a-fA-F]+$/.test(el) || /^\d+$/.test(el)),
+  );
+}
+
 export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
   const { isMobile } = useScreen();
@@ -131,15 +141,6 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                     className="flex flex-col gap-[10px] mt-0"
                   >
                     {c.data.map((input, i) => {
-                      // Helper to check if array is a felt252 array (all elements are hex or decimal strings)
-                      function isFeltArray(arr: any[]): boolean {
-                        return arr.every(
-                          (el) =>
-                            typeof el === "string" &&
-                            (/^0x[0-9a-fA-F]+$/.test(el) || /^\d+$/.test(el)),
-                        );
-                      }
-
                       const isArray = Array.isArray(input.value);
                       const isFeltArrayType =
                         isArray && isFeltArray(input.value);
