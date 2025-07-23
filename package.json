@@ -18,7 +18,7 @@
     "storybook:build": "storybook build"
   },
   "dependencies": {
-    "@cartridge/connector": "^0.9.0",
+    "@cartridge/connector": "^0.9.1",
     "@cartridge/presets": "github:cartridge-gg/presets#d246ec1",
     "@cartridge/ui": "github:cartridge-gg/ui#79f946c",
     "@cartridge/utils": "^0.7.13",
