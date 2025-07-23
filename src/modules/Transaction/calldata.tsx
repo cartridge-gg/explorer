@@ -201,8 +201,8 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                               height={115}
                             />
                           ) : display.type === "complex" ? (
-                            <div className="bg-input/50 rounded-md overflow-auto py-[7px] px-[10px] font-mono text-xs max-h-[115px] cursor-not-allowed">
-                              <pre className="whitespace-pre-wrap break-words text-foreground-200 text-[11px] font-mono">
+                            <div className="bg-input/50 rounded-md overflow-auto overflow-x-auto py-[7px] px-[10px] font-mono text-xs max-h-[115px] cursor-not-allowed">
+                              <pre className="whitespace-pre break-words text-foreground-200 text-[11px] font-mono">
                                 {display.value}
                               </pre>
                               {/* <Editor
