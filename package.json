@@ -81,5 +81,8 @@
   },
   "resolutions": {
     "@types/react": "^17.0.38"
+  },
+  "engines": {
+    "node": ">=22.0.0 <24.4.1"
   }
 }
