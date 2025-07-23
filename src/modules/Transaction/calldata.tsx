@@ -120,36 +120,38 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                 overlayClassName="bg-[#000000]/[0.7]"
                 className="[&>button]:hidden w-full sm:max-w-[586px] max-h-[500px] rounded-[12px] sm:rounded-[12px] p-0 border gap-0 min-h-0"
               >
-                <div className="flex items-center justify-between px-[15px] border-b border-background-200 h-[32px]">
-                  <h1 className="text-[12px]/[16px] font-normal capitalize">
-                    function calldata overview
-                  </h1>
-                  <DialogClose asChild>
-                    <button className="text-foreground-400 hover:text-foreground-300">
-                      <TimesIcon className="w-[15px] h-[15px]" />
-                    </button>
-                  </DialogClose>
-                </div>
-
-                <div className="flex flex-col gap-[10px] p-[15px] border-b border-background-200">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="capitalize text-foreground-400 text-[12px]/[16px] font-normal">
-                      contract
-                    </p>
-                    <CopyableInteger
-                      title="Contract Address"
-                      length={isMobile ? 1 : 3}
-                      value={c.contract}
-                    />
+                <div className="sticky top-0 z-10 bg-background">
+                  <div className="flex items-center justify-between px-[15px] border-b border-background-200 h-[32px]">
+                    <h1 className="text-[12px]/[16px] font-normal capitalize">
+                      function calldata overview
+                    </h1>
+                    <DialogClose asChild>
+                      <button className="text-foreground-400 hover:text-foreground-300">
+                        <TimesIcon className="w-[15px] h-[15px]" />
+                      </button>
+                    </DialogClose>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <p className="capitalize text-foreground-400 text-[12px]/[16px] font-normal">
-                      function
-                    </p>
-                    <CopyableText
-                      value={c.function_name}
-                      title="Function name"
-                    />
+
+                  <div className="flex flex-col gap-[10px] p-[15px] border-b border-background-200">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="capitalize text-foreground-400 text-[12px]/[16px] font-normal">
+                        contract
+                      </p>
+                      <CopyableInteger
+                        title="Contract Address"
+                        length={isMobile ? 1 : 3}
+                        value={c.contract}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="capitalize text-foreground-400 text-[12px]/[16px] font-normal">
+                        function
+                      </p>
+                      <CopyableText
+                        value={c.function_name}
+                        title="Function name"
+                      />
+                    </div>
                   </div>
                 </div>
 
