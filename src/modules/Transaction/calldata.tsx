@@ -21,7 +21,6 @@ import { decodeCalldata } from "@/shared/utils/rpc";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { CopyableText } from "@/shared/components/copyable-text";
 import { Selector } from "@/shared/components/Selector";
-import { Editor } from "@/shared/components/editor";
 import { Felt } from "@starknet-io/types-js";
 
 // Helper to check if array is a felt252 array (all elements are hex or decimal strings)
@@ -118,7 +117,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
 
               <DialogContent
                 overlayClassName="bg-[#000000]/[0.7]"
-                className="[&>button]:hidden w-full sm:max-w-[586px] max-h-[500px] rounded-[12px] sm:rounded-[12px] p-0 border gap-0 min-h-0"
+                className="[&>button]:hidden w-full sm:max-w-[586px] max-h-[500px] rounded-[12px] sm:rounded-[12px] p-0 border gap-0 min-h-0 overflow-hidden"
               >
                 <div className="sticky top-0 z-10 bg-background">
                   <div className="flex items-center justify-between px-[15px] border-b border-background-200 h-[32px]">
@@ -157,7 +156,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
 
                 <Tabs
                   defaultValue="decoded"
-                  className="flex flex-col gap-[13px] p-[15px]"
+                  className="flex flex-col gap-[13px] p-[15px] overflow-y-scroll"
                 >
                   <Selector
                     containerClassName="self-start"
@@ -166,7 +165,10 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                       { value: "decoded", label: "Decoded" },
                     ]}
                   />
-                  <TabsContent value="raw" className="mt-0">
+                  <TabsContent
+                    value="raw"
+                    className="flex flex-col gap-[10px] data-[state=inactive]:hidden mt-0 overflow-y-scroll max-h-[350px]"
+                  >
                     <FeltDisplayer
                       value={c.raw_args}
                       className="max-h-[425px]"
@@ -175,64 +177,48 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
 
                   <TabsContent
                     value="decoded"
-                    className="flex flex-col gap-[10px] mt-0"
+                    className="flex flex-col gap-[10px] data-[state=inactive]:hidden mt-0 overflow-y-scroll max-h-[350px]"
                   >
                     {c.data.map((input, i) => {
                       if (!input.name) {
                         return null;
                       }
-
                       const display = getDisplayInfo(input.value);
-
                       return (
                         <div key={i} className="flex flex-col gap-[10px]">
-                          <div className="flex items-center gap-[7px]">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-[3px] sm:gap-[7px]">
                             <p className="text-foreground-400 font-semibold text-[12px]">
                               {input.name}
                             </p>
-                            <Badge className="px-[7px] py-[2px]">
+                            <Badge className="px-[7px] py-[2px] w-fit">
                               <span className="text-[10px] font-semibold">
                                 {input.type || "Unknown"}
                               </span>
                             </Badge>
                           </div>
-                          {display.type === "feltArray" ? (
-                            <FeltDisplayer
-                              value={display.value as Felt[]}
-                              className="w-full bg-input/50 border-none rounded-md"
-                              height={115}
-                            />
-                          ) : display.type === "complex" ? (
-                            <>
-                              <div className="bg-input/50 rounded-md overflow-auto overflow-x-auto py-[7px] px-[10px] font-mono text-xs max-h-[115px] cursor-not-allowed">
-                                <pre className="whitespace-pre break-words text-foreground-200 text-[11px] font-mono">
-                                  {display.value}
-                                </pre>
-                              </div>
-                              <Editor
-                                defaultLanguage="json"
-                                value={display.value as string}
-                                options={{
-                                  readOnly: true,
-                                  minimap: { enabled: false },
-                                  scrollBeyondLastLine: false,
-                                  scrollbar: { alwaysConsumeMouseWheel: false },
-                                  wordWrap: "on",
-                                  lineNumbers: "off",
-                                  fontSize: 11,
-                                  padding: { top: 8, bottom: 8 },
-                                }}
-                                className="w-full"
+                          <div>
+                            {display.type === "feltArray" ? (
+                              <FeltDisplayer
+                                value={display.value as Felt[]}
+                                className="w-full bg-input/50 border-none rounded-md"
                                 height={115}
                               />
-                            </>
-                          ) : (
-                            <Input
-                              value={display.value}
-                              disabled
-                              className="bg-input focus-visible:bg-input border-none disabled:bg-input px-[10px] py-[7px]"
-                            />
-                          )}
+                            ) : display.type === "complex" ? (
+                              <>
+                                <div className="bg-input/50 rounded-md overflow-auto overflow-x-auto py-[7px] px-[10px] font-mono text-xs max-h-[115px] cursor-not-allowed">
+                                  <pre className="whitespace-pre break-words text-foreground-200 text-[11px] font-mono">
+                                    {display.value}
+                                  </pre>
+                                </div>
+                              </>
+                            ) : (
+                              <Input
+                                value={display.value}
+                                disabled
+                                className="bg-input focus-visible:bg-input border-none disabled:bg-input px-[10px] py-[7px]"
+                              />
+                            )}
+                          </div>
                         </div>
                       );
                     })}
