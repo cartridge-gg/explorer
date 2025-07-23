@@ -21,6 +21,7 @@ import { decodeCalldata } from "@/shared/utils/rpc";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { CopyableText } from "@/shared/components/copyable-text";
 import { Selector } from "@/shared/components/Selector";
+import { Editor } from "@/shared/components/editor";
 
 export function Calldata({ tx }: { tx: GetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
@@ -72,7 +73,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
 
               <DialogContent
                 overlayClassName="bg-[#000000]/[0.7]"
-                className="[&>button]:hidden w-full sm:max-w-[586px] rounded-[12px] sm:rounded-[12px] p-0 border gap-0 min-h-0"
+                className="[&>button]:hidden w-full sm:max-w-[586px] max-h-[500px] rounded-[12px] sm:rounded-[12px] p-0 border gap-0 min-h-0"
               >
                 <div className="flex items-center justify-between px-[15px] border-b border-background-200 h-[32px]">
                   <h1 className="text-[12px]/[16px] font-normal capitalize">
@@ -130,14 +131,24 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                     className="flex flex-col gap-[10px] mt-0"
                   >
                     {c.data.map((input, i) => {
-                      const resultValue =
-                        typeof input.value === "object"
-                          ? JSON.stringify(input.value, (_, value) =>
+                      const isArray = Array.isArray(input.value);
+                      const isObject =
+                        typeof input.value === "object" &&
+                        input.value !== null &&
+                        !isArray;
+                      const prettifiedJson = isObject
+                        ? JSON.stringify(
+                            input.value,
+                            (_, value) =>
                               typeof value === "bigint"
                                 ? `0x${value.toString(16)}`
                                 : value,
-                            )
-                          : input.value.toString();
+                            2,
+                          )
+                        : undefined;
+                      const resultValue = isObject
+                        ? prettifiedJson
+                        : input.value.toString();
 
                       if (!input.name) {
                         return null;
@@ -155,11 +166,38 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                               </span>
                             </Badge>
                           </div>
-                          <Input
-                            value={resultValue}
-                            disabled
-                            className="bg-input focus-visible:bg-input border-none disabled:bg-input px-[10px] py-[7px]"
-                          />
+                          {isArray ? (
+                            <FeltDisplayer
+                              value={input.value}
+                              className="w-full"
+                              height={115}
+                            />
+                          ) : isObject ? (
+                            <div className="bg-input rounded-sm overflow-hidden">
+                              <Editor
+                                defaultLanguage="json"
+                                value={prettifiedJson}
+                                options={{
+                                  readOnly: true,
+                                  minimap: { enabled: false },
+                                  scrollBeyondLastLine: false,
+                                  scrollbar: { alwaysConsumeMouseWheel: false },
+                                  wordWrap: "on",
+                                  lineNumbers: "off",
+                                  fontSize: 13,
+                                  padding: { top: 8, bottom: 8 },
+                                }}
+                                className="w-full"
+                                height={115}
+                              />
+                            </div>
+                          ) : (
+                            <Input
+                              value={resultValue}
+                              disabled
+                              className="bg-input focus-visible:bg-input border-none disabled:bg-input px-[10px] py-[7px]"
+                            />
+                          )}
                         </div>
                       );
                     })}
