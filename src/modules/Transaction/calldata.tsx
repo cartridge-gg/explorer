@@ -131,21 +131,33 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                     className="flex flex-col gap-[10px] mt-0"
                   >
                     {c.data.map((input, i) => {
+                      // Helper to check if array is a felt252 array (all elements are hex or decimal strings)
+                      function isFeltArray(arr: any[]): boolean {
+                        return arr.every(
+                          (el) =>
+                            typeof el === "string" &&
+                            (/^0x[0-9a-fA-F]+$/.test(el) || /^\d+$/.test(el)),
+                        );
+                      }
+
                       const isArray = Array.isArray(input.value);
+                      const isFeltArrayType =
+                        isArray && isFeltArray(input.value);
                       const isObject =
                         typeof input.value === "object" &&
                         input.value !== null &&
                         !isArray;
-                      const prettifiedJson = isObject
-                        ? JSON.stringify(
-                            input.value,
-                            (_, value) =>
-                              typeof value === "bigint"
-                                ? `0x${value.toString(16)}`
-                                : value,
-                            2,
-                          )
-                        : undefined;
+                      const prettifiedJson =
+                        isObject || (isArray && !isFeltArrayType)
+                          ? JSON.stringify(
+                              input.value,
+                              (_, value) =>
+                                typeof value === "bigint"
+                                  ? `0x${value.toString(16)}`
+                                  : value,
+                              2,
+                            )
+                          : undefined;
                       const resultValue = isObject
                         ? prettifiedJson
                         : input.value.toString();
@@ -166,13 +178,13 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                               </span>
                             </Badge>
                           </div>
-                          {isArray ? (
+                          {isFeltArrayType ? (
                             <FeltDisplayer
                               value={input.value}
                               className="w-full"
                               height={115}
                             />
-                          ) : isObject ? (
+                          ) : isObject || (isArray && !isFeltArrayType) ? (
                             <div className="bg-input rounded-sm overflow-hidden">
                               <Editor
                                 defaultLanguage="json"
@@ -184,7 +196,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                                   scrollbar: { alwaysConsumeMouseWheel: false },
                                   wordWrap: "on",
                                   lineNumbers: "off",
-                                  fontSize: 13,
+                                  fontSize: 11,
                                   padding: { top: 8, bottom: 8 },
                                 }}
                                 className="w-full"
