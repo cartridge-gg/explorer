@@ -99,7 +99,7 @@ export function FeltDisplayer({
           return (
             <div className="flex gap-[10px]">
               <div
-                className="bg-spacer select-none space-y-[5px]"
+                className="select-none space-y-[5px]"
                 style={{ minWidth: lineNumberWidth }}
               >
                 <p className="text-right text-[12px] font-normal text-foreground-400">
