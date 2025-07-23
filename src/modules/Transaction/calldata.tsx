@@ -22,15 +22,54 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { CopyableText } from "@/shared/components/copyable-text";
 import { Selector } from "@/shared/components/Selector";
 import { Editor } from "@/shared/components/editor";
+import { Felt } from "@starknet-io/types-js";
 
 // Helper to check if array is a felt252 array (all elements are hex or decimal strings)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isFeltArray(arr: Array<any>): boolean {
-  return arr.every(
-    (el) =>
-      typeof el === "string" &&
-      (/^0x[0-9a-fA-F]+$/.test(el) || /^\d+$/.test(el)),
-  );
+  return arr.every((i) => typeof i === "bigint");
+}
+
+type DisplayInfo =
+  | { type: "feltArray"; value: Array<Felt> }
+  | { type: "complex"; value: string }
+  | { type: "primitive"; value: string };
+
+const isFeltArrayValue = (value: unknown): value is Array<Felt> =>
+  Array.isArray(value) && isFeltArray(value);
+
+const isComplexValue = (value: unknown): boolean => {
+  const isArray = Array.isArray(value);
+  const isObject = typeof value === "object" && value !== null && !isArray;
+  return isObject || (isArray && !isFeltArray(value));
+};
+
+// Helper to determine display type and value
+function getDisplayInfo(value: unknown): DisplayInfo {
+  if (isFeltArrayValue(value)) {
+    console.log("felt");
+    console.log(typeof value);
+    return { type: "feltArray", value };
+  }
+
+  if (isComplexValue(value)) {
+    console.log("object");
+    console.log(value);
+    return {
+      type: "complex",
+      value: JSON.stringify(
+        value,
+        (_, v) => (typeof v === "bigint" ? `0x${v.toString(16)}` : v),
+        2,
+      ),
+    };
+  }
+
+  // Handle primitive values (including null)
+  return {
+    type: "primitive",
+    value: value?.toString() ?? "null",
+  };
 }
 
 export function Calldata({ tx }: { tx: GetTransactionResponse }) {
@@ -141,31 +180,11 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                     className="flex flex-col gap-[10px] mt-0"
                   >
                     {c.data.map((input, i) => {
-                      const isArray = Array.isArray(input.value);
-                      const isFeltArrayType =
-                        isArray && isFeltArray(input.value);
-                      const isObject =
-                        typeof input.value === "object" &&
-                        input.value !== null &&
-                        !isArray;
-                      const prettifiedJson =
-                        isObject || (isArray && !isFeltArrayType)
-                          ? JSON.stringify(
-                              input.value,
-                              (_, value) =>
-                                typeof value === "bigint"
-                                  ? `0x${value.toString(16)}`
-                                  : value,
-                              2,
-                            )
-                          : undefined;
-                      const resultValue = isObject
-                        ? prettifiedJson
-                        : input.value.toString();
-
                       if (!input.name) {
                         return null;
                       }
+
+                      const display = getDisplayInfo(input.value);
 
                       return (
                         <div key={i} className="flex flex-col gap-[10px]">
@@ -179,17 +198,17 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                               </span>
                             </Badge>
                           </div>
-                          {isFeltArrayType ? (
+                          {display.type === "feltArray" ? (
                             <FeltDisplayer
-                              value={input.value}
+                              value={display.value as Felt[]}
                               className="w-full"
                               height={115}
                             />
-                          ) : isObject || (isArray && !isFeltArrayType) ? (
+                          ) : display.type === "complex" ? (
                             <div className="bg-input rounded-sm overflow-hidden">
                               <Editor
                                 defaultLanguage="json"
-                                value={prettifiedJson}
+                                value={display.value as string}
                                 options={{
                                   readOnly: true,
                                   minimap: { enabled: false },
@@ -206,7 +225,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                             </div>
                           ) : (
                             <Input
-                              value={resultValue}
+                              value={display.value}
                               disabled
                               className="bg-input focus-visible:bg-input border-none disabled:bg-input px-[10px] py-[7px]"
                             />
