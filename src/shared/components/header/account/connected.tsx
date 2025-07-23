@@ -16,7 +16,7 @@ import {
 } from "@cartridge/ui";
 import { useAccount, useDisconnect, useStarkName } from "@starknet-react/core";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Call } from "starknet";
 import {
@@ -29,18 +29,11 @@ import {
 
 export function Connected() {
   const { isMobile } = useScreen();
-  const { address, connector, account, status } = useAccount();
+  const { address, connector, account } = useAccount();
   const { disconnect } = useDisconnect();
-  const { data: starkName, error: starkNameError } = useStarkName({ address });
+  const { data: starkName } = useStarkName({ address });
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    console.log("address: ", address);
-    console.log("connector: ", connector);
-    console.log("account: ", account);
-    console.log("status: ", status);
-  }, [address, connector, account, status, starkName, starkNameError]);
 
   const { state } = useCallCart();
   const { clearCalls, removeCall } = useCallCartDispatch();
