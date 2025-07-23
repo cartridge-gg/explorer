@@ -39,10 +39,7 @@ export function Connected() {
     console.log("address: ", address);
     console.log("connector: ", connector);
     console.log("account: ", account);
-    console.log("account type: ", typeof account);
     console.log("status: ", status);
-    console.log("stark name: ", starkName);
-    console.log("starkError: ", starkNameError);
   }, [address, connector, account, status, starkName, starkNameError]);
 
   const { state } = useCallCart();
