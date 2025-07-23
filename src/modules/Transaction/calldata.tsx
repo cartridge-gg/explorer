@@ -21,7 +21,7 @@ import { decodeCalldata } from "@/shared/utils/rpc";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { CopyableText } from "@/shared/components/copyable-text";
 import { Selector } from "@/shared/components/Selector";
-import { Editor } from "@/shared/components/editor";
+// import { Editor } from "@/shared/components/editor";
 import { Felt } from "@starknet-io/types-js";
 
 // Helper to check if array is a felt252 array (all elements are hex or decimal strings)
@@ -201,8 +201,11 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                               height={115}
                             />
                           ) : display.type === "complex" ? (
-                            <div className="bg-input rounded-sm overflow-hidden">
-                              <Editor
+                            <div className="bg-input/50 rounded-md overflow-auto py-[7px] px-[10px] font-mono text-xs max-h-[115px] cursor-not-allowed">
+                              <pre className="whitespace-pre-wrap break-words text-foreground-200 text-[11px] font-mono">
+                                {display.value}
+                              </pre>
+                              {/* <Editor
                                 defaultLanguage="json"
                                 value={display.value as string}
                                 options={{
@@ -217,7 +220,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                                 }}
                                 className="w-full"
                                 height={115}
-                              />
+                              /> */}
                             </div>
                           ) : (
                             <Input
