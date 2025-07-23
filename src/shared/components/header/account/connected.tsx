@@ -14,7 +14,7 @@ import {
   TableHeader,
   Skeleton,
 } from "@cartridge/ui";
-import { useAccount, useDisconnect } from "@starknet-react/core";
+import { useAccount, useDisconnect, useStarkName } from "@starknet-react/core";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -31,6 +31,7 @@ export function Connected() {
   const { isMobile } = useScreen();
   const { address, connector, account } = useAccount();
   const { disconnect } = useDisconnect();
+  const { data: starkName } = useStarkName({ address });
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -105,7 +106,7 @@ export function Connected() {
             {username.isLoading ? (
               <Skeleton className="h-4 w-20" />
             ) : (
-              (username.data ?? truncateString(address ?? "", 3))
+              username.data || starkName || truncateString(address ?? "", 3)
             )}
           </span>
         </Button>
