@@ -197,7 +197,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
                           {display.type === "feltArray" ? (
                             <FeltDisplayer
                               value={display.value as Felt[]}
-                              className="w-full"
+                              className="w-full bg-input/50 border-none rounded-md"
                               height={115}
                             />
                           ) : display.type === "complex" ? (
