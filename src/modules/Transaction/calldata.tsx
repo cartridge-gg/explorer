@@ -47,14 +47,10 @@ const isComplexValue = (value: unknown): boolean => {
 // Helper to determine display type and value
 function getDisplayInfo(value: unknown): DisplayInfo {
   if (isFeltArrayValue(value)) {
-    console.log("felt");
-    console.log(typeof value);
     return { type: "feltArray", value };
   }
 
   if (isComplexValue(value)) {
-    console.log("object");
-    console.log(value);
     return {
       type: "complex",
       value: JSON.stringify(
