@@ -6,15 +6,21 @@ import {
   TooltipProvider,
   TooltipTrigger,
   Badge,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
 } from "@cartridge/ui";
 import { Monaco } from "@monaco-editor/react";
 import { InfoIcon } from "lucide-react";
 import { editor } from "monaco-editor";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { JsonSchema } from "json-schema-library";
 import { isPrimitive } from "@/shared/utils/json-schema";
 import { TypeNode } from "@/shared/utils/abi";
 import { Editor } from "@/shared/components/editor";
+import { formatSnakeCaseToDisplayValue } from "../utils/string";
 
 export function ParamForm({
   params,
@@ -195,5 +201,215 @@ function ParamEditor({
         value={value}
       />
     </div>
+  );
+}
+
+// Recursively render a form for a JSON schema
+export function JsonSchemaForm({
+  schema,
+  value,
+  onChange,
+  disabled = false,
+  path = [],
+}: {
+  schema: JsonSchema;
+  value: any;
+  onChange: (value: any) => void;
+  disabled?: boolean;
+  path?: string[];
+}) {
+  // Remove any reference to oneOfMode or all-fields, always use select for oneOf at any depth
+  if (schema.oneOf) {
+    // Use state to track selected branch
+    const selectedIdx =
+      typeof value?.__oneOfSelected__ === "number"
+        ? value.__oneOfSelected__
+        : 0;
+    const branchValue =
+      value?.__oneOfValue__ ??
+      (schema.oneOf[selectedIdx]?.type === "object"
+        ? {}
+        : schema.oneOf[selectedIdx]?.type === "array"
+          ? []
+          : "");
+    return (
+      <div className="flex flex-col gap-2">
+        <Select
+          value={selectedIdx}
+          onValueChange={(e) => {
+            const idx = Number(e);
+            onChange({
+              __oneOfSelected__: idx,
+              __oneOfValue__:
+                schema.oneOf[idx]?.type === "object"
+                  ? {}
+                  : schema.oneOf[idx]?.type === "array"
+                    ? []
+                    : "",
+            });
+          }}
+          disabled={disabled}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Theme" />
+          </SelectTrigger>
+          <SelectContent>
+            {schema.oneOf.map((option: any, idx: number) => (
+              <SelectItem key={idx} value={idx}>
+                {option.title || `Option ${idx + 1}`}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <JsonSchemaForm
+          schema={schema.oneOf[selectedIdx]}
+          value={branchValue}
+          onChange={(v) =>
+            onChange({ __oneOfSelected__: selectedIdx, __oneOfValue__: v })
+          }
+          disabled={disabled}
+          path={path}
+        />
+      </div>
+    );
+  }
+  // Handle allOf (merge all subschemas into one object)
+  if (schema.allOf) {
+    // Merge all properties and required fields
+    let mergedProps: Record<string, any> = {};
+    let mergedRequired: string[] = [];
+    const mergedSchema = {
+      type: "object",
+      properties: {},
+      required: [] as string[],
+    };
+    for (const sub of schema.allOf) {
+      if (sub.type === "object" && sub.properties) {
+        mergedProps = { ...mergedProps, ...sub.properties };
+        if (Array.isArray(sub.required)) {
+          mergedRequired = [...mergedRequired, ...sub.required];
+        }
+      }
+    }
+    mergedSchema.properties = mergedProps;
+    mergedSchema.required = mergedRequired;
+    return (
+      <JsonSchemaForm
+        schema={mergedSchema}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        path={path}
+      />
+    );
+  }
+  // Handle object
+  if (schema.type === "object" && schema.properties) {
+    return (
+      <div className="flex flex-col gap-2 border p-2 rounded bg-background-100">
+        {Object.entries(schema.properties).map(
+          ([key, propSchema]: [string, any]) => (
+            <div key={key} className="flex flex-col gap-1">
+              {
+                <label className="text-xs font-semibold">
+                  {formatSnakeCaseToDisplayValue(key)}
+                  {schema.required?.includes(key) ? " *" : null}
+                </label>
+              }
+              <JsonSchemaForm
+                schema={propSchema}
+                value={value?.[key] ?? ""}
+                onChange={(v) => onChange({ ...value, [key]: v })}
+                disabled={disabled}
+                path={[...path, key]}
+              />
+            </div>
+          ),
+        )}
+      </div>
+    );
+  }
+  // Handle array
+  if (schema.type === "array" && schema.items) {
+    const arr: any[] = Array.isArray(value) ? value : [];
+    return (
+      <div className="flex flex-col gap-2 border p-2 rounded bg-background-100">
+        {arr.map((item, idx) => (
+          <div key={idx} className="flex flex-row gap-2 items-center">
+            <JsonSchemaForm
+              schema={schema.items}
+              value={item}
+              onChange={(v) => {
+                const newArr = arr.slice();
+                newArr[idx] = v;
+                onChange(newArr);
+              }}
+              disabled={disabled}
+              path={[...path, String(idx)]}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                const newArr = arr.slice();
+                newArr.splice(idx, 1);
+                onChange(newArr);
+              }}
+              disabled={disabled}
+              className="text-xs text-red-500"
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => onChange([...arr, ""])}
+          disabled={disabled}
+          className="text-xs text-blue-500 self-start"
+        >
+          Add item
+        </button>
+      </div>
+    );
+  }
+  // Handle primitive
+  if (
+    schema.type === "string" ||
+    schema.type === "number" ||
+    schema.type === "integer" ||
+    schema.type === "boolean"
+  ) {
+    return (
+      <Input
+        type={
+          schema.type === "boolean"
+            ? "checkbox"
+            : schema.type === "number" || schema.type === "integer"
+              ? "number"
+              : "text"
+        }
+        checked={schema.type === "boolean" ? Boolean(value) : undefined}
+        value={schema.type === "boolean" ? undefined : (value ?? "")}
+        onChange={(e) => {
+          let v: any = e.target.value;
+          if (schema.type === "boolean") v = e.target.checked;
+          if (schema.type === "number" || schema.type === "integer")
+            v = e.target.value === "" ? "" : Number(e.target.value);
+          onChange(v);
+        }}
+        disabled={disabled}
+        className="bg-input focus-visible:bg-input border-none caret-foreground font-sans px-[10px] py-[5px] h-[30px] rounded-sm"
+      />
+    );
+  }
+  // Fallback: show as text
+  return (
+    <Input
+      type="text"
+      value={value ?? ""}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      className="bg-input focus-visible:bg-input border-none caret-foreground font-sans px-[10px] py-[5px] h-[30px] rounded-sm"
+    />
   );
 }

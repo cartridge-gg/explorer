@@ -41,12 +41,61 @@ import { useScrollTo } from "@/shared/hooks/useScrollTo";
 import { toast } from "sonner";
 import { Editor } from "@/shared/components/editor";
 import { Selector } from "@/shared/components/Selector";
+import { JsonSchemaForm } from "@/shared/components/form";
 
 interface FormState {
-  inputs: { name: string; value: string }[];
+  inputs: any[];
   result: unknown;
   hasCalled: boolean;
   loading: boolean;
+}
+
+// Utility to recursively flatten __oneOf__ at any depth
+function flattenOneOf(value: any): any {
+  if (Array.isArray(value)) {
+    return value.map(flattenOneOf);
+  }
+  if (value && typeof value === 'object') {
+    if ('__oneOf__' in value && Array.isArray(value.__oneOf__)) {
+      for (const branch of value.__oneOf__) {
+        const flat = flattenOneOf(branch);
+        if (
+          flat &&
+          (typeof flat === 'object'
+            ? Object.keys(flat).length > 0
+            : flat !== '' && flat !== undefined)
+        ) {
+          return flat;
+        }
+      }
+      return '';
+    }
+    // Recursively flatten all properties
+    const out: Record<string, any> = {};
+    for (const k in value) {
+      out[k] = flattenOneOf(value[k]);
+    }
+    return out;
+  }
+  return value;
+}
+
+// Utility to recursively flatten __oneOfSelected__ at any depth
+function flattenOneOfSelected(value: any): any {
+  if (Array.isArray(value)) {
+    return value.map(flattenOneOfSelected);
+  }
+  if (value && typeof value === 'object') {
+    if ('__oneOfSelected__' in value && '__oneOfValue__' in value) {
+      return flattenOneOfSelected(value.__oneOfValue__);
+    }
+    const out: Record<string, any> = {};
+    for (const k in value) {
+      out[k] = flattenOneOfSelected(value[k]);
+    }
+    return out;
+  }
+  return value;
 }
 
 export function JsonRpcPlayground() {
@@ -85,6 +134,10 @@ export function JsonRpcPlayground() {
   const [form, setForm] = useState<Record<string, FormState>>({});
   const [activeTab, setActiveTab] = useState("request");
 
+  useEffect(() => {
+    console.log("selected: ", selected);
+  }, [selected]);
+
   // Scroll to selected method hook
   const { scrollContainerRef, setItemRef } = useScrollTo({
     item: selected,
@@ -97,7 +150,7 @@ export function JsonRpcPlayground() {
       setForm((prev) => ({
         ...prev,
         [method.name]: prev[method.name] ?? {
-          inputs: method.params?.map((p) => ({ name: p.name, value: "" })),
+          inputs: method.params?.map((p) => ""),
           result: null,
           hasCalled: false,
           loading: false,
@@ -109,25 +162,61 @@ export function JsonRpcPlayground() {
   );
 
   const onParamChange = useCallback(
-    (i: number, value?: string) => {
-      if (!selected || typeof value === "undefined") return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (i: number, value: any) => {
+      if (!selected) return;
       setForm((prev) => {
         const newForm = { ...prev };
         if (!newForm[selected.name]) {
           newForm[selected.name] = {
-            inputs:
-              selected.params?.map((p) => ({ name: p.name, value: "" })) || [],
+            inputs: selected.params?.map((p) => "") || [],
             result: null,
             hasCalled: false,
             loading: false,
           };
         }
-        newForm[selected.name].inputs[i].value = value;
+        newForm[selected.name].inputs[i] = value;
         return newForm;
       });
     },
     [selected],
   );
+
+  // Replace parametersSection with JsonSchemaForm for each param, using all-fields mode for top-level oneOf
+  const parametersSection = useMemo(() => {
+    if (!selected?.params || selected.params.length === 0) return null;
+
+    return (
+      <div className="flex flex-col gap-4">
+        {selected.params.map((param, i) => (
+          <div key={param.name} className="flex flex-col gap-1">
+            <CardLabel className="text-[12px]/[16px] font-semibold tracking-[0.24px] text-foreground-400">
+              {formatSnakeCaseToDisplayValue(param.name)}
+            </CardLabel>
+            <JsonSchemaForm
+              schema={param.schema}
+              value={
+                form[selected?.name]?.inputs[i] ||
+                (param.schema &&
+                typeof param.schema === "object" &&
+                "type" in param.schema
+                  ? param.schema.type === "object"
+                    ? {}
+                    : param.schema.type === "array"
+                      ? []
+                      : ""
+                  : "")
+              }
+              onChange={(v) => {
+                onParamChange(i, v);
+              }}
+              disabled={form[selected?.name]?.loading}
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }, [selected, form, onParamChange]);
 
   const requestJSON = useMemo(() => {
     if (!selected || !form[selected.name]) return;
@@ -137,17 +226,7 @@ export function JsonRpcPlayground() {
       {
         jsonrpc: "2.0",
         method: selected.name,
-        params: inputs?.map((p) => {
-          if (typeof p.value === "undefined") {
-            return "";
-          }
-
-          try {
-            return JSON.parse(p.value);
-          } catch {
-            return p.value;
-          }
-        }),
+        params: inputs?.map(flattenOneOfSelected),
       },
       null,
       2,
@@ -162,31 +241,6 @@ export function JsonRpcPlayground() {
     return JSON.stringify(result, null, 2);
   }, [selected, form]);
 
-  const parametersSection = useMemo(() => {
-    if (!selected?.params || selected.params.length === 0) return null;
-
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-[15px]">
-        {selected.params.map((param, i) => (
-          <div key={i} className="flex flex-col gap-[8px]">
-            <CardLabel className="text-[12px]/[16px] font-semibold tracking-[0.24px] text-foreground-400">
-              {formatSnakeCaseToDisplayValue(param.name)}
-            </CardLabel>
-            <div className="relative flex items-center w-full">
-              <Input
-                placeholder={param.name}
-                value={form[selected?.name]?.inputs[i]?.value || ""}
-                onChange={(e) => onParamChange(i, e.target.value)}
-                containerClassName="w-full"
-                className="bg-input focus-visible:bg-input border-none caret-foreground font-sans px-[10px] py-[5px] h-[30px] rounded-sm"
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }, [selected, form, onParamChange]);
-
   const onExecute = useCallback(async () => {
     if (!selected) return;
 
@@ -198,13 +252,7 @@ export function JsonRpcPlayground() {
       },
     }));
     const f = form[selected.name];
-    const params = f.inputs.map((p) => {
-      try {
-        return JSON.parse(p.value);
-      } catch {
-        return p.value;
-      }
-    });
+    const params = f.inputs.map(flattenOneOfSelected);
     const res = await fetch(getRpcUrl(), {
       headers: {
         "Content-Type": "application/json",
@@ -259,7 +307,7 @@ export function JsonRpcPlayground() {
       ...prev,
       [methods[0].name]: {
         ...prev[methods[0].name],
-        inputs: methods[0].params?.map((p) => ({ name: p.name, value: "" })),
+        inputs: methods[0].params?.map((p) => ""),
       },
     }));
   }, [methods]);
@@ -416,11 +464,8 @@ export function JsonRpcPlayground() {
               </div>
             </CardContent>
 
-            <form className="flex flex-col p-[15px] gap-[30px] justify-between h-auto">
-              <CardContent className="p-0">
-                {/* New custom parameters implementation */}
-                {parametersSection}
-              </CardContent>
+            <form className="flex flex-col p-[15px] gap-[30px] justify-between h-auto md:h-[300px] overflow-y-scroll">
+              <CardContent className="p-0">{parametersSection}</CardContent>
 
               <Button
                 onClick={onExecute}
