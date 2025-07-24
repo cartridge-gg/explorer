@@ -15,11 +15,13 @@ export function truncateString(str: string, n: number = 6): string {
     : str;
 }
 
-export function formatSnakeCaseToDisplayValue(variable: string) {
-  if (!variable) return "";
+export function formatSnakeCaseToDisplayValue<T extends string>(
+  variable: T,
+): Capitalize<T> {
   return variable
+    .toLowerCase()
     .replace(/_/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+    .replace(/\b\w/g, (char) => char.toUpperCase()) as Capitalize<T>;
 }
 
 export function fromCamelCase(str: string) {
