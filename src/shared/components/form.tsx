@@ -21,6 +21,7 @@ export function ParamForm({
   onChange,
   onSubmit,
   disabled = false,
+  className,
 }: {
   params: {
     id?: string;
@@ -34,11 +35,12 @@ export function ParamForm({
   onChange: (i: number, value: string) => void;
   onSubmit?: (i: number, value: string) => void;
   disabled?: boolean;
+  className?: string;
 }) {
   if (params.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-[10px] w-full">
+    <div className={cn("flex flex-col gap-[10px] w-full", className)}>
       {params.map((p, i) => (
         <div key={i} className="flex flex-col gap-[10px]">
           <div className="flex items-center gap-[7px]">

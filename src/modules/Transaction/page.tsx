@@ -2,7 +2,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { BigNumberish, cairo } from "starknet";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback } from "react";
 import { toast } from "sonner";
 import { Calldata } from "./calldata";
 import {
@@ -52,7 +52,6 @@ import {
 import { CopyableInteger } from "@/shared/components/copyable-integer";
 import dayjs from "dayjs";
 import { getFinalityStatus } from "@/shared/utils/receipt";
-import FeltList from "@/shared/components/FeltList";
 import { Editor } from "@/shared/components/editor";
 import { AccountAddressV2 } from "@/shared/components/account-address-v2";
 import { Selector } from "@/shared/components/Selector";
@@ -71,10 +70,7 @@ function ConvertToSTRK(input: BigNumberish) {
   return value.toFixed(6);
 }
 
-const OFFSET = 65;
-
 export function Transaction() {
-  const [tabsContentHeight, setTabsContentHeight] = useState(0);
   const { txHash } = useParams<{ txHash: string }>();
   const {
     isLoading,
@@ -85,13 +81,10 @@ export function Transaction() {
       declared,
       block,
       blockComputeData,
-      executions,
       events,
       storageDiff,
     },
   } = useTransaction({ txHash });
-
-  const tabsContentRef = useRef<HTMLDivElement>(null);
 
   const tab = useHashLinkTabs(
     tx?.type === "INVOKE"
@@ -100,26 +93,6 @@ export function Transaction() {
         ? "class"
         : "signature",
   );
-
-  useEffect(() => {
-    const container = tabsContentRef.current;
-    if (!container) return;
-    if (tabsContentHeight !== 0) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { height } = entry.contentRect;
-        const calculatedHeight = height - OFFSET;
-        setTabsContentHeight(Math.max(calculatedHeight, 0)); // Ensure non-negative
-      }
-    });
-
-    resizeObserver.observe(container);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [tabsContentHeight]);
 
   const { isMobile } = useScreen();
 
@@ -188,14 +161,14 @@ export function Transaction() {
         <NotFound />
       ) : (
         <div className="flex flex-col gap-[20px] lg:gap-[40px] pb-8">
-          <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-[3px]">
+          <div className="flex flex-col sl:flex-row sl:h-[73vh] gap-[3px] h-full">
             {/* sidebar */}
             <div className="sl:min-w-[337px] flex flex-col gap-[3px] sl:overflow-y-scroll">
               <Card className="rounded-sm p-0 sl:min-w-[337px] flex flex-col gap-[3px] sl:overflow-y-scroll">
                 <CardContent className="flex-row justify-between">
                   <div className="flex flex-col gap-[6px]">
                     <CardLabel>Status</CardLabel>
-                    {block ? (
+                    {receipt ? (
                       <p
                         className="inline-block text-[13px] font-semibold
                             bg-gradient-to-r from-[#fff] to-[#636363]
@@ -224,7 +197,7 @@ export function Transaction() {
                 </CardContent>
               </Card>
 
-              <Card className="flex-1 overflow-y-scroll scrollbar-none gap-0 rounded-sm rounded-bl-[12px] p-0">
+              <Card className="flex-1 overflow-y-scroll scrollbar-none gap-0 rounded-sm sl:rounded-bl-[12px] p-0">
                 <CardContent className="gap-[8px]">
                   <div className="flex justify-between items-center">
                     <CardLabel>Hash</CardLabel>
@@ -270,12 +243,14 @@ export function Transaction() {
 
                 <Separator />
                 <CardContent className="gap-[8px]">
-                  <div className="flex justify-between items-center">
-                    <CardLabel>Tip</CardLabel>
-                    <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                      {tx?.tip ? Number(tx?.tip).toLocaleString() : "-"}
-                    </p>
-                  </div>
+                  {!!tx?.tip && (
+                    <div className="flex justify-between items-center">
+                      <CardLabel>Tip</CardLabel>
+                      <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+                        {Number(tx.tip) ? Number(tx.tip).toLocaleString() : "-"}
+                      </p>
+                    </div>
+                  )}
                   <div className="flex justify-between items-center">
                     <CardLabel>Fee</CardLabel>
                     <div className="flex flex-row items-center gap-[10px]">
@@ -462,17 +437,14 @@ export function Transaction() {
               </Card>
             </div>
 
-            <Card
-              ref={tabsContentRef}
-              className="p-0 h-full flex-grow grid grid-rows-[min-content_1fr] overflow-x-scroll sl:min-w-[794px] rounded-sm rounded-br-[12px]"
-            >
+            <Card className="p-0 h-full overflow-x-scroll sl:min-w-[794px] rounded-sm rounded-b-[12px] sl:rounded-bl-sm rounded-br-[12px]">
               {tx ? (
                 <Tabs
                   value={tab.selected}
                   onValueChange={tab.onChange}
-                  className="h-full"
+                  className="flex flex-col h-full"
                 >
-                  <CardContent className="pb-0 pt-[3px] gap-0">
+                  <CardContent className="pb-0 pt-[3px] gap-0 flex-shrink-0">
                     <TabsList className="gap-[12px] p-0">
                       {tx?.type === "INVOKE" && (
                         <TabsTrigger
@@ -525,9 +497,12 @@ export function Transaction() {
                   </CardContent>
                   <Separator className="mt-[1px]" />
 
-                  <CardContent className="p-[15px]">
+                  <CardContent className="p-[15px] h-full">
                     {tx?.type === "INVOKE" && (
-                      <TabsContent value="calldata" className="mt-0">
+                      <TabsContent
+                        value="calldata"
+                        className="mt-0 h-full overflow-hidden"
+                      >
                         <Calldata tx={tx} />
                       </TabsContent>
                     )}
@@ -569,35 +544,54 @@ export function Transaction() {
                         />
                       </TabsContent>
                     )}
-                    <TabsContent value="signature" className="mt-0">
+                    <TabsContent
+                      value="signature"
+                      className="mt-0 h-full overflow-hidden"
+                    >
                       {tx?.signature && tx?.signature?.length > 0 ? (
-                        <UITabs defaultValue="hex">
-                          <Selector
-                            items={[
-                              { value: "dec", label: "Dec" },
-                              { value: "hex", label: "Hex" },
-                            ]}
-                          />
-                          <UITabsContent value="hex" className="mt-[15px]">
+                        <UITabs
+                          defaultValue="hex"
+                          className="flex flex-col h-full"
+                        >
+                          <div className="mb-[15px]">
+                            <Selector
+                              items={[
+                                { value: "dec", label: "Dec" },
+                                { value: "hex", label: "Hex" },
+                              ]}
+                            />
+                          </div>
+                          <UITabsContent
+                            value="hex"
+                            className="flex-1 data-[state=inactive]:hidden relative"
+                          >
                             <FeltDisplayer
-                              className="min-h-[80vh]"
+                              height={isMobile ? "500px" : "100%"}
                               value={tx?.signature ?? []}
+                              // simulate scrollable
+                              // value={Array.from(
+                              //   { length: 1000 },
+                              //   (_, i) => i + 1,
+                              // )}
                             />
                           </UITabsContent>
-                          <UITabsContent value="dec">
+                          <UITabsContent
+                            value="dec"
+                            className="flex-1 data-[state=inactive]:hidden relative"
+                          >
                             {tx ? (
-                              <FeltList list={tx?.signature} displayAs="dec" />
+                              <FeltDisplayer
+                                height={isMobile ? "500px" : "100%"}
+                                value={tx.signature ?? []}
+                                displayAs="dec"
+                              />
                             ) : (
                               <Skeleton className="h-4 w-full" />
                             )}
                           </UITabsContent>
                         </UITabs>
                       ) : (
-                        <EmptySignature
-                          style={{
-                            height: tabsContentHeight,
-                          }}
-                        />
+                        <EmptySignature className="h-full" />
                       )}
                     </TabsContent>
                     <TabsContent value="events" className="mt-0">
@@ -628,7 +622,6 @@ export function Transaction() {
           <ExecutionResourcesCard
             isLoading={isLoading}
             blockComputeData={blockComputeData}
-            executions={executions}
           />
         </div>
       )}

@@ -1,7 +1,8 @@
 import React, { memo, useCallback } from "react";
 import { cn, Skeleton } from "@cartridge/ui";
-import { formatNumber } from "../utils/number";
+import { abbreviateNumber } from "../utils/number";
 import { toast } from "sonner";
+import * as RPC08 from "@starknet-io/types-js";
 
 export const Card = React.forwardRef<
   HTMLDivElement,
@@ -114,7 +115,7 @@ export function ExecutionResourcesCard({
   blockComputeData,
   isLoading,
 }: {
-  blockComputeData?: { l1_gas: number; l2_gas: number; l1_data_gas: number };
+  blockComputeData?: RPC08.EXECUTION_RESOURCES;
   executions?: {
     ecdsa: number;
     keccak: number;
@@ -170,41 +171,39 @@ const FireIcon = memo(({ className }: { className?: string }) => {
   );
 });
 
-const ResourceCard = memo(
-  ({
-    className,
-    label,
-    value,
-    isLoading,
-  }: {
-    className?: string;
-    label: string;
-    value?: number;
-    isLoading?: boolean;
-  }) => {
-    const onCopyValue = useCallback(() => {
-      navigator.clipboard.writeText(value?.toString() || "0");
-      toast.success(`${label} value copied to clipboard`);
-    }, [label, value]);
+const ResourceCard = ({
+  className,
+  label,
+  value,
+  isLoading,
+}: {
+  className?: string;
+  label: string;
+  value?: number;
+  isLoading?: boolean;
+}) => {
+  const onCopyValue = useCallback(() => {
+    navigator.clipboard.writeText(value?.toString() || "0");
+    toast.success(`${label} value copied to clipboard`);
+  }, [label, value]);
 
-    return (
-      <button
-        type="button"
-        className={cn(
-          "bg-background-200 hover:bg-background-300 flex flex-col items-start justify-between p-[10px] w-[120px] h-[64px] select-none",
-          className,
-        )}
-        onClick={onCopyValue}
-      >
-        <CardLabel>{label}</CardLabel>
-        {!isLoading ? (
-          <div className="font-mono text-foreground font-semibold">
-            {formatNumber(value || 0)}
-          </div>
-        ) : (
-          <Skeleton className="h-6 w-full" />
-        )}
-      </button>
-    );
-  },
-);
+  return (
+    <button
+      type="button"
+      className={cn(
+        "bg-background-200 hover:bg-background-300 flex flex-col items-start justify-between p-[10px] w-[120px] h-[64px] select-none",
+        className,
+      )}
+      onClick={onCopyValue}
+    >
+      <CardLabel>{label}</CardLabel>
+      {!isLoading ? (
+        <p className="font-mono text-foreground font-semibold">
+          {abbreviateNumber(value || 0, 3)}
+        </p>
+      ) : (
+        <Skeleton className="h-6 w-full" />
+      )}
+    </button>
+  );
+};

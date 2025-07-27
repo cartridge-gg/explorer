@@ -53,6 +53,7 @@ import { MultiFilter } from "@/shared/components/filter";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { truncateString } from "@/shared/utils/string";
 import { useScreen } from "@/shared/hooks/useScreen";
+import { TransactionType } from "@/types/types";
 
 const TXN_OFFSET = 150; // Offset for the transaction table
 const EVENT_OFFSET = 115; // Offset for the event table
@@ -115,6 +116,28 @@ export function Block() {
     enabled: !!txnItemPerPage && !!eventsItemPerPage,
   });
   const { blockNumber: latestBlockNumber } = useBlockNumber();
+
+  const filterItems: Array<{ key: TransactionType; value: string }> =
+    useMemo(() => {
+      const types: Array<TransactionType> = [
+        "INVOKE",
+        "L1_HANDLER",
+        "DECLARE",
+        "DEPLOY",
+        "DEPLOY_ACCOUNT",
+      ];
+
+      return types.map((type) => {
+        return {
+          key: type,
+          value: type
+            .toLowerCase()
+            .split("_")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ") as Capitalize<typeof type>,
+        };
+      });
+    }, []);
 
   const isLatestBlock = useMemo(() => {
     return (
@@ -241,7 +264,7 @@ export function Block() {
                 </CardContent>
               </Card>
 
-              <Card className="flex-1 overflow-y-scroll scrollbar-none p-0 gap-0 rounded-sm rounded-bl-[12px]">
+              <Card className="flex-1 overflow-y-scroll scrollbar-none p-0 gap-0 rounded-sm sl:rounded-bl-[12px]">
                 <CardContent className="gap-[8px]">
                   <div className="flex items-center justify-between">
                     <CardLabel>Hash</CardLabel>
@@ -489,7 +512,7 @@ export function Block() {
 
             <Card
               ref={tableContainerRef}
-              className="flex-1 p-0 rounded-sm rounded-br-[12px] gap-0 h-[388px] md:h-auto"
+              className="flex-1 p-0 rounded-sm rounded-b-[12px] sl:rounded-bl-sm rounded-br-[12px] gap-0 h-[388px] md:h-auto"
             >
               <Tabs value={tab.selected} onValueChange={tab.onChange}>
                 <CardContent className="pb-0 pt-[3px] gap-0">
@@ -535,11 +558,7 @@ export function Block() {
                           txs.getColumn("type")?.setFilterValue(values);
                         }
                       }}
-                      items={[
-                        { key: "INVOKE", value: "Invoke" },
-                        { key: "DEPLOY_ACCOUNT", value: "Deploy Account" },
-                        { key: "DECLARE", value: "Declare" },
-                      ]}
+                      items={filterItems}
                     />
                     {tableContainerHeight > 0 && (
                       <DataTable

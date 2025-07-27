@@ -21,7 +21,6 @@ import { FunctionAbi } from "starknet";
 import {
   getEventName,
   initBlockComputeData,
-  initExecutions,
   parseExecutionResources,
 } from "@/shared/utils/rpc";
 
@@ -101,7 +100,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
   });
 
   const {
-    data: { receipt, events: eventsData, executions, blockComputeData },
+    data: { receipt, events: eventsData, blockComputeData },
   } = useQuery({
     queryKey: ["transaction-sammary", txHash],
     queryFn: async () => {
@@ -112,7 +111,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
       const receipt =
         receiptResult.value as SuccessfulTransactionReceiptResponse;
 
-      const { executions, blockComputeData } = parseExecutionResources(
+      const { blockComputeData } = parseExecutionResources(
         receipt.execution_resources,
       );
 
@@ -201,7 +200,6 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
       return {
         receipt,
         events,
-        executions,
         blockComputeData,
       };
     },
@@ -210,7 +208,6 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
       // Re-check if this is correct
       receipt: {} as SuccessfulTransactionReceiptResponse,
       events: [],
-      executions: initExecutions,
       blockComputeData: initBlockComputeData,
     },
   });
@@ -422,7 +419,6 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
       calldata,
       block,
       blockComputeData,
-      executions,
       events,
       storageDiff,
     },
@@ -553,7 +549,7 @@ export function useCalldata(calldata: Calldata[] | undefined) {
               raw_args: d.args,
             };
           } catch (e) {
-            console.log("error decoding: ", e);
+            console.error("error decoding: ", e);
             return {
               contract: d.contract,
               function_name: "Error",

@@ -301,7 +301,7 @@ export function JsonRpcPlayground() {
   return (
     <div
       id="json-playground"
-      className="w-full max-w-full flex flex-col gap-[3px] sl:w-[1134px] pb-[20px]"
+      className="flex-1 min-h-0 w-full flex flex-col gap-[3px] lg:w-[1134px] pb-[20px]"
     >
       <Breadcrumb className="mb-[7px]">
         <BreadcrumbList>
@@ -329,204 +329,204 @@ export function JsonRpcPlayground() {
         </PageHeaderTitle>
       </PageHeader>
 
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-col lg:flex-row gap-[3px] w-full">
-          {/* Sidebar Card */}
-          <Card className="flex flex-col gap-3 p-[15px] w-full lg:w-[356px] lg:h-auto">
-            <CardContent className="px-0">
-              <div className="relative flex items-center w-full">
-                <Input
-                  placeholder="Method"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  containerClassName="w-full"
-                  className="bg-input focus-visible:bg-input focus-visible:border-foreground-300 pr-10 caret-foreground"
-                />
-                <SearchIcon className="absolute right-3" />
+      <div className="flex flex-col lg:flex-row gap-[3px] w-full flex-1 min-h-0">
+        {/* Sidebar Card */}
+        <Card className="flex flex-col gap-3 p-[15px] w-full lg:w-[356px] lg:h-auto">
+          <CardContent className="px-0">
+            <div className="relative flex items-center w-full">
+              <Input
+                placeholder="Method"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                containerClassName="w-full"
+                className="bg-input focus-visible:bg-input focus-visible:border-foreground-300 pr-10 caret-foreground"
+              />
+              <SearchIcon className="absolute right-3" />
+            </div>
+          </CardContent>
+
+          <CardHeader className="px-0">
+            <CardTitle className="px-[8px] text-[12px]/[16px] font-semibold tracking-[0.24px] text-foreground-400">
+              Methods
+            </CardTitle>
+          </CardHeader>
+
+          {/* Desktop List */}
+          <CardContent
+            ref={scrollContainerRef}
+            className="overflow-y-auto max-h-[200px] lg:max-h-[calc(100vh-200px)] px-0 space-y-[3px] select-none"
+          >
+            {methods?.length > 0 ? (
+              methods.map((method) => (
+                <div
+                  ref={(el) => setItemRef(method, el)}
+                  className={cn(
+                    "py-[3px] px-[8px] cursor-pointer flex flex-row items-center justify-between gap-1 transition-colors rounded border border-transparent h-[35px]",
+                    method.name === selected?.name
+                      ? "border-primary"
+                      : "hover:border-background-400",
+                  )}
+                  key={method.name}
+                  onClick={() => onMethodChange(method)}
+                >
+                  {method.summary && (
+                    <div className="text-sm text-foreground-200 text-medium">
+                      {method.name.replace("starknet_", "")}
+                    </div>
+                  )}
+                  <Badge className="py-[2px] px-[8px]">
+                    <span className="text-[12px]/[16px] font-medium text-foreground-200">
+                      {method.name.split("_")[0]}
+                    </span>
+                  </Badge>
+                </div>
+              ))
+            ) : (
+              <div className="py-4 px-4 text-center text-foreground-300">
+                No method found
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Right Column - Method/Params and Request/Response Cards */}
+        <div className="flex flex-col gap-[3px] flex-1 min-h-0 w-full">
+          {/* Method Details and Parameters Card */}
+          <Card className="py-0 flex flex-col divide-y divide-background-200 gap-0 w-full">
+            <CardContent className="flex flex-col p-[15px] gap-[10px]">
+              <div className="flex flex-col gap-[4px]">
+                <CardLabel className="text-[12px]/[16px] tracking-[0.25px] font-semibold text-foreground-400">
+                  Method
+                </CardLabel>
+                <p className="text-[13px]/[16px] font-normal text-foreground-200">
+                  {fromCamelCase(
+                    selected?.name?.replace("starknet_", "") ?? "",
+                  )}
+                </p>
+              </div>
+              <div className="flex flex-col gap-[4px]">
+                <CardLabel className="text-[12px]/[16px] tracking-[0.25px] font-semibold text-foreground-400">
+                  Description
+                </CardLabel>
+                {selected?.summary && (
+                  <p className="text-[13px]/[16px] font-normal text-foreground-200">
+                    {selected.summary}
+                  </p>
+                )}
               </div>
             </CardContent>
 
-            <CardHeader className="px-0">
-              <CardTitle className="px-[8px] text-[12px]/[16px] font-semibold tracking-[0.24px] text-foreground-400">
-                Methods
-              </CardTitle>
-            </CardHeader>
+            <form className="flex flex-col p-[15px] gap-[30px] justify-between h-auto">
+              <CardContent className="p-0">
+                {/* New custom parameters implementation */}
+                {parametersSection}
+              </CardContent>
 
-            {/* Desktop List */}
-            <CardContent
-              ref={scrollContainerRef}
-              className="overflow-y-auto max-h-[200px] lg:max-h-[calc(100vh-200px)] px-0 space-y-[3px] select-none"
-            >
-              {methods?.length > 0 ? (
-                methods.map((method) => (
-                  <div
-                    ref={(el) => setItemRef(method, el)}
-                    className={cn(
-                      "py-[3px] px-[8px] cursor-pointer flex flex-row items-center justify-between gap-1 transition-colors rounded border border-transparent h-[35px]",
-                      method.name === selected?.name
-                        ? "border-primary"
-                        : "hover:border-background-400",
-                    )}
-                    key={method.name}
-                    onClick={() => onMethodChange(method)}
-                  >
-                    {method.summary && (
-                      <div className="text-sm text-foreground-200 text-medium">
-                        {method.name.replace("starknet_", "")}
-                      </div>
-                    )}
-                    <Badge className="py-[2px] px-[8px]">
-                      <span className="text-[12px]/[16px] font-medium text-foreground-200">
-                        {method.name.split("_")[0]}
-                      </span>
-                    </Badge>
-                  </div>
-                ))
-              ) : (
-                <div className="py-4 px-4 text-center text-foreground-300">
-                  No method found
-                </div>
-              )}
-            </CardContent>
+              <Button
+                onClick={onExecute}
+                type="submit"
+                variant="primary"
+                className="self-end bg-foreground-100 px-[10px] h-[25px] rounded-sm w-full lg:w-fit"
+                isLoading={form[selected?.name ?? ""]?.loading}
+              >
+                <span className="text-[13px]/[16px] font-semibold uppercase">
+                  Send
+                </span>
+              </Button>
+            </form>
           </Card>
 
-          {/* Right Column - Method/Params and Request/Response Cards */}
-          <div className="flex flex-col gap-[3px] flex-1 min-h-0 w-full">
-            {/* Method Details and Parameters Card */}
-            <Card className="py-0 flex flex-col divide-y divide-background-200 gap-0 w-full">
-              <CardContent className="flex flex-col p-[15px] gap-[10px]">
-                <div className="flex flex-col gap-[4px]">
-                  <CardLabel className="text-[12px]/[16px] tracking-[0.25px] font-semibold text-foreground-400">
-                    Method
-                  </CardLabel>
-                  <p className="text-[13px]/[16px] font-normal text-foreground-200">
-                    {fromCamelCase(
-                      selected?.name?.replace("starknet_", "") ?? "",
-                    )}
-                  </p>
-                </div>
-                <div className="flex flex-col gap-[4px]">
-                  <CardLabel className="text-[12px]/[16px] tracking-[0.25px] font-semibold text-foreground-400">
-                    Description
-                  </CardLabel>
-                  {selected?.summary && (
-                    <p className="text-[13px]/[16px] font-normal text-foreground-200">
-                      {selected.summary}
-                    </p>
-                  )}
+          {/* Request and Response Card */}
+          <Card className="p-[15px] flex-1 min-h-0 w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="space-y-0 h-full flex flex-col"
+            >
+              <CardContent className="p-0 flex flex-col gap-[20px] lg:flex-row items-center justify-between">
+                <Selector
+                  containerClassName="w-full lg:w-auto"
+                  className="w-full lg:w-auto"
+                  items={[
+                    {
+                      label: "Request",
+                      value: "request",
+                    },
+                    {
+                      label: "Response",
+                      value: "response",
+                    },
+                  ]}
+                />
+                <div className="flex flex-row items-center self-start gap-[6px]">
+                  <button
+                    type="button"
+                    onClick={onCopyRawResponse}
+                    disabled={!selected || !form[selected.name]?.hasCalled}
+                    className="flex items-center gap-[6px] py-[3px] pl-[10px] pr-[8px] bg-background-200 border border-[#454B46] rounded-sm text-foreground-200 hover:text-foreground-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="text-[12px]/[16px] font-semibold tracking-[0.24px]">
+                      Raw response
+                    </span>
+                    <CopyIcon className="w-[18px] h-[18px]" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onCopyResult}
+                    disabled={!selected || !form[selected.name]?.hasCalled}
+                    className="flex items-center gap-[6px] py-[3px] pl-[10px] pr-[8px] bg-background-200 border border-[#454B46] rounded-sm text-foreground-200 hover:text-foreground-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="text-[12px]/[16px] font-semibold tracking-[0.24px]">
+                      Result
+                    </span>
+                    <CopyIcon className="w-[18px] h-[18px]" />
+                  </button>
                 </div>
               </CardContent>
 
-              <form className="flex flex-col p-[15px] gap-[30px] justify-between h-auto">
-                <CardContent className="p-0">
-                  {/* New custom parameters implementation */}
-                  {parametersSection}
-                </CardContent>
-
-                <Button
-                  onClick={onExecute}
-                  type="submit"
-                  variant="primary"
-                  className="self-end bg-foreground-100 px-[10px] h-[25px] rounded-sm w-full lg:w-fit"
-                  isLoading={form[selected?.name ?? ""]?.loading}
+              <CardContent className="p-0 gap-0 flex-1 min-h-0">
+                <TabsContent
+                  value="request"
+                  className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0 data-[state=inactive]:hidden h-full min-h-0"
                 >
-                  <span className="text-[13px]/[16px] font-semibold uppercase">
-                    Send
-                  </span>
-                </Button>
-              </form>
-            </Card>
-
-            {/* Request and Response Card */}
-            <Card className="p-[15px] flex-1 min-h-0 w-full">
-              <Tabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="space-y-0 h-full flex flex-col"
-              >
-                <CardContent className="p-0 flex flex-col gap-[20px] lg:flex-row items-center justify-between">
-                  <Selector
-                    items={[
-                      {
-                        label: "Request",
-                        value: "request",
+                  <Editor
+                    className="min-h-[470px] h-full min-w-0"
+                    value={requestJSON}
+                    language="json"
+                    options={{
+                      readOnly: true,
+                      scrollbar: {
+                        alwaysConsumeMouseWheel: false,
                       },
-                      {
-                        label: "Response",
-                        value: "response",
+                      minimap: {
+                        enabled: false,
                       },
-                    ]}
+                    }}
                   />
-                  <div className="flex flex-row items-center self-start gap-[6px]">
-                    <button
-                      type="button"
-                      onClick={onCopyRawResponse}
-                      disabled={!selected || !form[selected.name]?.hasCalled}
-                      className="flex items-center gap-[6px] py-[3px] pl-[10px] pr-[8px] bg-background-200 border border-[#454B46] rounded-sm text-foreground-200 hover:text-foreground-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <span className="text-[12px]/[16px] font-semibold tracking-[0.24px]">
-                        Raw response
-                      </span>
-                      <CopyIcon className="w-[18px] h-[18px]" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={onCopyResult}
-                      disabled={!selected || !form[selected.name]?.hasCalled}
-                      className="flex items-center gap-[6px] py-[3px] pl-[10px] pr-[8px] bg-background-200 border border-[#454B46] rounded-sm text-foreground-200 hover:text-foreground-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <span className="text-[12px]/[16px] font-semibold tracking-[0.24px]">
-                        Result
-                      </span>
-                      <CopyIcon className="w-[18px] h-[18px]" />
-                    </button>
-                  </div>
-                </CardContent>
+                </TabsContent>
 
-                <CardContent className="p-0 gap-0 flex-1 min-h-0">
-                  <TabsContent
-                    value="request"
-                    className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0 data-[state=inactive]:hidden h-full min-h-0"
-                  >
-                    <Editor
-                      className="min-h-[470px] h-full min-w-0"
-                      value={requestJSON}
-                      language="json"
-                      options={{
-                        readOnly: true,
-                        scrollbar: {
-                          alwaysConsumeMouseWheel: false,
-                        },
-                        minimap: {
-                          enabled: false,
-                        },
-                      }}
-                    />
-                  </TabsContent>
-
-                  <TabsContent
-                    value="response"
-                    className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0 data-[state=inactive]:hidden h-full min-h-0"
-                  >
-                    <Editor
-                      className="min-h-[470px] h-full min-w-0"
-                      value={responseJSON}
-                      language="json"
-                      options={{
-                        readOnly: true,
-                        scrollbar: {
-                          alwaysConsumeMouseWheel: false,
-                        },
-                        minimap: {
-                          enabled: false,
-                        },
-                      }}
-                    />
-                  </TabsContent>
-                </CardContent>
-              </Tabs>
-            </Card>
-          </div>
+                <TabsContent
+                  value="response"
+                  className="flex flex-col data-[state=active]:mt-[10px] data-[state=inactive]:mt-0 data-[state=inactive]:hidden h-full min-h-0"
+                >
+                  <Editor
+                    className="min-h-[470px] h-full min-w-0"
+                    value={responseJSON}
+                    language="json"
+                    options={{
+                      readOnly: true,
+                      scrollbar: {
+                        alwaysConsumeMouseWheel: false,
+                      },
+                      minimap: {
+                        enabled: false,
+                      },
+                    }}
+                  />
+                </TabsContent>
+              </CardContent>
+            </Tabs>
+          </Card>
         </div>
       </div>
     </div>

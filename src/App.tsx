@@ -15,22 +15,29 @@ import { NotFound } from "@/modules/NotFound/page";
 import { World } from "@/modules/World/page";
 import { cn } from "@cartridge/ui";
 import { DotBackground } from "./shared/components/dotted-background";
+import { TailwindIndicator } from "./shared/components/tailwind-indicator";
 
 export function App() {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
 
   return (
-    <div className={cn(isHomePage ? "h-screen" : "lg:h-screen")}>
+    <div
+      className={cn(isHomePage ? "h-screen" : "lg:h-screen lg:max-h-screen")}
+    >
       <DotBackground />
-      {!isHomePage && <Header className="py-[20px] px-[20px]" />}
+      <TailwindIndicator />
 
       <div
         className={cn(
-          "flex flex-col items-center gap-[15px] px-[15px] xl:px-[189px] w-full min-w-[320px] relative z-20 pt-[80px] lg:pt-[15px]",
-          isHomePage ? "h-screen" : "lg:h-screen",
+          "flex flex-col items-center gap-[15px] px-[15px] xl:px-[189px] w-full min-w-[320px] relative z-20 pt-[80px] lg:pt-0 h-full",
+          isHomePage && "h-screen",
         )}
       >
+        {!isHomePage && (
+          <Header className="py-[20px] px-[20px] sm:px-0 sl:w-[1134px]" />
+        )}
+
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/txns" element={<TransactionList />} />
