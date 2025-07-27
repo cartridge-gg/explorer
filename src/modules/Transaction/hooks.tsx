@@ -33,9 +33,10 @@ import { EVENT } from "@starknet-io/starknet-types-08";
 //   [key: string]: string | number;
 // }
 
-type EventData = {
+interface EventData extends EVENT {
   id: string;
-} & EVENT;
+  event_name: string;
+}
 
 // interface EventData {
 //   id: string;
@@ -109,6 +110,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
 
       const receipt =
         receiptResult.value as SuccessfulTransactionReceiptResponse;
+
       const { executions, blockComputeData } = parseExecutionResources(
         receipt.execution_resources,
       );
@@ -124,9 +126,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
         acc[address].push({
           event: {
             id: `${receipt.transaction_hash}-${originalIndex}`,
-            // from: address,
-            // event_name: getEventName(event.keys[0]),
-            // block: receipt.block_number,
+            event_name: getEventName(event.keys[0]),
             from_address: address,
             data: event.data,
             keys: event.keys,
