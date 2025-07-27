@@ -2,7 +2,7 @@ import React, { memo, useCallback } from "react";
 import { cn, Skeleton } from "@cartridge/ui";
 import { abbreviateNumber } from "../utils/number";
 import { toast } from "sonner";
-import * as RPC08 from "@starknet-io/types-js";
+import * as RPC08 from "@starknet-io/starknet-types-08";
 
 export const Card = React.forwardRef<
   HTMLDivElement,
