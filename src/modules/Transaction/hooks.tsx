@@ -28,23 +28,11 @@ import { useBlock } from "@starknet-react/core";
 import { isValidAddress } from "@/shared/utils/contract";
 import { EVENT } from "@starknet-io/starknet-types-08";
 
-// interface ParsedEvent {
-//   transaction_hash: string;
-//   [key: string]: string | number;
-// }
-
 interface EventData extends EVENT {
   id: string;
   event_name: string;
+  block: number;
 }
-
-// interface EventData {
-//   id: string;
-//   from: string;
-//   event_name: string;
-//   block: number;
-//   data?: ParsedEvent;
-// }
 
 interface StorageDiffData {
   contract_address: string;
@@ -130,6 +118,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
             from_address: address,
             data: event.data,
             keys: event.keys,
+            block: receipt.block_number,
           },
           originalIndex,
         });
@@ -205,7 +194,6 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     },
     enabled: typeof txHash === "string",
     initialData: {
-      // Re-check if this is correct
       receipt: {} as SuccessfulTransactionReceiptResponse,
       events: [],
       blockComputeData: initBlockComputeData,
@@ -222,7 +210,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
           contract_address,
           key: entry.key,
           value: entry.value,
-          block_number: receipt?.block_number,
+          block_number: receipt.block_number,
         }));
       });
     },
@@ -257,7 +245,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
           </div>
         ),
       }),
-      eventColumnHelper.accessor("from", {
+      eventColumnHelper.accessor("from_address", {
         header() {
           return (
             <div className="text-left border-0">

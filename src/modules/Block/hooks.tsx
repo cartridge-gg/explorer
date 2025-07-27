@@ -18,7 +18,7 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import * as RPC08 from "@starknet-io/types-js";
+import * as RPC08 from "@starknet-io/starknet-types-08";
 
 interface BlockData {
   block?: Awaited<ReturnType<typeof RPC_PROVIDER.getBlockWithReceipts>>;
