@@ -213,7 +213,9 @@ export function JsonSchemaForm({
   path = [],
 }: {
   schema: JsonSchema;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onChange: (value: any) => void;
   disabled?: boolean;
   path?: string[];
@@ -254,6 +256,7 @@ export function JsonSchemaForm({
             <SelectValue placeholder="Theme" />
           </SelectTrigger>
           <SelectContent>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {schema.oneOf.map((option: any, idx: number) => (
               <SelectItem key={idx} value={idx}>
                 {option.title || `Option ${idx + 1}`}
@@ -276,6 +279,7 @@ export function JsonSchemaForm({
   // Handle allOf (merge all subschemas into one object)
   if (schema.allOf) {
     // Merge all properties and required fields
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mergedProps: Record<string, any> = {};
     let mergedRequired: string[] = [];
     const mergedSchema = {
@@ -308,6 +312,7 @@ export function JsonSchemaForm({
     return (
       <div className="flex flex-col gap-[8px] p-[8px] rounded bg-background-100">
         {Object.entries(schema.properties).map(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ([key, propSchema]: [string, any]) => (
             <div key={key} className="flex flex-col gap-[4px]">
               {
@@ -331,6 +336,7 @@ export function JsonSchemaForm({
   }
   // Handle array
   if (schema.type === "array" && schema.items) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const arr: any[] = Array.isArray(value) ? value : [];
     return (
       <div className="flex flex-col gap-[8px] p-[8px] rounded bg-background-100">
@@ -391,7 +397,7 @@ export function JsonSchemaForm({
         checked={schema.type === "boolean" ? Boolean(value) : undefined}
         value={schema.type === "boolean" ? undefined : (value ?? "")}
         onChange={(e) => {
-          let v: any = e.target.value;
+          let v: string | number | boolean = e.target.value;
           if (schema.type === "boolean") v = e.target.checked;
           if (schema.type === "number" || schema.type === "integer")
             v = e.target.value === "" ? "" : Number(e.target.value);

@@ -44,54 +44,27 @@ import { Selector } from "@/shared/components/Selector";
 import { JsonSchemaForm } from "@/shared/components/form";
 
 interface FormState {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputs: any[];
   result: unknown;
   hasCalled: boolean;
   loading: boolean;
 }
 
-// Utility to recursively flatten __oneOf__ at any depth
+// Utility to recursively flatten __oneOfSelected__ at any depth
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function flattenOneOf(value: any): any {
   if (Array.isArray(value)) {
     return value.map(flattenOneOf);
   }
-  if (value && typeof value === 'object') {
-    if ('__oneOf__' in value && Array.isArray(value.__oneOf__)) {
-      for (const branch of value.__oneOf__) {
-        const flat = flattenOneOf(branch);
-        if (
-          flat &&
-          (typeof flat === 'object'
-            ? Object.keys(flat).length > 0
-            : flat !== '' && flat !== undefined)
-        ) {
-          return flat;
-        }
-      }
-      return '';
+  if (value && typeof value === "object") {
+    if ("__oneOfSelected__" in value && "__oneOfValue__" in value) {
+      return flattenOneOf(value.__oneOfValue__);
     }
-    // Recursively flatten all properties
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const out: Record<string, any> = {};
     for (const k in value) {
       out[k] = flattenOneOf(value[k]);
-    }
-    return out;
-  }
-  return value;
-}
-
-// Utility to recursively flatten __oneOfSelected__ at any depth
-function flattenOneOfSelected(value: any): any {
-  if (Array.isArray(value)) {
-    return value.map(flattenOneOfSelected);
-  }
-  if (value && typeof value === 'object') {
-    if ('__oneOfSelected__' in value && '__oneOfValue__' in value) {
-      return flattenOneOfSelected(value.__oneOfValue__);
-    }
-    const out: Record<string, any> = {};
-    for (const k in value) {
-      out[k] = flattenOneOfSelected(value[k]);
     }
     return out;
   }
@@ -150,7 +123,7 @@ export function JsonRpcPlayground() {
       setForm((prev) => ({
         ...prev,
         [method.name]: prev[method.name] ?? {
-          inputs: method.params?.map((p) => ""),
+          inputs: method.params?.map(() => ""),
           result: null,
           hasCalled: false,
           loading: false,
@@ -169,7 +142,7 @@ export function JsonRpcPlayground() {
         const newForm = { ...prev };
         if (!newForm[selected.name]) {
           newForm[selected.name] = {
-            inputs: selected.params?.map((p) => "") || [],
+            inputs: selected.params?.map(() => "") || [],
             result: null,
             hasCalled: false,
             loading: false,
@@ -226,7 +199,7 @@ export function JsonRpcPlayground() {
       {
         jsonrpc: "2.0",
         method: selected.name,
-        params: inputs?.map(flattenOneOfSelected),
+        params: inputs?.map(flattenOneOf),
       },
       null,
       2,
@@ -252,7 +225,7 @@ export function JsonRpcPlayground() {
       },
     }));
     const f = form[selected.name];
-    const params = f.inputs.map(flattenOneOfSelected);
+    const params = f.inputs.map(flattenOneOf);
     const res = await fetch(getRpcUrl(), {
       headers: {
         "Content-Type": "application/json",
@@ -307,7 +280,7 @@ export function JsonRpcPlayground() {
       ...prev,
       [methods[0].name]: {
         ...prev[methods[0].name],
-        inputs: methods[0].params?.map((p) => ""),
+        inputs: methods[0].params?.map(() => ""),
       },
     }));
   }, [methods]);
