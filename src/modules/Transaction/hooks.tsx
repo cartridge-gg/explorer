@@ -15,6 +15,7 @@ import {
   CallData,
   events as eventsLib,
   hash,
+  RevertedTransactionReceiptResponse,
   SuccessfulTransactionReceiptResponse,
 } from "starknet";
 import { FunctionAbi } from "starknet";
@@ -87,6 +88,10 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     retry: false,
   });
 
+  const isReceiptError = (receipt: unknown): receipt is Error => {
+    return receipt instanceof Error;
+  };
+
   const {
     data: { receipt, events: eventsData, blockComputeData },
   } = useQuery({
@@ -96,8 +101,13 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
         txHash || "",
       );
 
-      const receipt =
-        receiptResult.value as SuccessfulTransactionReceiptResponse;
+      if (isReceiptError(receiptResult)) {
+        throw receiptResult;
+      }
+
+      const receipt = receiptResult.value as
+        | SuccessfulTransactionReceiptResponse
+        | RevertedTransactionReceiptResponse;
 
       const { executions, blockComputeData } = parseExecutionResources(
         receipt.execution_resources,
@@ -156,9 +166,10 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
             );
 
             return eventEntries.map(({ originalIndex }) => {
-              const matchingParsedEvent = parsedEvents.find(
-                (e) => e.transaction_hash === receipt.transaction_hash,
-              );
+              const matchingParsedEvent =
+                parsedEvents.find(
+                  (e) => e.transaction_hash === receipt.transaction_hash,
+                ) || {};
 
               const eventKey = matchingParsedEvent
                 ? (Object.keys(matchingParsedEvent).find((key) =>
@@ -170,10 +181,11 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
                 originalIndex,
                 eventData: {
                   id: `${receipt.transaction_hash}-${originalIndex}`,
-                  from: address,
+                  from_address: address,
                   event_name: getEventName(eventKey),
                   block: receipt.block_number,
                   data: matchingParsedEvent,
+                  keys: eventEntries[originalIndex].event.keys,
                 },
               };
             });
@@ -204,7 +216,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     queryKey: ["transaction", txHash, "storageDiff"],
     queryFn: async () => {
       const trace = await RPC_PROVIDER.getTransactionTrace(txHash || "");
-      return trace.state_diff?.storage_diffs?.flatMap((storage_diff) => {
+      return trace.state_diff!.storage_diffs.flatMap((storage_diff) => {
         const contract_address = storage_diff.address;
         return storage_diff.storage_entries.map((entry) => ({
           contract_address,
