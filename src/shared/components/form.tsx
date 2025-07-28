@@ -15,7 +15,7 @@ import {
 import { Monaco } from "@monaco-editor/react";
 import { InfoIcon } from "lucide-react";
 import { editor } from "monaco-editor";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { JsonSchema } from "json-schema-library";
 import { isPrimitive } from "@/shared/utils/json-schema";
 import { TypeNode } from "@/shared/utils/abi";
@@ -68,7 +68,7 @@ export function ParamForm({
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className="bg-[#F3F3F3] p-2 max-w-[300px]"
+                    className="bg-[#F3F3F3] p-[8px] max-w-[300px]"
                   >
                     <div>{p.description ?? p.summary}</div>
                   </TooltipContent>
@@ -233,7 +233,7 @@ export function JsonSchemaForm({
           ? []
           : "");
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-[8px]">
         <Select
           value={selectedIdx}
           onValueChange={(e) => {
@@ -306,10 +306,10 @@ export function JsonSchemaForm({
   // Handle object
   if (schema.type === "object" && schema.properties) {
     return (
-      <div className="flex flex-col gap-2 border p-2 rounded bg-background-100">
+      <div className="flex flex-col gap-[8px] p-[8px] rounded bg-background-100">
         {Object.entries(schema.properties).map(
           ([key, propSchema]: [string, any]) => (
-            <div key={key} className="flex flex-col gap-1">
+            <div key={key} className="flex flex-col gap-[4px]">
               {
                 <label className="text-xs font-semibold">
                   {formatSnakeCaseToDisplayValue(key)}
@@ -333,9 +333,9 @@ export function JsonSchemaForm({
   if (schema.type === "array" && schema.items) {
     const arr: any[] = Array.isArray(value) ? value : [];
     return (
-      <div className="flex flex-col gap-2 border p-2 rounded bg-background-100">
+      <div className="flex flex-col gap-[8px] p-[8px] rounded bg-background-100">
         {arr.map((item, idx) => (
-          <div key={idx} className="flex flex-row gap-2 items-center">
+          <div key={idx} className="flex flex-row gap-[8px] items-center">
             <JsonSchemaForm
               schema={schema.items}
               value={item}
