@@ -168,8 +168,6 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
               abiEnums,
             );
 
-            console.log("parsedEvents: ", parsedEvents);
-
             return eventEntries.map(({ originalIndex }) => {
               const matchingParsedEvent =
                 parsedEvents.find(
@@ -181,8 +179,6 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
                     key.includes("::"),
                   ) ?? "")
                 : "";
-
-              console.log("eventKey: ", eventKey);
 
               return {
                 originalIndex,
