@@ -102,9 +102,8 @@ export function Transaction() {
   }, []);
 
   useEffect(() => {
-    console.log("tx: ", tx);
     console.log("receipt from page: ", receipt);
-  });
+  }, [receipt]);
 
   return (
     <div className="w-full flex flex-col gap-[3px] sl:w-[1134px]">

@@ -113,14 +113,12 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
         | SuccessfulTransactionReceiptResponse
         | RevertedTransactionReceiptResponse;
 
-      console.log("receipt from hooks early: ", receipt);
-
       const { blockComputeData } = parseExecutionResources(
         receipt.execution_resources,
       );
 
       // Group events by contract address while preserving original indices
-      const eventsByContract = receipt.events.reduce<
+      const eventsByContract = receipt?.events.reduce<
         Record<string, Array<{ event: EventData; originalIndex: number }>>
       >((acc, event, originalIndex) => {
         const address = event.from_address;
@@ -163,49 +161,49 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
             const abiEnums = CallData.getAbiEnum(contract_abi);
 
             // Map events while preserving original indices
+            return eventEntries?.map(({ originalIndex }) => {
+              const matchingParsedEvent = eventsLib
+                .parseEvents(
+                  eventsResponse.events,
+                  abiEvents,
+                  abiStructs,
+                  abiEnums,
+                )
+                .find((e) => e.transaction_hash === receipt.transaction_hash);
 
-            const parsedEvents = eventsLib.parseEvents(
-              eventsResponse.events,
-              abiEvents,
-              abiStructs,
-              abiEnums,
-            );
-
-            return eventEntries.map(({ originalIndex }) => {
-              const matchingParsedEvent =
-                parsedEvents.find(
-                  (e) => e.transaction_hash === receipt.transaction_hash,
-                ) || {};
-
-              const eventKey = matchingParsedEvent
+              const eventKey: string = matchingParsedEvent
                 ? (Object.keys(matchingParsedEvent).find((key) =>
                     key.includes("::"),
                   ) ?? "")
                 : "";
 
-              console.log("return here 1");
+              console.log("return heree 1");
+              console.log("eventKey: ", eventKey);
 
               return {
                 originalIndex,
                 eventData: {
                   id: `${receipt.transaction_hash}-${originalIndex}`,
                   from_address: address,
-                  event_name: getEventName(eventKey)[0],
+                  event_name: getEventName(eventKey),
                   block: receipt.block_number,
-                  data: Object.keys(matchingParsedEvent),
                   keys: eventEntries[originalIndex].event.keys,
+                  data: Object.keys(matchingParsedEvent ?? {}),
                 } satisfies EventData,
               };
             });
           },
         ),
       );
-      console.log("return here 2");
 
-      const events = eventsWithIndices
+      console.log("return here 2: ", eventsWithIndices);
+
+      const events: EventData[] = eventsWithIndices
         .flat()
-        .sort((a, b) => b.originalIndex - a.originalIndex)
+        .sort((a, b) => a.originalIndex - b.originalIndex)
         .map(({ eventData }) => eventData);
+
+      console.log("return here 3");
 
       console.log("receipt from hooks end: ", receipt);
       console.log("events from hooks end: ", events);
