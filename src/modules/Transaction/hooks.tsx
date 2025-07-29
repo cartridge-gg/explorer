@@ -177,9 +177,6 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
                   ) ?? "")
                 : "";
 
-              console.log("return heree 1");
-              console.log("eventKey: ", eventKey);
-
               return {
                 originalIndex,
                 eventData: {
@@ -187,7 +184,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
                   from_address: address,
                   event_name: getEventName(eventKey),
                   block: receipt.block_number,
-                  keys: eventEntries[originalIndex].event.keys,
+                  keys: [eventKey],
                   data: Object.keys(matchingParsedEvent ?? {}),
                 } satisfies EventData,
               };
@@ -196,18 +193,10 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
         ),
       );
 
-      console.log("return here 2: ", eventsWithIndices);
-
       const events: EventData[] = eventsWithIndices
         .flat()
         .sort((a, b) => a.originalIndex - b.originalIndex)
         .map(({ eventData }) => eventData);
-
-      console.log("return here 3");
-
-      console.log("receipt from hooks end: ", receipt);
-      console.log("events from hooks end: ", events);
-      console.log("blockComputeData from hooks end: ", blockComputeData);
 
       return {
         receipt,

@@ -2,7 +2,7 @@ import { truncateString } from "@/shared/utils/string";
 import { useParams } from "react-router-dom";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { BigNumberish, cairo } from "starknet";
-import { memo, useCallback, useEffect } from "react";
+import { memo, useCallback } from "react";
 import { toast } from "sonner";
 import { Calldata } from "./calldata";
 import {
@@ -100,10 +100,6 @@ export function Transaction() {
     navigator.clipboard.writeText(value);
     toast.success("Value copied to clipboard");
   }, []);
-
-  useEffect(() => {
-    console.log("receipt from page: ", receipt);
-  }, [receipt]);
 
   return (
     <div className="w-full flex flex-col gap-[3px] sl:w-[1134px]">
