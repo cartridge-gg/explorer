@@ -57,6 +57,12 @@ import { AccountAddressV2 } from "@/shared/components/account-address-v2";
 import { Selector } from "@/shared/components/Selector";
 import { FeltDisplayer } from "@/shared/components/felt-displayer";
 import { EmptySignature } from "@/shared/components/empty/empty-signature";
+import {
+  txnHasNonce,
+  txnHasNonceDataAvailabilityMode,
+  txnHasSenderAddress,
+  txnHasTip,
+} from "@/types/txn";
 
 /**
  *
@@ -197,244 +203,249 @@ export function Transaction() {
                 </CardContent>
               </Card>
 
-              <Card className="flex-1 overflow-y-scroll scrollbar-none gap-0 rounded-sm sl:rounded-bl-[12px] p-0">
-                <CardContent className="gap-[8px]">
-                  <div className="flex justify-between items-center">
-                    <CardLabel>Hash</CardLabel>
-                    <div>
-                      <CopyableInteger
-                        title="Transaction Hash"
-                        length={1}
-                        value={receipt.transaction_hash}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <CardLabel>Block</CardLabel>
-                    <div className="flex items-center">
-                      <p>{receipt?.block_number}</p>
-                    </div>
-                  </div>
-                </CardContent>
-                {(!!tx?.sender_address || !!tx?.nonce) && (
-                  <>
-                    <Separator />
-                    <CardContent className="gap-[8px]">
-                      {!!tx?.sender_address && (
-                        <div className="flex flex-col justify-between gap-[8px]">
-                          <CardLabel>Sender</CardLabel>
-                          <AccountAddressV2
-                            address={tx.sender_address!}
-                            to={`../contract/${tx.sender_address}`}
-                          />
-                        </div>
-                      )}
-                      {!!tx?.nonce && (
-                        <div className="flex justify-between items-center">
-                          <CardLabel>Nonce</CardLabel>
-                          <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                            {Number(tx?.nonce)}
-                          </p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </>
-                )}
-
-                <Separator />
-                <CardContent className="gap-[8px]">
-                  {!!tx?.tip && (
+              {tx && (
+                <Card className="flex-1 overflow-y-scroll scrollbar-none gap-0 rounded-sm sl:rounded-bl-[12px] p-0">
+                  <CardContent className="gap-[8px]">
                     <div className="flex justify-between items-center">
-                      <CardLabel>Tip</CardLabel>
-                      <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                        {Number(tx.tip) ? Number(tx.tip).toLocaleString() : "-"}
-                      </p>
+                      <CardLabel>Hash</CardLabel>
+                      <div>
+                        <CopyableInteger
+                          title="Transaction Hash"
+                          length={1}
+                          value={receipt.transaction_hash}
+                        />
+                      </div>
                     </div>
+                    <div className="flex justify-between items-center">
+                      <CardLabel>Block</CardLabel>
+                      <div className="flex items-center">
+                        <p>{receipt?.block_number}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                  {(txnHasSenderAddress(tx) || txnHasNonce(tx)) && (
+                    <>
+                      <Separator />
+                      <CardContent className="gap-[8px]">
+                        {txnHasSenderAddress(tx) && (
+                          <div className="flex flex-col justify-between gap-[8px]">
+                            <CardLabel>Sender</CardLabel>
+                            <AccountAddressV2
+                              address={tx.sender_address!}
+                              to={`../contract/${tx.sender_address}`}
+                            />
+                          </div>
+                        )}
+                        {txnHasNonce(tx) && (
+                          <div className="flex justify-between items-center">
+                            <CardLabel>Nonce</CardLabel>
+                            <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+                              {Number(tx?.nonce)}
+                            </p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </>
                   )}
-                  <div className="flex justify-between items-center">
-                    <CardLabel>Fee</CardLabel>
-                    <div className="flex flex-row items-center gap-[10px]">
-                      <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                        {ConvertToSTRK(
-                          Number(cairo.felt(receipt?.actual_fee?.amount ?? 0)),
-                        ).toLocaleString()}
-                      </p>
-                      {receipt?.actual_fee && (
-                        <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
-                          strk
-                        </Badge>
-                      )}
+
+                  <Separator />
+                  <CardContent className="gap-[8px]">
+                    {txnHasTip(tx) && (
+                      <div className="flex justify-between items-center">
+                        <CardLabel>Tip</CardLabel>
+                        <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+                          {Number(tx.tip)
+                            ? Number(tx.tip).toLocaleString()
+                            : "-"}
+                        </p>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center">
+                      <CardLabel>Fee</CardLabel>
+                      <div className="flex flex-row items-center gap-[10px]">
+                        <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+                          {ConvertToSTRK(
+                            Number(
+                              cairo.felt(receipt?.actual_fee?.amount ?? 0),
+                            ),
+                          ).toLocaleString()}
+                        </p>
+                        {receipt?.actual_fee && (
+                          <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
+                            strk
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
+                  </CardContent>
 
-                {Number(tx?.version) === 3 && (
-                  <>
-                    <Separator />
-                    <CardContent className="gap-[15px]">
-                      <CardHeader className="px-0 gap-[12px] text-foreground-100">
-                        <GasIcon />
-                        <CardTitle className="text-[12px] font-semibold p-0">
-                          Resource Bounds
-                        </CardTitle>
-                      </CardHeader>
-
-                      <div className="space-y-[8px]">
-                        <CardLabel>L1 execution gas</CardLabel>
-
-                        <div className="flex items-center gap-px">
-                          <PriceCard
-                            label="Max amount"
-                            value={Number(
-                              cairo.felt(
-                                tx?.resource_bounds?.l1_gas?.max_amount ?? 0,
-                              ),
-                            )}
-                            unit="strk"
-                            onClick={() =>
-                              onCopyValue(
-                                tx?.resource_bounds?.l1_gas?.max_amount ?? "0",
-                              )
-                            }
-                          />
-                          <PriceCard
-                            label="Max price / unit"
-                            value={ConvertToSTRK(
-                              Number(
-                                cairo.felt(
-                                  tx?.resource_bounds?.l1_gas
-                                    ?.max_price_per_unit ?? 0,
-                                ),
-                              ),
-                            )}
-                            unit="strk"
-                            onClick={() =>
-                              onCopyValue(
-                                tx?.resource_bounds?.l1_gas
-                                  ?.max_price_per_unit ?? "0",
-                              )
-                            }
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-[8px]">
-                        <CardLabel>L2 execution gas</CardLabel>
-
-                        <div className="flex items-center gap-px">
-                          <PriceCard
-                            label="Max amount"
-                            value={Number(
-                              cairo.felt(
-                                tx?.resource_bounds?.l2_gas?.max_amount ?? 0,
-                              ),
-                            )}
-                            unit="strk"
-                            onClick={() =>
-                              onCopyValue(
-                                tx?.resource_bounds?.l2_gas?.max_amount ?? "0",
-                              )
-                            }
-                          />
-                          <PriceCard
-                            label="Max price / unit"
-                            value={ConvertToSTRK(
-                              Number(
-                                cairo.felt(
-                                  tx?.resource_bounds?.l2_gas
-                                    ?.max_price_per_unit ?? 0,
-                                ),
-                              ),
-                            )}
-                            unit="strk"
-                            onClick={() =>
-                              onCopyValue(
-                                tx?.resource_bounds?.l2_gas
-                                  ?.max_price_per_unit ?? "0",
-                              )
-                            }
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-[8px]">
-                        <CardLabel>L1 data gas</CardLabel>
-
-                        <div className="flex items-center gap-px">
-                          <PriceCard
-                            label="Max amount"
-                            value={Number(
-                              cairo.felt(
-                                tx?.resource_bounds?.l1_data_gas?.max_amount ??
-                                  0,
-                              ),
-                            )}
-                            unit="strk"
-                            onClick={() =>
-                              onCopyValue(
-                                tx?.resource_bounds?.l1_data_gas?.max_amount ??
-                                  "0",
-                              )
-                            }
-                          />
-                          <PriceCard
-                            label="Max price / unit"
-                            value={ConvertToSTRK(
-                              Number(
-                                cairo.felt(
-                                  tx?.resource_bounds?.l1_data_gas
-                                    ?.max_price_per_unit ?? 0,
-                                ),
-                              ),
-                            )}
-                            unit="strk"
-                            onClick={() =>
-                              onCopyValue(
-                                tx?.resource_bounds?.l1_data_gas
-                                  ?.max_price_per_unit ?? "0",
-                              )
-                            }
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </>
-                )}
-
-                {!!(
-                  tx?.fee_data_availability_mode ??
-                  tx?.nonce_data_availability_mode
-                ) && (
-                  <>
-                    <Separator />
-                    <CardContent>
-                      <div className="space-y-[13px]">
+                  {Number(tx?.version) === 3 && (
+                    <>
+                      <Separator />
+                      <CardContent className="gap-[15px]">
                         <CardHeader className="px-0 gap-[12px] text-foreground-100">
-                          <ServerIcon />
+                          <GasIcon />
                           <CardTitle className="text-[12px] font-semibold p-0">
-                            Data Availability Mode
+                            Resource Bounds
                           </CardTitle>
                         </CardHeader>
 
                         <div className="space-y-[8px]">
-                          <div className="flex justify-between gap-2">
-                            <CardLabel>Nonce</CardLabel>
-                            <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                              {tx.nonce_data_availability_mode}
-                            </p>
-                          </div>
-                          <div className="flex justify-between gap-2">
-                            <CardLabel>Fee</CardLabel>
-                            <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-                              {tx.fee_data_availability_mode}
-                            </p>
+                          <CardLabel>L1 execution gas</CardLabel>
+
+                          <div className="flex items-center gap-px">
+                            <PriceCard
+                              label="Max amount"
+                              value={Number(
+                                cairo.felt(
+                                  tx?.resource_bounds?.l1_gas?.max_amount ?? 0,
+                                ),
+                              )}
+                              unit="strk"
+                              onClick={() =>
+                                onCopyValue(
+                                  tx?.resource_bounds?.l1_gas?.max_amount ??
+                                    "0",
+                                )
+                              }
+                            />
+                            <PriceCard
+                              label="Max price / unit"
+                              value={ConvertToSTRK(
+                                Number(
+                                  cairo.felt(
+                                    tx?.resource_bounds?.l1_gas
+                                      ?.max_price_per_unit ?? 0,
+                                  ),
+                                ),
+                              )}
+                              unit="strk"
+                              onClick={() =>
+                                onCopyValue(
+                                  tx?.resource_bounds?.l1_gas
+                                    ?.max_price_per_unit ?? "0",
+                                )
+                              }
+                            />
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </>
-                )}
-              </Card>
+
+                        <div className="space-y-[8px]">
+                          <CardLabel>L2 execution gas</CardLabel>
+
+                          <div className="flex items-center gap-px">
+                            <PriceCard
+                              label="Max amount"
+                              value={Number(
+                                cairo.felt(
+                                  tx?.resource_bounds?.l2_gas?.max_amount ?? 0,
+                                ),
+                              )}
+                              unit="strk"
+                              onClick={() =>
+                                onCopyValue(
+                                  tx?.resource_bounds?.l2_gas?.max_amount ??
+                                    "0",
+                                )
+                              }
+                            />
+                            <PriceCard
+                              label="Max price / unit"
+                              value={ConvertToSTRK(
+                                Number(
+                                  cairo.felt(
+                                    tx?.resource_bounds?.l2_gas
+                                      ?.max_price_per_unit ?? 0,
+                                  ),
+                                ),
+                              )}
+                              unit="strk"
+                              onClick={() =>
+                                onCopyValue(
+                                  tx?.resource_bounds?.l2_gas
+                                    ?.max_price_per_unit ?? "0",
+                                )
+                              }
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-[8px]">
+                          <CardLabel>L1 data gas</CardLabel>
+
+                          <div className="flex items-center gap-px">
+                            <PriceCard
+                              label="Max amount"
+                              value={Number(
+                                cairo.felt(
+                                  tx?.resource_bounds?.l1_data_gas
+                                    ?.max_amount ?? 0,
+                                ),
+                              )}
+                              unit="strk"
+                              onClick={() =>
+                                onCopyValue(
+                                  tx?.resource_bounds?.l1_data_gas
+                                    ?.max_amount ?? "0",
+                                )
+                              }
+                            />
+                            <PriceCard
+                              label="Max price / unit"
+                              value={ConvertToSTRK(
+                                Number(
+                                  cairo.felt(
+                                    tx?.resource_bounds?.l1_data_gas
+                                      ?.max_price_per_unit ?? 0,
+                                  ),
+                                ),
+                              )}
+                              unit="strk"
+                              onClick={() =>
+                                onCopyValue(
+                                  tx?.resource_bounds?.l1_data_gas
+                                    ?.max_price_per_unit ?? "0",
+                                )
+                              }
+                            />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </>
+                  )}
+
+                  {txnHasNonceDataAvailabilityMode(tx) && (
+                    <>
+                      <Separator />
+                      <CardContent>
+                        <div className="space-y-[13px]">
+                          <CardHeader className="px-0 gap-[12px] text-foreground-100">
+                            <ServerIcon />
+                            <CardTitle className="text-[12px] font-semibold p-0">
+                              Data Availability Mode
+                            </CardTitle>
+                          </CardHeader>
+
+                          <div className="space-y-[8px]">
+                            <div className="flex justify-between gap-2">
+                              <CardLabel>Nonce</CardLabel>
+                              <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+                                {tx.nonce_data_availability_mode}
+                              </p>
+                            </div>
+                            <div className="flex justify-between gap-2">
+                              <CardLabel>Fee</CardLabel>
+                              <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+                                {tx.fee_data_availability_mode}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </>
+                  )}
+                </Card>
+              )}
             </div>
 
             <Card className="p-0 h-full overflow-x-scroll sl:min-w-[794px] rounded-sm rounded-b-[12px] sl:rounded-bl-sm rounded-br-[12px]">

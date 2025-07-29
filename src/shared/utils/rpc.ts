@@ -1,7 +1,7 @@
 import { cairo, shortString } from "starknet";
 import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
-import { TStarknetGetTransactionResponse } from "@/types/types";
+import { TStarknetTransactionTypesMerged } from "@/types/types";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
@@ -20,7 +20,7 @@ export interface DecodedCallData {
 
 // Function to decode Starknet calldata
 export function decodeCalldata(
-  tx: TStarknetGetTransactionResponse,
+  tx: TStarknetTransactionTypesMerged,
 ): DecodedCallData[] | undefined {
   if (tx.version === "0x0" || !("calldata" in tx) || !tx.calldata) {
     return;

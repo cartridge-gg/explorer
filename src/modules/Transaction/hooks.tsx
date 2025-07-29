@@ -28,7 +28,7 @@ import {
 import { useBlock } from "@starknet-react/core";
 import { isValidAddress } from "@/shared/utils/contract";
 import type { EVENT } from "@starknet-io/starknet-types-08";
-import { TStarknetGetTransactionResponse } from "@/types/types";
+import { TStarknetTransactionTypesMerged } from "@/types/txn";
 
 interface EventData extends EVENT {
   id: string;
@@ -62,7 +62,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     isLoading,
     error,
   } = useQuery<{
-    tx?: Awaited<TStarknetGetTransactionResponse>;
+    tx?: Awaited<TStarknetTransactionTypesMerged>;
     declared?: Awaited<ReturnType<typeof RPC_PROVIDER.getClassByHash>>;
     calldata?: { contract: string; selector: string; args: string[] }[];
   }>({
@@ -78,7 +78,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
           ? await RPC_PROVIDER.getClassByHash(tx.class_hash)
           : undefined;
 
-      const _tx = tx as TStarknetGetTransactionResponse;
+      const _tx = tx as TStarknetTransactionTypesMerged;
       return {
         tx: _tx,
         declared,
