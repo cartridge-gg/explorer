@@ -28,29 +28,7 @@ import {
 import { useBlock } from "@starknet-react/core";
 import { isValidAddress } from "@/shared/utils/contract";
 import type { EVENT } from "@starknet-io/starknet-types-08";
-import { MergeMultiple } from "@/types/helpers";
-import type {
-  // L1 Handler
-  L1_HANDLER_TXN,
-
-  // Deploy
-  DEPLOY_TXN,
-
-  // Deploy Account
-  DEPLOY_ACCOUNT_TXN_V1,
-  DEPLOY_ACCOUNT_TXN_V3,
-
-  // Invoke
-  INVOKE_TXN_V0,
-  INVOKE_TXN_V1,
-  INVOKE_TXN_V3,
-
-  // Declare
-  DECLARE_TXN_V0,
-  DECLARE_TXN_V2,
-  DECLARE_TXN_V3,
-  DECLARE_TXN_V1,
-} from "@starknet-io/starknet-types-08";
+import { TStarknetGetTransactionResponse } from "@/types/types";
 
 interface EventData extends EVENT {
   id: string;
@@ -84,7 +62,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     isLoading,
     error,
   } = useQuery<{
-    tx?: Awaited<ReturnType<typeof RPC_PROVIDER.getTransaction>>;
+    tx?: Awaited<TStarknetGetTransactionResponse>;
     declared?: Awaited<ReturnType<typeof RPC_PROVIDER.getClassByHash>>;
     calldata?: { contract: string; selector: string; args: string[] }[];
   }>({
@@ -99,8 +77,10 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
         tx.type === "DECLARE"
           ? await RPC_PROVIDER.getClassByHash(tx.class_hash)
           : undefined;
+
+      const _tx = tx as TStarknetGetTransactionResponse;
       return {
-        tx,
+        tx: _tx,
         declared,
       };
     },
@@ -438,28 +418,11 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     },
   });
 
-  // merge possible types so we can access all props
-  const _tx = tx as MergeMultiple<
-    [
-      INVOKE_TXN_V0,
-      INVOKE_TXN_V1,
-      INVOKE_TXN_V3,
-      L1_HANDLER_TXN,
-      DECLARE_TXN_V0,
-      DECLARE_TXN_V1,
-      DECLARE_TXN_V2,
-      DECLARE_TXN_V3,
-      DEPLOY_TXN,
-      DEPLOY_ACCOUNT_TXN_V1,
-      DEPLOY_ACCOUNT_TXN_V3,
-    ]
-  >;
-
   return {
     isLoading,
     error,
     data: {
-      tx: _tx,
+      tx,
       declared,
       receipt,
       calldata,
