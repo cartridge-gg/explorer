@@ -205,7 +205,7 @@ export function Transaction() {
                       <CopyableInteger
                         title="Transaction Hash"
                         length={1}
-                        value={receipt?.transaction_hash}
+                        value={receipt.transaction_hash}
                       />
                     </div>
                   </div>
