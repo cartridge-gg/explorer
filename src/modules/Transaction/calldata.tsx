@@ -83,7 +83,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
       </div>
       <TabsContent
         value="decoded"
-        className="flex-1 space-y-px overflow-hidden"
+        className="flex-1 space-y-px overflow-hidden mt-0 data-[state=inactive]:hidden"
       >
         {!tx ? (
           <>
@@ -232,7 +232,10 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
         )}
       </TabsContent>
 
-      <TabsContent value="raw" className="flex-1 mt-0">
+      <TabsContent
+        value="raw"
+        className="flex-1 mt-0 data-[state=inactive]:hidden"
+      >
         <FeltDisplayer
           height={isMobile ? "500px" : "100%"}
           value={tx.calldata}
