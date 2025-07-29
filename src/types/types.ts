@@ -1,3 +1,27 @@
+import { MergeMultiple } from "@/types/helpers";
+import type {
+  // L1 Handler
+  L1_HANDLER_TXN,
+
+  // Deploy
+  DEPLOY_TXN,
+
+  // Deploy Account
+  DEPLOY_ACCOUNT_TXN_V1,
+  DEPLOY_ACCOUNT_TXN_V3,
+
+  // Invoke
+  INVOKE_TXN_V0,
+  INVOKE_TXN_V1,
+  INVOKE_TXN_V3,
+
+  // Declare
+  DECLARE_TXN_V0,
+  DECLARE_TXN_V2,
+  DECLARE_TXN_V3,
+  DECLARE_TXN_V1,
+} from "@starknet-io/starknet-types-08";
+
 // Function and API Types
 export interface FunctionResult<T = unknown> {
   loading: boolean;
@@ -121,3 +145,19 @@ export type ExecutionResourcesKeyMap = typeof EXECUTION_RESOURCES_KEY_MAP;
 
 export type StarknetChainId = "SN_MAIN" | "SN_SEPOLIA";
 export type ChainId = StarknetChainId | string;
+
+export type TStarknetGetTransactionResponse = MergeMultiple<
+  [
+    INVOKE_TXN_V0,
+    INVOKE_TXN_V1,
+    INVOKE_TXN_V3,
+    L1_HANDLER_TXN,
+    DECLARE_TXN_V0,
+    DECLARE_TXN_V1,
+    DECLARE_TXN_V2,
+    DECLARE_TXN_V3,
+    DEPLOY_TXN,
+    DEPLOY_ACCOUNT_TXN_V1,
+    DEPLOY_ACCOUNT_TXN_V3,
+  ]
+>;

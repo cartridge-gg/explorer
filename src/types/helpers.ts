@@ -59,24 +59,26 @@ export type Merge<T1, T2> = Simplify<
 /**
  * Merges multiple types into a single type
  * Usage: MergeMultiple<[Type1, Type2, Type3, ...]>
- * 
+ *
  * Example:
  * type a = { w: bigint[]; x: bigint; y: string };
  * type b = { w: number[]; x: number; z: string };
  * type c = { x: boolean; w: string[] };
  * type result = MergeMultiple<[a, b, c]>;
  * // Result: { w: (bigint | number | string)[]; x: bigint | number | boolean; y?: string; z?: string; }
- * 
+ *
  * For the Transaction page usage:
  * type TransactionUnion = MergeMultiple<[INVOKE_TXN, L1_HANDLER_TXN, DECLARE_TXN, DEPLOY_TXN, DEPLOY_ACCOUNT_TXN]>;
  * // This creates a union type that includes all properties from all transaction types
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type MergeMultiple<T extends readonly any[]> = T extends readonly [
   infer First,
-  ...infer Rest
+  ...infer Rest,
 ]
-  ? Rest extends readonly any[]
-    ? Rest['length'] extends 0
+  ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Rest extends readonly any[]
+    ? Rest["length"] extends 0
       ? First
       : Merge<First, MergeMultiple<Rest>>
     : First
