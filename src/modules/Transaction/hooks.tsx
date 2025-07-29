@@ -105,14 +105,17 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
       );
 
       if (isReceiptError(receiptResult)) {
-        throw receiptResult;
+        console.error("receipt result error: ", receiptResult);
+        throw new Error("Transaction receipt error");
       }
 
       const receipt = receiptResult.value as
         | SuccessfulTransactionReceiptResponse
         | RevertedTransactionReceiptResponse;
 
-      const { executions, blockComputeData } = parseExecutionResources(
+      console.log("receipt from hooks early: ", receipt);
+
+      const { blockComputeData } = parseExecutionResources(
         receipt.execution_resources,
       );
 
@@ -180,15 +183,16 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
                   ) ?? "")
                 : "";
 
+              console.log("return here 1");
+
               return {
                 originalIndex,
                 eventData: {
                   id: `${receipt.transaction_hash}-${originalIndex}`,
                   from_address: address,
-                  event_name: getEventName(eventKey),
+                  event_name: getEventName(eventKey)[0],
                   block: receipt.block_number,
                   data: Object.keys(matchingParsedEvent),
-                  // data: eventKey,
                   keys: eventEntries[originalIndex].event.keys,
                 } satisfies EventData,
               };
@@ -196,11 +200,16 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
           },
         ),
       );
+      console.log("return here 2");
 
       const events = eventsWithIndices
         .flat()
         .sort((a, b) => b.originalIndex - a.originalIndex)
         .map(({ eventData }) => eventData);
+
+      console.log("receipt from hooks end: ", receipt);
+      console.log("events from hooks end: ", events);
+      console.log("blockComputeData from hooks end: ", blockComputeData);
 
       return {
         receipt,

@@ -1,7 +1,6 @@
 import { cairo, shortString } from "starknet";
 import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
-import * as RPC08 from "@starknet-io/starknet-types-08";
 import { TStarknetGetTransactionResponse } from "@/types/types";
 
 // paginated response for latest block_numbers
