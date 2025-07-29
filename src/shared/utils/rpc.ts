@@ -1,7 +1,7 @@
-import { cairo, GetTransactionResponse, shortString } from "starknet";
+import { cairo, shortString } from "starknet";
 import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
-import * as RPC08 from "@starknet-io/types-js";
+import { TStarknetGetTransactionResponse } from "@/types/types";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
@@ -20,23 +20,29 @@ export interface DecodedCallData {
 
 // Function to decode Starknet calldata
 export function decodeCalldata(
-  tx: GetTransactionResponse,
+  tx: TStarknetGetTransactionResponse,
 ): DecodedCallData[] | undefined {
   if (tx.version === "0x0" || !("calldata" in tx) || !tx.calldata) {
     return;
   }
 
-  const numTxns = Number(cairo.felt(tx.calldata[0])); // Number of transactions in batch
+  const calldata = tx.calldata ?? [];
+
+  if (calldata.length === 0) {
+    return [];
+  }
+
+  const numTxns = Number(cairo.felt(calldata[0])); // Number of transactions in batch
   const transactions: DecodedCallData[] = [];
   let index = 1; // Start after batch size
 
   for (let i = 0; i < numTxns; i++) {
-    const contract = tx.calldata[index]; // Contract address
-    const sender = tx.calldata[index + 1]; // Sender address
-    const numArgs = Number(cairo.felt(tx.calldata[index + 2])); // Number of arguments
+    const contract = calldata[index]; // Contract address
+    const sender = calldata[index + 1]; // Sender address
+    const numArgs = Number(cairo.felt(calldata[index + 2])); // Number of arguments
 
     // Extract arguments dynamically
-    const args = tx.calldata.slice(index + 3, index + 3 + numArgs);
+    const args = calldata.slice(index + 3, index + 3 + numArgs);
 
     transactions.push({
       contract: contract,
@@ -100,7 +106,9 @@ export const convertObjectValuesToDisplayValues = (
 };
 
 export function parseExecutionResources(
-  execution_resources: RPC08.EXECUTION_RESOURCES,
+  execution_resources:
+    | RPCSPEC08.API.EXECUTION_RESOURCES
+    | RPCSPEC07.API.SPEC.EXECUTION_RESOURCES,
 ) {
   return Object.entries(execution_resources).reduce(
     (acc, [key, value]) => {
@@ -116,6 +124,25 @@ export function parseExecutionResources(
         case "l1_data_gas": {
           acc.blockComputeData.l1_data_gas += Number(value);
           break;
+        }
+        case "data_availability": {
+          if (typeof value === "number") {
+            break;
+          }
+
+          // Handle legacy format for backward compatibility
+          acc.blockComputeData.l1_gas += value.l1_gas;
+          acc.blockComputeData.l1_data_gas += value.l1_data_gas;
+          break;
+        }
+        default: {
+          const _key = key as keyof typeof EXECUTION_RESOURCES_KEY_MAP;
+          const keyMap = EXECUTION_RESOURCES_KEY_MAP[
+            _key
+          ] as keyof typeof acc.executions;
+          if (!keyMap) return acc;
+
+          acc.executions[keyMap] += Number(value) || 0;
         }
       }
 
