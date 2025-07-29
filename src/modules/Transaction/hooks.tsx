@@ -265,7 +265,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
         header() {
           return (
             <div className="text-left border-0">
-              <span>From Address</span>
+              <span>From</span>
             </div>
           );
         },
