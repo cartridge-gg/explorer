@@ -343,11 +343,6 @@ export function Contract() {
     [classHash],
   );
 
-  const onCopyValue = useCallback((value: string) => {
-    navigator.clipboard.writeText(value);
-    toast.success("Value copied to clipboard");
-  }, []);
-
   return (
     <div className="w-full flex flex-col gap-[3px] sl:w-[1134px]">
       <Breadcrumb>
@@ -439,6 +434,7 @@ export function Contract() {
               <CardContent className="flex flex-row gap-[1px] p-0">
                 <ResourceCard
                   className="p-[12px] h-[64px] min-w-[150px] md:w-[150px] w-full"
+                  isLoading={isStrkLoading}
                   label="Starknet Token"
                   value={
                     balances.strk !== undefined
@@ -448,6 +444,7 @@ export function Contract() {
                 />
                 <ResourceCard
                   className="p-[12px] h-[64px] min-w-[150px] md:w-[150px] w-full"
+                  isLoading={isEthLoading}
                   label="Ether"
                   value={
                     balances.eth !== undefined
@@ -692,38 +689,3 @@ export function Contract() {
     </div>
   );
 }
-
-const PriceCard = ({
-  label,
-  value,
-  unit,
-  className,
-  onClick,
-}: {
-  label: string;
-  value: string | number;
-  unit: string;
-  className?: string;
-  onClick?: () => void;
-}) => {
-  return (
-    <button
-      type="button"
-      className={cn(
-        "bg-background-200 hover:bg-background-300 p-[12px] flex-1 flex flex-col items-start w-full gap-1",
-        className,
-      )}
-      onClick={onClick}
-    >
-      <CardLabel>{label}</CardLabel>
-      <div className="flex items-center justify-between w-full">
-        <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
-          {Number(value) === 0 ? "-" : value}
-        </p>
-        <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
-          {unit}
-        </Badge>
-      </div>
-    </button>
-  );
-};
