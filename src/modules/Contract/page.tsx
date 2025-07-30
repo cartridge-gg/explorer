@@ -31,6 +31,7 @@ import {
   CardLabel,
   CardSeparator,
   CardTitle,
+  ResourceCard,
 } from "@/shared/components/card";
 import {
   Tabs,
@@ -342,6 +343,11 @@ export function Contract() {
     [classHash],
   );
 
+  const onCopyValue = useCallback((value: string) => {
+    navigator.clipboard.writeText(value);
+    toast.success("Value copied to clipboard");
+  }, []);
+
   return (
     <div className="w-full flex flex-col gap-[3px] sl:w-[1134px]">
       <Breadcrumb>
@@ -382,7 +388,7 @@ export function Contract() {
           <div className="flex flex-col gap-[3px]">
             {/* Address Card */}
             <Card className="p-0 rounded-sm">
-              <CardContent className="flex flex-col md:flex-row p-0 gap-0 divide-y md:divide-x divide-background-200 ">
+              <CardContent className="flex flex-col md:flex-row p-0 gap-0 divide-y md:divide-x md:divide-y-0 divide-background-200 ">
                 <div className="flex-1 flex flex-col md:flex-row items-start md:items-center gap-[8px] md:gap-[40px] p-[15px]">
                   <div className="flex flex-row items-center md:items-start justify-between md:flex-col gap-[6px] w-full">
                     <CardLabel className="text-[12px]/[16px] tracking-[0.24px]">
@@ -431,34 +437,24 @@ export function Contract() {
               </CardHeader>
 
               <CardContent className="flex flex-row gap-[1px] p-0">
-                <div className="bg-background-200 hover:bg-background-300 flex flex-col justify-between p-[12px] h-[64px] min-w-[150px] md:w-[150px] w-full">
-                  <CardLabel className="text-[12px]/[16px] tracking-[0.24px]">
-                    Starknet Token
-                  </CardLabel>
-                  <p className="text-[13px]/[16px] tracking-[0.26px] font-mono text-foreground-100">
-                    {isStrkLoading
-                      ? "0.00"
-                      : balances.strk !== undefined
-                        ? (Number(balances.strk) / 10 ** 18)
-                            .toPrecision(6)
-                            .toString()
-                        : "-"}
-                  </p>
-                </div>
-                <div className="bg-background-200 hover:bg-background-300 flex flex-col justify-between p-[12px] h-[64px] min-w-[150px] md:w-[150px] w-full">
-                  <CardLabel className="text-[12px]/[16px] tracking-[0.24px]">
-                    Ether
-                  </CardLabel>
-                  <p className="text-[13px]/[16px] tracking-[0.26px] font-mono text-foreground-100">
-                    {isEthLoading
-                      ? "0.00"
-                      : balances.eth !== undefined
-                        ? (Number(balances.eth) / 10 ** 18)
-                            .toPrecision(6)
-                            .toString()
-                        : "-"}
-                  </p>
-                </div>
+                <ResourceCard
+                  className="p-[12px] h-[64px] min-w-[150px] md:w-[150px] w-full"
+                  label="Starknet Token"
+                  value={
+                    balances.strk !== undefined
+                      ? (Number(balances.strk) / 10 ** 18).toPrecision(6)
+                      : "-"
+                  }
+                />
+                <ResourceCard
+                  className="p-[12px] h-[64px] min-w-[150px] md:w-[150px] w-full"
+                  label="Ether"
+                  value={
+                    balances.eth !== undefined
+                      ? (Number(balances.eth) / 10 ** 18).toPrecision(6)
+                      : "-"
+                  }
+                />
               </CardContent>
             </Card>
           </div>
@@ -696,3 +692,38 @@ export function Contract() {
     </div>
   );
 }
+
+const PriceCard = ({
+  label,
+  value,
+  unit,
+  className,
+  onClick,
+}: {
+  label: string;
+  value: string | number;
+  unit: string;
+  className?: string;
+  onClick?: () => void;
+}) => {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "bg-background-200 hover:bg-background-300 p-[12px] flex-1 flex flex-col items-start w-full gap-1",
+        className,
+      )}
+      onClick={onClick}
+    >
+      <CardLabel>{label}</CardLabel>
+      <div className="flex items-center justify-between w-full">
+        <p className="text-[13px] font-mono font-medium text-foreground-200 max-w-xs break-all">
+          {Number(value) === 0 ? "-" : value}
+        </p>
+        <Badge className="uppercase bg-background-500 text-[10px]/[12px] font-medium px-[5px] py-[3px] pointer-events-none">
+          {unit}
+        </Badge>
+      </div>
+    </button>
+  );
+};
