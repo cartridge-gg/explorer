@@ -91,10 +91,6 @@ export function Contract() {
   const { isMobile } = useScreen();
   const tab = useHashLinkTabs("interact");
 
-  useEffect(() => {
-    tab.onChange(tab.selected);
-  }, [tab]);
-
   const {
     data: { classHash, contract, readFuncs, writeFuncs, nonce },
     isLoading,
@@ -136,6 +132,12 @@ export function Contract() {
   const { balances, isStrkLoading, isEthLoading } = useBalances(
     contractAddress ?? "",
   );
+
+  useEffect(() => {
+    if (classHash || contract) {
+      tab.onChange(tab.selected);
+    }
+  }, [tab, classHash, contract]);
 
   const [search, setSearch] = useState("");
   const [functionTypeFilter, setFunctionTypeFilter] = useState<string[]>([]);
