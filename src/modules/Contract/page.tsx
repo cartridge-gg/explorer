@@ -91,6 +91,10 @@ export function Contract() {
   const { isMobile } = useScreen();
   const tab = useHashLinkTabs("interact");
 
+  useEffect(() => {
+    tab.onChange(tab.selected);
+  }, [tab]);
+
   const {
     data: { classHash, contract, readFuncs, writeFuncs, nonce },
     isLoading,
