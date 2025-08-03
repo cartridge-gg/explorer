@@ -2,7 +2,7 @@ import React, { memo, useCallback } from "react";
 import { cn, Skeleton } from "@cartridge/ui";
 import { abbreviateNumber } from "../utils/number";
 import { toast } from "sonner";
-import * as RPC08 from "@starknet-io/types-js";
+import * as RPC08 from "@starknet-io/starknet-types-08";
 
 export const Card = React.forwardRef<
   HTMLDivElement,
@@ -171,7 +171,7 @@ const FireIcon = memo(({ className }: { className?: string }) => {
   );
 });
 
-const ResourceCard = ({
+export const ResourceCard = ({
   className,
   label,
   value,
@@ -179,7 +179,7 @@ const ResourceCard = ({
 }: {
   className?: string;
   label: string;
-  value?: number;
+  value?: number | string;
   isLoading?: boolean;
 }) => {
   const onCopyValue = useCallback(() => {
@@ -199,7 +199,7 @@ const ResourceCard = ({
       <CardLabel>{label}</CardLabel>
       {!isLoading ? (
         <p className="font-mono text-foreground font-semibold">
-          {abbreviateNumber(value || 0, 3)}
+          {typeof value === "number" ? abbreviateNumber(value || 0, 3) : value}
         </p>
       ) : (
         <Skeleton className="h-6 w-full" />

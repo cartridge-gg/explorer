@@ -31,6 +31,7 @@ import {
   CardLabel,
   CardSeparator,
   CardTitle,
+  ResourceCard,
 } from "@/shared/components/card";
 import {
   Tabs,
@@ -131,6 +132,11 @@ export function Contract() {
   const { balances, isStrkLoading, isEthLoading } = useBalances(
     contractAddress ?? "",
   );
+
+  // defaults to "interact" as other tabs are not yet implemented
+  useEffect(() => {
+    tab.onChange("interact");
+  }, [tab]);
 
   const [search, setSearch] = useState("");
   const [functionTypeFilter, setFunctionTypeFilter] = useState<string[]>([]);
@@ -382,7 +388,7 @@ export function Contract() {
           <div className="flex flex-col gap-[3px]">
             {/* Address Card */}
             <Card className="p-0 rounded-sm">
-              <CardContent className="flex flex-col md:flex-row p-0 gap-0 divide-y md:divide-x divide-background-200 ">
+              <CardContent className="flex flex-col md:flex-row p-0 gap-0 divide-y md:divide-x md:divide-y-0 divide-background-200 ">
                 <div className="flex-1 flex flex-col md:flex-row items-start md:items-center gap-[8px] md:gap-[40px] p-[15px]">
                   <div className="flex flex-row items-center md:items-start justify-between md:flex-col gap-[6px] w-full">
                     <CardLabel className="text-[12px]/[16px] tracking-[0.24px]">
@@ -431,34 +437,26 @@ export function Contract() {
               </CardHeader>
 
               <CardContent className="flex flex-row gap-[1px] p-0">
-                <div className="bg-background-200 hover:bg-background-300 flex flex-col justify-between p-[12px] h-[64px] min-w-[150px] md:w-[150px] w-full">
-                  <CardLabel className="text-[12px]/[16px] tracking-[0.24px]">
-                    Starknet Token
-                  </CardLabel>
-                  <p className="text-[13px]/[16px] tracking-[0.26px] font-mono text-foreground-100">
-                    {isStrkLoading
-                      ? "0.00"
-                      : balances.strk !== undefined
-                        ? (Number(balances.strk) / 10 ** 18)
-                            .toPrecision(6)
-                            .toString()
-                        : "-"}
-                  </p>
-                </div>
-                <div className="bg-background-200 hover:bg-background-300 flex flex-col justify-between p-[12px] h-[64px] min-w-[150px] md:w-[150px] w-full">
-                  <CardLabel className="text-[12px]/[16px] tracking-[0.24px]">
-                    Ether
-                  </CardLabel>
-                  <p className="text-[13px]/[16px] tracking-[0.26px] font-mono text-foreground-100">
-                    {isEthLoading
-                      ? "0.00"
-                      : balances.eth !== undefined
-                        ? (Number(balances.eth) / 10 ** 18)
-                            .toPrecision(6)
-                            .toString()
-                        : "-"}
-                  </p>
-                </div>
+                <ResourceCard
+                  className="p-[12px] h-[64px] min-w-[150px] md:w-[150px] w-full"
+                  isLoading={isStrkLoading}
+                  label="Starknet Token"
+                  value={
+                    balances.strk !== undefined
+                      ? (Number(balances.strk) / 10 ** 18).toPrecision(6)
+                      : "-"
+                  }
+                />
+                <ResourceCard
+                  className="p-[12px] h-[64px] min-w-[150px] md:w-[150px] w-full"
+                  isLoading={isEthLoading}
+                  label="Ether"
+                  value={
+                    balances.eth !== undefined
+                      ? (Number(balances.eth) / 10 ** 18).toPrecision(6)
+                      : "-"
+                  }
+                />
               </CardContent>
             </Card>
           </div>

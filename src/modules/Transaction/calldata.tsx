@@ -16,12 +16,12 @@ import {
 } from "@/shared/components/dialog";
 import { Badge } from "@/shared/components/badge";
 import { useCalldata } from "./hooks";
-import { GetTransactionResponse } from "starknet";
 import { decodeCalldata } from "@/shared/utils/rpc";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { CopyableText } from "@/shared/components/copyable-text";
 import { Selector } from "@/shared/components/Selector";
 import { Felt } from "@starknet-io/types-js";
+import { TStarknetGetTransactionResponse } from "@/types/types";
 
 // Helper to check if array is a felt252 array (all elements are hex or decimal strings)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,7 +67,7 @@ function getDisplayInfo(value: unknown): DisplayInfo {
   };
 }
 
-export function Calldata({ tx }: { tx: GetTransactionResponse }) {
+export function Calldata({ tx }: { tx: TStarknetGetTransactionResponse }) {
   const { data: decoded } = useCalldata(decodeCalldata(tx));
   const { isMobile } = useScreen();
 
@@ -83,7 +83,7 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
       </div>
       <TabsContent
         value="decoded"
-        className="flex-1 space-y-px overflow-hidden"
+        className="flex-1 space-y-px overflow-hidden mt-0 data-[state=inactive]:hidden"
       >
         {!tx ? (
           <>
@@ -232,7 +232,10 @@ export function Calldata({ tx }: { tx: GetTransactionResponse }) {
         )}
       </TabsContent>
 
-      <TabsContent value="raw" className="flex-1 mt-0">
+      <TabsContent
+        value="raw"
+        className="flex-1 mt-0 data-[state=inactive]:hidden"
+      >
         <FeltDisplayer
           height={isMobile ? "500px" : "100%"}
           value={tx.calldata}

@@ -205,7 +205,7 @@ export function Transaction() {
                       <CopyableInteger
                         title="Transaction Hash"
                         length={1}
-                        value={receipt?.transaction_hash}
+                        value={receipt.transaction_hash}
                       />
                     </div>
                   </div>
@@ -563,7 +563,7 @@ export function Transaction() {
                           </div>
                           <UITabsContent
                             value="hex"
-                            className="flex-1 data-[state=inactive]:hidden relative"
+                            className="mt-0 flex-1 data-[state=inactive]:hidden relative"
                           >
                             <FeltDisplayer
                               height={isMobile ? "500px" : "100%"}
@@ -577,7 +577,7 @@ export function Transaction() {
                           </UITabsContent>
                           <UITabsContent
                             value="dec"
-                            className="flex-1 data-[state=inactive]:hidden relative"
+                            className="mt-0 flex-1 data-[state=inactive]:hidden relative"
                           >
                             {tx ? (
                               <FeltDisplayer
