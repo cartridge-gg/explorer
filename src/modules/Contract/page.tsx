@@ -133,6 +133,11 @@ export function Contract() {
     contractAddress ?? "",
   );
 
+  // defaults to "interact" as other tabs are not yet implemented
+  useEffect(() => {
+    tab.onChange("interact");
+  }, [tab]);
+
   const [search, setSearch] = useState("");
   const [functionTypeFilter, setFunctionTypeFilter] = useState<string[]>([]);
   const [form, setForm] = useState<{
