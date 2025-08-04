@@ -71,7 +71,7 @@ export function ParamForm({
                     side="right"
                     className="bg-[#F3F3F3] p-[8px] max-w-[300px]"
                   >
-                    <div>{p.description ?? p.summary}</div>
+                    <h2>{p.description ?? p.summary}</h2>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -259,6 +259,8 @@ export function JsonSchemaForm({
           <SelectContent>
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {schema.oneOf.map((option: any, idx: number) => (
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
               <SelectItem key={idx} value={idx}>
                 {option.title || `Option ${idx + 1}`}
               </SelectItem>

@@ -166,6 +166,7 @@ export function JsonRpcPlayground() {
             <CardLabel className="text-[12px]/[16px] font-semibold tracking-[0.24px] text-foreground-400">
               {formatSnakeCaseToDisplayValue(param.name)}
             </CardLabel>
+            <h2 className="text-[12px]">{param.description}</h2>
             <JsonSchemaForm
               schema={param.schema}
               value={
