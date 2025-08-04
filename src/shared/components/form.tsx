@@ -335,10 +335,38 @@ export function JsonSchemaForm({
       </div>
     );
   }
+
+  // Handle enum
+  if (schema.type === "array" && schema.items && schema.items.enum) {
+    const currentValue = Array.isArray(value) ? value[0] || "" : value || "";
+    const displayValue = currentValue === "" ? "NONE" : currentValue;
+
+    return (
+      <Select
+        value={displayValue}
+        onValueChange={(v) => onChange(v === "NONE" ? [] : [v])}
+        disabled={disabled}
+      >
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select enum value" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="NONE">Empty</SelectItem>
+          {schema.items.enum.map((enumValue: string) => (
+            <SelectItem key={enumValue} value={enumValue}>
+              {enumValue}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    );
+  }
+
   // Handle array
-  if (schema.type === "array" && schema.items) {
+  if (schema.type === "array" && schema.items && !schema.enum) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const arr: any[] = Array.isArray(value) ? value : [];
+
     return (
       <div className="flex flex-col gap-[8px] p-[8px] rounded bg-background-100">
         {arr.map((item, idx) => (
@@ -389,6 +417,31 @@ export function JsonSchemaForm({
     schema.type === "integer" ||
     schema.type === "boolean"
   ) {
+    // Handle enum values in primitive types
+    if (schema.enum) {
+      const displayValue = value === "" ? "NONE" : value || "";
+
+      return (
+        <Select
+          value={displayValue}
+          onValueChange={(v) => onChange(v === "NONE" ? "" : v)}
+          disabled={disabled}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select enum value" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="NONE">Empty</SelectItem>
+            {schema.enum.map((enumValue: string) => (
+              <SelectItem key={enumValue} value={enumValue}>
+                {enumValue}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
+
     return (
       <Input
         type={
