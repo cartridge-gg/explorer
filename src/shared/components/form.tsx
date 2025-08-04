@@ -321,7 +321,6 @@ export function JsonSchemaForm({
               {
                 <label className="text-xs font-semibold">
                   {formatSnakeCaseToDisplayValue(key)}
-                  {schema.required?.includes(key) ? " *" : null}
                 </label>
               }
               <JsonSchemaForm
