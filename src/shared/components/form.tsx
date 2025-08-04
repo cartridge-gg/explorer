@@ -11,9 +11,10 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
+  Button,
 } from "@cartridge/ui";
 import { Monaco } from "@monaco-editor/react";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, PlusIcon } from "@cartridge/ui";
 import { editor } from "monaco-editor";
 import { useCallback } from "react";
 import { JsonSchema } from "json-schema-library";
@@ -64,7 +65,7 @@ export function ParamForm({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <InfoIcon className="size-3" />
+                    <InfoIcon />
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
@@ -353,28 +354,31 @@ export function JsonSchemaForm({
               disabled={disabled}
               path={[...path, String(idx)]}
             />
-            <button
+            <Button
               type="button"
+              variant="destructive"
               onClick={() => {
                 const newArr = arr.slice();
                 newArr.splice(idx, 1);
                 onChange(newArr);
               }}
               disabled={disabled}
-              className="text-xs text-red-500"
+              className="text-xs"
             >
               Remove
-            </button>
+            </Button>
           </div>
         ))}
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={() => onChange([...arr, ""])}
           disabled={disabled}
-          className="text-xs text-blue-500 self-start"
+          className="text-xs self-start flex items-center gap-[5px] border-background-300"
         >
-          Add item
-        </button>
+          <PlusIcon variant="solid" className="!w-[12px]" />
+          <span>Add item</span>
+        </Button>
       </div>
     );
   }
