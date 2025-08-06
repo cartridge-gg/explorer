@@ -18,7 +18,7 @@ When working with the `starknet_estimateFee` method, the system detects when a u
 The system uses the following mapping based on the OpenRPC schema order:
 
 | Branch Index | Transaction Type | Version |
-|--------------|------------------|---------|
+| ------------ | ---------------- | ------- |
 | 0            | INVOKE           | 0x3     |
 | 1            | DECLARE          | 0x3     |
 | 2            | DEPLOY_ACCOUNT   | 0x3     |
@@ -66,19 +66,26 @@ const autoPopulateImpliedFields = useCallback(
       // Process array of transactions
       if (Array.isArray(value)) {
         const updatedTransactions = value.map((tx) => {
-          if (tx && typeof tx === "object" && tx.__oneOfSelected__ !== undefined) {
-            const { type, version } = getTransactionTypeAndVersion(tx.__oneOfSelected__);
-            
+          if (
+            tx &&
+            typeof tx === "object" &&
+            tx.__oneOfSelected__ !== undefined
+          ) {
+            const { type, version } = getTransactionTypeAndVersion(
+              tx.__oneOfSelected__,
+            );
+
             // Auto-populate type and version if not already set
             const txValue = { ...tx.__oneOfValue__ };
             if (!txValue.type || txValue.type === "") txValue.type = type;
-            if (!txValue.version || txValue.version === "") txValue.version = version;
-            
+            if (!txValue.version || txValue.version === "")
+              txValue.version = version;
+
             return { ...tx, __oneOfValue__: txValue };
           }
           return tx;
         });
-        
+
         allInputs[0] = updatedTransactions;
       }
     }
