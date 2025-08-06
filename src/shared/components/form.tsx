@@ -339,6 +339,8 @@ export function JsonSchemaForm({
 
   // Handle enum
   if (schema.type === "array" && schema.items && schema.items.enum) {
+    const items = schema.items.enum;
+
     const currentValue = Array.isArray(value) ? value[0] || "" : value || "";
     const displayValue = currentValue === "" ? "NONE" : currentValue;
 
@@ -353,7 +355,7 @@ export function JsonSchemaForm({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="NONE">Empty</SelectItem>
-          {schema.items.enum.map((enumValue: string) => (
+          {items.map((enumValue: string) => (
             <SelectItem key={enumValue} value={enumValue}>
               {enumValue}
             </SelectItem>
@@ -364,7 +366,7 @@ export function JsonSchemaForm({
   }
 
   // Handle array
-  if (schema.type === "array" && schema.items && !schema.enum) {
+  if (schema.type === "array" && schema.items && !schema.items.enum) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const arr: any[] = Array.isArray(value) ? value : [];
 
