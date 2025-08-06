@@ -212,6 +212,7 @@ export function JsonSchemaForm({
   onChange,
   disabled = false,
   path = [],
+  className,
 }: {
   schema: JsonSchema;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -220,6 +221,7 @@ export function JsonSchemaForm({
   onChange: (value: any) => void;
   disabled?: boolean;
   path?: string[];
+  className?: string;
 }) {
   // Remove any reference to oneOfMode or all-fields, always use select for oneOf at any depth
   if (schema.oneOf) {
@@ -241,7 +243,7 @@ export function JsonSchemaForm({
           value={selectedIdx}
           onValueChange={(e) => {
             const idx = Number(e);
-            onChange({
+            const newValue = {
               __oneOfSelected__: idx,
               __oneOfValue__:
                 schema.oneOf[idx]?.type === "object"
@@ -249,7 +251,8 @@ export function JsonSchemaForm({
                   : schema.oneOf[idx]?.type === "array"
                     ? []
                     : "",
-            });
+            };
+            onChange(newValue);
           }}
           disabled={disabled}
         >
@@ -275,6 +278,7 @@ export function JsonSchemaForm({
           }
           disabled={disabled}
           path={path}
+          className={className}
         />
       </div>
     );
@@ -307,6 +311,7 @@ export function JsonSchemaForm({
         onChange={onChange}
         disabled={disabled}
         path={path}
+        className={className}
       />
     );
   }
@@ -316,22 +321,55 @@ export function JsonSchemaForm({
       <div className="flex flex-col gap-[8px] p-[8px] rounded bg-background-100">
         {Object.entries(schema.properties).map(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ([key, propSchema]: [string, any]) => (
-            <div key={key} className="flex flex-col gap-[4px]">
-              {
-                <label className="text-xs font-semibold">
-                  {formatSnakeCaseToDisplayValue(key)}
-                </label>
-              }
-              <JsonSchemaForm
-                schema={propSchema}
-                value={value?.[key] ?? ""}
-                onChange={(v) => onChange({ ...value, [key]: v })}
-                disabled={disabled}
-                path={[...path, key]}
-              />
-            </div>
-          ),
+          ([key, propSchema]: [string, any]) => {
+            const isAutoPopulated =
+              (key === "type" || key === "version") &&
+              value?.[key] &&
+              path.length > 0 &&
+              (path[0] === "request" || path.includes("request"));
+
+            return (
+              <div key={key} className="flex flex-col gap-[4px]">
+                <div className="flex items-center gap-[5px]">
+                  <label className="text-xs font-semibold">
+                    {formatSnakeCaseToDisplayValue(key)}
+                  </label>
+                  {isAutoPopulated && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge className="px-[4px] py-[1px] rounded-sm bg-blue-100 hover:bg-blue-200 cursor-help">
+                            <span className="text-[9px] text-blue-600">
+                              auto
+                            </span>
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          className="bg-[#F3F3F3] p-[8px] max-w-[200px]"
+                        >
+                          <p className="text-[11px]">
+                            This field is automatically populated based on the
+                            transaction type selection.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+                <JsonSchemaForm
+                  schema={propSchema}
+                  value={value?.[key] ?? ""}
+                  onChange={(v) => onChange({ ...value, [key]: v })}
+                  disabled={disabled}
+                  className={
+                    isAutoPopulated ? "opacity-75 bg-blue-50" : className
+                  }
+                  path={[...path, key]}
+                />
+              </div>
+            );
+          },
         )}
       </div>
     );
@@ -384,6 +422,7 @@ export function JsonSchemaForm({
               }}
               disabled={disabled}
               path={[...path, String(idx)]}
+              className={className}
             />
             <Button
               type="button"
@@ -464,7 +503,11 @@ export function JsonSchemaForm({
           onChange(v);
         }}
         disabled={disabled}
-        className="bg-input focus-visible:bg-input border-none caret-foreground font-sans px-[10px] py-[5px] h-[30px] rounded-sm"
+        className={cn(
+          "bg-input focus-visible:bg-input border-none caret-foreground font-sans px-[10px] py-[5px] h-[30px] rounded-sm",
+          disabled && "opacity-60 cursor-not-allowed",
+          className,
+        )}
       />
     );
   }
@@ -475,7 +518,10 @@ export function JsonSchemaForm({
       value={value ?? ""}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
-      className="bg-input focus-visible:bg-input border-none caret-foreground font-sans px-[10px] py-[5px] h-[30px] rounded-sm"
+      className={cn(
+        "bg-input focus-visible:bg-input border-none caret-foreground font-sans px-[10px] py-[5px] h-[30px] rounded-sm",
+        className,
+      )}
     />
   );
 }
