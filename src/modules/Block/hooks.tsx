@@ -57,6 +57,52 @@ export interface TUseBlockProps {
   enabled?: boolean;
 }
 
+export interface TUseBlocksProps {
+  from: number;
+  to: number;
+  chunkSize: number;
+  continuationToken?: string;
+}
+
+export function useBlocks({
+  from,
+  to,
+  chunkSize,
+  continuationToken,
+}: TUseBlocksProps) {
+  return useQuery({
+    queryKey: ["blocks", from, to, chunkSize, continuationToken],
+    queryFn: async () => {
+      const data = await fetch(import.meta.env.VITE_RPC_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
+          method: "starknet_getBlocks",
+          params: [
+            {
+              from: from,
+              to: to,
+              result_page_request: {
+                chunk_size: chunkSize,
+                continuation_token: continuationToken,
+              },
+            },
+          ],
+        }),
+      });
+
+      const blocks = await data.json();
+
+      return blocks;
+    },
+    enabled: !!from && !!to && !!chunkSize,
+  });
+}
+
 export function useBlock({
   pageSize: externalPageSize = 20,
   txnPageSize = externalPageSize,
