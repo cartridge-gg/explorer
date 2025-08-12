@@ -123,4 +123,4 @@ export const RPC_PROVIDER = new Proxy(baseRpcProvider, {
   },
 });
 
-export const katana = new KATANA("http://localhost:5050");
+export const katana = new KATANA(import.meta.env.KATANA_URL);
