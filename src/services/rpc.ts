@@ -1,6 +1,7 @@
 "use client";
 import { RpcProvider } from "starknet";
 import { queryClient } from "./query";
+import { KATANA } from "./katana";
 
 // Moved from constants/rpc.ts
 export const EXECUTION_RESOURCES_KEY_MAP = {
@@ -121,3 +122,5 @@ export const RPC_PROVIDER = new Proxy(baseRpcProvider, {
     };
   },
 });
+
+export const katana = new KATANA("http://localhost:5050");
