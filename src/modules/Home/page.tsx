@@ -24,6 +24,7 @@ export function Home() {
           });
           return res.result.transactions;
         },
+        staleTime: 60 * 1000, // 1 minute
       },
       {
         queryKey: ["home", "blockList"],
@@ -35,6 +36,7 @@ export function Home() {
           });
           return res.result.blocks;
         },
+        staleTime: 60 * 1000, // 1 minute
       },
     ],
   });
