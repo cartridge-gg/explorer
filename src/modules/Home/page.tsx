@@ -4,10 +4,44 @@ import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { Link } from "react-router-dom";
 import { Network, Skeleton } from "@cartridge/ui";
 import useChain from "@/shared/hooks/useChain";
+import { useQueries } from "@tanstack/react-query";
+import { katana } from "@/services/rpc";
+import { useEffect } from "react";
 
 export function Home() {
   const { id: chainId } = useChain();
   const { data: specVersion } = useSpecVersion();
+
+  const data = useQueries({
+    queries: [
+      {
+        queryKey: ["home", "txlist"],
+        queryFn: async () => {
+          const res = await katana.getTransactions({
+            from: 1,
+            to: 10,
+            chunkSize: 10,
+          });
+          return res.result.transactions;
+        },
+      },
+      {
+        queryKey: ["home", "blockList"],
+        queryFn: async () => {
+          const res = await katana.getBlocks({
+            from: 1,
+            to: 10,
+            chunkSize: 10,
+          });
+          return res.result.blocks;
+        },
+      },
+    ],
+  });
+
+  useEffect(() => {
+    console.log("result: ", data);
+  });
 
   return (
     <div className="relative w-full h-full flex flex-col items-center">

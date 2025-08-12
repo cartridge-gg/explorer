@@ -9,7 +9,7 @@ import {
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { RPC_PROVIDER, katana } from "@/services/rpc";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { getPaginatedBlockNumbers } from "@/shared/utils/rpc";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { ListIcon, Card, CardContent } from "@cartridge/ui";
