@@ -123,4 +123,4 @@ export const RPC_PROVIDER = new Proxy(baseRpcProvider, {
   },
 });
 
-export const katana = new KATANA(import.meta.env.KATANA_URL);
+export const katana = new KATANA(import.meta.env.VITE_KATANA_URL);
