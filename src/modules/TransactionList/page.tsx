@@ -19,9 +19,9 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/shared/components/breadcrumb";
-import { DataTable } from "@/shared/components/data-table";
-import { CopyableText } from "@/shared/components/copyable-text";
-import { TTransactionList } from "@/services/katana";
+import { DataTable } from "./data-table";
+import type { TTransactionList } from "@/services/katana";
+import { CopyableInteger } from "@/shared/components/copyable-integer";
 
 const columnHelper = createColumnHelper<TTransactionList>();
 
@@ -33,8 +33,8 @@ export function TransactionList() {
     queryKey: ["transactions"],
     queryFn: async () => {
       const res = await katana.getTransactions({
-        from: 1,
-        to: 100,
+        from: 0,
+        to: 5,
         chunkSize: 15,
       });
       return res;
@@ -46,44 +46,56 @@ export function TransactionList() {
     () => [
       columnHelper.accessor("block_number", {
         header: "Block",
-        cell: (info) => (
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-foreground-200 rounded-sm flex items-center justify-center">
-              <TransactionIcon className="text-background-500" />
+        cell: (info) => {
+          return (
+            <div className="flex items-center gap-2">
+              <TransactionIcon className="text-background-500 !w-[38px]" />
+              <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100">
+                {info.getValue()}
+              </span>
             </div>
-            <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100">
-              {info.getValue()}
-            </span>
-          </div>
-        ),
+          );
+        },
+        size: 140,
       }),
       columnHelper.accessor("transaction_hash", {
         header: "Hash",
-        cell: (info) => (
-          <CopyableText
-            title="Transaction Hash"
-            value={info.getValue()}
-            containerClassName="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100"
-          />
-        ),
+        cell: (info) => {
+          return (
+            <div className="flex items-center gap-[6px] font-bold text-foreground cursor-pointer transition-all">
+              <CopyableInteger
+                title={info.getValue()}
+                value={info.getValue()}
+                length={1}
+              />
+            </div>
+          );
+        },
+        size: 200,
       }),
       columnHelper.accessor("sender_address", {
         header: "Sender",
-        cell: (info) => (
-          <CopyableText
-            title="Sender Address"
-            value={info.getValue() as string}
-            containerClassName="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100"
-          />
-        ),
+        cell: (info) => {
+          return (
+            <div className="flex items-center gap-[6px] font-bold text-foreground cursor-pointer transition-all">
+              <CopyableInteger
+                title={info.getValue() as string}
+                value={info.getValue()}
+                length={1}
+              />
+            </div>
+          );
+        },
+        size: 200,
       }),
       columnHelper.accessor("type", {
         header: "Type",
         cell: (info) => (
-          <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100">
+          <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize">
             {info.getValue()}
           </span>
         ),
+        size: 100,
       }),
     ],
     [],
@@ -103,7 +115,7 @@ export function TransactionList() {
   });
 
   return (
-    <div className="px-2 py-4 rounded-lg flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-[3px] sl:w-[1134px]">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -111,23 +123,24 @@ export function TransactionList() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="text-foreground-400 text-[12px]/[16px] font-normal">
+            <BreadcrumbPage className="text-foreground-100 text-[12px]/[16px] font-normal">
               Transactions
             </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader>
+      <PageHeader
+        containerClassName="rounded-t-[12px] rounded-b-sm h-[35px]"
+        className="px-[15px] py-[8px]"
+      >
         <PageHeaderTitle>
-          <div className="text-[20px]/[24px] font-semibold tracking-[0.4px] text-foreground-100">
-            Transactions
-          </div>
+          <h1 className="text-[13px]/[16px] font-normal">Transactions</h1>
         </PageHeaderTitle>
       </PageHeader>
 
-      <Card>
-        <CardContent>
+      <Card className="bg-[#1A1E1B] border-none">
+        <CardContent className="p-0 bg-background-100">
           {isLoading ? (
             <div className="flex justify-center items-center h-full">
               <Spinner />

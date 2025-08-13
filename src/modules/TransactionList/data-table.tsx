@@ -1,0 +1,153 @@
+import { Table as TableType, flexRender } from "@tanstack/react-table";
+import {
+  ArrowIcon,
+  ArrowToLineIcon,
+  Button,
+  cn,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@cartridge/ui";
+import { Table } from "@/shared/components/primitives/table";
+
+interface DataTableProps<T> extends React.HTMLAttributes<HTMLDivElement> {
+  table: TableType<T>;
+  onRowClick?: (row: T) => void;
+  containerClassName?: string;
+  tableClassName?: string;
+}
+
+export function DataTable<T>({
+  table,
+  onRowClick,
+  containerClassName,
+  tableClassName,
+  className,
+  ...props
+}: DataTableProps<T>) {
+  return (
+    <div
+      {...props}
+      className={cn(
+        "h-full flex flex-col gap-[15px] justify-between px-[10px] pt-[8px] pb-[20px] bg-background-100 border border-background-200 rounded-t-[4px] rounded-b-[12px]",
+        className,
+      )}
+    >
+      <Table
+        containerClassName={cn(containerClassName)}
+        className={cn(
+          "relative table-auto w-full flex-1 overflow-auto min-h-0",
+          tableClassName,
+        )}
+      >
+        <TableHeader className="sticky top-0 z-[20] bg-background-100 border-b-[5px] border-background-100">
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id} className="border-none">
+              {headerGroup.headers.map((header) => (
+                <TableHead
+                  key={header.id}
+                  className="h-auto p-0 align-top text-left text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[15px] last:pr-[15px]"
+                >
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody className="space-y-[10px]">
+          {table.getRowModel().rows.map((row) => (
+            <TableRow
+              key={row.id}
+              className={cn(
+                "border-none h-[45px] bg-background-150",
+                onRowClick && "cursor-pointer hover:bg-background-100",
+              )}
+              onClick={() => onRowClick?.(row.original)}
+            >
+              {row.getVisibleCells().map((cell) => (
+                <TableCell
+                  key={cell.id}
+                  className={cn(
+                    "text-sm p-0 rounded-[4px] border-none h-[45px]",
+                  )}
+                >
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      <div className="flex items-center justify-end gap-[3px] flex-shrink-0">
+        <div className="flex items-center gap-[5px]">
+          <Button
+            variant="secondary"
+            onClick={() => table.firstPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="bg-background-200 hover:bg-[#2B2F2C] disabled:bg-background-100 border border-solid border-[#454B46] rounded-sm w-[28px] h-[21px] px-[6px] py-[7px] text-foreground-200 disabled:text-[#454B46]"
+          >
+            <ArrowToLineIcon
+              variant="left"
+              className="!w-[16px] !h-[16px] aspect-square"
+            />
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="bg-background-200 hover:bg-[#2B2F2C] disabled:bg-background-100 border border-solid border-[#454B46] rounded-sm w-[28px] h-[21px] px-[6px] py-[7px] text-foreground-200 disabled:text-[#454B46]"
+          >
+            <ArrowIcon
+              variant="left"
+              className="!w-[16px] !h-[16px] aspect-square"
+            />
+          </Button>
+        </div>
+
+        <div className="px-[8px] py-[2px] space-x-[4px] text-[12px]/[16px] text-foreground-400 ">
+          <span className="font-normal">Page</span>
+          <span className="tracking-[0.24px] font-semibold">
+            {table.getState().pagination.pageIndex + 1}
+          </span>
+          <span className="font-normal">of</span>
+          <span className="tracking-[0.24px] font-semibold">
+            {table.getPageCount() || 1}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-[5px]">
+          <Button
+            variant="secondary"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="bg-background-200 hover:bg-[#2B2F2C] disabled:bg-background-100 border border-solid border-[#454B46] rounded-sm w-[28px] h-[21px] px-[6px] py-[7px] text-foreground-200 disabled:text-[#454B46]"
+          >
+            <ArrowIcon
+              variant="right"
+              className="!w-[16px] !h-[16px] aspect-square"
+            />
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!table.getCanNextPage()}
+            onClick={() => table.lastPage()}
+            className="bg-background-200 hover:bg-[#2B2F2C] disabled:bg-background-100 border border-solid border-[#454B46] rounded-sm w-[28px] h-[21px] px-[6px] py-[7px] text-foreground-200 disabled:text-[#454B46]"
+          >
+            <ArrowToLineIcon
+              variant="right"
+              className="!w-[16px] !h-[16px] aspect-square"
+            />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
