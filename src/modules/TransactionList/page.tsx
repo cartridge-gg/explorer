@@ -109,13 +109,13 @@ export function TransactionList() {
     getSortedRowModel: getSortedRowModel(),
     initialState: {
       pagination: {
-        pageSize: 15, // Match the 15 rows shown in the image
+        pageSize: 3, // Match the 15 rows shown in the image
       },
     },
   });
 
   return (
-    <div className="w-full flex flex-col gap-[3px] sl:w-[1134px]">
+    <div className="w-full h-screen flex flex-col gap-[3px] sl:w-[1134px] pb-[20px]">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -139,20 +139,19 @@ export function TransactionList() {
         </PageHeaderTitle>
       </PageHeader>
 
-      <Card className="bg-[#1A1E1B] border-none">
-        <CardContent className="p-0 bg-background-100">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-full">
-              <Spinner />
-            </div>
-          ) : (
-            <DataTable
-              table={table}
-              onRowClick={(row) => navigate(`../tx/${row.transaction_hash}`)}
-            />
-          )}
-        </CardContent>
-      </Card>
+      <div className="flex-1 min-h-0">
+        {isLoading ? (
+          <div className="flex justify-center items-center h-full">
+            <Spinner />
+          </div>
+        ) : (
+          <DataTable
+            table={table}
+            onRowClick={(row) => navigate(`../tx/${row.transaction_hash}`)}
+            className="h-full"
+          />
+        )}
+      </div>
     </div>
   );
 }

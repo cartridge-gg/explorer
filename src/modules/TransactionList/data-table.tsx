@@ -31,60 +31,62 @@ export function DataTable<T>({
     <div
       {...props}
       className={cn(
-        "h-full flex flex-col gap-[15px] justify-between px-[10px] pt-[8px] pb-[20px] bg-background-100 border border-background-200 rounded-t-[4px] rounded-b-[12px]",
+        "h-full flex flex-col px-[10px] pt-[8px] pb-[20px] bg-background-100 border border-background-200 rounded-t-[4px] rounded-b-[12px]",
         className,
       )}
     >
-      <Table
-        containerClassName={cn(containerClassName)}
-        className={cn(
-          "relative table-auto w-full flex-1 overflow-auto min-h-0",
-          tableClassName,
-        )}
-      >
-        <TableHeader className="sticky top-0 z-[20] bg-background-100 border-b-[5px] border-background-100">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="border-none">
-              {headerGroup.headers.map((header) => (
-                <TableHead
-                  key={header.id}
-                  className="h-auto p-0 align-top text-left text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[15px] last:pr-[15px]"
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody className="space-y-[10px]">
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              className={cn(
-                "border-none h-[45px] bg-background-150",
-                onRowClick && "cursor-pointer hover:bg-background-100",
-              )}
-              onClick={() => onRowClick?.(row.original)}
-            >
-              {row.getVisibleCells().map((cell) => (
-                <TableCell
-                  key={cell.id}
-                  className={cn(
-                    "text-sm p-0 rounded-[4px] border-none h-[45px]",
-                  )}
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <div className="flex-1 min-h-0 mb-[15px]">
+        <Table
+          containerClassName={cn(containerClassName)}
+          className={cn(
+            "relative table-auto w-full h-full overflow-auto",
+            tableClassName,
+          )}
+        >
+          <TableHeader className="sticky top-0 z-[20] bg-background-100 border-b-[5px] border-background-100">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="border-none">
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    className="h-auto p-0 align-top text-left text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[15px] last:pr-[15px]"
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody className="space-y-[10px] select-none">
+            {table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                className={cn(
+                  "border-b border-background-100 h-[45px] bg-background-150",
+                  onRowClick && "cursor-pointer hover:bg-background-100",
+                )}
+                onClick={() => onRowClick?.(row.original)}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell
+                    key={cell.id}
+                    className={cn(
+                      "text-sm p-0 rounded-[4px] border-none h-[45px]",
+                    )}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <div className="flex items-center justify-end gap-[3px] flex-shrink-0">
         <div className="flex items-center gap-[5px]">
