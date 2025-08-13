@@ -7,10 +7,28 @@ import { isReceiptError } from "@/modules/Transaction/hooks";
 import { TStarknetGetTransactionResponse } from "@/types/types";
 
 export interface TUseBlocksProps {
+  /**
+   * Unique identifier for that specific request
+   */
   id?: number;
+  /**
+   * The starting transaction number (inclusive). For descending order, this should be higher
+   * than to.
+   */
   from: number;
+  /**
+   * The ending transaction number (inclusive). If not provided, returns transactions starting
+   * from `from`. For descending order, this should be lower than `from`.
+   */
   to: number;
+  /**
+   * Chunk size
+   */
   chunkSize: number;
+  /**
+   * The token returned from the previous query. If no token is provided the first page is
+   * returned.
+   */
   continuationToken?: string;
 }
 
