@@ -1,5 +1,4 @@
 import { SearchBar } from "@/shared/components/search-bar";
-import { Header } from "@/shared/components/header";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { Link } from "react-router-dom";
 import { Network, Skeleton } from "@cartridge/ui";
@@ -7,6 +6,7 @@ import useChain from "@/shared/hooks/useChain";
 import { useQueries } from "@tanstack/react-query";
 import { katana } from "@/services/rpc";
 import { useEffect } from "react";
+import { Header } from "@/shared/components/header";
 
 export function Home() {
   const { id: chainId } = useChain();
