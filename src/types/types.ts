@@ -160,4 +160,6 @@ export type TStarknetGetTransactionResponse = MergeMultiple<
     DEPLOY_ACCOUNT_TXN_V1,
     DEPLOY_ACCOUNT_TXN_V3,
   ]
->;
+> & {
+  transaction_hash: string;
+};
