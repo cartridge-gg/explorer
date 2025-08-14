@@ -32,6 +32,8 @@ export interface TUseBlocksProps {
   continuationToken?: string;
 }
 
+export type TUseTransactionsProps = TUseBlocksProps;
+
 /**
  * Custom class to access Katana's properties.
  *
@@ -94,7 +96,7 @@ export class KATANA {
     to,
     chunkSize,
     continuationToken,
-  }: TUseBlocksProps): Promise<Array<TTransactionList>> {
+  }: TUseTransactionsProps): Promise<Array<TTransactionList>> {
     const data = await fetch(this.katanaURL, {
       method: "POST",
       headers: {
@@ -153,7 +155,7 @@ export class KATANA {
    *
    * Similar to `starknet_blockNumber` but for transaction.
    */
-  async transactionNumber(id?: number) {
+  async transactionNumber(id?: number): Promise<number> {
     const data = await fetch(this.katanaURL, {
       method: "POST",
       headers: {
@@ -167,7 +169,9 @@ export class KATANA {
       }),
     });
 
-    return await data.json();
+    const res = await data.json();
+
+    return Number(res.result);
   }
 }
 

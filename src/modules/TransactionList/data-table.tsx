@@ -29,7 +29,6 @@ export function DataTable<T>({
   tableClassName,
   className,
   isLoadingMore,
-  onNextPage,
   ...props
 }: DataTableProps<T>) {
   return (
@@ -54,7 +53,7 @@ export function DataTable<T>({
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="h-auto p-0 align-top text-left text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[60px] last:pr-[15px]"
+                    className="h-auto p-0 align-top text-left text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[80px] last:pr-[15px]"
                   >
                     {header.isPlaceholder
                       ? null
@@ -72,7 +71,7 @@ export function DataTable<T>({
               <TableRow
                 key={row.id}
                 className={cn(
-                  "border-b border-background-100 h-[45px] bg-background-150",
+                  "border-b border-background-100 h-[45px] py-[10px] bg-background-150",
                   onRowClick && "cursor-pointer hover:bg-background-100",
                 )}
                 onClick={() => onRowClick?.(row.original)}

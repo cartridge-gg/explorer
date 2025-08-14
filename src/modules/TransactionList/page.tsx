@@ -65,12 +65,10 @@ export function TransactionList() {
     return 0;
   }, [tableContainerHeight, isMobile]);
 
+  // Get total transactions
   const { data: totalTxs, isSuccess } = useQuery({
     queryKey: ["txlist", "total"],
-    queryFn: async () => {
-      const res = await katana.transactionNumber();
-      return res.result;
-    },
+    queryFn: async () => await katana.transactionNumber(),
   });
 
   // Query for transactions using katana
@@ -84,7 +82,7 @@ export function TransactionList() {
     queryKey: ["transactions", txnItemPerPage],
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * txnItemPerPage;
-      const to = from + txnItemPerPage * totalTxs;
+      const to = from + txnItemPerPage * (totalTxs || 1);
       const res = await katana.getTransactions({
         from,
         to,
@@ -113,7 +111,7 @@ export function TransactionList() {
         header: "Block",
         cell: (info) => {
           return (
-            <div className="flex items-center gap-[27px]">
+            <div className="flex items-center gap-[27px] pl-[19px]">
               <TransactionIcon className="text-background-500 !w-[38px]" />
               <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100">
                 {info.getValue()}
@@ -218,8 +216,8 @@ export function TransactionList() {
   }, [updatePageSize]);
 
   return (
-    <div className="w-full h-screen flex flex-col gap-[3px] sl:w-[1134px] pb-[20px]">
-      <Breadcrumb>
+    <div className="w-full lg:max-h-screen h-screen flex flex-col gap-[2px] sl:w-[1134px] pb-[20px]">
+      <Breadcrumb className="mb-[8px]">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
@@ -253,7 +251,6 @@ export function TransactionList() {
             onRowClick={(row) => navigate(`../tx/${row.transaction_hash}`)}
             className="h-full"
             isLoadingMore={isFetchingNextPage}
-            onNextPage={() => fetchNextPage()}
           />
         )}
       </div>
