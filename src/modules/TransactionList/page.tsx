@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -7,10 +7,10 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { katana } from "@/services/rpc";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
-import { Card, CardContent, cn, Spinner } from "@cartridge/ui";
+import { cn, Spinner } from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -22,25 +22,86 @@ import {
 import { DataTable } from "./data-table";
 import type { TTransactionList } from "@/services/katana";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
+import { useScreen } from "@/shared/hooks/useScreen";
 
 const columnHelper = createColumnHelper<TTransactionList>();
 
+const TXN_OFFSET = 70; // Offset for the transaction table
+const ROW_HEIGHT = 45;
+
 export function TransactionList() {
+  const [tableContainerHeight, setTableContainerHeight] = useState(0);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
   const navigate = useNavigate();
+  const { isMobile } = useScreen();
+
+  useEffect(() => {
+    const container = tableContainerRef.current;
+    if (!container) return;
+    if (tableContainerHeight !== 0) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { height } = entry.contentRect;
+        setTableContainerHeight(Math.max(height, 0)); // Ensure non-negative
+      }
+    });
+
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [tableContainerHeight]);
+
+  const txnItemPerPage = useMemo(() => {
+    if (isMobile) return 5;
+
+    if (tableContainerHeight > 0) {
+      const calculatedHeight = tableContainerHeight - TXN_OFFSET;
+      return Math.max(1, Math.floor(calculatedHeight / ROW_HEIGHT));
+    }
+    return 0;
+  }, [tableContainerHeight, isMobile]);
+
+  useEffect(() => {
+    console.log("txn item per page: ", txnItemPerPage);
+  }, [txnItemPerPage]);
 
   // Query for transactions using katana
-  const { data: transactionsData, isLoading } = useQuery({
-    queryKey: ["transactions"],
-    queryFn: async () => {
+  const {
+    data: transactionsData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["transactions", txnItemPerPage],
+    queryFn: async ({ pageParam = 0 }) => {
+      const from = pageParam * txnItemPerPage;
+      const to = from + txnItemPerPage;
       const res = await katana.getTransactions({
-        from: 0,
-        to: 5,
-        chunkSize: 15,
+        from,
+        to,
+        chunkSize: txnItemPerPage,
       });
       return res;
     },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      // If the last page has fewer transactions than requested, we've reached the end
+      if (lastPage.length < txnItemPerPage) return undefined;
+      return allPages.length;
+    },
     staleTime: 60 * 1000, // 1 minute
+    enabled: txnItemPerPage > 0, // Only run query when we have calculated page size
   });
+
+  // Flatten all pages into a single array of transactions
+  const transactions = useMemo(() => {
+    return transactionsData?.pages?.flat() ?? [];
+  }, [transactionsData]);
 
   const columns = useMemo(
     () => [
@@ -48,7 +109,7 @@ export function TransactionList() {
         header: "Block",
         cell: (info) => {
           return (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-[27px]">
               <TransactionIcon className="text-background-500 !w-[38px]" />
               <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100">
                 {info.getValue()}
@@ -102,17 +163,55 @@ export function TransactionList() {
   );
 
   const table = useReactTable({
-    data: transactionsData!,
+    data: transactions,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     initialState: {
       pagination: {
-        pageSize: 3, // Match the 15 rows shown in the image
+        pageSize: txnItemPerPage || 13,
       },
     },
+    manualPagination: false,
   });
+
+  // Effect to fetch next page when we're near the end
+  useEffect(() => {
+    const currentPage = table.getState().pagination.pageIndex;
+    const pageSize = table.getState().pagination.pageSize;
+    const totalTransactions = transactions.length;
+    const currentRowIndex = (currentPage + 1) * pageSize;
+
+    // If we're displaying rows close to the end of loaded data, fetch more
+    if (
+      currentRowIndex >= totalTransactions - pageSize && // Near the end of loaded data
+      hasNextPage &&
+      !isFetchingNextPage &&
+      txnItemPerPage > 0 &&
+      totalTransactions > 0
+    ) {
+      fetchNextPage();
+    }
+  }, [
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    transactions.length,
+    txnItemPerPage,
+    table,
+  ]);
+
+  // Update table page size when txnItemPerPage changes
+  const updatePageSize = useCallback(() => {
+    if (txnItemPerPage > 0) {
+      table.setPageSize(txnItemPerPage);
+    }
+  }, [txnItemPerPage, table]);
+
+  useEffect(() => {
+    updatePageSize();
+  }, [updatePageSize]);
 
   return (
     <div className="w-full h-screen flex flex-col gap-[3px] sl:w-[1134px] pb-[20px]">
@@ -139,8 +238,8 @@ export function TransactionList() {
         </PageHeaderTitle>
       </PageHeader>
 
-      <div className="flex-1 min-h-0">
-        {isLoading ? (
+      <div ref={tableContainerRef} className="flex-1 min-h-0">
+        {isLoading && transactions.length === 0 ? (
           <div className="flex justify-center items-center h-full">
             <Spinner />
           </div>
@@ -149,6 +248,7 @@ export function TransactionList() {
             table={table}
             onRowClick={(row) => navigate(`../tx/${row.transaction_hash}`)}
             className="h-full"
+            isLoadingMore={isFetchingNextPage}
           />
         )}
       </div>

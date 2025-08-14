@@ -4,6 +4,7 @@ import {
   ArrowToLineIcon,
   Button,
   cn,
+  Spinner,
   TableBody,
   TableCell,
   TableHead,
@@ -17,6 +18,7 @@ interface DataTableProps<T> extends React.HTMLAttributes<HTMLDivElement> {
   onRowClick?: (row: T) => void;
   containerClassName?: string;
   tableClassName?: string;
+  isLoadingMore?: boolean;
 }
 
 export function DataTable<T>({
@@ -25,6 +27,7 @@ export function DataTable<T>({
   containerClassName,
   tableClassName,
   className,
+  isLoadingMore,
   ...props
 }: DataTableProps<T>) {
   return (
@@ -49,7 +52,7 @@ export function DataTable<T>({
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="h-auto p-0 align-top text-left text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[15px] last:pr-[15px]"
+                    className="h-auto p-0 align-top text-left text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[60px] last:pr-[15px]"
                   >
                     {header.isPlaceholder
                       ? null
@@ -87,6 +90,15 @@ export function DataTable<T>({
           </TableBody>
         </Table>
       </div>
+
+      {isLoadingMore && (
+        <div className="flex justify-center items-center py-2">
+          <Spinner className="w-4 h-4" />
+          <span className="ml-2 text-sm text-foreground-300">
+            Loading more...
+          </span>
+        </div>
+      )}
 
       <div className="flex items-center justify-end gap-[3px] flex-shrink-0">
         <div className="flex items-center gap-[5px]">
