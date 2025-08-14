@@ -19,6 +19,7 @@ interface DataTableProps<T> extends React.HTMLAttributes<HTMLDivElement> {
   containerClassName?: string;
   tableClassName?: string;
   isLoadingMore?: boolean;
+  onNextPage?: () => void;
 }
 
 export function DataTable<T>({
@@ -28,6 +29,7 @@ export function DataTable<T>({
   tableClassName,
   className,
   isLoadingMore,
+  onNextPage,
   ...props
 }: DataTableProps<T>) {
   return (

@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { useNavigate } from "react-router-dom";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { katana } from "@/services/rpc";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { cn, Spinner } from "@cartridge/ui";
@@ -65,9 +65,13 @@ export function TransactionList() {
     return 0;
   }, [tableContainerHeight, isMobile]);
 
-  useEffect(() => {
-    console.log("txn item per page: ", txnItemPerPage);
-  }, [txnItemPerPage]);
+  const { data: totalTxs, isSuccess } = useQuery({
+    queryKey: ["txlist", "total"],
+    queryFn: async () => {
+      const res = await katana.transactionNumber();
+      return res.result;
+    },
+  });
 
   // Query for transactions using katana
   const {
@@ -80,11 +84,11 @@ export function TransactionList() {
     queryKey: ["transactions", txnItemPerPage],
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * txnItemPerPage;
-      const to = from + txnItemPerPage;
+      const to = from + txnItemPerPage * totalTxs;
       const res = await katana.getTransactions({
         from,
         to,
-        chunkSize: txnItemPerPage,
+        chunkSize: to,
       });
       return res;
     },
@@ -95,7 +99,7 @@ export function TransactionList() {
       return allPages.length;
     },
     staleTime: 60 * 1000, // 1 minute
-    enabled: txnItemPerPage > 0, // Only run query when we have calculated page size
+    enabled: txnItemPerPage > 0 && isSuccess, // Only run query when we have calculated page size
   });
 
   // Flatten all pages into a single array of transactions
@@ -249,6 +253,7 @@ export function TransactionList() {
             onRowClick={(row) => navigate(`../tx/${row.transaction_hash}`)}
             className="h-full"
             isLoadingMore={isFetchingNextPage}
+            onNextPage={() => fetchNextPage()}
           />
         )}
       </div>
