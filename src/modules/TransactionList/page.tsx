@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { useNavigate } from "react-router-dom";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { katana } from "@/services/rpc";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { cn, Spinner } from "@cartridge/ui";
@@ -72,29 +72,16 @@ export function TransactionList() {
   });
 
   // Query for transactions using katana
-  const {
-    data: transactionsData,
-    isLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
+  const { data: transactionsData, isLoading } = useQuery({
     queryKey: ["transactions", txnItemPerPage],
-    queryFn: async ({ pageParam = 0 }) => {
-      const from = pageParam * txnItemPerPage;
-      const to = from + txnItemPerPage * (totalTxs || 1);
+    queryFn: async () => {
+      const total = totalTxs ?? 1;
       const res = await katana.getTransactions({
-        from,
-        to,
-        chunkSize: to,
+        from: 0,
+        to: total,
+        chunkSize: total,
       });
       return res;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      // If the last page has fewer transactions than requested, we've reached the end
-      if (lastPage.length < txnItemPerPage) return undefined;
-      return allPages.length;
     },
     staleTime: 60 * 1000, // 1 minute
     enabled: txnItemPerPage > 0 && isSuccess, // Only run query when we have calculated page size
@@ -102,7 +89,7 @@ export function TransactionList() {
 
   // Flatten all pages into a single array of transactions
   const transactions = useMemo(() => {
-    return transactionsData?.pages?.flat() ?? [];
+    return transactionsData?.flat() ?? [];
   }, [transactionsData]);
 
   const columns = useMemo(
@@ -178,43 +165,6 @@ export function TransactionList() {
     manualPagination: false,
   });
 
-  // Effect to fetch next page when we're near the end
-  useEffect(() => {
-    const currentPage = table.getState().pagination.pageIndex;
-    const pageSize = table.getState().pagination.pageSize;
-    const totalTransactions = transactions.length;
-    const currentRowIndex = (currentPage + 1) * pageSize;
-
-    // If we're displaying rows close to the end of loaded data, fetch more
-    if (
-      currentRowIndex >= totalTransactions - pageSize && // Near the end of loaded data
-      hasNextPage &&
-      !isFetchingNextPage &&
-      txnItemPerPage > 0 &&
-      totalTransactions > 0
-    ) {
-      fetchNextPage();
-    }
-  }, [
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
-    transactions.length,
-    txnItemPerPage,
-    table,
-  ]);
-
-  // Update table page size when txnItemPerPage changes
-  const updatePageSize = useCallback(() => {
-    if (txnItemPerPage > 0) {
-      table.setPageSize(txnItemPerPage);
-    }
-  }, [txnItemPerPage, table]);
-
-  useEffect(() => {
-    updatePageSize();
-  }, [updatePageSize]);
-
   return (
     <div className="w-full lg:max-h-screen h-screen flex flex-col gap-[2px] sl:w-[1134px] pb-[20px]">
       <Breadcrumb className="mb-[8px]">
@@ -250,7 +200,6 @@ export function TransactionList() {
             table={table}
             onRowClick={(row) => navigate(`../tx/${row.transaction_hash}`)}
             className="h-full"
-            isLoadingMore={isFetchingNextPage}
           />
         )}
       </div>
