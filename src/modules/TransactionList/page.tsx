@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -26,7 +26,7 @@ import { useScreen } from "@/shared/hooks/useScreen";
 
 const columnHelper = createColumnHelper<TTransactionList>();
 
-const TXN_OFFSET = 70; // Offset for the transaction table
+const TXN_OFFSET = 56; // Offset for the transaction table
 const ROW_HEIGHT = 45;
 
 export function TransactionList() {
@@ -159,11 +159,22 @@ export function TransactionList() {
     getSortedRowModel: getSortedRowModel(),
     initialState: {
       pagination: {
-        pageSize: txnItemPerPage || 13,
+        pageSize: txnItemPerPage || 5,
       },
     },
     manualPagination: false,
   });
+
+  // Update table page size when txnItemPerPage changes
+  const updatePageSize = useCallback(() => {
+    if (txnItemPerPage > 0) {
+      table.setPageSize(txnItemPerPage);
+    }
+  }, [txnItemPerPage, table]);
+
+  useEffect(() => {
+    updatePageSize();
+  }, [updatePageSize]);
 
   return (
     <div className="w-full lg:max-h-screen h-screen flex flex-col gap-[2px] sl:w-[1134px] pb-[20px]">
