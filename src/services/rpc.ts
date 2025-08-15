@@ -1,7 +1,12 @@
 "use client";
 import { RpcProvider } from "starknet";
 import { queryClient } from "./query";
-import { KATANA } from "./katana";
+import {
+  KATANA,
+  type TUseBlocksProps,
+  type TUseTransactionsProps,
+  type TTransactionList,
+} from "./katana";
 
 // Moved from constants/rpc.ts
 export const EXECUTION_RESOURCES_KEY_MAP = {
@@ -19,7 +24,7 @@ export const EXECUTION_RESOURCES_KEY_MAP = {
 
 export function getBasePath(): string | undefined {
   // See <vite.config.ts>
-  if (import.meta.env.VITE_APP_IS_EMBEDDED) {
+  if (import.meta.env.VITE_IS_EMBEDDED) {
     const pathname = window.location.pathname;
     const explorerIndex = pathname.lastIndexOf("/explorer");
 
@@ -36,7 +41,7 @@ export function getBasePath(): string | undefined {
 // In embedded mode, it is assumed that the explorer is served at the relative path `/explorer` of the JSON-RPC server.
 export function getRpcUrl(): string {
   // See <vite.config.ts>
-  if (import.meta.env.VITE_APP_IS_EMBEDDED) {
+  if (import.meta.env.VITE_IS_EMBEDDED) {
     const pathname = window.location.pathname;
     const explorerIndex = pathname.lastIndexOf("/explorer");
 
@@ -57,9 +62,21 @@ export async function getChainId(): Promise<string> {
   return window.CHAIN_ID ?? (await RPC_PROVIDER.getChainId());
 }
 
+// Extended RPC Provider type that includes Katana methods when embedded
+type ExtendedRpcProvider = RpcProvider & {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getBlocks?: (props: TUseBlocksProps) => Promise<any>;
+  getTransactions?: (
+    props: TUseTransactionsProps,
+  ) => Promise<TTransactionList[]>;
+  transactionNumber?: (id?: number) => Promise<number>;
+  getKatanaURL?: () => Promise<string>;
+};
+
 declare global {
   interface Window {
     RPC_URL?: string;
+    CHAIN_ID?: string;
   }
 }
 
@@ -81,6 +98,9 @@ export const QUERY_KEYS = [
   "getBlock",
   "specVersion",
   "getController",
+  "getBlocks",
+  "getTransactions",
+  "transactionNumber",
 ];
 
 // Cache configuration
@@ -89,20 +109,31 @@ export const CACHE_CONFIG = {
   gcTime: 1000 * 60 * 60 * 24, // 24 hours
 };
 
+export const katana = new KATANA(import.meta.env.VITE_RPC_URL);
+
 // Create a proxy that intercepts method calls and adds caching for specific methods
-export const RPC_PROVIDER = new Proxy(baseRpcProvider, {
+export const RPC_PROVIDER = new Proxy(baseRpcProvider as ExtendedRpcProvider, {
   get(target, prop: string | symbol) {
     const originalMethod = target[prop as keyof typeof target];
     const methodName = prop as string;
 
+    // In embedded mode, check if the method exists on katana instance
+    let methodToCall = originalMethod;
+    if (import.meta.env.VITE_IS_EMBEDDED) {
+      const katanaMethod = katana[methodName as keyof typeof katana];
+      if (typeof katanaMethod === "function") {
+        methodToCall = katanaMethod.bind(katana);
+      }
+    }
+
     // Early return for properties (non-functions)
-    if (typeof originalMethod !== "function") {
-      return originalMethod;
+    if (typeof methodToCall !== "function") {
+      return methodToCall;
     }
 
     // Early return for non-cached methods
     if (!QUERY_KEYS.includes(methodName)) {
-      return originalMethod.bind(target);
+      return methodToCall;
     }
 
     // Return cached version for queryable methods
@@ -113,8 +144,8 @@ export const RPC_PROVIDER = new Proxy(baseRpcProvider, {
       return queryClient.fetchQuery({
         queryKey: fullQueryKey,
         queryFn: () =>
-          (originalMethod as (...args: unknown[]) => unknown).apply(
-            target,
+          (methodToCall as (...args: unknown[]) => unknown).apply(
+            methodToCall === originalMethod ? target : katana,
             args,
           ),
         ...CACHE_CONFIG,
@@ -122,5 +153,3 @@ export const RPC_PROVIDER = new Proxy(baseRpcProvider, {
     };
   },
 });
-
-export const katana = new KATANA(import.meta.env.VITE_KATANA_URL);

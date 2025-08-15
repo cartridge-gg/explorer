@@ -38,9 +38,7 @@ export default defineConfig({
     },
   },
   define: {
-    "import.meta.env.VITE_APP_IS_EMBEDDED": JSON.stringify(
-      process.env.IS_EMBEDDED,
-    ),
+    "import.meta.env.VITE_IS_EMBEDDED": JSON.stringify(process.env.IS_EMBEDDED),
   },
   preview: {
     allowedHosts: ["x.cartridge.gg"],

@@ -80,7 +80,7 @@ export function DataTable<T>({
                   <TableCell
                     key={cell.id}
                     className={cn(
-                      "text-sm p-0 rounded-[4px] border-none h-[45px]",
+                      "text-sm p-0 first:rounded-l-[4px] last:rounded-r-[4px] border-none h-[45px]",
                     )}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
