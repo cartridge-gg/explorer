@@ -23,6 +23,7 @@ import { DataTable } from "./data-table";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { useScreen } from "@/shared/hooks/useScreen";
 import * as RPC08 from "@starknet-io/types-js";
+import dayjs from "dayjs";
 
 const columnHelper = createColumnHelper<RPC08.BlockWithTxs>();
 
@@ -159,8 +160,8 @@ export function BlockList() {
       columnHelper.accessor("timestamp", {
         header: "Timestamp",
         cell: (info) => (
-          <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize">
-            {info.getValue()}
+          <span className="text-[12px]/[16px] font-normal text-foreground-100">
+            {dayjs.unix(info.getValue()).fromNow()}
           </span>
         ),
         size: 100,
@@ -204,7 +205,7 @@ export function BlockList() {
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbPage className="text-foreground-100 text-[12px]/[16px] font-normal">
-              Transactions
+              Blocks
             </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
@@ -215,7 +216,7 @@ export function BlockList() {
         className="px-[15px] py-[8px]"
       >
         <PageHeaderTitle>
-          <h1 className="text-[13px]/[16px] font-normal">Transactions</h1>
+          <h1 className="text-[13px]/[16px] font-normal">Blocks</h1>
         </PageHeaderTitle>
       </PageHeader>
 
