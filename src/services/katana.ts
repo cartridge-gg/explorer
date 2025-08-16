@@ -5,6 +5,7 @@ import type {
 import { RPC_PROVIDER } from "./rpc";
 import { isReceiptError } from "@/modules/Transaction/hooks";
 import { TStarknetGetTransactionResponse } from "@/types/types";
+import * as RPC08 from "@starknet-io/types-js";
 
 export interface TUseBlocksProps {
   /**
@@ -83,7 +84,9 @@ export class KATANA {
       }),
     });
 
-    return await data.json();
+    const res = await data.json();
+
+    return res.result.blocks as Array<RPC08.BlockWithTxs>;
   }
 
   /**

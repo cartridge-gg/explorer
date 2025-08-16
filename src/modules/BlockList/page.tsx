@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { katana } from "@/services/rpc";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { cn, Spinner } from "@cartridge/ui";
 import {
@@ -20,13 +20,13 @@ import {
   BreadcrumbPage,
 } from "@/shared/components/breadcrumb";
 import { DataTable } from "./data-table";
-import type { TTransactionList } from "@/services/katana";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { useScreen } from "@/shared/hooks/useScreen";
+import * as RPC08 from "@starknet-io/types-js";
 
-const columnHelper = createColumnHelper<TTransactionList>();
+const columnHelper = createColumnHelper<RPC08.BlockWithTxs>();
 
-const TXN_OFFSET = 56; // Offset for the transaction table
+const BLOCK_OFFSET = 56; // Offset for the blocks table
 const ROW_HEIGHT = 45;
 
 export function BlockList() {
@@ -55,28 +55,28 @@ export function BlockList() {
     };
   }, [tableContainerHeight]);
 
-  const txnItemPerPage = useMemo(() => {
+  const blockItemPerPage = useMemo(() => {
     if (isMobile) return 5;
 
     if (tableContainerHeight > 0) {
-      const calculatedHeight = tableContainerHeight - TXN_OFFSET;
+      const calculatedHeight = tableContainerHeight - BLOCK_OFFSET;
       return Math.max(1, Math.floor(calculatedHeight / ROW_HEIGHT));
     }
     return 0;
   }, [tableContainerHeight, isMobile]);
 
-  // Get total transactions
-  const { data: totalTxs, isSuccess } = useQuery({
+  // Get total blocks
+  const { data: totalBlocks, isSuccess } = useQuery({
     queryKey: ["txlist", "total"],
-    queryFn: async () => await katana.transactionNumber(),
+    queryFn: async () => await RPC_PROVIDER.getBlockNumber(),
   });
 
   // Query for transactions using katana
-  const { data: transactionsData, isLoading } = useQuery({
-    queryKey: ["transactions", txnItemPerPage],
+  const { data: blocksData, isLoading } = useQuery({
+    queryKey: ["blockList", blockItemPerPage],
     queryFn: async () => {
-      const total = totalTxs ?? 1;
-      const res = await katana.getTransactions({
+      const total = totalBlocks ?? 1;
+      const res = await RPC_PROVIDER.getBlocks?.({
         from: 0,
         to: total,
         chunkSize: total,
@@ -84,18 +84,18 @@ export function BlockList() {
       return res;
     },
     staleTime: 60 * 1000, // 1 minute
-    enabled: txnItemPerPage > 0 && isSuccess, // Only run query when we have calculated page size
+    enabled: blockItemPerPage > 0 && isSuccess, // Only run query when we have calculated page size
   });
 
   // Flatten all pages into a single array of transactions
-  const transactions = useMemo(() => {
-    return transactionsData?.flat() ?? [];
-  }, [transactionsData]);
+  const blocks = useMemo(() => {
+    return blocksData?.flat() ?? [];
+  }, [blocksData]);
 
   const columns = useMemo(
     () => [
       columnHelper.accessor("block_number", {
-        header: "Block",
+        header: "Number",
         cell: (info) => {
           return (
             <div className="flex items-center gap-[27px] pl-[19px]">
@@ -108,23 +108,8 @@ export function BlockList() {
         },
         size: 140,
       }),
-      columnHelper.accessor("transaction_hash", {
+      columnHelper.accessor("block_hash", {
         header: "Hash",
-        cell: (info) => {
-          return (
-            <div className="flex items-center gap-[6px] font-bold text-foreground cursor-pointer transition-all">
-              <CopyableInteger
-                title={info.getValue()}
-                value={info.getValue()}
-                length={1}
-              />
-            </div>
-          );
-        },
-        size: 200,
-      }),
-      columnHelper.accessor("sender_address", {
-        header: "Sender",
         cell: (info) => {
           return (
             <div className="flex items-center gap-[6px] font-bold text-foreground cursor-pointer transition-all">
@@ -138,8 +123,41 @@ export function BlockList() {
         },
         size: 200,
       }),
-      columnHelper.accessor("type", {
-        header: "Type",
+      columnHelper.accessor("sequencer_address", {
+        header: "Sequencer",
+        cell: (info) => {
+          return (
+            <div className="flex items-center gap-[6px] font-bold text-foreground cursor-pointer transition-all">
+              <CopyableInteger
+                title={info.getValue() as string}
+                value={info.getValue()}
+                length={1}
+              />
+            </div>
+          );
+        },
+        size: 200,
+      }),
+      columnHelper.accessor("transactions", {
+        header: "Transactions",
+        cell: (info) => (
+          <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize">
+            {info.getValue().length}
+          </span>
+        ),
+        size: 100,
+      }),
+      columnHelper.accessor("status", {
+        header: "Status",
+        cell: (info) => (
+          <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize">
+            {info.getValue()}
+          </span>
+        ),
+        size: 100,
+      }),
+      columnHelper.accessor("timestamp", {
+        header: "Timestamp",
         cell: (info) => (
           <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize">
             {info.getValue()}
@@ -152,14 +170,14 @@ export function BlockList() {
   );
 
   const table = useReactTable({
-    data: transactions,
+    data: blocks,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     initialState: {
       pagination: {
-        pageSize: txnItemPerPage || 5,
+        pageSize: blockItemPerPage || 5,
       },
     },
     manualPagination: false,
@@ -167,10 +185,10 @@ export function BlockList() {
 
   // Update table page size when txnItemPerPage changes
   const updatePageSize = useCallback(() => {
-    if (txnItemPerPage > 0) {
-      table.setPageSize(txnItemPerPage);
+    if (blockItemPerPage > 0) {
+      table.setPageSize(blockItemPerPage);
     }
-  }, [txnItemPerPage, table]);
+  }, [blockItemPerPage, table]);
 
   useEffect(() => {
     updatePageSize();
@@ -202,7 +220,7 @@ export function BlockList() {
       </PageHeader>
 
       <div ref={tableContainerRef} className="flex-1 min-h-0">
-        {isLoading && transactions.length === 0 ? (
+        {isLoading && blocks.length === 0 ? (
           <div className="flex justify-center items-center h-full">
             <Spinner />
           </div>

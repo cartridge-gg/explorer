@@ -68,12 +68,12 @@ export function TransactionList() {
   // Get total transactions
   const { data: totalTxs, isSuccess } = useQuery({
     queryKey: ["txlist", "total"],
-    queryFn: async () => await katana.transactionNumber(),
+    queryFn: async () => await RPC_PROVIDER?.transactionNumber?.(),
   });
 
   // Query for transactions using katana
   const { data: transactionsData, isLoading } = useQuery({
-    queryKey: ["transactions", txnItemPerPage],
+    queryKey: ["transactionList", txnItemPerPage],
     queryFn: async () => {
       const total = totalTxs ?? 1;
       const res = await RPC_PROVIDER.getTransactions?.({
