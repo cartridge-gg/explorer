@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { katana } from "@/services/rpc";
+import { katana, RPC_PROVIDER } from "@/services/rpc";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { cn, Spinner } from "@cartridge/ui";
 import {
@@ -76,7 +76,7 @@ export function TransactionList() {
     queryKey: ["transactions", txnItemPerPage],
     queryFn: async () => {
       const total = totalTxs ?? 1;
-      const res = await katana.getTransactions({
+      const res = await RPC_PROVIDER.getTransactions?.({
         from: 0,
         to: total,
         chunkSize: total,

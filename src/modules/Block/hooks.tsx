@@ -1,5 +1,4 @@
-import { RPC_PROVIDER, katana } from "@/services/rpc";
-import { TUseBlocksProps } from "@/services/katana";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { Badge } from "@/shared/components/badge";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { useScreen } from "@/shared/hooks/useScreen";
@@ -58,22 +57,6 @@ export interface TUseBlockProps {
   enabled?: boolean;
 }
 
-export function useBlocks({
-  from,
-  to,
-  chunkSize,
-  continuationToken,
-}: TUseBlocksProps) {
-  return useQuery(
-    katana.getBlocksQueryConfig({
-      from,
-      to,
-      chunkSize,
-      continuationToken,
-    }),
-  );
-}
-
 export function useBlock({
   pageSize: externalPageSize = 20,
   txnPageSize = externalPageSize,
@@ -88,8 +71,7 @@ export function useBlock({
         throw new Error("Invalid block identifier");
       }
 
-      const block: RPC08.BLOCK_WITH_RECEIPTS =
-        await RPC_PROVIDER.getBlockWithReceipts(blockId);
+      const block = await RPC_PROVIDER.getBlockWithReceipts(blockId);
 
       const txs = block.transactions.map(({ transaction, receipt }, id) => ({
         id,
@@ -109,7 +91,7 @@ export function useBlock({
       const { blockComputeData } = block.transactions.reduce(
         (acc, { receipt }) => {
           // const r = parseExecutionResources(receipt.execution_resources);
-          const r = receipt.execution_resources;
+          const r = receipt.execution_resources as RPC08.EXECUTION_RESOURCES;
           acc.blockComputeData.l1_gas += r.l1_gas;
           acc.blockComputeData.l2_gas += r.l2_gas;
           acc.blockComputeData.l1_data_gas += r.l1_data_gas;
@@ -119,6 +101,10 @@ export function useBlock({
           blockComputeData: initBlockComputeData,
         },
       );
+
+      if (!block) {
+        throw new Error("Block is undefined");
+      }
 
       return {
         block,
