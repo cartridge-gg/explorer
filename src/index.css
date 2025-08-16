@@ -7,12 +7,29 @@
 @tailwind utilities;
 
 @layer base {
-  html,
+  html {
+    @apply scrollbar-thin scrollbar-track-background-200 scrollbar-thumb-spacer-100 scrollbar-hover:scrollbar-track-background-200 scrollbar-hover:scrollbar-thumb-spacer-100;
+  }
+
   body {
     @apply text-foreground ring-foreground text-base overscroll-y-none;
   }
 
   a {
     @apply cursor-pointer;
+  }
+
+  /*Custom scrollbar for every scrollable components*/
+
+  .overflow-y-auto {
+    @apply scrollbar-thin scrollbar-track-background-200 scrollbar-thumb-spacer-100 scrollbar-hover:scrollbar-track-background-200 scrollbar-hover:scrollbar-thumb-spacer-100;
+  }
+
+  .overflow-auto {
+    @apply scrollbar-thin scrollbar-track-background-200 scrollbar-thumb-spacer-100 scrollbar-hover:scrollbar-track-background-200 scrollbar-hover:scrollbar-thumb-spacer-100;
+  }
+
+  .overflow-y-scroll {
+    @apply scrollbar-thin scrollbar-track-background-200 scrollbar-thumb-spacer-100 scrollbar-hover:scrollbar-track-background-200 scrollbar-hover:scrollbar-thumb-spacer-100;
   }
 }
