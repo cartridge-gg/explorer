@@ -136,9 +136,9 @@ export function BlockList() {
         size: 200,
       }),
       columnHelper.accessor("transactions", {
-        header: "Transactions",
+        header: "Total Transactions",
         cell: (info) => (
-          <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize">
+          <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize pl-[10px]">
             {info.getValue().length}
           </span>
         ),
