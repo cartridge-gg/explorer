@@ -1,4 +1,3 @@
-"use client";
 import { RpcProvider } from "starknet";
 import { queryClient } from "./query";
 import {
@@ -7,6 +6,7 @@ import {
   type TUseTransactionsProps,
   type TTransactionList,
 } from "./katana";
+import * as RPC08 from "@starknet-io/types-js";
 
 // Moved from constants/rpc.ts
 export const EXECUTION_RESOURCES_KEY_MAP = {
@@ -64,11 +64,10 @@ export async function getChainId(): Promise<string> {
 
 // Extended RPC Provider type that includes Katana methods when embedded
 type ExtendedRpcProvider = RpcProvider & {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getBlocks?: (props: TUseBlocksProps) => Promise<any>;
+  getBlocks?: (props: TUseBlocksProps) => Promise<Array<RPC08.BlockWithTxs>>;
   getTransactions?: (
     props: TUseTransactionsProps,
-  ) => Promise<TTransactionList[]>;
+  ) => Promise<Array<TTransactionList>>;
   transactionNumber?: (id?: number) => Promise<number>;
   getKatanaURL?: () => Promise<string>;
 };
@@ -119,11 +118,9 @@ export const RPC_PROVIDER = new Proxy(baseRpcProvider as ExtendedRpcProvider, {
 
     // In embedded mode, check if the method exists on katana instance
     let methodToCall = originalMethod;
-    if (import.meta.env.VITE_IS_EMBEDDED) {
-      const katanaMethod = katana[methodName as keyof typeof katana];
-      if (typeof katanaMethod === "function") {
-        methodToCall = katanaMethod.bind(katana);
-      }
+    const katanaMethod = katana[methodName as keyof typeof katana];
+    if (typeof katanaMethod === "function") {
+      methodToCall = katanaMethod.bind(katana);
     }
 
     // Early return for properties (non-functions)
