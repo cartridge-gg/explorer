@@ -112,7 +112,7 @@ export const katana = new KATANA(import.meta.env.VITE_RPC_URL);
 
 // Create a proxy that intercepts method calls and adds caching for specific methods
 export const RPC_PROVIDER = new Proxy(baseRpcProvider as ExtendedRpcProvider, {
-  get(target, prop: string | symbol) {
+  get(target, prop) {
     const originalMethod = target[prop as keyof typeof target];
     const methodName = prop as string;
 
