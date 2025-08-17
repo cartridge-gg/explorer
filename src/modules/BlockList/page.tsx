@@ -82,7 +82,7 @@ export function BlockList() {
         to: total,
         chunkSize: total,
       });
-      return res;
+      return res?.sort((a, b) => b.timestamp - a.timestamp);
     },
     staleTime: 60 * 1000, // 1 minute
     enabled: blockItemPerPage > 0 && isSuccess, // Only run query when we have calculated page size
@@ -196,7 +196,7 @@ export function BlockList() {
   }, [updatePageSize]);
 
   return (
-    <div className="w-full lg:max-h-screen h-screen flex flex-col gap-[2px] sl:w-[1134px] pb-[20px]">
+    <div className="flex-1 min-h-0 w-full lg:max-h-screen h-screen flex flex-col gap-[2px] sl:w-[1134px] pb-[20px]">
       <Breadcrumb className="mb-[8px]">
         <BreadcrumbList>
           <BreadcrumbItem>
