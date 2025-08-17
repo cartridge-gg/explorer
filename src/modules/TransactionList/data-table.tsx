@@ -47,13 +47,18 @@ export function DataTable<T>({
             tableClassName,
           )}
         >
-          <TableHeader className="sticky top-0 z-[20] bg-background-100 border-b-[5px] border-background-100">
+          <TableHeader className="sticky top-0 z-[20] bg-background-100">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-none">
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="h-auto p-0 align-top text-left text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[80px] last:pr-[15px]"
+                    className={cn(
+                      "h-auto p-0 align-top text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[80px] last:pr-[15px]",
+                      header.column.id.toLowerCase() === "type"
+                        ? "text-right pr-[38px]"
+                        : "text-left",
+                    )}
                   >
                     {header.isPlaceholder
                       ? null
@@ -66,21 +71,24 @@ export function DataTable<T>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody className="space-y-[10px] select-none">
+          <div className="bg-background-100 w-full h-[5px]" />
+          <TableBody className="select-none">
             {table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
-                className={cn(
-                  "border-b border-background-100 h-[45px] py-[10px] bg-background-150",
-                  onRowClick && "cursor-pointer hover:bg-background-100",
-                )}
+                className="border-b border-background-100 bg-background-150 hover:bg-background-100 cursor-pointer"
                 onClick={() => onRowClick?.(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
                     className={cn(
-                      "text-sm p-0 first:rounded-l-[4px] last:rounded-r-[4px] border-none h-[45px]",
+                      "text-sm p-0 border-none h-[45px] last:pr-[15px]",
+                      cell.column.id.toLowerCase() === "sender"
+                        ? "text-left w-full"
+                        : cell.column.id.toLowerCase() === "type"
+                          ? "text-right"
+                          : "text-left pr-[38px] w-[130px]",
                     )}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

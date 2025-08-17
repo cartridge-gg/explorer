@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { katana, RPC_PROVIDER } from "@/services/rpc";
+import { RPC_PROVIDER } from "@/services/rpc";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { cn, Spinner } from "@cartridge/ui";
 import {
@@ -98,7 +98,7 @@ export function TransactionList() {
         header: "Block",
         cell: (info) => {
           return (
-            <div className="flex items-center gap-[27px] pl-[19px]">
+            <div className="flex items-center gap-[27px] pl-[19px] w-fit">
               <TransactionIcon className="text-background-500 !w-[38px]" />
               <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100">
                 {info.getValue()}
@@ -112,13 +112,11 @@ export function TransactionList() {
         header: "Hash",
         cell: (info) => {
           return (
-            <div className="flex items-center gap-[6px] font-bold text-foreground cursor-pointer transition-all">
-              <CopyableInteger
-                title={info.getValue()}
-                value={info.getValue()}
-                length={1}
-              />
-            </div>
+            <CopyableInteger
+              title={info.getValue()}
+              value={info.getValue()}
+              length={1}
+            />
           );
         },
         size: 200,
@@ -127,13 +125,11 @@ export function TransactionList() {
         header: "Sender",
         cell: (info) => {
           return (
-            <div className="flex items-center gap-[6px] font-bold text-foreground cursor-pointer transition-all">
-              <CopyableInteger
-                title={info.getValue() as string}
-                value={info.getValue()}
-                length={1}
-              />
-            </div>
+            <CopyableInteger
+              title={info.getValue() as string}
+              value={info.getValue()}
+              length={1}
+            />
           );
         },
         size: 200,
@@ -177,7 +173,7 @@ export function TransactionList() {
   }, [updatePageSize]);
 
   return (
-    <div className="w-full lg:max-h-screen h-screen flex flex-col gap-[2px] sl:w-[1134px] pb-[20px]">
+    <div className="flex-1 min-h-0 w-full lg:max-h-screen h-screen flex flex-col gap-[2px] sl:w-[1134px] pb-[10px]">
       <Breadcrumb className="mb-[8px]">
         <BreadcrumbList>
           <BreadcrumbItem>
