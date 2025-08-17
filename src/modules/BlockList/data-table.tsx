@@ -53,7 +53,15 @@ export function DataTable<T>({
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="h-auto p-0 align-top text-left text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[80px] last:pr-[15px]"
+                    className={cn(
+                      "h-auto p-0 align-top text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[80px] last:pr-[15px]",
+                      !(
+                        header.column.id.toLowerCase() === "status" ||
+                        header.column.id.toLowerCase() === "timestamp"
+                      )
+                        ? "text-left"
+                        : "text-right pr-[38px]",
+                    )}
                   >
                     {header.isPlaceholder
                       ? null
@@ -66,7 +74,7 @@ export function DataTable<T>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody className="space-y-[10px] select-none">
+          <TableBody className="select-none">
             {table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
@@ -80,7 +88,13 @@ export function DataTable<T>({
                   <TableCell
                     key={cell.id}
                     className={cn(
-                      "text-sm p-0 first:rounded-l-[4px] last:rounded-r-[4px] border-none h-[45px]",
+                      "text-sm p-0 first:rounded-l-[4px] last:rounded-r-[4px] border-none h-[45px] last:pr-[15px]",
+                      cell.column.id.toLowerCase() === "status" ||
+                        cell.column.id.toLowerCase() === "timestamp"
+                        ? "text-right pr-[38px]"
+                        : cell.column.id.toLowerCase() === "transactions"
+                          ? "text-left w-full"
+                          : "text-left pr-[38px]",
                     )}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

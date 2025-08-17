@@ -82,7 +82,7 @@ export function BlockList() {
         to: total,
         chunkSize: total,
       });
-      return res?.sort((a, b) => b.timestamp - a.timestamp);
+      return res;
     },
     staleTime: 60 * 1000, // 1 minute
     enabled: blockItemPerPage > 0 && isSuccess, // Only run query when we have calculated page size
@@ -113,13 +113,11 @@ export function BlockList() {
         header: "Hash",
         cell: (info) => {
           return (
-            <div className="flex items-center gap-[6px] font-bold text-foreground cursor-pointer transition-all">
-              <CopyableInteger
-                title={info.getValue() as string}
-                value={info.getValue()}
-                length={1}
-              />
-            </div>
+            <CopyableInteger
+              title={info.getValue() as string}
+              value={info.getValue()}
+              length={1}
+            />
           );
         },
         size: 200,
@@ -128,13 +126,11 @@ export function BlockList() {
         header: "Sequencer",
         cell: (info) => {
           return (
-            <div className="flex items-center gap-[6px] font-bold text-foreground cursor-pointer transition-all">
-              <CopyableInteger
-                title={info.getValue() as string}
-                value={info.getValue()}
-                length={1}
-              />
-            </div>
+            <CopyableInteger
+              title={info.getValue() as string}
+              value={info.getValue()}
+              length={1}
+            />
           );
         },
         size: 200,
@@ -160,7 +156,7 @@ export function BlockList() {
       columnHelper.accessor("timestamp", {
         header: "Timestamp",
         cell: (info) => (
-          <span className="text-[12px]/[16px] font-normal text-foreground-100">
+          <span className="text-[12px]/[16px] font-normal text-foreground-100 whitespace-nowrap">
             {dayjs.unix(info.getValue()).fromNow()}
           </span>
         ),
@@ -180,6 +176,12 @@ export function BlockList() {
       pagination: {
         pageSize: blockItemPerPage || 5,
       },
+      sorting: [
+        {
+          id: "timestamp",
+          desc: true,
+        },
+      ],
     },
     manualPagination: false,
   });
@@ -196,7 +198,7 @@ export function BlockList() {
   }, [updatePageSize]);
 
   return (
-    <div className="flex-1 min-h-0 w-full lg:max-h-screen h-screen flex flex-col gap-[2px] sl:w-[1134px] pb-[20px]">
+    <div className="flex-1 min-h-0 w-full lg:max-h-screen h-screen flex flex-col gap-[2px] sl:w-[1134px] pb-[10px]">
       <Breadcrumb className="mb-[8px]">
         <BreadcrumbList>
           <BreadcrumbItem>
