@@ -24,6 +24,7 @@ import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { useScreen } from "@/shared/hooks/useScreen";
 import * as RPC08 from "@starknet-io/types-js";
 import dayjs from "dayjs";
+import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
 
 const columnHelper = createColumnHelper<RPC08.BlockWithTxs>();
 
@@ -223,16 +224,20 @@ export function BlockList() {
       </PageHeader>
 
       <div ref={tableContainerRef} className="flex-1 min-h-0">
-        {isLoading && blocks.length === 0 ? (
+        {isLoading ? (
           <div className="flex justify-center items-center h-full">
             <Spinner />
           </div>
-        ) : (
+        ) : blocks.length ? (
           <DataTable
             table={table}
             onRowClick={(row) => navigate(`../block/${row.block_hash}`)}
             className="h-full"
           />
+        ) : (
+          <div className="h-full flex flex-col p-[15px] bg-background-100 border border-background-200 rounded-t-[4px] rounded-b-[12px]">
+            <EmptyTransactions className="h-full" />
+          </div>
         )}
       </div>
     </div>

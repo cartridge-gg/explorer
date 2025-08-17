@@ -23,6 +23,7 @@ import { DataTable } from "./data-table";
 import type { TTransactionList } from "@/services/katana";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { useScreen } from "@/shared/hooks/useScreen";
+import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
 
 const columnHelper = createColumnHelper<TTransactionList>();
 
@@ -198,16 +199,20 @@ export function TransactionList() {
       </PageHeader>
 
       <div ref={tableContainerRef} className="flex-1 min-h-0">
-        {isLoading && transactions.length === 0 ? (
+        {isLoading ? (
           <div className="flex justify-center items-center h-full">
             <Spinner />
           </div>
-        ) : (
+        ) : transactions.length ? (
           <DataTable
             table={table}
             onRowClick={(row) => navigate(`../tx/${row.transaction_hash}`)}
             className="h-full"
           />
+        ) : (
+          <div className="h-full flex flex-col p-[15px] bg-background-100 border border-background-200 rounded-t-[4px] rounded-b-[12px]">
+            <EmptyTransactions className="h-full" />
+          </div>
         )}
       </div>
     </div>
