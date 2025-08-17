@@ -79,10 +79,7 @@ export function DataTable<T>({
             {table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
-                className={cn(
-                  "border-b border-background-100 py-[10px] bg-background-150",
-                  onRowClick && "cursor-pointer hover:bg-background-100",
-                )}
+                className="border-b border-background-100 bg-background-150 hover:bg-background-100 cursor-pointer"
                 onClick={() => onRowClick?.(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (

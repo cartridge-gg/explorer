@@ -230,7 +230,7 @@ export function BlockList() {
         ) : (
           <DataTable
             table={table}
-            onRowClick={(row) => navigate(`../tx/${row.block_hash}`)}
+            onRowClick={(row) => navigate(`../block/${row.block_hash}`)}
             className="h-full"
           />
         )}
