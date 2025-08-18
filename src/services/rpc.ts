@@ -70,7 +70,6 @@ type ExtendedRpcProvider = RpcProvider & {
   ) => Promise<Array<TTransactionList>>;
   transactionNumber?: (id?: number) => Promise<number>;
   getKatanaURL?: () => Promise<string>;
-  isKatana?: () => boolean;
 };
 
 declare global {
@@ -101,7 +100,6 @@ export const QUERY_KEYS = [
   "getBlocks",
   "getTransactions",
   "transactionNumber",
-  "isKatana",
 ];
 
 // Cache configuration
@@ -121,19 +119,9 @@ export const RPC_PROVIDER = new Proxy(baseRpcProvider as ExtendedRpcProvider, {
     // In embedded mode, check if the method exists on katana instance
     let methodToCall = originalMethod;
 
-    // Check if katana
-    const isKatana = () => {
-      return typeof katana.getBlocks === "function";
-    };
-
-    // Special handling for isKatana method
-    if (methodName === "isKatana") {
-      methodToCall = isKatana;
-    } else {
-      const katanaMethod = katana[methodName as keyof typeof katana];
-      if (typeof katanaMethod === "function") {
-        methodToCall = katanaMethod.bind(katana);
-      }
+    const katanaMethod = katana[methodName as keyof typeof katana];
+    if (typeof katanaMethod === "function") {
+      methodToCall = katanaMethod.bind(katana);
     }
 
     // Early return for properties (non-functions)

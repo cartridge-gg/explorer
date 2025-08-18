@@ -10,11 +10,15 @@ import { useSearch } from "./hooks";
 import { isMac } from "@/constants/device";
 
 export function SearchBar({
+  containerClassName,
   className,
   onNavigate,
+  placeholder,
 }: {
+  containerClassName?: string;
   className?: string;
   onNavigate?: () => void;
+  placeholder?: string;
 }) {
   const [value, setValue] = useState("");
   const searchBarRef = useRef<HTMLDivElement>(null);
@@ -67,7 +71,7 @@ export function SearchBar({
       className={cn(
         "bg-spacer-100 min-w-[200px] w-full h-[42px] flex relative border border-background-200 items-center justify-between shadow rounded-sm",
         value || result || isSearching ? "border-b-none rounded-b-none" : "",
-        className,
+        containerClassName,
       )}
       ref={searchBarRef}
     >
@@ -91,8 +95,11 @@ export function SearchBar({
         value={value}
         ref={inputRef}
         containerClassName="w-full flex-1"
-        className="bg-spacer-100 border-none focus-visible:bg-spacer-100 caret-foreground search-input px-0 font-inter placeholder:font-mono placeholder:text-[14px]/[20px] placeholder:font-normal"
-        placeholder="Search"
+        className={cn(
+          "bg-spacer-100 border-none focus-visible:bg-spacer-100 caret-foreground search-input px-0 font-inter placeholder:font-mono placeholder:text-[14px]/[20px] placeholder:font-normal",
+          className,
+        )}
+        placeholder={placeholder || "Search"}
         onChange={(e) => {
           setValue(e.target.value);
         }}
@@ -113,7 +120,7 @@ export function SearchBar({
       )}
 
       {(value || result || isSearching) && (
-        <div className="bg-background-100 absolute bottom-0 left-[-1px] right-[-1px] translate-y-full border-dashed border-t border-background-200">
+        <div className="bg-spacer-100 absolute bottom-0 left-[-1px] right-[-1px] translate-y-full border-dashed border-t border-background-200">
           <div className="flex flex-col gap-2 p-[10px] border border-background-200 border-t-0 shadow-sm rounded-b-sm">
             {isSearching ? (
               <div className="flex px-2 py-2 items-center justify-center text-sm text-foreground-100 h-10">

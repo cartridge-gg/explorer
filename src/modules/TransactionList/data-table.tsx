@@ -58,7 +58,7 @@ export function DataTable<T>({
                     className={cn(
                       "h-auto p-0 align-top text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[80px] last:pr-[15px]",
                       header.column.id.toLowerCase() === "type"
-                        ? "text-right pr-[38px]"
+                        ? "text-right pr-[50px]"
                         : "text-left",
                     )}
                   >
@@ -75,22 +75,35 @@ export function DataTable<T>({
           </TableHeader>
           <div className="bg-background-100 w-full h-[5px]" />
           <TableBody className="select-none">
-            {table.getRowModel().rows.map((row) => (
+            {table.getRowModel().rows.map((row, rowNum) => (
               <TableRow
                 key={row.id}
                 className="border-b border-background-100 bg-background-150 hover:bg-background-100 cursor-pointer"
                 onClick={() => onRowClick?.(row.original)}
               >
-                {row.getVisibleCells().map((cell) => (
+                {row.getVisibleCells().map((cell, cellNum) => (
                   <TableCell
                     key={cell.id}
                     className={cn(
                       "text-sm p-0 border-none h-[45px] last:pr-[15px]",
+                      // Handles spacing
                       cell.column.id.toLowerCase() === "sender"
                         ? "text-left w-full"
                         : cell.column.id.toLowerCase() === "type"
                           ? "text-right"
-                          : "text-left pr-[38px] w-[130px]",
+                          : "text-left pr-[50px] w-[130px]",
+
+                      // Handles corner
+                      rowNum === 0 && cellNum === 0 && "rounded-tl-md",
+                      rowNum === 0 &&
+                        cellNum === row.getVisibleCells().length - 1 &&
+                        "rounded-tr-md",
+                      rowNum === table.getRowModel().rows.length - 1 &&
+                        cellNum === 0 &&
+                        "rounded-bl-md",
+                      rowNum === table.getRowModel().rows.length - 1 &&
+                        cellNum === row.getVisibleCells().length - 1 &&
+                        "rounded-br-md",
                     )}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

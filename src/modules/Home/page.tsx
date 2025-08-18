@@ -1,7 +1,7 @@
 import { SearchBar } from "@/shared/components/search-bar";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { Link } from "react-router-dom";
-import { Network, Skeleton, cn, Spinner } from "@cartridge/ui";
+import { Network, Skeleton, cn, Spinner, WedgeIcon } from "@cartridge/ui";
 import useChain from "@/shared/hooks/useChain";
 import { useQuery } from "@tanstack/react-query";
 import { RPC_PROVIDER } from "@/services/rpc";
@@ -32,7 +32,7 @@ import {
 const transactionColumnHelper = createColumnHelper<TTransactionList>();
 const blockColumnHelper = createColumnHelper<RPC08.BlockWithTxs>();
 
-const TABLE_OFFSET = 45; // Offset for the tables
+const TABLE_OFFSET = 25; // Offset for the tables
 const ROW_HEIGHT = 45;
 
 export function Home() {
@@ -222,7 +222,7 @@ export function Home() {
         size: 160,
       }),
       blockColumnHelper.accessor("transactions", {
-        header: "Txns",
+        header: "Total transactions",
         cell: (info) => (
           <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize pl-[10px]">
             {info.getValue().length}
@@ -324,7 +324,7 @@ export function Home() {
             )}
           </div>
 
-          <SearchBar className="rounded-t-none" />
+          <SearchBar containerClassName="rounded-t-none" />
         </div>
 
         <Link
@@ -343,23 +343,30 @@ export function Home() {
   }
 
   return (
-    <div className="relative w-full h-screen flex flex-col overflow-hidden">
+    <div className="relative w-full h-screen flex flex-col overflow-hidden pb-[10px]">
       <Header className="py-[20px] flex-shrink-0" />
 
-      <SearchBar />
+      <SearchBar
+        className="placeholder:text-[12px]/[16px]"
+        placeholder="Search blocks / transactions / contracts..."
+      />
 
-      <div className="h-full flex flex-col gap-[15px] overflow-hidden">
+      <div className="h-full flex flex-col gap-[15px] overflow-hidden mt-[20px]">
         {/* Latest Blocks Card */}
-        <Card className="flex-1 flex flex-col gap-0 p-0 rounded-[12px] min-h-0">
-          <CardHeader className="px-[15px] py-[8px] h-[35px] gap-[10px] border-b border-background-200 flex-shrink-0 justify-between">
-            <CardTitle className="text-[13px]/[16px] font-normal p-0">
+        <Card className="flex-1 flex flex-col gap-0 p-0 rounded-md min-h-0">
+          <CardHeader className="p-0 h-[35px] gap-[10px] border-b border-background-200 flex-shrink-0 justify-between">
+            <CardTitle className="text-[13px]/[16px] font-normal p-0 pl-[15px]">
               Latest Blocks
             </CardTitle>
             <Link
               to="./blocks"
-              className="text-[12px] text-foreground-300 hover:text-foreground-100 transition-colors"
+              className="h-full bg-background-100 hover:bg-background-300 pl-[15px] pr-[10px] border-l border-background-300 text-foreground-300 transition-colors flex items-center gap-[5px]"
             >
-              View All →
+              <span className="text-[13px]/[16px] font-normal">View All</span>
+              <WedgeIcon
+                variant="right"
+                className="!w-[20px] !h-[20px] aspect-square"
+              />
             </Link>
           </CardHeader>
 
@@ -372,7 +379,7 @@ export function Home() {
               <BlockDataTable
                 table={blockTable}
                 onRowClick={(row) => navigate(`./block/${row.block_hash}`)}
-                className="h-full"
+                className="h-full border-none"
                 showPagination={false}
               />
             ) : (
@@ -385,15 +392,19 @@ export function Home() {
 
         {/* Latest Transactions Card */}
         <Card className="flex-1 flex flex-col gap-0 p-0 rounded-[12px] min-h-0">
-          <CardHeader className="px-[15px] py-[8px] h-[35px] gap-[10px] border-b border-background-200 flex-shrink-0 justify-between">
-            <CardTitle className="text-[13px]/[16px] font-normal p-0">
+          <CardHeader className="p-0 h-[35px] gap-[10px] border-b border-background-200 flex-shrink-0 justify-between">
+            <CardTitle className="text-[13px]/[16px] font-normal p-0 pl-[15px]">
               Latest Transactions
             </CardTitle>
             <Link
-              to="./transactions"
-              className="text-[12px] text-foreground-300 hover:text-foreground-100 transition-colors"
+              to="./txns"
+              className="h-full bg-background-100 hover:bg-background-300 pl-[15px] pr-[10px] border-l border-background-300 text-foreground-300 transition-colors flex items-center gap-[5px]"
             >
-              View All →
+              <span className="text-[13px]/[16px] font-normal">View All</span>
+              <WedgeIcon
+                variant="right"
+                className="!w-[20px] !h-[20px] aspect-square"
+              />
             </Link>
           </CardHeader>
 
@@ -406,7 +417,7 @@ export function Home() {
               <DataTable
                 table={transactionTable}
                 onRowClick={(row) => navigate(`./tx/${row.transaction_hash}`)}
-                className="h-full"
+                className="h-full border-none"
                 showPagination={false}
               />
             ) : (
