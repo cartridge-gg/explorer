@@ -65,7 +65,7 @@ export function SearchBar({
   return (
     <div
       className={cn(
-        "bg-background-100 min-w-[200px] w-full h-[42px] flex relative border border-background-200 items-center justify-between shadow rounded-sm",
+        "bg-spacer-100 min-w-[200px] w-full h-[42px] flex relative border border-background-200 items-center justify-between shadow rounded-sm",
         value || result || isSearching ? "border-b-none rounded-b-none" : "",
         className,
       )}
@@ -91,7 +91,7 @@ export function SearchBar({
         value={value}
         ref={inputRef}
         containerClassName="w-full flex-1"
-        className="bg-background-100 border-none focus-visible:bg-background-100 caret-foreground search-input px-0 font-inter"
+        className="bg-spacer-100 border-none focus-visible:bg-spacer-100 caret-foreground search-input px-0 font-inter placeholder:font-mono placeholder:text-[14px]/[20px] placeholder:font-normal"
         placeholder="Search"
         onChange={(e) => {
           setValue(e.target.value);
