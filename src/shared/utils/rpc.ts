@@ -2,6 +2,7 @@ import { cairo, shortString } from "starknet";
 import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
 import { TStarknetGetTransactionResponse } from "@/types/types";
+import * as RPCSPEC08 from "@starknet-io/types-js";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
@@ -106,9 +107,7 @@ export const convertObjectValuesToDisplayValues = (
 };
 
 export function parseExecutionResources(
-  execution_resources:
-    | RPCSPEC08.API.EXECUTION_RESOURCES
-    | RPCSPEC07.API.SPEC.EXECUTION_RESOURCES,
+  execution_resources: RPCSPEC08.API.EXECUTION_RESOURCES,
 ) {
   return Object.entries(execution_resources).reduce(
     (acc, [key, value]) => {
