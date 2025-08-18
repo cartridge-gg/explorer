@@ -6,15 +6,22 @@ import {
   TooltipProvider,
   TooltipTrigger,
   Badge,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  Button,
 } from "@cartridge/ui";
 import { Monaco } from "@monaco-editor/react";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, PlusIcon } from "@cartridge/ui";
 import { editor } from "monaco-editor";
 import { useCallback } from "react";
 import { JsonSchema } from "json-schema-library";
 import { isPrimitive } from "@/shared/utils/json-schema";
 import { TypeNode } from "@/shared/utils/abi";
 import { Editor } from "@/shared/components/editor";
+import { formatSnakeCaseToDisplayValue } from "../utils/string";
 
 export function ParamForm({
   params,
@@ -58,13 +65,13 @@ export function ParamForm({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <InfoIcon className="size-3" />
+                    <InfoIcon />
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className="bg-[#F3F3F3] p-2 max-w-[300px]"
+                    className="bg-[#F3F3F3] p-[8px] max-w-[300px]"
                   >
-                    <div>{p.description ?? p.summary}</div>
+                    <h2>{p.description ?? p.summary}</h2>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -195,5 +202,326 @@ function ParamEditor({
         value={value}
       />
     </div>
+  );
+}
+
+// Recursively render a form for a JSON schema
+export function JsonSchemaForm({
+  schema,
+  value,
+  onChange,
+  disabled = false,
+  path = [],
+  className,
+}: {
+  schema: JsonSchema;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onChange: (value: any) => void;
+  disabled?: boolean;
+  path?: string[];
+  className?: string;
+}) {
+  // Remove any reference to oneOfMode or all-fields, always use select for oneOf at any depth
+  if (schema.oneOf) {
+    // Use state to track selected branch
+    const selectedIdx =
+      typeof value?.__oneOfSelected__ === "number"
+        ? value.__oneOfSelected__
+        : 0;
+    const branchValue =
+      value?.__oneOfValue__ ??
+      (schema.oneOf[selectedIdx]?.type === "object"
+        ? {}
+        : schema.oneOf[selectedIdx]?.type === "array"
+          ? []
+          : "");
+    return (
+      <div className="flex flex-col gap-[8px]">
+        <Select
+          value={selectedIdx}
+          onValueChange={(e) => {
+            const idx = Number(e);
+            const newValue = {
+              __oneOfSelected__: idx,
+              __oneOfValue__:
+                schema.oneOf[idx]?.type === "object"
+                  ? {}
+                  : schema.oneOf[idx]?.type === "array"
+                    ? []
+                    : "",
+            };
+            onChange(newValue);
+          }}
+          disabled={disabled}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Theme" />
+          </SelectTrigger>
+          <SelectContent>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            {schema.oneOf.map((option: any, idx: number) => (
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              <SelectItem key={idx} value={idx}>
+                {option.title || `Option ${idx + 1}`}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <JsonSchemaForm
+          schema={schema.oneOf[selectedIdx]}
+          value={branchValue}
+          onChange={(v) =>
+            onChange({ __oneOfSelected__: selectedIdx, __oneOfValue__: v })
+          }
+          disabled={disabled}
+          path={path}
+          className={className}
+        />
+      </div>
+    );
+  }
+  // Handle allOf (merge all subschemas into one object)
+  if (schema.allOf) {
+    // Merge all properties and required fields
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let mergedProps: Record<string, any> = {};
+    let mergedRequired: string[] = [];
+    const mergedSchema = {
+      type: "object",
+      properties: {},
+      required: [] as string[],
+    };
+    for (const sub of schema.allOf) {
+      if (sub.type === "object" && sub.properties) {
+        mergedProps = { ...mergedProps, ...sub.properties };
+        if (Array.isArray(sub.required)) {
+          mergedRequired = [...mergedRequired, ...sub.required];
+        }
+      }
+    }
+    mergedSchema.properties = mergedProps;
+    mergedSchema.required = mergedRequired;
+    return (
+      <JsonSchemaForm
+        schema={mergedSchema}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        path={path}
+        className={className}
+      />
+    );
+  }
+  // Handle object
+  if (schema.type === "object" && schema.properties) {
+    return (
+      <div className="flex flex-col gap-[8px] p-[8px] rounded bg-background-100">
+        {Object.entries(schema.properties).map(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ([key, propSchema]: [string, any]) => {
+            const isAutoPopulated =
+              (key === "type" || key === "version") &&
+              value?.[key] &&
+              path.length > 0 &&
+              (path[0] === "request" || path.includes("request"));
+
+            return (
+              <div key={key} className="flex flex-col gap-[4px]">
+                <div className="flex items-center gap-[5px]">
+                  <label className="text-xs font-semibold">
+                    {formatSnakeCaseToDisplayValue(key)}
+                  </label>
+                  {isAutoPopulated && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge className="px-[4px] py-[1px] rounded-sm bg-blue-100 hover:bg-blue-200 cursor-help">
+                            <span className="text-[9px] text-blue-600">
+                              auto
+                            </span>
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          className="bg-[#F3F3F3] p-[8px] max-w-[200px]"
+                        >
+                          <p className="text-[11px]">
+                            This field is automatically populated based on the
+                            transaction type selection.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+                <JsonSchemaForm
+                  schema={propSchema}
+                  value={value?.[key] ?? ""}
+                  onChange={(v) => onChange({ ...value, [key]: v })}
+                  disabled={disabled}
+                  className={
+                    isAutoPopulated ? "opacity-75 bg-blue-50" : className
+                  }
+                  path={[...path, key]}
+                />
+              </div>
+            );
+          },
+        )}
+      </div>
+    );
+  }
+
+  // Handle enum
+  if (schema.type === "array" && schema.items && schema.items.enum) {
+    const items = schema.items.enum;
+
+    const currentValue = Array.isArray(value) ? value[0] || "" : value || "";
+    const displayValue = currentValue === "" ? "NONE" : currentValue;
+
+    return (
+      <Select
+        value={displayValue}
+        onValueChange={(v) => onChange(v === "NONE" ? [] : [v])}
+        disabled={disabled}
+      >
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select enum value" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="NONE">Empty</SelectItem>
+          {items.map((enumValue: string) => (
+            <SelectItem key={enumValue} value={enumValue}>
+              {enumValue}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    );
+  }
+
+  // Handle array
+  if (schema.type === "array" && schema.items && !schema.items.enum) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const arr: any[] = Array.isArray(value) ? value : [];
+
+    return (
+      <div className="flex flex-col gap-[8px] p-[8px] rounded bg-background-100">
+        {arr.map((item, idx) => (
+          <div key={idx} className="flex flex-row gap-[8px] items-center">
+            <JsonSchemaForm
+              schema={schema.items}
+              value={item}
+              onChange={(v) => {
+                const newArr = arr.slice();
+                newArr[idx] = v;
+                onChange(newArr);
+              }}
+              disabled={disabled}
+              path={[...path, String(idx)]}
+              className={className}
+            />
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => {
+                const newArr = arr.slice();
+                newArr.splice(idx, 1);
+                onChange(newArr);
+              }}
+              disabled={disabled}
+              className="text-xs"
+            >
+              Remove
+            </Button>
+          </div>
+        ))}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onChange([...arr, ""])}
+          disabled={disabled}
+          className="text-xs self-start flex items-center gap-[5px] border-background-300"
+        >
+          <PlusIcon variant="solid" className="!w-[12px]" />
+          <span>Add item</span>
+        </Button>
+      </div>
+    );
+  }
+  // Handle primitive
+  if (
+    schema.type === "string" ||
+    schema.type === "number" ||
+    schema.type === "integer" ||
+    schema.type === "boolean"
+  ) {
+    // Handle enum values in primitive types
+    if (schema.enum) {
+      const displayValue = value === "" ? "NONE" : value || "";
+
+      return (
+        <Select
+          value={displayValue}
+          onValueChange={(v) => onChange(v === "NONE" ? "" : v)}
+          disabled={disabled}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select enum value" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="NONE">Empty</SelectItem>
+            {schema.enum.map((enumValue: string) => (
+              <SelectItem key={enumValue} value={enumValue}>
+                {enumValue}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    return (
+      <Input
+        type={
+          schema.type === "boolean"
+            ? "checkbox"
+            : schema.type === "number" || schema.type === "integer"
+              ? "number"
+              : "text"
+        }
+        checked={schema.type === "boolean" ? Boolean(value) : undefined}
+        value={schema.type === "boolean" ? undefined : (value ?? "")}
+        onChange={(e) => {
+          let v: string | number | boolean = e.target.value;
+          if (schema.type === "boolean") v = e.target.checked;
+          if (schema.type === "number" || schema.type === "integer")
+            v = e.target.value === "" ? "" : Number(e.target.value);
+          onChange(v);
+        }}
+        disabled={disabled}
+        className={cn(
+          "bg-input focus-visible:bg-input border-none caret-foreground font-sans px-[10px] py-[5px] h-[30px] rounded-sm",
+          disabled && "opacity-60 cursor-not-allowed",
+          className,
+        )}
+      />
+    );
+  }
+  // Fallback: show as text
+  return (
+    <Input
+      type="text"
+      value={value ?? ""}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      className={cn(
+        "bg-input focus-visible:bg-input border-none caret-foreground font-sans px-[10px] py-[5px] h-[30px] rounded-sm",
+        className,
+      )}
+    />
   );
 }
