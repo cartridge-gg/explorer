@@ -158,6 +158,12 @@ export function TransactionList() {
       pagination: {
         pageSize: txnItemPerPage || 5,
       },
+      sorting: [
+        {
+          id: "block_number",
+          desc: true,
+        },
+      ],
     },
     manualPagination: false,
   });
