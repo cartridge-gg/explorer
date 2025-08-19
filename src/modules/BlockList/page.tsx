@@ -28,7 +28,7 @@ import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
 
 const columnHelper = createColumnHelper<BlockWithTxHashes>();
 
-const BLOCK_OFFSET = 56; // Offset for the blocks table
+const BLOCK_OFFSET = 69; // Offset for the blocks table
 const ROW_HEIGHT = 45;
 
 export function BlockList() {

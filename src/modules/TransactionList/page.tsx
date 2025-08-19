@@ -27,7 +27,7 @@ import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
 
 const columnHelper = createColumnHelper<TTransactionList>();
 
-const TXN_OFFSET = 56; // Offset for the transaction table
+const TXN_OFFSET = 69; // Offset for the transaction table
 const ROW_HEIGHT = 45;
 
 export function TransactionList() {
