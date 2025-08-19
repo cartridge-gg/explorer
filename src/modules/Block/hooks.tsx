@@ -18,7 +18,7 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import * as RPC08 from "@starknet-io/starknet-types-08";
+import type { EXECUTION_RESOURCES } from "@starknet-io/starknet-types-08";
 
 interface BlockData {
   block?: Awaited<ReturnType<typeof RPC_PROVIDER.getBlockWithReceipts>>;
@@ -91,7 +91,7 @@ export function useBlock({
       const { blockComputeData } = block.transactions.reduce(
         (acc, { receipt }) => {
           // const r = parseExecutionResources(receipt.execution_resources);
-          const r = receipt.execution_resources as RPC08.EXECUTION_RESOURCES;
+          const r = receipt.execution_resources as EXECUTION_RESOURCES;
           acc.blockComputeData.l1_gas += r.l1_gas;
           acc.blockComputeData.l2_gas += r.l2_gas;
           acc.blockComputeData.l1_data_gas += r.l1_data_gas;

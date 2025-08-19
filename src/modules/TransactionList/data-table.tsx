@@ -93,7 +93,7 @@ export function DataTable<T>({
                           ? "text-right"
                           : "text-left pr-[50px] w-[130px]",
 
-                      // Handles corner
+                      // Handles border radius
                       rowNum === 0 && cellNum === 0 && "rounded-tl-md",
                       rowNum === 0 &&
                         cellNum === row.getVisibleCells().length - 1 &&

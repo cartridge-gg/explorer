@@ -22,11 +22,11 @@ import {
 import { DataTable } from "./data-table";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { useScreen } from "@/shared/hooks/useScreen";
-import * as RPC08 from "@starknet-io/types-js";
+import { BlockWithTxHashes } from "starknet";
 import dayjs from "dayjs";
 import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
 
-const columnHelper = createColumnHelper<RPC08.BlockWithTxs>();
+const columnHelper = createColumnHelper<BlockWithTxHashes>();
 
 const BLOCK_OFFSET = 56; // Offset for the blocks table
 const ROW_HEIGHT = 45;
@@ -91,7 +91,7 @@ export function BlockList() {
 
   // Flatten all pages into a single array of transactions
   const blocks = useMemo(() => {
-    return blocksData?.flat() ?? [];
+    return blocksData?.flat() ?? ([] as BlockWithTxHashes[]);
   }, [blocksData]);
 
   const columns = useMemo(

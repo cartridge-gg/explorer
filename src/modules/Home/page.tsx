@@ -16,7 +16,6 @@ import {
 } from "@tanstack/react-table";
 import { useNavigate } from "react-router-dom";
 import type { TTransactionList } from "@/services/katana";
-import * as RPC08 from "@starknet-io/types-js";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { useScreen } from "@/shared/hooks/useScreen";
 import dayjs from "dayjs";
@@ -28,9 +27,10 @@ import {
   CardContent,
   CardTitle,
 } from "@/shared/components/card";
+import type { BlockWithTxHashes } from "starknet";
 
 const transactionColumnHelper = createColumnHelper<TTransactionList>();
-const blockColumnHelper = createColumnHelper<RPC08.BlockWithTxs>();
+const blockColumnHelper = createColumnHelper<BlockWithTxHashes>();
 
 const TABLE_OFFSET = 25; // Offset for the tables
 const ROW_HEIGHT = 45;

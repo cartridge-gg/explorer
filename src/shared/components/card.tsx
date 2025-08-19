@@ -2,7 +2,7 @@ import React, { memo, useCallback } from "react";
 import { cn, Skeleton } from "@cartridge/ui";
 import { abbreviateNumber } from "../utils/number";
 import { toast } from "sonner";
-import * as RPC08 from "@starknet-io/starknet-types-08";
+import type { EXECUTION_RESOURCES } from "@starknet-io/starknet-types-08";
 
 export const Card = React.forwardRef<
   HTMLDivElement,
@@ -115,16 +115,7 @@ export function ExecutionResourcesCard({
   blockComputeData,
   isLoading,
 }: {
-  blockComputeData?: RPC08.EXECUTION_RESOURCES;
-  executions?: {
-    ecdsa: number;
-    keccak: number;
-    bitwise: number;
-    pedersen: number;
-    poseidon: number;
-    range_check: number;
-    segment_arena: number;
-  };
+  blockComputeData?: EXECUTION_RESOURCES;
   isLoading?: boolean;
 }) {
   return (

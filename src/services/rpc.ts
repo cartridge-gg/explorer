@@ -1,4 +1,4 @@
-import { RpcProvider } from "starknet";
+import { BlockWithTxHashes, RpcProvider } from "starknet";
 import { queryClient } from "./query";
 import {
   KATANA,
@@ -6,21 +6,6 @@ import {
   type TUseTransactionsProps,
   type TTransactionList,
 } from "./katana";
-import * as RPC08 from "@starknet-io/types-js";
-
-// Moved from constants/rpc.ts
-export const EXECUTION_RESOURCES_KEY_MAP = {
-  bitwise_builtin_applications: "bitwise",
-  pedersen_builtin_applications: "pedersen",
-  range_check_builtin_applications: "range_check",
-  poseidon_builtin_applications: "poseidon",
-  steps: "steps",
-  ecdsa_builtin_applications: "ecdsa",
-  segment_arena_builtin: "segment_arena",
-  keccak_builtin_applications: "keccak",
-  memory_holes: "memory_holes",
-  ec_op_builtin_applications: "ec_op",
-};
 
 export function getBasePath(): string | undefined {
   // See <vite.config.ts>
@@ -64,7 +49,7 @@ export async function getChainId(): Promise<string> {
 
 // Extended RPC Provider type that includes Katana methods when embedded
 type ExtendedRpcProvider = RpcProvider & {
-  getBlocks?: (props: TUseBlocksProps) => Promise<Array<RPC08.BlockWithTxs>>;
+  getBlocks?: (props: TUseBlocksProps) => Promise<Array<BlockWithTxHashes>>;
   getTransactions?: (
     props: TUseTransactionsProps,
   ) => Promise<Array<TTransactionList>>;
