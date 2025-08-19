@@ -22,12 +22,16 @@ import {
 import { DataTable } from "./data-table";
 import type { TTransactionList } from "@/services/katana";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
-import { useScreen } from "@/shared/hooks/useScreen";
 import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
 
 const columnHelper = createColumnHelper<TTransactionList>();
 
-const TXN_OFFSET = 69; // Offset for the transaction table
+// Header height = 16 + 5 + 8 = 29px
+// Pagination height = 21px
+// Gap between cells and pagination = 15px (ignorable)
+// Bottom card padding = 20px
+// Result = 29 + 21 + 15 + 20 = 85px
+const TXN_OFFSET = 70; // 85 - 15px for gap
 const ROW_HEIGHT = 45;
 
 export function TransactionList() {
@@ -35,7 +39,6 @@ export function TransactionList() {
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
-  const { isMobile } = useScreen();
 
   useEffect(() => {
     const container = tableContainerRef.current;
@@ -57,14 +60,12 @@ export function TransactionList() {
   }, [tableContainerHeight]);
 
   const txnItemPerPage = useMemo(() => {
-    if (isMobile) return 5;
-
     if (tableContainerHeight > 0) {
       const calculatedHeight = tableContainerHeight - TXN_OFFSET;
       return Math.max(1, Math.floor(calculatedHeight / ROW_HEIGHT));
     }
     return 0;
-  }, [tableContainerHeight, isMobile]);
+  }, [tableContainerHeight]);
 
   // Get total transactions
   const { data: totalTxs, isSuccess } = useQuery({
@@ -167,6 +168,10 @@ export function TransactionList() {
     },
     manualPagination: false,
   });
+
+  useEffect(() => {
+    console.log("txn item per page: ", txnItemPerPage);
+  }, [txnItemPerPage]);
 
   // Update table page size when txnItemPerPage changes
   const updatePageSize = useCallback(() => {

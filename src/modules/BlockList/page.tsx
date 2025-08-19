@@ -21,14 +21,18 @@ import {
 } from "@/shared/components/breadcrumb";
 import { DataTable } from "./data-table";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
-import { useScreen } from "@/shared/hooks/useScreen";
 import { BlockWithTxHashes } from "starknet";
 import dayjs from "dayjs";
 import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
 
 const columnHelper = createColumnHelper<BlockWithTxHashes>();
 
-const BLOCK_OFFSET = 69; // Offset for the blocks table
+// Header height = 16 + 5 + 8 = 29px
+// Pagination height = 21px
+// Gap between cells and pagination = 15px (ignorable)
+// Bottom card padding = 20px
+// Result = 29 + 21 + 15 + 20 = 85px
+const BLOCK_OFFSET = 70; // 85 - 15px for gap
 const ROW_HEIGHT = 45;
 
 export function BlockList() {
@@ -36,7 +40,6 @@ export function BlockList() {
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
-  const { isMobile } = useScreen();
 
   useEffect(() => {
     const container = tableContainerRef.current;
@@ -58,14 +61,12 @@ export function BlockList() {
   }, [tableContainerHeight]);
 
   const blockItemPerPage = useMemo(() => {
-    if (isMobile) return 5;
-
     if (tableContainerHeight > 0) {
       const calculatedHeight = tableContainerHeight - BLOCK_OFFSET;
       return Math.max(1, Math.floor(calculatedHeight / ROW_HEIGHT));
     }
     return 0;
-  }, [tableContainerHeight, isMobile]);
+  }, [tableContainerHeight]);
 
   // Get total blocks
   const { data: totalBlocks, isSuccess } = useQuery({
@@ -175,7 +176,7 @@ export function BlockList() {
     getSortedRowModel: getSortedRowModel(),
     initialState: {
       pagination: {
-        pageSize: blockItemPerPage || 5,
+        pageSize: blockItemPerPage,
       },
       sorting: [
         {

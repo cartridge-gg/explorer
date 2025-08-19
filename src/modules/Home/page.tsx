@@ -1,12 +1,9 @@
 import { SearchBar } from "@/shared/components/search-bar";
-import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { Link } from "react-router-dom";
-import { Network, Skeleton, cn, Spinner, WedgeIcon } from "@cartridge/ui";
-import useChain from "@/shared/hooks/useChain";
+import { cn, Spinner, WedgeIcon } from "@cartridge/ui";
 import { useQuery } from "@tanstack/react-query";
 import { RPC_PROVIDER } from "@/services/rpc";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Header } from "@/shared/components/header";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -17,7 +14,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import type { TTransactionList } from "@/services/katana";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
-import { useScreen } from "@/shared/hooks/useScreen";
 import dayjs from "dayjs";
 import { DataTable } from "@/modules/TransactionList/data-table";
 import { DataTable as BlockDataTable } from "@/modules/BlockList/data-table";
@@ -32,14 +28,14 @@ import type { BlockWithTxHashes } from "starknet";
 const transactionColumnHelper = createColumnHelper<TTransactionList>();
 const blockColumnHelper = createColumnHelper<BlockWithTxHashes>();
 
-const TABLE_OFFSET = 25; // Offset for the tables
+// Header height = 16 + 5 + 8 = 29px
+// Bottom card padding = 20px
+// Result = 29 + 20 = 49px
+const TABLE_OFFSET = 49; // Offset for the tables
 const ROW_HEIGHT = 45;
 
 export function Home() {
-  const { id: chainId } = useChain();
-  const { data: specVersion } = useSpecVersion();
   const navigate = useNavigate();
-  const { isMobile } = useScreen();
 
   const [tableContainerHeight, setTableContainerHeight] = useState(0);
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -64,14 +60,12 @@ export function Home() {
   }, [tableContainerHeight]);
 
   const itemsPerPage = useMemo(() => {
-    if (isMobile) return 5;
-
     if (tableContainerHeight > 0) {
       const calculatedHeight = tableContainerHeight - TABLE_OFFSET;
       return Math.max(1, Math.floor(calculatedHeight / ROW_HEIGHT));
     }
     return 0;
-  }, [tableContainerHeight, isMobile]);
+  }, [tableContainerHeight]);
 
   // Get total transactions and blocks
   const { data: totalTxs, isSuccess: isTxSuccess } = useQuery({
@@ -303,49 +297,8 @@ export function Home() {
     updatePageSize();
   }, [updatePageSize]);
 
-  if (isMobile) {
-    return (
-      <div className="relative w-full h-full flex flex-col items-center">
-        <Header className="py-[20px]" />
-
-        <div className="h-full flex flex-col items-center justify-center gap-2 p-1 w-full sm:w-[520px]">
-          <div className="flex gap-2 w-full uppercase text-sm font-bold">
-            <div className="px-3 py-1 flex flex-1 items-center bg-background-200 rounded-tl">
-              Explorer
-            </div>
-
-            {chainId ? (
-              <Network
-                chainId={chainId.id}
-                tooltipTriggerClassName="w-40 bg-background-200 hover:bg-background-300 rounded-none rounded-tr"
-              />
-            ) : (
-              <Skeleton className="w-40 h-10 rounded-none rounded-tr" />
-            )}
-          </div>
-
-          <SearchBar containerClassName="rounded-t-none" />
-        </div>
-
-        <Link
-          to="./json-rpc"
-          className="absolute bottom-[20px] left-0 flex flex-col uppercase text-sm items-start gap-1"
-        >
-          <div className="homepage-chain-info-item border border-background-200 h-[20px] flex items-center">
-            <span className="font-bold px-2">Starknet JSON-RPC Spec</span>
-            <span className="border-l border-background-200 px-2">
-              {specVersion || "N/A"}
-            </span>
-          </div>
-        </Link>
-      </div>
-    );
-  }
-
   return (
-    <div className="relative w-full h-screen flex flex-col overflow-hidden pb-[10px]">
-      <Header className="py-[20px] flex-shrink-0" />
-
+    <div className="relative w-full h-screen flex flex-col gap-[4px] sl:w-[1134px] pb-[10px] overflow-hidden">
       <SearchBar
         className="placeholder:text-[12px]/[16px]"
         placeholder="Search blocks / transactions / contracts..."

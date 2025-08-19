@@ -41,7 +41,7 @@ export function DataTable<T>({
         className,
       )}
     >
-      <div className="flex-1 min-h-0 mb-[15px]">
+      <div className={cn("flex-1 min-h-0", showPagination && "mb-[15px]")}>
         <Table
           containerClassName={cn(containerClassName)}
           className={cn(
