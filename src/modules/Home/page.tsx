@@ -31,24 +31,23 @@ const blockColumnHelper = createColumnHelper<BlockWithTxHashes>();
 // Header height = 16 + 5 + 8 = 29px
 // Bottom card padding = 20px
 // Result = 29 + 20 = 49px
-const TABLE_OFFSET = 49; // Offset for the tables
+// const TABLE_OFFSET = 49; // Offset for the tables
 const ROW_HEIGHT = 45;
 
 export function Home() {
   const navigate = useNavigate();
 
-  const [tableContainerHeight, setTableContainerHeight] = useState(0);
-  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const [availableHeight, setAvailableHeight] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const container = tableContainerRef.current;
+    const container = containerRef.current;
     if (!container) return;
-    if (tableContainerHeight !== 0) return;
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { height } = entry.contentRect;
-        setTableContainerHeight(Math.max(height, 0));
+        setAvailableHeight(Math.max(height, 0));
       }
     });
 
@@ -57,15 +56,39 @@ export function Home() {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [tableContainerHeight]);
+  }, []);
 
+  // Calculate how many rows can fit ensuring both cards stay within screen bounds
   const itemsPerPage = useMemo(() => {
-    if (tableContainerHeight > 0) {
-      const calculatedHeight = tableContainerHeight - TABLE_OFFSET;
-      return Math.max(1, Math.floor(calculatedHeight / ROW_HEIGHT));
+    if (availableHeight > 0) {
+      // Calculate space available for both cards
+      const gapBetweenCards = 15;
+      const bottomPadding = 20;
+      const headerHeight = 35;
+
+      // Total space for both card contents = available - gap - padding - both headers
+      const totalContentSpace =
+        availableHeight - gapBetweenCards - bottomPadding - headerHeight * 2;
+
+      // Space per card content = total content space / 2
+      const contentSpacePerCard = totalContentSpace / 2;
+
+      // Rows that fit in one card
+      const rowsPerCard = Math.floor(contentSpacePerCard / ROW_HEIGHT);
+
+      return Math.max(1, rowsPerCard) - 1;
     }
     return 0;
-  }, [tableContainerHeight]);
+  }, [availableHeight]);
+
+  // Step 3: Calculate optimal card height to fit exactly those rows
+  const cardHeight = useMemo(() => {
+    if (itemsPerPage > 0) {
+      // Optimal height = header + exact rows needed
+      return 35 + itemsPerPage * ROW_HEIGHT;
+    }
+    return "auto";
+  }, [itemsPerPage]);
 
   // Get total transactions and blocks
   const { data: totalTxs, isSuccess: isTxSuccess } = useQuery({
@@ -246,6 +269,10 @@ export function Home() {
     [],
   );
 
+  useEffect(() => {
+    console.log("items Per page: ", itemsPerPage);
+  }, [itemsPerPage]);
+
   const transactionTable = useReactTable({
     data: transactions,
     columns: transactionColumns,
@@ -304,9 +331,12 @@ export function Home() {
         placeholder="Search blocks / transactions / contracts..."
       />
 
-      <div className="h-full flex flex-col gap-[15px] overflow-hidden mt-[20px]">
+      <div
+        ref={containerRef}
+        className="h-full flex flex-col gap-[15px] overflow-hidden mt-[20px]"
+      >
         {/* Latest Blocks Card */}
-        <Card className="flex-1 flex flex-col gap-0 p-0 rounded-md min-h-0">
+        <Card className="flex flex-col gap-0 p-0 rounded-md min-h-0">
           <CardHeader className="p-0 h-[35px] gap-[10px] border-b border-background-200 flex-shrink-0 justify-between">
             <CardTitle className="text-[13px]/[16px] font-normal p-0 pl-[15px]">
               Latest Blocks
@@ -323,7 +353,10 @@ export function Home() {
             </Link>
           </CardHeader>
 
-          <CardContent ref={tableContainerRef} className="flex-1 min-h-0 p-0">
+          <CardContent
+            className="flex-1 min-h-0 p-0"
+            style={{ height: cardHeight }}
+          >
             {isLoadingBlocks ? (
               <div className="flex justify-center items-center h-full">
                 <Spinner />
@@ -332,7 +365,7 @@ export function Home() {
               <BlockDataTable
                 table={blockTable}
                 onRowClick={(row) => navigate(`./block/${row.block_hash}`)}
-                className="h-full border-none"
+                className="h-full border-none pb-[15px]"
                 showPagination={false}
               />
             ) : (
@@ -344,7 +377,7 @@ export function Home() {
         </Card>
 
         {/* Latest Transactions Card */}
-        <Card className="flex-1 flex flex-col gap-0 p-0 rounded-[12px] min-h-0">
+        <Card className="flex flex-col gap-0 p-0 rounded-[12px] min-h-0">
           <CardHeader className="p-0 h-[35px] gap-[10px] border-b border-background-200 flex-shrink-0 justify-between">
             <CardTitle className="text-[13px]/[16px] font-normal p-0 pl-[15px]">
               Latest Transactions
@@ -361,7 +394,10 @@ export function Home() {
             </Link>
           </CardHeader>
 
-          <CardContent className="flex-1 min-h-0 p-0">
+          <CardContent
+            className="flex-1 min-h-0 p-0"
+            style={{ height: cardHeight }}
+          >
             {isLoadingTxs ? (
               <div className="flex justify-center items-center h-full">
                 <Spinner />
@@ -370,7 +406,7 @@ export function Home() {
               <DataTable
                 table={transactionTable}
                 onRowClick={(row) => navigate(`./tx/${row.transaction_hash}`)}
-                className="h-full border-none"
+                className="h-full border-none pb-[15px]"
                 showPagination={false}
               />
             ) : (
