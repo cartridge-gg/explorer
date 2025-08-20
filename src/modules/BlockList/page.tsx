@@ -24,6 +24,7 @@ import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { BlockWithTxHashes } from "starknet";
 import dayjs from "dayjs";
 import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
+import useChain from "@/shared/hooks/useChain";
 
 const columnHelper = createColumnHelper<BlockWithTxHashes>();
 
@@ -36,6 +37,12 @@ const BLOCK_OFFSET = 70; // 85 - 15px for gap
 const ROW_HEIGHT = 45;
 
 export function BlockList() {
+  const chainID = useChain();
+
+  const isKatana = useMemo(() => {
+    return chainID.id?.id === "0x4b4154414e41";
+  }, [chainID.id]);
+
   const [tableContainerHeight, setTableContainerHeight] = useState(0);
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
@@ -72,6 +79,7 @@ export function BlockList() {
   const { data: totalBlocks, isSuccess } = useQuery({
     queryKey: ["txlist", "total"],
     queryFn: async () => await RPC_PROVIDER.getBlockNumber(),
+    enabled: isKatana, // Only run if using katana
   });
 
   // Query for transactions using katana

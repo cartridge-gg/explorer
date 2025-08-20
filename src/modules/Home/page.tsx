@@ -1,6 +1,6 @@
 import { SearchBar } from "@/shared/components/search-bar";
 import { Link } from "react-router-dom";
-import { cn, Spinner, WedgeIcon } from "@cartridge/ui";
+import { cn, Network, Skeleton, Spinner, WedgeIcon } from "@cartridge/ui";
 import { useQuery } from "@tanstack/react-query";
 import { RPC_PROVIDER } from "@/services/rpc";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -24,6 +24,8 @@ import {
   CardTitle,
 } from "@/shared/components/card";
 import type { BlockWithTxHashes } from "starknet";
+import useChain from "@/shared/hooks/useChain";
+import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 
 const transactionColumnHelper = createColumnHelper<TTransactionList>();
 const blockColumnHelper = createColumnHelper<BlockWithTxHashes>();
@@ -35,6 +37,67 @@ const blockColumnHelper = createColumnHelper<BlockWithTxHashes>();
 const ROW_HEIGHT = 45;
 
 export function Home() {
+  const chainID = useChain();
+
+  const isKatana = useMemo(() => {
+    return chainID.id?.id === "0x4b4154414e41";
+  }, [chainID.id]);
+
+  if (chainID.isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (isKatana) {
+    return <TxnAndBlockList />;
+  }
+  return <OldHomePage />;
+}
+
+const OldHomePage = () => {
+  const { id: chainId } = useChain();
+  const { data: specVersion } = useSpecVersion();
+
+  return (
+    <div className="relative w-full h-full flex flex-col items-center">
+      <div className="h-full flex flex-col items-center justify-center gap-2 p-1 w-full sm:w-[520px]">
+        <div className="flex gap-2 w-full uppercase text-sm font-bold">
+          <div className="px-3 py-1 flex flex-1 items-center bg-background-200 rounded-tl">
+            Explorer
+          </div>
+
+          {chainId ? (
+            <Network
+              chainId={chainId.id}
+              tooltipTriggerClassName="w-40 bg-background-200 hover:bg-background-300 rounded-none rounded-tr"
+            />
+          ) : (
+            <Skeleton className="w-40 h-10 rounded-none rounded-tr" />
+          )}
+        </div>
+
+        <SearchBar className="rounded-t-none" />
+      </div>
+
+      <Link
+        to="./json-rpc"
+        className="absolute bottom-[20px] left-0 flex flex-col uppercase text-sm items-start gap-1"
+      >
+        <div className="homepage-chain-info-item border border-background-200 h-[20px] flex items-center">
+          <span className="font-bold px-2">Starknet JSON-RPC Spec</span>
+          <span className="border-l border-background-200 px-2">
+            {specVersion || "N/A"}
+          </span>
+        </div>
+      </Link>
+    </div>
+  );
+};
+
+const TxnAndBlockList = () => {
   const navigate = useNavigate();
 
   const [availableHeight, setAvailableHeight] = useState(0);
@@ -269,10 +332,6 @@ export function Home() {
     [],
   );
 
-  useEffect(() => {
-    console.log("items Per page: ", itemsPerPage);
-  }, [itemsPerPage]);
-
   const transactionTable = useReactTable({
     data: transactions,
     columns: transactionColumns,
@@ -419,21 +478,9 @@ export function Home() {
           </CardContent>
         </Card>
       </div>
-
-      {/*<Link
-        to="./json-rpc"
-        className="absolute bottom-[20px] left-4 flex flex-col uppercase text-sm items-start gap-1 flex-shrink-0"
-      >
-        <div className="homepage-chain-info-item border border-background-200 h-[20px] flex items-center">
-          <span className="font-bold px-2">Starknet JSON-RPC Spec</span>
-          <span className="border-l border-background-200 px-2">
-            {specVersion || "N/A"}
-          </span>
-        </div>
-      </Link>*/}
     </div>
   );
-}
+};
 
 const TransactionIcon = ({ className }: { className?: string }) => {
   return (

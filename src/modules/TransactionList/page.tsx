@@ -23,6 +23,7 @@ import { DataTable } from "./data-table";
 import type { TTransactionList } from "@/services/katana";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
+import useChain from "@/shared/hooks/useChain";
 
 const columnHelper = createColumnHelper<TTransactionList>();
 
@@ -35,6 +36,12 @@ const TXN_OFFSET = 70; // 85 - 15px for gap
 const ROW_HEIGHT = 45;
 
 export function TransactionList() {
+  const chainID = useChain();
+
+  const isKatana = useMemo(() => {
+    return chainID.id?.id === "0x4b4154414e41";
+  }, [chainID.id]);
+
   const [tableContainerHeight, setTableContainerHeight] = useState(0);
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
@@ -71,6 +78,7 @@ export function TransactionList() {
   const { data: totalTxs, isSuccess } = useQuery({
     queryKey: ["txlist", "total"],
     queryFn: async () => await RPC_PROVIDER?.transactionNumber?.(),
+    enabled: isKatana, // Only run if using katana
   });
 
   // Query for transactions using katana
