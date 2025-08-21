@@ -46,6 +46,10 @@ interface StorageDiffData {
 const eventColumnHelper = createColumnHelper<EventData>();
 const storageDiffColumnHelper = createColumnHelper<StorageDiffData>();
 
+export const isReceiptError = (receipt: unknown): receipt is Error => {
+  return receipt instanceof Error;
+};
+
 export function useTransaction({ txHash }: { txHash: string | undefined }) {
   const navigate = useNavigate();
   const [eventsPagination, setEventsPagination] = useState({
@@ -90,10 +94,6 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     },
     retry: false,
   });
-
-  const isReceiptError = (receipt: unknown): receipt is Error => {
-    return receipt instanceof Error;
-  };
 
   const {
     data: { receipt, events: eventsData, blockComputeData },

@@ -1,14 +1,14 @@
 import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
-import dynamicLinksPlugin from "./dynamic-link";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), process.env.IS_EMBEDDED ? dynamicLinksPlugin() : null],
+  plugins: [react()],
   server: {
     port: process.env.NODE_ENV === "development" ? 3004 : undefined,
   },
+  base: process.env.IS_EMBEDDED ? "/explorer/" : "./",
   build: {
     rollupOptions: {
       output: {
@@ -38,9 +38,7 @@ export default defineConfig({
     },
   },
   define: {
-    "import.meta.env.VITE_APP_IS_EMBEDDED": JSON.stringify(
-      process.env.IS_EMBEDDED,
-    ),
+    "import.meta.env.VITE_IS_EMBEDDED": JSON.stringify(process.env.IS_EMBEDDED),
   },
   preview: {
     allowedHosts: ["x.cartridge.gg"],

@@ -1,10 +1,39 @@
+import type {
+  RevertedTransactionReceiptResponse,
+  SuccessfulTransactionReceiptResponse,
+} from "starknet";
+import { RPC_PROVIDER } from "./rpc";
+import { isReceiptError } from "@/modules/Transaction/hooks";
+import { TStarknetGetTransactionResponse } from "@/types/types";
+import type { BlockWithTxHashes } from "starknet";
+
 export interface TUseBlocksProps {
+  /**
+   * Unique identifier for that specific request
+   */
   id?: number;
+  /**
+   * The starting transaction number (inclusive). For descending order, this should be higher
+   * than to.
+   */
   from: number;
+  /**
+   * The ending transaction number (inclusive). If not provided, returns transactions starting
+   * from `from`. For descending order, this should be lower than `from`.
+   */
   to: number;
+  /**
+   * Chunk size
+   */
   chunkSize: number;
+  /**
+   * The token returned from the previous query. If no token is provided the first page is
+   * returned.
+   */
   continuationToken?: string;
 }
+
+export type TUseTransactionsProps = TUseBlocksProps;
 
 /**
  * Custom class to access Katana's properties.
@@ -55,7 +84,9 @@ export class KATANA {
       }),
     });
 
-    return await data.json();
+    const res = await data.json();
+
+    return res.result.blocks as Array<BlockWithTxHashes>;
   }
 
   /**
@@ -68,7 +99,7 @@ export class KATANA {
     to,
     chunkSize,
     continuationToken,
-  }: TUseBlocksProps) {
+  }: TUseTransactionsProps): Promise<Array<TTransactionList>> {
     const data = await fetch(this.katanaURL, {
       method: "POST",
       headers: {
@@ -91,7 +122,34 @@ export class KATANA {
       }),
     });
 
-    return await data.json();
+    const res = await data.json();
+
+    const txns = res.result
+      .transactions as Array<TStarknetGetTransactionResponse>;
+
+    const processed = await Promise.all(
+      txns.map(async (tx) => {
+        const receiptResult = await RPC_PROVIDER.getTransactionReceipt(
+          tx.transaction_hash,
+        );
+
+        if (isReceiptError(receiptResult)) {
+          console.error("receipt result error: ", receiptResult);
+          throw new Error("Transaction receipt error");
+        }
+
+        const receipt = receiptResult.value as
+          | SuccessfulTransactionReceiptResponse
+          | RevertedTransactionReceiptResponse;
+
+        return {
+          ...tx,
+          block_number: receipt.block_number,
+        };
+      }),
+    );
+
+    return processed;
   }
 
   /**
@@ -100,7 +158,7 @@ export class KATANA {
    *
    * Similar to `starknet_blockNumber` but for transaction.
    */
-  async transactionNumber(id?: number) {
+  async transactionNumber(id?: number): Promise<number> {
     const data = await fetch(this.katanaURL, {
       method: "POST",
       headers: {
@@ -114,6 +172,12 @@ export class KATANA {
       }),
     });
 
-    return await data.json();
+    const res = await data.json();
+
+    return Number(res.result);
   }
 }
+
+export type TTransactionList = TStarknetGetTransactionResponse & {
+  block_number: number;
+};
