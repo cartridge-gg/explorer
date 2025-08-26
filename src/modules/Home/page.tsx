@@ -27,6 +27,7 @@ import type { BlockWithTxHashes } from "starknet";
 import useChain from "@/shared/hooks/useChain";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { formatSnakeCaseToDisplayValue } from "@/shared/utils/string";
+import { useHasKatanaExtensions } from "@/shared/hooks/useRpcCapabilities";
 
 const transactionColumnHelper = createColumnHelper<TTransactionList>();
 const blockColumnHelper = createColumnHelper<BlockWithTxHashes>();
@@ -38,13 +39,9 @@ const blockColumnHelper = createColumnHelper<BlockWithTxHashes>();
 const ROW_HEIGHT = 45;
 
 export function Home() {
-  const chainID = useChain();
+  const { hasKatanaExtensions, isLoading } = useHasKatanaExtensions();
 
-  const isKatana = useMemo(() => {
-    return chainID.id?.id === "0x4b4154414e41";
-  }, [chainID.id]);
-
-  if (chainID.isLoading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <Spinner />
@@ -52,7 +49,7 @@ export function Home() {
     );
   }
 
-  if (isKatana) {
+  if (hasKatanaExtensions) {
     return <TxnAndBlockList />;
   }
   return <OldHomePage />;

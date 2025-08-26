@@ -93,6 +93,55 @@ export const CACHE_CONFIG = {
   gcTime: 1000 * 60 * 60 * 24, // 24 hours
 };
 
+export interface RpcCapabilities {
+  hasKatanaExtensions: boolean;
+  supportedMethods: string[];
+}
+
+// Function to detect RPC capabilities
+export async function detectRpcCapabilities(): Promise<RpcCapabilities> {
+  const katanaMethods = [
+    "starknet_getBlocks",
+    "starknet_getTransactions",
+    "starknet_transactionNumber",
+  ];
+  const supportedMethods: string[] = [];
+
+  // Test each method to see if it's supported
+  for (const method of katanaMethods) {
+    try {
+      // Make a test call to see if the method exists
+      const response = await fetch(getRpcUrl(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method,
+          params:
+            method === "starknet_transactionNumber"
+              ? []
+              : [{ from: 0, to: 0, result_page_request: { chunk_size: 1 } }],
+          id: 1,
+        }),
+      });
+
+      const result = await response.json();
+
+      // If we don't get a "method not found" error, the method is supported
+      if (!result.error || result.error.code !== -32601) {
+        supportedMethods.push(method);
+      }
+    } catch (error) {
+      console.warn(`Failed to test method ${method}:`, error);
+    }
+  }
+
+  return {
+    hasKatanaExtensions: supportedMethods.length === katanaMethods.length,
+    supportedMethods,
+  };
+}
+
 export const katana = new KATANA(import.meta.env.VITE_RPC_URL);
 
 // Create a proxy that intercepts method calls and adds caching for specific methods

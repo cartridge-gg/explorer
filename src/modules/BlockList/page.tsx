@@ -6,7 +6,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { RPC_PROVIDER } from "@/services/rpc";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
@@ -24,7 +24,7 @@ import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { BlockWithTxHashes } from "starknet";
 import dayjs from "dayjs";
 import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
-import useChain from "@/shared/hooks/useChain";
+import { useHasKatanaExtensions } from "@/shared/hooks/useRpcCapabilities";
 import { formatSnakeCaseToDisplayValue } from "@/shared/utils/string";
 
 const columnHelper = createColumnHelper<BlockWithTxHashes>();
@@ -38,11 +38,8 @@ const BLOCK_OFFSET = 70; // 85 - 15px for gap
 const ROW_HEIGHT = 45;
 
 export function BlockList() {
-  const chainID = useChain();
-
-  const isKatana = useMemo(() => {
-    return chainID.id?.id === "0x4b4154414e41";
-  }, [chainID.id]);
+  const { hasKatanaExtensions, isLoading: capabilitiesLoading } =
+    useHasKatanaExtensions();
 
   const [tableContainerHeight, setTableContainerHeight] = useState(0);
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -80,7 +77,7 @@ export function BlockList() {
   const { data: totalBlocks, isSuccess } = useQuery({
     queryKey: ["txlist", "total"],
     queryFn: async () => await RPC_PROVIDER.getBlockNumber(),
-    enabled: isKatana, // Only run if using katana
+    enabled: hasKatanaExtensions && !capabilitiesLoading, // Only run if katana extensions are available
   });
 
   // Query for transactions using katana
@@ -96,7 +93,7 @@ export function BlockList() {
       return res;
     },
     staleTime: 60 * 1000, // 1 minute
-    enabled: blockItemPerPage > 0 && isSuccess, // Only run query when we have calculated page size
+    enabled: blockItemPerPage > 0 && isSuccess && hasKatanaExtensions, // Only run query when we have calculated page size and katana extensions
   });
 
   // Flatten all pages into a single array of transactions
@@ -213,7 +210,9 @@ export function BlockList() {
       <Breadcrumb className="mb-[8px]">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+            <BreadcrumbLink asChild>
+              <Link to="..">Explorer</Link>
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>

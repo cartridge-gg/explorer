@@ -108,7 +108,7 @@ export function Block() {
   }, [tableContainerHeight, isMobile]);
 
   const {
-    data: { blockId, block, txs, events, executions, blockComputeData },
+    data: { blockId, block, txs, events, blockComputeData },
     error,
   } = useBlock({
     txnPageSize: txnItemPerPage,
@@ -595,10 +595,7 @@ export function Block() {
             </Card>
           </div>
 
-          <ExecutionResourcesCard
-            blockComputeData={blockComputeData}
-            executions={executions}
-          />
+          <ExecutionResourcesCard blockComputeData={blockComputeData!} />
         </div>
       )}
     </div>
