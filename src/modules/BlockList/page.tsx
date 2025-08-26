@@ -25,6 +25,7 @@ import { BlockWithTxHashes } from "starknet";
 import dayjs from "dayjs";
 import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
 import useChain from "@/shared/hooks/useChain";
+import { formatSnakeCaseToDisplayValue } from "@/shared/utils/string";
 
 const columnHelper = createColumnHelper<BlockWithTxHashes>();
 
@@ -157,8 +158,8 @@ export function BlockList() {
       columnHelper.accessor("status", {
         header: "Status",
         cell: (info) => (
-          <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize">
-            {info.getValue()}
+          <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize whitespace-nowrap">
+            {formatSnakeCaseToDisplayValue(info.getValue() as string)}
           </span>
         ),
         size: 100,

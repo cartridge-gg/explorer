@@ -24,6 +24,7 @@ import type { TTransactionList } from "@/services/katana";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
 import useChain from "@/shared/hooks/useChain";
+import { formatSnakeCaseToDisplayValue } from "@/shared/utils/string";
 
 const columnHelper = createColumnHelper<TTransactionList>();
 
@@ -148,7 +149,7 @@ export function TransactionList() {
         header: "Type",
         cell: (info) => (
           <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize">
-            {info.getValue()}
+            {formatSnakeCaseToDisplayValue(info.getValue())}
           </span>
         ),
         size: 100,

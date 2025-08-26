@@ -26,6 +26,7 @@ import {
 import type { BlockWithTxHashes } from "starknet";
 import useChain from "@/shared/hooks/useChain";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
+import { formatSnakeCaseToDisplayValue } from "@/shared/utils/string";
 
 const transactionColumnHelper = createColumnHelper<TTransactionList>();
 const blockColumnHelper = createColumnHelper<BlockWithTxHashes>();
@@ -250,7 +251,7 @@ const TxnAndBlockList = () => {
         header: "Type",
         cell: (info) => (
           <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize">
-            {info.getValue()}
+            {formatSnakeCaseToDisplayValue(info.getValue())}
           </span>
         ),
         size: 80,
@@ -313,8 +314,8 @@ const TxnAndBlockList = () => {
       blockColumnHelper.accessor("status", {
         header: "Status",
         cell: (info) => (
-          <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize">
-            {info.getValue()}
+          <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize whitespace-nowrap">
+            {formatSnakeCaseToDisplayValue(info.getValue() as string)}
           </span>
         ),
         size: 100,
