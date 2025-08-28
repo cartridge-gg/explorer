@@ -4,8 +4,8 @@ import {
   KATANA,
   type TUseBlocksProps,
   type TUseTransactionsProps,
-  type TTransactionList,
 } from "./katana";
+import type { TransactionReceipt } from "starknet";
 
 export function getBasePath(): string | undefined {
   // See <vite.config.ts>
@@ -52,7 +52,7 @@ type ExtendedRpcProvider = RpcProvider & {
   getBlocks?: (props: TUseBlocksProps) => Promise<Array<BlockWithTxHashes>>;
   getTransactions?: (
     props: TUseTransactionsProps,
-  ) => Promise<Array<TTransactionList>>;
+  ) => Promise<Array<TransactionReceipt>>;
   transactionNumber?: (id?: number) => Promise<number>;
   getKatanaURL?: () => Promise<string>;
 };
@@ -67,6 +67,7 @@ declare global {
 // Create the base RPC provider
 const baseRpcProvider = new RpcProvider({
   nodeUrl: getRpcUrl(),
+  specVersion: "0.8.1",
 });
 
 export const QUERY_KEYS = [

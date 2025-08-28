@@ -1,11 +1,4 @@
-import type {
-  RevertedTransactionReceiptResponse,
-  SuccessfulTransactionReceiptResponse,
-} from "starknet";
-import { RPC_PROVIDER } from "./rpc";
-import { isReceiptError } from "@/modules/Transaction/hooks";
-import { TStarknetGetTransactionResponse } from "@/types/types";
-import type { BlockWithTxHashes } from "starknet";
+import type { BlockWithTxHashes, TransactionReceipt } from "starknet";
 
 export interface TUseBlocksProps {
   /**
@@ -99,7 +92,7 @@ export class KATANA {
     to,
     chunkSize,
     continuationToken,
-  }: TUseTransactionsProps): Promise<Array<TTransactionList>> {
+  }: TUseTransactionsProps): Promise<Array<TransactionReceipt>> {
     const data = await fetch(this.katanaURL, {
       method: "POST",
       headers: {
@@ -124,32 +117,7 @@ export class KATANA {
 
     const res = await data.json();
 
-    const txns = res.result
-      .transactions as Array<TStarknetGetTransactionResponse>;
-
-    const processed = await Promise.all(
-      txns.map(async (tx) => {
-        const receiptResult = await RPC_PROVIDER.getTransactionReceipt(
-          tx.transaction_hash,
-        );
-
-        if (isReceiptError(receiptResult)) {
-          console.error("receipt result error: ", receiptResult);
-          throw new Error("Transaction receipt error");
-        }
-
-        const receipt = receiptResult.value as
-          | SuccessfulTransactionReceiptResponse
-          | RevertedTransactionReceiptResponse;
-
-        return {
-          ...tx,
-          block_number: receipt.block_number,
-        };
-      }),
-    );
-
-    return processed;
+    return res.result.transactions as Array<TransactionReceipt>;
   }
 
   /**
@@ -177,7 +145,3 @@ export class KATANA {
     return Number(res.result);
   }
 }
-
-export type TTransactionList = TStarknetGetTransactionResponse & {
-  block_number: number;
-};

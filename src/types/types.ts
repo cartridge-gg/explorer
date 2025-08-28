@@ -21,6 +21,10 @@ import type {
   DECLARE_TXN_V3,
   DECLARE_TXN_V1,
 } from "@starknet-io/starknet-types-08";
+import {
+  RevertedTransactionReceiptResponse,
+  SuccessfulTransactionReceiptResponse,
+} from "starknet";
 
 // Function and API Types
 export interface FunctionResult<T = unknown> {

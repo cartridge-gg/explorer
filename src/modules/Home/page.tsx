@@ -12,7 +12,6 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { useNavigate } from "react-router-dom";
-import type { TTransactionList } from "@/services/katana";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
 import dayjs from "dayjs";
 import { DataTable } from "@/modules/TransactionList/data-table";
@@ -23,13 +22,13 @@ import {
   CardContent,
   CardTitle,
 } from "@/shared/components/card";
-import type { BlockWithTxHashes } from "starknet";
+import type { BlockWithTxHashes, TransactionReceipt } from "starknet";
 import useChain from "@/shared/hooks/useChain";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { formatSnakeCaseToDisplayValue } from "@/shared/utils/string";
 import { useHasKatanaExtensions } from "@/shared/hooks/useRpcCapabilities";
 
-const transactionColumnHelper = createColumnHelper<TTransactionList>();
+const transactionColumnHelper = createColumnHelper<TransactionReceipt>();
 const blockColumnHelper = createColumnHelper<BlockWithTxHashes>();
 
 // Header height = 16 + 5 + 8 = 29px
@@ -231,13 +230,14 @@ const TxnAndBlockList = () => {
         },
         size: 180,
       }),
-      transactionColumnHelper.accessor("sender_address", {
+      transactionColumnHelper.accessor("events.from_address", {
         header: "Sender",
         cell: (info) => {
+          console.log("sender:", info);
           return (
             <CopyableInteger
               title={info.getValue() as string}
-              value={info.getValue()}
+              value={info.getValue() as string}
               length={1}
             />
           );
