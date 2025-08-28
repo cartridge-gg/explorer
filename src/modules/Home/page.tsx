@@ -216,6 +216,8 @@ const TxnAndBlockList = () => {
             </div>
           );
         },
+        footer: (info) => info.column.id,
+        size: 158,
       }),
       transactionColumnHelper.accessor("transaction.transaction_hash", {
         header: "Hash",
@@ -228,6 +230,8 @@ const TxnAndBlockList = () => {
             />
           );
         },
+        footer: (info) => info.column.id,
+        size: 158,
       }),
       transactionColumnHelper.accessor("transaction.sender_address", {
         header: "Sender",
@@ -235,11 +239,12 @@ const TxnAndBlockList = () => {
           return (
             <CopyableInteger
               title={info.getValue() as string}
-              value={info.getValue() as string}
+              value={info.getValue()}
               length={1}
             />
           );
         },
+        footer: (info) => info.column.id,
       }),
       transactionColumnHelper.accessor("transaction.type", {
         header: "Type",
@@ -248,6 +253,11 @@ const TxnAndBlockList = () => {
             {formatSnakeCaseToDisplayValue(info.getValue())}
           </span>
         ),
+        footer: (info) => info.column.id,
+        size: 158,
+        meta: {
+          align: "right",
+        },
       }),
     ],
     [],
@@ -267,7 +277,8 @@ const TxnAndBlockList = () => {
             </div>
           );
         },
-        size: 120,
+        footer: (info) => info.column.id,
+        size: 158,
       }),
       blockColumnHelper.accessor("block_hash", {
         header: "Hash",
@@ -280,7 +291,8 @@ const TxnAndBlockList = () => {
             />
           );
         },
-        size: 180,
+        footer: (info) => info.column.id,
+        size: 158,
       }),
       blockColumnHelper.accessor("sequencer_address", {
         header: "Sequencer",
@@ -293,16 +305,17 @@ const TxnAndBlockList = () => {
             />
           );
         },
-        size: 160,
+        footer: (info) => info.column.id,
+        size: 158,
       }),
       blockColumnHelper.accessor("transactions", {
-        header: "Total transactions",
+        header: "Total Transactions",
         cell: (info) => (
           <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize pl-[10px]">
             {info.getValue().length}
           </span>
         ),
-        size: 60,
+        footer: (info) => info.column.id,
       }),
       blockColumnHelper.accessor("status", {
         header: "Status",
@@ -311,16 +324,24 @@ const TxnAndBlockList = () => {
             {formatSnakeCaseToDisplayValue(info.getValue() as string)}
           </span>
         ),
-        size: 100,
+        footer: (info) => info.column.id,
+        size: 158,
+        meta: {
+          align: "right",
+        },
       }),
       blockColumnHelper.accessor("timestamp", {
-        header: "Age",
+        header: "Timestamp",
         cell: (info) => (
           <span className="text-[12px]/[16px] font-normal text-foreground-100 whitespace-nowrap">
             {dayjs.unix(info.getValue()).fromNow()}
           </span>
         ),
-        size: 80,
+        footer: (info) => info.column.id,
+        size: 158,
+        meta: {
+          align: "right",
+        },
       }),
     ],
     [],
