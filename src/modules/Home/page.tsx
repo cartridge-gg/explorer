@@ -28,6 +28,7 @@ import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { formatSnakeCaseToDisplayValue } from "@/shared/utils/string";
 import { useHasKatanaExtensions } from "@/shared/hooks/useRpcCapabilities";
 import { TTransactionList } from "@/types/types";
+import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
 
 const transactionColumnHelper = createColumnHelper<TTransactionList>();
 const blockColumnHelper = createColumnHelper<BlockWithTxHashes>();
@@ -443,8 +444,17 @@ const TxnAndBlockList = () => {
                 showPagination={false}
               />
             ) : (
-              <div className="h-full flex items-center justify-center">
-                <span className="text-foreground-300">No blocks available</span>
+              <div
+                id="empty-blocks"
+                style={{
+                  height: cardHeight,
+                }}
+                className="flex items-center justify-center p-[10px]"
+              >
+                <EmptyTransactions
+                  message="No blocks available"
+                  className="h-full w-full"
+                />
               </div>
             )}
           </CardContent>
@@ -486,10 +496,17 @@ const TxnAndBlockList = () => {
                 showPagination={false}
               />
             ) : (
-              <div className="h-full flex items-center justify-center">
-                <span className="text-foreground-300">
-                  No transactions available
-                </span>
+              <div
+                id="empty-txns"
+                style={{
+                  height: cardHeight,
+                }}
+                className="flex items-center justify-center p-[10px]"
+              >
+                <EmptyTransactions
+                  message="No transactions available"
+                  className="h-full w-full"
+                />
               </div>
             )}
           </CardContent>

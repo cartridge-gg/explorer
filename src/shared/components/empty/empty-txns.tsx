@@ -2,10 +2,14 @@ import React from "react";
 import { Card, CardContent } from "../card";
 import { cn } from "@cartridge/ui";
 
+interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
+  message?: string;
+}
+
 export const EmptyTransactions = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
+  EmptyStateProps
+>(({ message, className, ...props }, ref) => (
   <Card
     ref={ref}
     className={cn(
@@ -16,7 +20,7 @@ export const EmptyTransactions = React.forwardRef<
   >
     <CardContent className="flex items-center justify-center">
       <p className="text-[13px]/[16px] font-normal text-foreground-400">
-        Data not available
+        {message || "Data not available"}
       </p>
     </CardContent>
   </Card>
