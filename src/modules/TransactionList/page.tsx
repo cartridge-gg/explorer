@@ -20,7 +20,7 @@ import {
   BreadcrumbPage,
 } from "@/shared/components/breadcrumb";
 import { DataTable } from "./data-table";
-import type { TTransactionList } from "@/services/katana";
+import type { TTransactionList } from "@/types/types";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
 import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
 import { formatSnakeCaseToDisplayValue } from "@/shared/utils/string";
@@ -102,7 +102,7 @@ export function TransactionList() {
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor("block_number", {
+      columnHelper.accessor("receipt.block_number", {
         header: "Block",
         cell: (info) => {
           return (
@@ -114,9 +114,8 @@ export function TransactionList() {
             </div>
           );
         },
-        size: 140,
       }),
-      columnHelper.accessor("transaction_hash", {
+      columnHelper.accessor("transaction.transaction_hash", {
         header: "Hash",
         cell: (info) => {
           return (
@@ -127,9 +126,8 @@ export function TransactionList() {
             />
           );
         },
-        size: 200,
       }),
-      columnHelper.accessor("sender_address", {
+      columnHelper.accessor("transaction.sender_address", {
         header: "Sender",
         cell: (info) => {
           return (
@@ -140,16 +138,14 @@ export function TransactionList() {
             />
           );
         },
-        size: 200,
       }),
-      columnHelper.accessor("type", {
+      columnHelper.accessor("transaction.type", {
         header: "Type",
         cell: (info) => (
           <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize">
             {formatSnakeCaseToDisplayValue(info.getValue())}
           </span>
         ),
-        size: 100,
       }),
     ],
     [],

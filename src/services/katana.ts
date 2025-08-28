@@ -1,4 +1,5 @@
-import type { BlockWithTxHashes, TransactionReceipt } from "starknet";
+import type { BlockWithTxHashes } from "starknet";
+import type { TTransactionList } from "@/types/types";
 
 export interface TUseBlocksProps {
   /**
@@ -92,7 +93,7 @@ export class KATANA {
     to,
     chunkSize,
     continuationToken,
-  }: TUseTransactionsProps): Promise<Array<TransactionReceipt>> {
+  }: TUseTransactionsProps): Promise<Array<TTransactionList>> {
     const data = await fetch(this.katanaURL, {
       method: "POST",
       headers: {
@@ -117,7 +118,7 @@ export class KATANA {
 
     const res = await data.json();
 
-    return res.result.transactions as Array<TransactionReceipt>;
+    return res.result.transactions as Array<TTransactionList>;
   }
 
   /**

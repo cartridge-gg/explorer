@@ -20,6 +20,7 @@ import type {
   DECLARE_TXN_V2,
   DECLARE_TXN_V3,
   DECLARE_TXN_V1,
+  TransactionReceipt,
 } from "@starknet-io/starknet-types-09";
 
 // Function and API Types
@@ -163,3 +164,8 @@ export type TStarknetGetTransactionResponse = MergeMultiple<
 > & {
   transaction_hash: string;
 };
+
+export interface TTransactionList {
+  transaction: TStarknetGetTransactionResponse;
+  receipt: TransactionReceipt;
+}

@@ -22,13 +22,14 @@ import {
   CardContent,
   CardTitle,
 } from "@/shared/components/card";
-import type { BlockWithTxHashes, TransactionReceipt } from "starknet";
+import type { BlockWithTxHashes } from "starknet";
 import useChain from "@/shared/hooks/useChain";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import { formatSnakeCaseToDisplayValue } from "@/shared/utils/string";
 import { useHasKatanaExtensions } from "@/shared/hooks/useRpcCapabilities";
+import { TTransactionList } from "@/types/types";
 
-const transactionColumnHelper = createColumnHelper<TransactionReceipt>();
+const transactionColumnHelper = createColumnHelper<TTransactionList>();
 const blockColumnHelper = createColumnHelper<BlockWithTxHashes>();
 
 // Header height = 16 + 5 + 8 = 29px
@@ -203,7 +204,7 @@ const TxnAndBlockList = () => {
 
   const transactionColumns = useMemo(
     () => [
-      transactionColumnHelper.accessor("block_number", {
+      transactionColumnHelper.accessor("receipt.block_number", {
         header: "Block",
         cell: (info) => {
           return (
@@ -215,9 +216,8 @@ const TxnAndBlockList = () => {
             </div>
           );
         },
-        size: 120,
       }),
-      transactionColumnHelper.accessor("transaction_hash", {
+      transactionColumnHelper.accessor("transaction.transaction_hash", {
         header: "Hash",
         cell: (info) => {
           return (
@@ -228,12 +228,10 @@ const TxnAndBlockList = () => {
             />
           );
         },
-        size: 180,
       }),
-      transactionColumnHelper.accessor("events.from_address", {
+      transactionColumnHelper.accessor("transaction.sender_address", {
         header: "Sender",
         cell: (info) => {
-          console.log("sender:", info);
           return (
             <CopyableInteger
               title={info.getValue() as string}
@@ -242,16 +240,14 @@ const TxnAndBlockList = () => {
             />
           );
         },
-        size: 180,
       }),
-      transactionColumnHelper.accessor("type", {
+      transactionColumnHelper.accessor("transaction.type", {
         header: "Type",
         cell: (info) => (
           <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize">
             {formatSnakeCaseToDisplayValue(info.getValue())}
           </span>
         ),
-        size: 80,
       }),
     ],
     [],

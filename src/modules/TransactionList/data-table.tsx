@@ -57,7 +57,7 @@ export function DataTable<T>({
                     key={header.id}
                     className={cn(
                       "h-auto p-0 align-top text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[80px] last:pr-[15px]",
-                      header.column.id.toLowerCase() === "type"
+                      header.column.id.toLowerCase() === "transaction_type"
                         ? "text-right pr-[50px]"
                         : "text-left",
                     )}
@@ -87,9 +87,10 @@ export function DataTable<T>({
                     className={cn(
                       "text-sm p-0 border-none h-[45px] last:pr-[15px]",
                       // Handles spacing
-                      cell.column.id.toLowerCase() === "sender"
+                      cell.column.id.toLowerCase() ===
+                        "transaction_sender_address"
                         ? "text-left w-full"
-                        : cell.column.id.toLowerCase() === "type"
+                        : cell.column.id.toLowerCase() === "transaction_type"
                           ? "text-right"
                           : "text-left pr-[50px] w-[130px]",
 
