@@ -217,7 +217,9 @@ export function TransactionList() {
         ) : transactions.length ? (
           <DataTable
             table={table}
-            onRowClick={(row) => navigate(`../tx/${row.transaction_hash}`)}
+            onRowClick={(row) =>
+              navigate(`../tx/${row.transaction.transaction_hash}`)
+            }
             className="h-full"
           />
         ) : (

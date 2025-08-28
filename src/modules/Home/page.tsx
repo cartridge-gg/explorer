@@ -458,7 +458,9 @@ const TxnAndBlockList = () => {
             ) : transactions.length ? (
               <DataTable
                 table={transactionTable}
-                onRowClick={(row) => navigate(`./tx/${row.transaction_hash}`)}
+                onRowClick={(row) =>
+                  navigate(`./tx/${row.transaction.transaction_hash}`)
+                }
                 className="h-full border-none pb-[15px]"
                 showPagination={false}
               />
