@@ -55,11 +55,19 @@ export function DataTable<T>({
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
+                    id={header.id}
+                    colSpan={header.colSpan}
+                    style={{
+                      minWidth: header.column.columnDef.size,
+                      maxWidth: header.column.columnDef.size,
+                    }}
                     className={cn(
-                      "h-auto p-0 align-top text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[80px] last:pr-[15px]",
+                      "h-auto p-0 align-top text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300",
                       header.column.id.toLowerCase() === "transaction_type"
-                        ? "text-right pr-[50px]"
+                        ? "text-right pr-[25px]"
                         : "text-left",
+                      header.column.id.toLowerCase() ===
+                        "receipt_block_number" && "pl-[85px]",
                     )}
                   >
                     {header.isPlaceholder
@@ -84,15 +92,17 @@ export function DataTable<T>({
                 {row.getVisibleCells().map((cell, cellNum) => (
                   <TableCell
                     key={cell.id}
+                    style={{
+                      minWidth: cell.column.columnDef.size,
+                      maxWidth: cell.column.columnDef.size,
+                    }}
                     className={cn(
-                      "text-sm p-0 border-none h-[45px] last:pr-[15px]",
+                      "text-sm p-0 border-none h-[45px]",
                       // Handles spacing
                       cell.column.id.toLowerCase() ===
-                        "transaction_sender_address"
-                        ? "text-left w-full"
-                        : cell.column.id.toLowerCase() === "transaction_type"
-                          ? "text-right"
-                          : "text-left pr-[50px] w-[130px]",
+                        "transaction_sender_address" && "w-full",
+                      cell.column.id.toLowerCase() === "transaction_type" &&
+                        "pr-[25px]",
 
                       // Handles border radius
                       rowNum === 0 && cellNum === 0 && "rounded-tl-md",
@@ -106,6 +116,7 @@ export function DataTable<T>({
                         cellNum === row.getVisibleCells().length - 1 &&
                         "rounded-br-md",
                     )}
+                    {...cell.column.columnDef.meta}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

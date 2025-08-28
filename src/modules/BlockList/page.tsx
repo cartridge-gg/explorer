@@ -154,7 +154,6 @@ export function BlockList() {
           </span>
         ),
         footer: (info) => info.column.id,
-        // size: Number.MAX_SAFE_INTEGER,
       }),
       columnHelper.accessor("status", {
         header: "Status",

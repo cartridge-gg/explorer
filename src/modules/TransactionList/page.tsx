@@ -114,6 +114,8 @@ export function TransactionList() {
             </div>
           );
         },
+        footer: (info) => info.column.id,
+        size: 158,
       }),
       columnHelper.accessor("transaction.transaction_hash", {
         header: "Hash",
@@ -126,6 +128,8 @@ export function TransactionList() {
             />
           );
         },
+        footer: (info) => info.column.id,
+        size: 158,
       }),
       columnHelper.accessor("transaction.sender_address", {
         header: "Sender",
@@ -138,6 +142,7 @@ export function TransactionList() {
             />
           );
         },
+        footer: (info) => info.column.id,
       }),
       columnHelper.accessor("transaction.type", {
         header: "Type",
@@ -146,6 +151,11 @@ export function TransactionList() {
             {formatSnakeCaseToDisplayValue(info.getValue())}
           </span>
         ),
+        footer: (info) => info.column.id,
+        size: 158,
+        meta: {
+          align: "right",
+        },
       }),
     ],
     [],
