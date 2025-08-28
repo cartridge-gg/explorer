@@ -20,7 +20,7 @@ import { decodeCalldata } from "@/shared/utils/rpc";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { CopyableText } from "@/shared/components/copyable-text";
 import { Selector } from "@/shared/components/Selector";
-import { Felt } from "@starknet-io/starknet-types-08";
+import { Felt } from "@starknet-io/starknet-types-09";
 import { TStarknetGetTransactionResponse } from "@/types/types";
 
 // Helper to check if array is a felt252 array (all elements are hex or decimal strings)

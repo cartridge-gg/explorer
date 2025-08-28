@@ -1,7 +1,7 @@
 export function getFinalityStatus(status: string) {
   switch (status) {
-    case "PENDING":
-      return "Pending";
+    case "PRE_CONFIRMED":
+      return "Preconfirmed";
     case "REJECTED":
       return "Rejected";
     case "ACCEPTED_ON_L1":

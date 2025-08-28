@@ -26,7 +26,7 @@ import {
 
 import { useBlock } from "@starknet-react/core";
 import { isValidAddress } from "@/shared/utils/contract";
-import type { EVENT } from "@starknet-io/starknet-types-08";
+import type { EVENT } from "@starknet-io/starknet-types-09";
 import { TStarknetGetTransactionResponse } from "@/types/types";
 import { sortedAbi } from "@/shared/utils/abi";
 

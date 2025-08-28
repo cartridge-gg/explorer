@@ -20,11 +20,7 @@ import type {
   DECLARE_TXN_V2,
   DECLARE_TXN_V3,
   DECLARE_TXN_V1,
-} from "@starknet-io/starknet-types-08";
-import {
-  RevertedTransactionReceiptResponse,
-  SuccessfulTransactionReceiptResponse,
-} from "starknet";
+} from "@starknet-io/starknet-types-09";
 
 // Function and API Types
 export interface FunctionResult<T = unknown> {

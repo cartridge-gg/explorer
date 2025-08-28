@@ -2,7 +2,7 @@ import React, { memo, useCallback } from "react";
 import { cn, Skeleton } from "@cartridge/ui";
 import { abbreviateNumber } from "../utils/number";
 import { toast } from "sonner";
-import type { EXECUTION_RESOURCES } from "@starknet-io/starknet-types-08";
+import type { EXECUTION_RESOURCES } from "@starknet-io/starknet-types-09";
 
 export const Card = React.forwardRef<
   HTMLDivElement,

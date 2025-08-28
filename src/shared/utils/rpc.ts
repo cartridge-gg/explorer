@@ -2,7 +2,7 @@ import { cairo, shortString } from "starknet";
 import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
 import { TStarknetGetTransactionResponse } from "@/types/types";
-import type { EXECUTION_RESOURCES } from "@starknet-io/starknet-types-08";
+import type { EXECUTION_RESOURCES } from "@starknet-io/starknet-types-09";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
