@@ -115,7 +115,8 @@ export function BlockList() {
             </div>
           );
         },
-        size: 140,
+        footer: (info) => info.column.id,
+        size: 158,
       }),
       columnHelper.accessor("block_hash", {
         header: "Hash",
@@ -128,7 +129,8 @@ export function BlockList() {
             />
           );
         },
-        size: 200,
+        footer: (info) => info.column.id,
+        size: 158,
       }),
       columnHelper.accessor("sequencer_address", {
         header: "Sequencer",
@@ -141,7 +143,8 @@ export function BlockList() {
             />
           );
         },
-        size: 200,
+        footer: (info) => info.column.id,
+        size: 158,
       }),
       columnHelper.accessor("transactions", {
         header: "Total Transactions",
@@ -150,7 +153,8 @@ export function BlockList() {
             {info.getValue().length}
           </span>
         ),
-        size: 100,
+        footer: (info) => info.column.id,
+        // size: Number.MAX_SAFE_INTEGER,
       }),
       columnHelper.accessor("status", {
         header: "Status",
@@ -159,7 +163,11 @@ export function BlockList() {
             {formatSnakeCaseToDisplayValue(info.getValue() as string)}
           </span>
         ),
-        size: 100,
+        footer: (info) => info.column.id,
+        size: 158,
+        meta: {
+          align: "right",
+        },
       }),
       columnHelper.accessor("timestamp", {
         header: "Timestamp",
@@ -168,7 +176,11 @@ export function BlockList() {
             {dayjs.unix(info.getValue()).fromNow()}
           </span>
         ),
-        size: 100,
+        footer: (info) => info.column.id,
+        size: 158,
+        meta: {
+          align: "right",
+        },
       }),
     ],
     [],

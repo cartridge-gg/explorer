@@ -55,14 +55,24 @@ export function DataTable<T>({
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
+                    id={header.id}
+                    colSpan={header.colSpan}
+                    style={{
+                      minWidth: header.column.columnDef.size,
+                      maxWidth: header.column.columnDef.size,
+                    }}
                     className={cn(
-                      "h-auto p-0 align-top text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300 first:pl-[80px] last:pr-[15px]",
+                      "h-auto p-0 align-top text-[12px]/[16px] font-normal tracking-[0.24px] text-foreground-300",
                       !(
                         header.column.id.toLowerCase() === "status" ||
                         header.column.id.toLowerCase() === "timestamp"
                       )
                         ? "text-left"
-                        : "text-right pr-[50px]",
+                        : "text-right",
+                      header.column.id.toLowerCase() === "timestamp" &&
+                        "pr-[25px]",
+                      header.column.id.toLowerCase() === "block_number" &&
+                        "pl-[85px]",
                     )}
                   >
                     {header.isPlaceholder
@@ -87,15 +97,17 @@ export function DataTable<T>({
                 {row.getVisibleCells().map((cell, cellNum) => (
                   <TableCell
                     key={cell.id}
+                    style={{
+                      minWidth: cell.column.columnDef.size,
+                      maxWidth: cell.column.columnDef.size,
+                    }}
                     className={cn(
-                      "text-sm p-0 border-none h-[45px] last:pr-[15px]",
+                      "text-sm p-0 border-none h-[45px]",
+                      cell.column.id.toLowerCase() === "transactions" &&
+                        "w-full",
                       // Handles spacing
-                      cell.column.id.toLowerCase() === "status" ||
-                        cell.column.id.toLowerCase() === "timestamp"
-                        ? "text-right pr-[50px]"
-                        : cell.column.id.toLowerCase() === "transactions"
-                          ? "text-left w-full"
-                          : "text-left pr-[50px]",
+                      cell.column.id.toLowerCase() === "timestamp" &&
+                        "pr-[25px]",
                       // Handles border radius
                       rowNum === 0 && cellNum === 0 && "rounded-tl-md",
                       rowNum === 0 &&
@@ -108,6 +120,7 @@ export function DataTable<T>({
                         cellNum === row.getVisibleCells().length - 1 &&
                         "rounded-br-md",
                     )}
+                    {...cell.column.columnDef.meta}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
