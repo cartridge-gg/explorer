@@ -338,7 +338,7 @@ const TxnAndBlockList = () => {
       },
       sorting: [
         {
-          id: "block_number",
+          id: "receipt_block_number",
           desc: true,
         },
       ],
