@@ -1,10 +1,33 @@
+import type { BlockWithTxHashes } from "starknet";
+import type { TTransactionList } from "@/types/types";
+
 export interface TUseBlocksProps {
+  /**
+   * Unique identifier for that specific request
+   */
   id?: number;
+  /**
+   * The starting transaction number (inclusive). For descending order, this should be higher
+   * than to.
+   */
   from: number;
+  /**
+   * The ending transaction number (inclusive). If not provided, returns transactions starting
+   * from `from`. For descending order, this should be lower than `from`.
+   */
   to: number;
+  /**
+   * Chunk size
+   */
   chunkSize: number;
+  /**
+   * The token returned from the previous query. If no token is provided the first page is
+   * returned.
+   */
   continuationToken?: string;
 }
+
+export type TUseTransactionsProps = TUseBlocksProps;
 
 /**
  * Custom class to access Katana's properties.
@@ -55,7 +78,9 @@ export class KATANA {
       }),
     });
 
-    return await data.json();
+    const res = await data.json();
+
+    return res.result.blocks as Array<BlockWithTxHashes>;
   }
 
   /**
@@ -68,7 +93,7 @@ export class KATANA {
     to,
     chunkSize,
     continuationToken,
-  }: TUseBlocksProps) {
+  }: TUseTransactionsProps): Promise<Array<TTransactionList>> {
     const data = await fetch(this.katanaURL, {
       method: "POST",
       headers: {
@@ -91,7 +116,9 @@ export class KATANA {
       }),
     });
 
-    return await data.json();
+    const res = await data.json();
+
+    return res.result.transactions as Array<TTransactionList>;
   }
 
   /**
@@ -100,7 +127,7 @@ export class KATANA {
    *
    * Similar to `starknet_blockNumber` but for transaction.
    */
-  async transactionNumber(id?: number) {
+  async transactionNumber(id?: number): Promise<number> {
     const data = await fetch(this.katanaURL, {
       method: "POST",
       headers: {
@@ -114,6 +141,8 @@ export class KATANA {
       }),
     });
 
-    return await data.json();
+    const res = await data.json();
+
+    return Number(res.result);
   }
 }

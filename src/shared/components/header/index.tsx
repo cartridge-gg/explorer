@@ -17,7 +17,6 @@ import { useState } from "react";
 
 export function Header({ className }: { className?: string }) {
   const location = useLocation();
-  const isHome = location.pathname === "/";
   const { isMobile } = useScreen();
   const { id: chainId } = useChain();
   const isHomePage = location.pathname === "/";
@@ -34,7 +33,7 @@ export function Header({ className }: { className?: string }) {
     >
       <div className="w-full sl:w-[1134px] flex items-center justify-between gap-2 ">
         <div className="w-[467px]">
-          {!isHome &&
+          {!isHomePage &&
             (!isMobile ? (
               <SearchBar />
             ) : (
@@ -61,20 +60,15 @@ export function Header({ className }: { className?: string }) {
         </div>
 
         <div className="flex items-center gap-4">
-          {!isHome && (
-            <>
-              {chainId ? (
-                <Network />
-              ) : (
-                <Skeleton className="size-[40px] sm:w-[112px]" />
-              )}
-              <Separator
-                orientation="vertical"
-                className="bg-background-400 w-1 h-8"
-              />
-            </>
+          {chainId ? (
+            <Network />
+          ) : (
+            <Skeleton className="size-[40px] sm:w-[112px]" />
           )}
-
+          <Separator
+            orientation="vertical"
+            className="bg-background-400 w-1 h-8"
+          />
           <Account />
         </div>
       </div>

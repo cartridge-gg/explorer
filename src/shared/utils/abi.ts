@@ -415,3 +415,20 @@ export function isReadFunction(func: FunctionAbiWithAst) {
     func.stateMutability === "pure"
   );
 }
+
+/**
+ *
+ * @param abi ABI
+ * @returns Sorted ABI with functions first and then by name
+ */
+export function sortedAbi(abi: Abi): Abi {
+  if (Array.isArray(abi)) {
+    return abi.sort((a, b) => {
+      if (a.type === "function" && b.type !== "function") return -1;
+      if (a.type !== "function" && b.type === "function") return 1;
+      return (a.name || "").localeCompare(b.name || "");
+    });
+  }
+
+  return abi;
+}

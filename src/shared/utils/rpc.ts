@@ -2,6 +2,7 @@ import { cairo, shortString } from "starknet";
 import BN from "bn.js";
 import { FeltDisplayVariants } from "../components/FeltDisplayAsToggle";
 import { TStarknetGetTransactionResponse } from "@/types/types";
+import type { EXECUTION_RESOURCES } from "@starknet-io/starknet-types-09";
 
 // paginated response for latest block_numbers
 export function getPaginatedBlockNumbers(block_number: number, limit: number) {
@@ -106,9 +107,7 @@ export const convertObjectValuesToDisplayValues = (
 };
 
 export function parseExecutionResources(
-  execution_resources:
-    | RPCSPEC08.API.EXECUTION_RESOURCES
-    | RPCSPEC07.API.SPEC.EXECUTION_RESOURCES,
+  execution_resources: EXECUTION_RESOURCES,
 ) {
   return Object.entries(execution_resources).reduce(
     (acc, [key, value]) => {
@@ -125,27 +124,7 @@ export function parseExecutionResources(
           acc.blockComputeData.l1_data_gas += Number(value);
           break;
         }
-        case "data_availability": {
-          if (typeof value === "number") {
-            break;
-          }
-
-          // Handle legacy format for backward compatibility
-          acc.blockComputeData.l1_gas += value.l1_gas;
-          acc.blockComputeData.l1_data_gas += value.l1_data_gas;
-          break;
-        }
-        default: {
-          const _key = key as keyof typeof EXECUTION_RESOURCES_KEY_MAP;
-          const keyMap = EXECUTION_RESOURCES_KEY_MAP[
-            _key
-          ] as keyof typeof acc.executions;
-          if (!keyMap) return acc;
-
-          acc.executions[keyMap] += Number(value) || 0;
-        }
       }
-
       return acc;
     },
     {

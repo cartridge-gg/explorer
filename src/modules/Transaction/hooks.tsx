@@ -10,7 +10,6 @@ import {
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  Abi,
   AbiEntry,
   CallData,
   events as eventsLib,
@@ -27,8 +26,9 @@ import {
 
 import { useBlock } from "@starknet-react/core";
 import { isValidAddress } from "@/shared/utils/contract";
-import type { EVENT } from "@starknet-io/starknet-types-08";
+import type { EVENT } from "@starknet-io/starknet-types-09";
 import { TStarknetGetTransactionResponse } from "@/types/types";
+import { sortedAbi } from "@/shared/utils/abi";
 
 interface EventData extends EVENT {
   id: string;
@@ -45,6 +45,10 @@ interface StorageDiffData {
 
 const eventColumnHelper = createColumnHelper<EventData>();
 const storageDiffColumnHelper = createColumnHelper<StorageDiffData>();
+
+export const isReceiptError = (receipt: unknown): receipt is Error => {
+  return receipt instanceof Error;
+};
 
 export function useTransaction({ txHash }: { txHash: string | undefined }) {
   const navigate = useNavigate();
@@ -90,10 +94,6 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
     },
     retry: false,
   });
-
-  const isReceiptError = (receipt: unknown): receipt is Error => {
-    return receipt instanceof Error;
-  };
 
   const {
     data: { receipt, events: eventsData, blockComputeData },
@@ -159,6 +159,9 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
             const abiEvents = eventsLib.getAbiEvents(contract_abi);
             const abiStructs = CallData.getAbiStruct(contract_abi);
             const abiEnums = CallData.getAbiEnum(contract_abi);
+            const cd = new CallData(sortedAbi(contract_abi));
+
+            const parser = cd.parser;
 
             // Map events while preserving original indices
             return eventEntries?.map(({ originalIndex }) => {
@@ -168,6 +171,7 @@ export function useTransaction({ txHash }: { txHash: string | undefined }) {
                   abiEvents,
                   abiStructs,
                   abiEnums,
+                  parser,
                 )
                 .find((e) => e.transaction_hash === receipt.transaction_hash);
 
@@ -487,18 +491,9 @@ export function useCalldata(calldata: Calldata[] | undefined) {
 
             const formattedParams = d.args;
 
-            let sortedAbi: Abi = [];
+            const newAbi = sortedAbi(abi);
 
-            // prioritize function type first
-            if (Array.isArray(abi)) {
-              sortedAbi = abi.sort((a, b) => {
-                if (a.type === "function" && b.type !== "function") return -1;
-                if (a.type !== "function" && b.type === "function") return 1;
-                return (a.name || "").localeCompare(b.name || "");
-              });
-            }
-
-            const myCallData = new CallData(sortedAbi);
+            const myCallData = new CallData(newAbi);
 
             const { inputs } = myCallData.parser
               .getLegacyFormat()

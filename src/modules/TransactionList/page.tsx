@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -6,13 +6,11 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import dayjs from "dayjs";
-import { useNavigate } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { RPC_PROVIDER } from "@/services/rpc";
-import { getPaginatedBlockNumbers } from "@/shared/utils/rpc";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
-import { ListIcon, Card, CardContent } from "@cartridge/ui";
+import { cn, Spinner } from "@cartridge/ui";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -21,112 +19,143 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/shared/components/breadcrumb";
-import { DataTable } from "@/shared/components/data-table";
+import { DataTable } from "./data-table";
+import type { TTransactionList } from "@/types/types";
 import { CopyableInteger } from "@/shared/components/copyable-integer";
+import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
+import { formatSnakeCaseToDisplayValue } from "@/shared/utils/string";
+import { useHasKatanaExtensions } from "@/shared/hooks/useRpcCapabilities";
 
-const ROWS_TO_RENDER = 20;
-const BLOCKS_BATCH_SIZE = 5; // Number of blocks to fetch at once
+const columnHelper = createColumnHelper<TTransactionList>();
 
-const columnHelper = createColumnHelper();
+// // Header height = 16 + 5 + 8 = 29px
+// // Pagination height = 21px
+// // Gap between cells and pagination = 15px (ignorable)
+// // Bottom card padding = 20px
+// // Result = 29 + 21 + 15 + 20 = 85px
+// const TXN_OFFSET = 70; // 85 - 15px for gap
+// const ROW_HEIGHT = 45;
 
 export function TransactionList() {
+  const { hasKatanaExtensions, isLoading: capabilitiesLoading } =
+    useHasKatanaExtensions();
+
+  // const [tableContainerHeight, setTableContainerHeight] = useState(0);
+  // const tableContainerRef = useRef<HTMLDivElement>(null);
+
   const navigate = useNavigate();
-  const [transactions, setTransactions] = useState([]);
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 20,
-  });
-  const [lastProcessedBlockIndex, setLastProcessedBlockIndex] = useState(0);
 
-  const { data: latestBlockNumber } = useQuery({
-    queryKey: ["latestBlockNumber"],
-    queryFn: () => RPC_PROVIDER.getBlockNumber(),
+  // useEffect(() => {
+  //   const container = tableContainerRef.current;
+  //   if (!container) return;
+  //   if (tableContainerHeight !== 0) return;
+
+  //   const resizeObserver = new ResizeObserver((entries) => {
+  //     for (const entry of entries) {
+  //       const { height } = entry.contentRect;
+  //       setTableContainerHeight(Math.max(height, 0)); // Ensure non-negative
+  //     }
+  //   });
+
+  //   resizeObserver.observe(container);
+
+  //   return () => {
+  //     resizeObserver.disconnect();
+  //   };
+  // }, [tableContainerHeight]);
+
+  const txnItemPerPage = useMemo(() => {
+    // if (tableContainerHeight > 0) {
+    //   const calculatedHeight = tableContainerHeight - TXN_OFFSET;
+    //   return Math.max(1, Math.floor(calculatedHeight / ROW_HEIGHT));
+    // }
+    return 15;
+    // }, [tableContainerHeight]);
+  }, []);
+
+  // Get total transactions
+  const { data: totalTxs, isSuccess } = useQuery({
+    queryKey: ["txlist", "total"],
+    queryFn: async () => await RPC_PROVIDER?.transactionNumber?.(),
+    enabled: hasKatanaExtensions && !capabilitiesLoading, // Only run if katana extensions are available
   });
 
-  const fetchBlocks = useMutation({
-    mutationFn: async (blockNumbers: number[]) => {
-      try {
-        const blockDataPromises = blockNumbers.map((blockNumber) =>
-          RPC_PROVIDER.getBlockWithTxs(blockNumber),
-        );
-        return Promise.all(blockDataPromises);
-      } catch (error) {
-        console.error("Error fetching blocks:", error);
-        return [];
-      }
+  // Query for transactions using katana
+  const { data: transactionsData, isLoading } = useQuery({
+    queryKey: ["transactionList", txnItemPerPage],
+    queryFn: async () => {
+      const total = totalTxs ?? 1;
+      const res = await RPC_PROVIDER.getTransactions?.({
+        from: 0,
+        to: total,
+        chunkSize: total,
+      });
+      return res;
     },
+    staleTime: 60 * 1000, // 1 minute
+    enabled: txnItemPerPage > 0 && isSuccess && hasKatanaExtensions, // Only run query when we have calculated page size and katana extensions
   });
 
-  useEffect(() => {
-    if (!latestBlockNumber) return;
-
-    const startBlockNumber =
-      latestBlockNumber - pagination.pageIndex * BLOCKS_BATCH_SIZE;
-    const blockNumbers = getPaginatedBlockNumbers(
-      startBlockNumber,
-      BLOCKS_BATCH_SIZE,
-    );
-
-    fetchBlocks.mutate(blockNumbers, {
-      onSuccess: (blocks) => {
-        const newTransactions = [];
-        let processedBlocks = 0;
-
-        // Start from where we left off in the previous batch
-        for (let i = lastProcessedBlockIndex; i < blocks.length; i++) {
-          const block = blocks[i];
-          if (!block || !block.transactions) continue;
-
-          for (const tx of block.transactions) {
-            newTransactions.push({
-              type: tx.type,
-              hash: tx.transaction_hash,
-              age: block.timestamp.toString(),
-            });
-
-            // If we have enough transactions for the current page
-            if (newTransactions.length >= ROWS_TO_RENDER) {
-              setLastProcessedBlockIndex(i);
-              setTransactions(newTransactions.slice(0, ROWS_TO_RENDER));
-              return;
-            }
-          }
-          processedBlocks++;
-        }
-
-        // If we've processed all blocks but still need more transactions
-        if (
-          processedBlocks === blocks.length &&
-          newTransactions.length < ROWS_TO_RENDER
-        ) {
-          setLastProcessedBlockIndex(0); // Reset for next batch
-          // You might want to fetch more blocks here
-        }
-
-        setTransactions(newTransactions);
-      },
-    });
-  }, [latestBlockNumber, pagination, fetchBlocks]);
+  // Flatten all pages into a single array of transactions
+  const transactions = useMemo(() => {
+    return transactionsData?.flat() ?? [];
+  }, [transactionsData]);
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor("type", {
-        header: "Type",
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor("hash", {
-        header: "Transaction Hash",
-        cell: (info) => (
-          <CopyableInteger
-            title="Transaction Hash"
-            value={info.renderValue()}
-          />
-        ),
-      }),
-      columnHelper.accessor("age", {
-        header: "Age",
+      columnHelper.accessor("receipt.block_number", {
+        header: "Block",
         cell: (info) => {
-          return dayjs.unix(info.getValue()).fromNow();
+          return (
+            <div className="flex items-center gap-[27px] pl-[19px] w-fit">
+              <TransactionIcon className="text-background-500 !w-[38px]" />
+              <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100">
+                {info.getValue()}
+              </span>
+            </div>
+          );
+        },
+        footer: (info) => info.column.id,
+        size: 158,
+      }),
+      columnHelper.accessor("transaction.transaction_hash", {
+        header: "Hash",
+        cell: (info) => {
+          return (
+            <CopyableInteger
+              title={info.getValue()}
+              value={info.getValue()}
+              length={1}
+            />
+          );
+        },
+        footer: (info) => info.column.id,
+        size: 158,
+      }),
+      columnHelper.accessor("transaction.sender_address", {
+        header: "Sender",
+        cell: (info) => {
+          return (
+            <CopyableInteger
+              title={info.getValue() as string}
+              value={info.getValue()}
+              length={1}
+            />
+          );
+        },
+        footer: (info) => info.column.id,
+      }),
+      columnHelper.accessor("transaction.type", {
+        header: "Type",
+        cell: (info) => (
+          <span className="text-[13px]/[16px] font-semibold tracking-[0.26px] text-foreground-100 capitalize">
+            {formatSnakeCaseToDisplayValue(info.getValue())}
+          </span>
+        ),
+        footer: (info) => info.column.id,
+        size: 158,
+        meta: {
+          align: "right",
         },
       }),
     ],
@@ -139,43 +168,105 @@ export function TransactionList() {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    onPaginationChange: setPagination,
     initialState: {
-      pagination,
+      pagination: {
+        pageSize: txnItemPerPage || 5,
+      },
+      sorting: [
+        {
+          id: "receipt_block_number",
+          desc: true,
+        },
+      ],
     },
+    manualPagination: false,
   });
 
+  // // Update table page size when txnItemPerPage changes
+  // const updatePageSize = useCallback(() => {
+  //   if (txnItemPerPage > 0) {
+  //     table.setPageSize(txnItemPerPage);
+  //   }
+  // }, [txnItemPerPage, table]);
+
+  // useEffect(() => {
+  //   updatePageSize();
+  // }, [updatePageSize]);
+
   return (
-    <div className="px-2 py-4 rounded-lg flex flex-col gap-4">
-      <Breadcrumb>
+    <div className="flex-1 min-h-0 w-full flex flex-col gap-[2px] sl:w-[1134px]">
+      <Breadcrumb className="mb-[8px]">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="..">Explorer</BreadcrumbLink>
+            <BreadcrumbLink asChild>
+              <Link to="..">Explorer</Link>
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="text-foreground-400 text-[12px]/[16px] font-normal">
+            <BreadcrumbPage className="text-foreground-100 text-[12px]/[16px] font-normal">
               Transactions
             </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <PageHeader>
+      <PageHeader
+        containerClassName="rounded-t-[12px] rounded-b-sm h-[35px]"
+        className="px-[15px] py-[8px]"
+      >
         <PageHeaderTitle>
-          <ListIcon variant="solid" />
-          <div>Transactions List</div>
+          <h1 className="text-[13px]/[16px] font-normal">Transactions</h1>
         </PageHeaderTitle>
       </PageHeader>
 
-      <Card>
-        <CardContent>
+      <div className="min-h-0">
+        {isLoading ? (
+          <div className="flex justify-center items-center h-full">
+            <Spinner />
+          </div>
+        ) : transactions.length ? (
           <DataTable
             table={table}
-            onRowClick={(row) => navigate(`../tx/${row.hash}`)}
+            onRowClick={(row) =>
+              navigate(`../tx/${row.transaction.transaction_hash}`)
+            }
           />
-        </CardContent>
-      </Card>
+        ) : (
+          <div
+            style={{
+              // minimum height
+              height: "550px",
+            }}
+            className="h-[550px] flex flex-col p-[15px] bg-background-100 border border-background-200 rounded-t-[4px] rounded-b-[12px]"
+          >
+            <EmptyTransactions
+              className="h-full"
+              message={
+                hasKatanaExtensions && transactions.length === 0
+                  ? "No transactions"
+                  : undefined
+              }
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
+
+const TransactionIcon = ({ className }: { className?: string }) => {
+  return (
+    <svg
+      className={cn(className)}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 38 39"
+      fill="none"
+    >
+      <path
+        d="M13.0872 29.5152L12.6667 29.253L12.2461 29.5152L10.2917 30.7374V8.25898C11.8503 9.23372 12.6419 9.72852 12.6667 9.74336L13.0872 9.48112L15.8333 7.76419L18.5794 9.48112L19 9.74336L19.4206 9.48112L22.1667 7.76419L24.9128 9.48112L25.3333 9.74336C25.3581 9.72852 26.1497 9.23372 27.7083 8.25898V30.7374L25.7539 29.5152L25.3333 29.253L24.9128 29.5152L22.1667 31.2322L19.4206 29.5152L19 29.253L18.5794 29.5152L15.8333 31.2322L13.0872 29.5152ZM9.5 32.1673L12.6667 30.1882L15.8333 32.1673L19 30.1882L22.1667 32.1673L25.3333 30.1882L28.5 32.1673V6.83398L25.3333 8.81315L22.1667 6.83398L19 8.81315L15.8333 6.83398L12.6667 8.81315L9.5 6.83398V32.1673ZM14.25 14.3548H13.8542V15.1465H24.1458V14.3548H14.25ZM13.8542 23.8548V24.6465H24.1458V23.8548H13.8542ZM14.25 19.1048H13.8542V19.8965H24.1458V19.1048H14.25Z"
+        fill="#373C38"
+      />
+    </svg>
+  );
+};
