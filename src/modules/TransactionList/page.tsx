@@ -28,49 +28,50 @@ import { useHasKatanaExtensions } from "@/shared/hooks/useRpcCapabilities";
 
 const columnHelper = createColumnHelper<TTransactionList>();
 
-// Header height = 16 + 5 + 8 = 29px
-// Pagination height = 21px
-// Gap between cells and pagination = 15px (ignorable)
-// Bottom card padding = 20px
-// Result = 29 + 21 + 15 + 20 = 85px
-const TXN_OFFSET = 70; // 85 - 15px for gap
-const ROW_HEIGHT = 45;
+// // Header height = 16 + 5 + 8 = 29px
+// // Pagination height = 21px
+// // Gap between cells and pagination = 15px (ignorable)
+// // Bottom card padding = 20px
+// // Result = 29 + 21 + 15 + 20 = 85px
+// const TXN_OFFSET = 70; // 85 - 15px for gap
+// const ROW_HEIGHT = 45;
 
 export function TransactionList() {
   const { hasKatanaExtensions, isLoading: capabilitiesLoading } =
     useHasKatanaExtensions();
 
-  const [tableContainerHeight, setTableContainerHeight] = useState(0);
-  const tableContainerRef = useRef<HTMLDivElement>(null);
+  // const [tableContainerHeight, setTableContainerHeight] = useState(0);
+  // const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const container = tableContainerRef.current;
-    if (!container) return;
-    if (tableContainerHeight !== 0) return;
+  // useEffect(() => {
+  //   const container = tableContainerRef.current;
+  //   if (!container) return;
+  //   if (tableContainerHeight !== 0) return;
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { height } = entry.contentRect;
-        setTableContainerHeight(Math.max(height, 0)); // Ensure non-negative
-      }
-    });
+  //   const resizeObserver = new ResizeObserver((entries) => {
+  //     for (const entry of entries) {
+  //       const { height } = entry.contentRect;
+  //       setTableContainerHeight(Math.max(height, 0)); // Ensure non-negative
+  //     }
+  //   });
 
-    resizeObserver.observe(container);
+  //   resizeObserver.observe(container);
 
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [tableContainerHeight]);
+  //   return () => {
+  //     resizeObserver.disconnect();
+  //   };
+  // }, [tableContainerHeight]);
 
   const txnItemPerPage = useMemo(() => {
-    if (tableContainerHeight > 0) {
-      const calculatedHeight = tableContainerHeight - TXN_OFFSET;
-      return Math.max(1, Math.floor(calculatedHeight / ROW_HEIGHT));
-    }
-    return 0;
-  }, [tableContainerHeight]);
+    // if (tableContainerHeight > 0) {
+    //   const calculatedHeight = tableContainerHeight - TXN_OFFSET;
+    //   return Math.max(1, Math.floor(calculatedHeight / ROW_HEIGHT));
+    // }
+    return 15;
+    // }, [tableContainerHeight]);
+  }, []);
 
   // Get total transactions
   const { data: totalTxs, isSuccess } = useQuery({
@@ -181,19 +182,19 @@ export function TransactionList() {
     manualPagination: false,
   });
 
-  // Update table page size when txnItemPerPage changes
-  const updatePageSize = useCallback(() => {
-    if (txnItemPerPage > 0) {
-      table.setPageSize(txnItemPerPage);
-    }
-  }, [txnItemPerPage, table]);
+  // // Update table page size when txnItemPerPage changes
+  // const updatePageSize = useCallback(() => {
+  //   if (txnItemPerPage > 0) {
+  //     table.setPageSize(txnItemPerPage);
+  //   }
+  // }, [txnItemPerPage, table]);
 
-  useEffect(() => {
-    updatePageSize();
-  }, [updatePageSize]);
+  // useEffect(() => {
+  //   updatePageSize();
+  // }, [updatePageSize]);
 
   return (
-    <div className="flex-1 min-h-0 w-full lg:max-h-screen h-screen flex flex-col gap-[2px] sl:w-[1134px] pb-[10px]">
+    <div className="flex-1 min-h-0 w-full flex flex-col gap-[2px] sl:w-[1134px]">
       <Breadcrumb className="mb-[8px]">
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -219,7 +220,7 @@ export function TransactionList() {
         </PageHeaderTitle>
       </PageHeader>
 
-      <div ref={tableContainerRef} className="flex-1 min-h-0">
+      <div className="min-h-0">
         {isLoading ? (
           <div className="flex justify-center items-center h-full">
             <Spinner />
@@ -230,11 +231,23 @@ export function TransactionList() {
             onRowClick={(row) =>
               navigate(`../tx/${row.transaction.transaction_hash}`)
             }
-            className="h-full"
           />
         ) : (
-          <div className="h-full flex flex-col p-[15px] bg-background-100 border border-background-200 rounded-t-[4px] rounded-b-[12px]">
-            <EmptyTransactions className="h-full" />
+          <div
+            style={{
+              // minimum height
+              height: "550px",
+            }}
+            className="h-[550px] flex flex-col p-[15px] bg-background-100 border border-background-200 rounded-t-[4px] rounded-b-[12px]"
+          >
+            <EmptyTransactions
+              className="h-full"
+              message={
+                hasKatanaExtensions && transactions.length === 0
+                  ? "No transactions"
+                  : undefined
+              }
+            />
           </div>
         )}
       </div>

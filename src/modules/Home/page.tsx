@@ -99,58 +99,57 @@ const OldHomePage = () => {
 const TxnAndBlockList = () => {
   const navigate = useNavigate();
 
-  const [availableHeight, setAvailableHeight] = useState(0);
+  // const [availableHeight, setAvailableHeight] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  // useEffect(() => {
+  //   const container = containerRef.current;
+  //   if (!container) return;
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { height } = entry.contentRect;
-        setAvailableHeight(Math.max(height, 0));
-      }
-    });
+  //   const resizeObserver = new ResizeObserver((entries) => {
+  //     for (const entry of entries) {
+  //       const { height } = entry.contentRect;
+  //       setAvailableHeight(Math.max(height, 0));
+  //     }
+  //   });
 
-    resizeObserver.observe(container);
+  //   resizeObserver.observe(container);
 
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
+  //   return () => {
+  //     resizeObserver.disconnect();
+  //   };
+  // }, []);
 
   // Calculate how many rows can fit ensuring both cards stay within screen bounds
   const itemsPerPage = useMemo(() => {
-    if (availableHeight > 0) {
-      // Calculate space available for both cards
-      const gapBetweenCards = 15;
-      const bottomPadding = 20;
-      const headerHeight = 35;
-
-      // Total space for both card contents = available - gap - padding - both headers
-      const totalContentSpace =
-        availableHeight - gapBetweenCards - bottomPadding - headerHeight * 2;
-
-      // Space per card content = total content space / 2
-      const contentSpacePerCard = totalContentSpace / 2;
-
-      // Rows that fit in one card
-      const rowsPerCard = Math.floor(contentSpacePerCard / ROW_HEIGHT);
-
-      return Math.max(1, rowsPerCard) - 1;
-    }
-    return 0;
-  }, [availableHeight]);
+    // if (availableHeight > 0) {
+    //   // Calculate space available for both cards
+    //   const gapBetweenCards = 15;
+    //   const bottomPadding = 20;
+    //   const headerHeight = 35;
+    //   // Total space for both card contents = available - gap - padding - both headers
+    //   const totalContentSpace =
+    //     availableHeight - gapBetweenCards - bottomPadding - headerHeight * 2;
+    //   // Space per card content = total content space / 2
+    //   const contentSpacePerCard = totalContentSpace / 2;
+    //   // Rows that fit in one card
+    //   const rowsPerCard = Math.floor(contentSpacePerCard / ROW_HEIGHT);
+    //   return Math.max(1, rowsPerCard) - 1;
+    // }
+    // return 0;
+    // }, [availableHeight]);
+    return 7; // show only 7 items in the list
+  }, []);
 
   // Step 3: Calculate optimal card height to fit exactly those rows
-  const cardHeight = useMemo(() => {
-    if (itemsPerPage > 0) {
-      // Optimal height = header + exact rows needed
-      return 35 + itemsPerPage * ROW_HEIGHT;
-    }
-    return "auto";
-  }, [itemsPerPage]);
+  const cardHeight = useMemo(
+    () =>
+      // This is the height of the table content when there's exactly `itemsPerPage` elems in the table.
+      //
+      // It is manually taken from browser dev tool based on what feels/looks right.
+      "361px",
+    [],
+  );
 
   // Get total transactions and blocks
   const { data: totalTxs, isSuccess: isTxSuccess } = useQuery({
@@ -400,15 +399,16 @@ const TxnAndBlockList = () => {
   }, [updatePageSize]);
 
   return (
-    <div className="relative w-full h-screen flex flex-col gap-[4px] sl:w-[1134px] pb-[10px] overflow-hidden">
+    <div className="relative w-full h-screen flex flex-col gap-[20px] sl:w-[1134px] pb-[10px]">
       <SearchBar
+        containerClassName="h-[45px]"
         className="placeholder:text-[12px]/[16px]"
         placeholder="Search blocks / transactions / contracts..."
       />
 
       <div
         ref={containerRef}
-        className="h-full flex flex-col gap-[15px] overflow-hidden mt-[20px]"
+        className="h-full flex flex-col gap-[15px] mt-[20px]"
       >
         {/* Latest Blocks Card */}
         <Card className="flex flex-col gap-0 p-0 rounded-md min-h-0">
@@ -428,16 +428,15 @@ const TxnAndBlockList = () => {
             </Link>
           </CardHeader>
 
-          <CardContent
-            className="flex-1 min-h-0 p-0"
-            style={{ height: cardHeight }}
-          >
+          <CardContent className="flex-1 min-h-0 p-0">
             {isLoadingBlocks ? (
               <div className="flex justify-center items-center h-full">
                 <Spinner />
               </div>
             ) : blocks.length ? (
               <BlockDataTable
+                containerClassName={`h-[${cardHeight}]`}
+                style={{ height: cardHeight }}
                 table={blockTable}
                 onRowClick={(row) => navigate(`./block/${row.block_hash}`)}
                 className="h-full border-none pb-[15px]"
@@ -446,9 +445,7 @@ const TxnAndBlockList = () => {
             ) : (
               <div
                 id="empty-blocks"
-                style={{
-                  height: cardHeight,
-                }}
+                style={{ height: cardHeight }}
                 className="flex items-center justify-center p-[10px]"
               >
                 <EmptyTransactions
@@ -478,16 +475,15 @@ const TxnAndBlockList = () => {
             </Link>
           </CardHeader>
 
-          <CardContent
-            className="flex-1 min-h-0 p-0"
-            style={{ height: cardHeight }}
-          >
+          <CardContent className="flex-1 min-h-0 p-0">
             {isLoadingTxs ? (
               <div className="flex justify-center items-center h-full">
                 <Spinner />
               </div>
             ) : transactions.length ? (
               <DataTable
+                containerClassName={`h-[${cardHeight}]`}
+                style={{ height: cardHeight }}
                 table={transactionTable}
                 onRowClick={(row) =>
                   navigate(`./tx/${row.transaction.transaction_hash}`)
@@ -498,9 +494,7 @@ const TxnAndBlockList = () => {
             ) : (
               <div
                 id="empty-txns"
-                style={{
-                  height: cardHeight,
-                }}
+                style={{ height: cardHeight }}
                 className="flex items-center justify-center p-[10px]"
               >
                 <EmptyTransactions

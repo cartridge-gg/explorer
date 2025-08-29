@@ -37,7 +37,7 @@ export function DataTable<T>({
     <div
       {...props}
       className={cn(
-        "h-full flex flex-col px-[10px] pt-[8px] pb-[20px] bg-background-100 border border-background-200 rounded-t-[4px] rounded-b-[12px]",
+        "flex flex-col px-[10px] pt-[8px] pb-[20px] bg-background-100 border border-background-200 rounded-t-[4px] rounded-b-[12px]",
         className,
       )}
     >
@@ -49,7 +49,7 @@ export function DataTable<T>({
             tableClassName,
           )}
         >
-          <TableHeader className="sticky top-0 z-[20] bg-background-100">
+          <TableHeader style={{ height: "23px" }}>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-none">
                 {headerGroup.headers.map((header) => (
@@ -86,7 +86,7 @@ export function DataTable<T>({
               </TableRow>
             ))}
           </TableHeader>
-          <div className="bg-background-100 w-full h-[5px]" />
+
           <TableBody className="select-none">
             {table.getRowModel().rows.map((row, rowNum) => (
               <TableRow
