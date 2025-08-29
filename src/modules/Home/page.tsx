@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { cn, Network, Skeleton, Spinner, WedgeIcon } from "@cartridge/ui";
 import { useQuery } from "@tanstack/react-query";
 import { RPC_PROVIDER } from "@/services/rpc";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -33,11 +33,11 @@ import { EmptyTransactions } from "@/shared/components/empty/empty-txns";
 const transactionColumnHelper = createColumnHelper<TTransactionList>();
 const blockColumnHelper = createColumnHelper<BlockWithTxHashes>();
 
-// Header height = 16 + 5 + 8 = 29px
-// Bottom card padding = 20px
-// Result = 29 + 20 = 49px
-// const TABLE_OFFSET = 49; // Offset for the tables
-const ROW_HEIGHT = 45;
+// // Header height = 16 + 5 + 8 = 29px
+// // Bottom card padding = 20px
+// // Result = 29 + 20 = 49px
+// // const TABLE_OFFSET = 49; // Offset for the tables
+// const ROW_HEIGHT = 45;
 
 export function Home() {
   const { hasKatanaExtensions, isLoading } = useHasKatanaExtensions();
