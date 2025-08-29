@@ -349,7 +349,10 @@ export function Contract() {
   );
 
   return (
-    <div className="w-full flex flex-col gap-[3px] sl:w-[1134px]">
+    <div
+      id="contract-details" // used for reverse proxy testing in katana repo
+      className="w-full flex flex-col gap-[3px] sl:w-[1134px]"
+    >
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>

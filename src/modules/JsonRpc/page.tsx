@@ -300,7 +300,7 @@ export function JsonRpcPlayground() {
 
   return (
     <div
-      id="json-playground"
+      id="json-playground" // used for reverse proxy testing in katana repo
       className="flex-1 min-h-0 w-full flex flex-col gap-[3px] lg:w-[1134px] pb-[20px]"
     >
       <Breadcrumb className="mb-[7px]">

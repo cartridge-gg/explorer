@@ -158,7 +158,10 @@ export function Block() {
   }, []);
 
   return (
-    <div className="w-full flex flex-col gap-[4px] sl:w-[1134px]">
+    <div
+      id="block-details" // used for reverse proxy testing in katana repo
+      className="w-full flex flex-col gap-[4px] sl:w-[1134px]"
+    >
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>

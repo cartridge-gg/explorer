@@ -399,7 +399,10 @@ const TxnAndBlockList = () => {
   }, [updatePageSize]);
 
   return (
-    <div className="relative w-full h-screen flex flex-col gap-[20px] sl:w-[1134px] pb-[10px]">
+    <div
+      id="home-with-katana-extension" // used for reverse proxy testing in katana repo
+      className="relative w-full h-screen flex flex-col gap-[20px] sl:w-[1134px] pb-[10px]"
+    >
       <SearchBar
         containerClassName="h-[45px]"
         className="placeholder:text-[12px]/[16px]"

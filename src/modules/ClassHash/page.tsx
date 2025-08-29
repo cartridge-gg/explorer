@@ -143,7 +143,10 @@ export function ClassHash() {
   });
 
   return (
-    <div className="w-full flex flex-col gap-[3px] sl:w-[1134px]">
+    <div
+      id="class-details" // used for reverse proxy testing in katana repo
+      className="w-full flex flex-col gap-[3px] sl:w-[1134px]"
+    >
       <Breadcrumb className="mb-[7px]">
         <BreadcrumbList>
           <BreadcrumbItem>
