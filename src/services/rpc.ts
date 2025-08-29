@@ -143,7 +143,7 @@ export async function detectRpcCapabilities(): Promise<RpcCapabilities> {
   };
 }
 
-export const katana = new KATANA(import.meta.env.VITE_RPC_URL);
+export const katana = new KATANA(getRpcUrl());
 
 // Create a proxy that intercepts method calls and adds caching for specific methods
 export const RPC_PROVIDER = new Proxy(baseRpcProvider as ExtendedRpcProvider, {
