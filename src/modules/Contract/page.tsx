@@ -110,11 +110,11 @@ export function Contract() {
       const { readFuncs, writeFuncs, code } =
         getContractClassInfo(contractClass);
 
-      const contract = new StarknetContract(
-        contractClass.abi,
-        contractAddress!,
-        RPC_PROVIDER,
-      );
+      const contract = new StarknetContract({
+        abi: contractClass.abi,
+        address: contractAddress!,
+        providerOrAccount: RPC_PROVIDER,
+      });
 
       return {
         classHash,
