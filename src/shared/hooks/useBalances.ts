@@ -76,8 +76,16 @@ export function useBalances(
   } = useQuery({
     queryKey: ["balance", "eth", contractAddress, addresses.eth],
     queryFn: async () => {
-      const eth = new Contract(ERC20_ABI, addresses.eth, RPC_PROVIDER);
+      const eth = new Contract({
+        abi: ERC20_ABI,
+        address: addresses.eth,
+        providerOrAccount: RPC_PROVIDER,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       const { balance } = await eth.call("balanceOf", [contractAddress]);
+
       return uint256.uint256ToBN(balance);
     },
   });
@@ -91,14 +99,18 @@ export function useBalances(
   } = useQuery({
     queryKey: ["balance", "strk", contractAddress, addresses.strk],
     queryFn: async () => {
-      const strkContract = new Contract(
-        ERC20_ABI,
-        addresses.strk,
-        RPC_PROVIDER,
-      );
+      const strkContract = new Contract({
+        abi: ERC20_ABI,
+        address: addresses.strk,
+        providerOrAccount: RPC_PROVIDER,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       const { balance } = await strkContract.call("balanceOf", [
         contractAddress,
       ]);
+
       return uint256.uint256ToBN(balance);
     },
   });
