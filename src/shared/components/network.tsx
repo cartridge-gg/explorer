@@ -1,4 +1,3 @@
-import { useNetwork } from "@starknet-react/core";
 import { cn } from "@cartridge/ui";
 import type { Chain } from "@starknet-react/chains";
 import { useCallback, useMemo } from "react";
@@ -6,6 +5,7 @@ import { getChecksumAddress } from "starknet";
 import { toast } from "sonner";
 import React from "react";
 import { useScreen } from "@/shared/hooks/useScreen";
+import useChain from "../hooks/useChain";
 
 const ChainColors: Record<Chain["network"], string> = {
   mainnet: "bg-[#FF4264]",
@@ -18,20 +18,21 @@ export const Network = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement>
 >(({ className, ...props }, ref) => {
-  const { chain } = useNetwork();
+  const { id } = useChain();
+  const chain = id?.asDisplay;
   const { isMobile } = useScreen();
 
   const onCopy = useCallback(() => {
-    if (!chain) return;
+    if (!id) return;
 
-    navigator.clipboard.writeText(getChecksumAddress(chain.id));
+    navigator.clipboard.writeText(getChecksumAddress(id.id));
     toast.success("Chain ID copied");
-  }, [chain]);
+  }, [id]);
 
   const color = useMemo(() => {
     if (!chain) return;
 
-    return ChainColors[chain.network.toLowerCase()] || ChainColors["other"];
+    return ChainColors[chain.toLowerCase()] || ChainColors["other"];
   }, [chain]);
 
   if (!chain) return null;
@@ -55,7 +56,7 @@ export const Network = React.forwardRef<
         )}
       />
       <span className="hidden sm:block text-foreground-200 group-hover:text-foreground-100 overflow-hidden text-center overflow-ellipsis whitespace-nowrap text-[14px]/[20px] font-medium px-[4px] capitalize">
-        {chain.network}
+        {chain}
       </span>
     </button>
   );
