@@ -12,6 +12,24 @@
     />
 
     <title>Explorer</title>
+    <script>
+      (function () {
+        const isReactScanEnabled = "%VITE_SCAN%" === "true";
+
+        if (isReactScanEnabled) {
+          console.log("React Scan enabled");
+
+          const script = document.createElement("script");
+          script.src = "//unpkg.com/react-scan/dist/auto.global.js";
+          script.crossOrigin = "anonymous";
+
+          // Insert as the first script to ensure it loads before React
+          document.head.appendChild(script);
+        } else {
+          console.log("React Scan disabled");
+        }
+      })();
+    </script>
     <script src="/noflash.js"></script>
   </head>
   <body>
