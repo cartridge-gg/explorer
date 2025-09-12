@@ -2,10 +2,11 @@ import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import dynamicLinksPlugin from "./dynamic-link";
+import mkcert from "vite-plugin-mkcert";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), process.env.IS_EMBEDDED ? dynamicLinksPlugin() : null],
+  plugins: [react(), process.env.IS_EMBEDDED ? dynamicLinksPlugin() : null, mkcert()],
   server: {
     port: process.env.NODE_ENV === "development" ? 3004 : undefined,
   },
