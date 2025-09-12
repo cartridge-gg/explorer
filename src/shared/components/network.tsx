@@ -1,4 +1,4 @@
-import { cn } from "@cartridge/ui";
+import { cn, Skeleton } from "@cartridge/ui";
 import type { Chain } from "@starknet-react/chains";
 import { useCallback, useMemo } from "react";
 import { getChecksumAddress } from "starknet";
@@ -18,7 +18,7 @@ export const Network = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement>
 >(({ className, ...props }, ref) => {
-  const { id } = useChain();
+  const { id, isLoading } = useChain();
   const chain = id?.asDisplay;
   const { isMobile } = useScreen();
 
@@ -34,6 +34,8 @@ export const Network = React.forwardRef<
 
     return ChainColors[chain.toLowerCase()] || ChainColors["other"];
   }, [chain]);
+
+  if (isLoading) return <Skeleton className="h-[112px] w-[40px]" />;
 
   if (!chain) return null;
 
