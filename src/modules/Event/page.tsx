@@ -182,7 +182,7 @@ export function Event() {
                         "data-[state=active]:border-primary data-[state=active]:text-primary text-[12px]/[18px] uppercase tracking-[0.24px]",
                       )}
                     >
-                      Raw Event
+                      Raw
                     </TabsTrigger>
                     <TabsTrigger
                       value="decoded"
@@ -192,7 +192,7 @@ export function Event() {
                         !hasDecoded && "opacity-50 cursor-not-allowed",
                       )}
                     >
-                      Decoded Event
+                      Decoded
                     </TabsTrigger>
                   </TabsList>
                 </div>
@@ -330,14 +330,16 @@ export function Event() {
                     value="decoded"
                     className="mt-0 flex-1 overflow-auto"
                   >
-                    <div className="px-[15px] py-[15px] flex flex-col gap-[20px] text-foreground">
-                      <section className="flex flex-col gap-[6px]">
-                        <CardLabel className="uppercase">Event</CardLabel>
-                        <p className="text-[12px] font-medium text-foreground-300 break-all">
-                          {decodedEvent?.qualifiedName ?? "Unknown"}
-                        </p>
-                      </section>
+                    <section className="px-[15px] py-[15px]">
+                      <div className="flex items-center justify-between">
+                        <CardLabel className="uppercase">Selector</CardLabel>
+                        <span className="font-mono text-[12px] text-foreground-300 break-all">
+                          {event?.keys?.[0] ?? "—"}
+                        </span>
+                      </div>
+                    </section>
 
+                    <div className="px-[15px] py-[15px] flex flex-col gap-[20px] text-foreground">
                       {hasDecodedKeys ? (
                         <section className="flex flex-col gap-[10px]">
                           <div className="flex items-center justify-between gap-[12px]">
