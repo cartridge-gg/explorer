@@ -1,5 +1,7 @@
 import { RPC_PROVIDER } from "@/services/rpc";
+import { sortedAbi, AbiEventMember } from "@/shared/utils/abi";
 import { isValidAddress } from "@/shared/utils/contract";
+import { stringifyData } from "@/shared/utils/string";
 import { EventDataItem } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
@@ -8,29 +10,8 @@ import {
   CallData,
   events,
   SuccessfulTransactionReceiptResponse,
+  EmittedEvent,
 } from "starknet";
-
-type AbiEventMember = {
-  name: string;
-  type: string;
-  kind: "key" | "data";
-};
-
-type AbiEventInput =
-  | AbiEventMember
-  | {
-      name: string;
-      type: string;
-      indexed?: boolean;
-      kind?: "key" | "data";
-    };
-
-type RawEventForParser =
-  SuccessfulTransactionReceiptResponse["events"][number] & {
-    block_number: number;
-    block_hash: string;
-    transaction_hash: string;
-  };
 
 type BlockResponse = {
   block_number?: number;
@@ -39,13 +20,11 @@ type BlockResponse = {
   [key: string]: unknown;
 };
 
-type RawField = {
-  index: number;
-  value: string;
-  name?: string;
-  type?: string;
-};
-
+// TODO: Depending on the ABI, events may come with the `flat` attribute.
+// If this attribute is present, then the selector is actually composed of multiple
+// felts which are the first n keys depending on the nested structure.
+// Otherwise, the selector is the first key of the event.
+// We should handle that to correctly show the selectors in the UI.
 type DecodedEventDetails = {
   name: string;
   qualifiedName: string;
@@ -59,8 +38,6 @@ type UseEventQueryResult = {
   event: SuccessfulTransactionReceiptResponse["events"][number];
   eventData: EventDataItem[];
   eventKeys: EventDataItem[];
-  rawKeys: RawField[];
-  rawData: RawField[];
   decodedEvent: DecodedEventDetails | null;
 };
 
@@ -77,198 +54,111 @@ export function useEvent() {
       if (!isValidAddress(txHash) || isNaN(eventIndex) || eventIndex < 0) {
         throw new Error("Invalid event id");
       }
+
+      // Since the event is indexed from the transaction receipt index,
+      // this fetch is mandatory.
       const receiptResponse = await RPC_PROVIDER.getTransactionReceipt(txHash);
 
-      // Type guard to ensure we have a successful receipt
-      if (!receiptResponse || !("block_number" in receiptResponse)) {
+      if (!receiptResponse) {
         throw new Error("Transaction receipt not found or is invalid");
       }
 
       const receipt = receiptResponse as SuccessfulTransactionReceiptResponse;
 
+      // The block is mostly required for its timestamp.
       const block = (await RPC_PROVIDER.getBlock(
         receipt.block_number,
       )) as BlockResponse;
 
-      const event = receipt?.events?.[eventIndex];
+      if (eventIndex > receipt?.events?.length) {
+        throw new Error("Event index out of range");
+      }
 
+      const event = receipt?.events?.[eventIndex];
       if (!event) {
         throw new Error("Event not found");
       }
 
-      const contract_abi = await RPC_PROVIDER.getClassAt(
+      const contract_abi = sortedAbi(await RPC_PROVIDER.getClassAt(
         event.from_address,
-      ).then((res) => res.abi);
+      ).then((res) => res.abi));
 
-      // Avoid fetching again the event...
-      // Construct event with proper structure for parseEvents
-      const blockNumber = "block_number" in block ? block.block_number : 0;
-      const blockHash = "block_hash" in block ? block.block_hash : "";
-
-      const eventsC: RawEventForParser[] = [
+      // We can rebuild the `EmittedEvent` instead of fetching again from the chain.
+      const eventsC: EmittedEvent[] = [
         {
-          block_number: blockNumber,
-          block_hash: blockHash || "0x0",
+          block_number: receipt?.block_number ?? 0,
+          block_hash: receipt?.block_hash ?? "0x0",
           transaction_hash: txHash,
           ...event,
         },
       ];
 
-      const parser = new AbiParser2(contract_abi);
       const abiEvents = events.getAbiEvents(contract_abi);
 
-      const parsedEvent = events.parseEvents(
-        eventsC,
-        abiEvents,
-        CallData.getAbiStruct(contract_abi),
-        CallData.getAbiEnum(contract_abi),
-        parser,
-      );
+      // `parseEvents` returns an array. However, we only have one event,
+      // which we can extract by taking the first element.
+      const parsedEvent = events.parseEvents(eventsC, abiEvents, CallData.getAbiStruct(contract_abi), CallData.getAbiEnum(contract_abi), new AbiParser2(contract_abi))[0];
 
       let decodedEventName = "";
       let decodedEventQualifiedName = "";
+      // The final output of the event data, where lives the
+      // event's member data, name and type.
       const eventKeys: EventDataItem[] = [];
       const eventData: EventDataItem[] = [];
-      const rawKeyDefinitions: Array<{ name?: string; type?: string }> = [];
-      const rawDataDefinitions: Array<{ name?: string; type?: string }> = [];
+      // The raw definitions map the member index to the name and type.
+      const rawKeyDefinitions: Array<{ name: string; type?: string }> = [];
+      const rawDataDefinitions: Array<{ name: string; type: string }> = [];
 
-      if (parsedEvent && parsedEvent.length > 0) {
-        const eventDataMap = parsedEvent.find(
-          (e) => e.transaction_hash === receipt?.transaction_hash,
+      if (parsedEvent) {
+        // When decoded, the events object has a key with the full cairo path,
+        // like dojo::world::world_contract::world::ContractInitialized.
+        // To extract it, we consider this is the only key including "::".
+        const qualifiedName = Object.keys(parsedEvent).find((key) =>
+          key.includes("::"),
         );
 
-        if (eventDataMap) {
-          const qualifiedName = Object.keys(eventDataMap).find((key) =>
-            key.includes("::"),
-          );
+        if (qualifiedName) {
+          decodedEventQualifiedName = qualifiedName;
+          decodedEventName =
+            qualifiedName.split("::").pop() ?? qualifiedName ?? "";
 
-          if (qualifiedName) {
-            decodedEventQualifiedName = qualifiedName;
-            decodedEventName =
-              qualifiedName.split("::").pop() ?? qualifiedName ?? "";
-
-            const eventKeyType: Record<string, string> = {};
-            const eventDataType: Record<string, string> = {};
-
-            const registerKey = (input: AbiEventInput) => {
-              const { name, type } = input;
-              if (!type) {
-                return;
-              }
-              rawKeyDefinitions.push({ name, type });
-              if (name) {
-                eventKeyType[name] = type;
-              } else {
-                eventKeyType[`key_${rawKeyDefinitions.length - 1}`] = type;
-              }
-            };
-
-            const registerData = (input: AbiEventInput) => {
-              const { name, type } = input;
-              if (!type) {
-                return;
-              }
-              rawDataDefinitions.push({ name, type });
-              if (name) {
-                eventDataType[name] = type;
-              } else {
-                eventDataType[`data_${rawDataDefinitions.length - 1}`] = type;
-              }
-            };
-
-            Object.keys(abiEvents).forEach((key) => {
-              const abiEvent = abiEvents[key];
-              if ("name" in abiEvent && abiEvent.name === decodedEventName) {
-                if ("members" in abiEvent && Array.isArray(abiEvent.members)) {
-                  (abiEvent.members as AbiEventMember[]).forEach((input) => {
-                    if (input.kind === "key") {
-                      registerKey(input);
-                    } else {
-                      registerData(input);
-                    }
-                  });
-                }
-
-                if ("keys" in abiEvent && Array.isArray(abiEvent.keys)) {
-                  (abiEvent.keys as AbiEventInput[]).forEach(registerKey);
-                }
-
-                if ("data" in abiEvent && Array.isArray(abiEvent.data)) {
-                  (abiEvent.data as AbiEventInput[]).forEach(registerData);
-                }
-
-                if ("inputs" in abiEvent && Array.isArray(abiEvent.inputs)) {
-                  (abiEvent.inputs as AbiEventInput[]).forEach((input) => {
-                    const isKey =
-                      input.kind === "key" ||
-                      (typeof input.indexed === "boolean" && input.indexed);
-                    if (isKey) {
-                      registerKey(input);
-                    } else {
-                      registerData(input);
-                    }
-                  });
-                }
-              }
-            });
-
-            const decodedEventData = eventDataMap[qualifiedName];
-            const stringify = (value: unknown) => {
-              if (typeof value === "bigint") {
-                return `0x${value.toString(16)}`;
-              }
-              if (Array.isArray(value)) {
-                return `[${value.map((item) => stringify(item)).join(", ")}]`;
-              }
-              if (typeof value === "object" && value !== null) {
-                return JSON.stringify(
-                  Object.fromEntries(
-                    Object.entries(value).map(([k, v]) => [k, stringify(v)]),
-                  ),
-                );
-              }
-              return String(value);
-            };
-
-            let keyPosition = 0;
-            let dataPosition = 0;
-
-            Object.entries(decodedEventData || {}).forEach(([key, value]) => {
-              const readableValue = stringify(value);
-              const isKey = key in eventKeyType;
-
-              if (isKey) {
-                const fallback = rawKeyDefinitions[keyPosition];
-                const inputType =
-                  eventKeyType[key] ??
-                  fallback?.type ??
-                  eventDataType[key] ??
-                  "unknown";
-                const inputName = key || fallback?.name || `key_${keyPosition}`;
-                eventKeys.push({
-                  input: inputName,
-                  input_type: inputType,
-                  data: readableValue,
+          // Iterate on all the ABI's events to find the one currently parsed,
+          // by using the qualified name which should be unique across the cairo project.
+          Object.keys(abiEvents).forEach((key) => {
+            const abiEvent = abiEvents[key];
+            if ("name" in abiEvent && abiEvent.name === decodedEventQualifiedName) {
+              if ("members" in abiEvent && Array.isArray(abiEvent.members)) {
+                (abiEvent.members as AbiEventMember[]).forEach(({ name, type, kind }: AbiEventMember) => {
+                  if (kind === "key") {
+                    rawKeyDefinitions.push({ name, type });
+                  } else {
+                    rawDataDefinitions.push({ name, type });
+                  }
                 });
-                keyPosition += 1;
-              } else {
-                const fallback = rawDataDefinitions[dataPosition];
-                const inputType =
-                  eventDataType[key] ??
-                  fallback?.type ??
-                  eventKeyType[key] ??
-                  "unknown";
-                const inputName =
-                  key || fallback?.name || `data_${dataPosition}`;
-                eventData.push({
-                  input: inputName,
-                  input_type: inputType,
-                  data: readableValue,
-                });
-                dataPosition += 1;
               }
+            }
+          });
+
+          // The decoded event data contains the field name as key in the object,
+          // and the value of the field.
+          // Combining this with the ABI definitions, we can build the `EventDataItem` object.
+          const decodedEventData = parsedEvent[qualifiedName];
+
+          // iterate on the raw definitions to build the event keys and data.
+          rawKeyDefinitions.forEach(({ name, type }, index) => {
+            eventKeys.push({
+              input: name ?? `key_${index}`,
+              input_type: type ?? "unknown",
+              data: stringifyData(decodedEventData[name]),
             });
-          }
+          });
+          rawDataDefinitions.forEach(({ name, type }) => {  
+            eventData.push({
+              input: name,
+              input_type: type,
+              data: stringifyData(decodedEventData[name]),
+            });
+          });
         }
       }
 
@@ -276,34 +166,20 @@ export function useEvent() {
         receipt,
         block,
         event,
-        eventData,
-        eventKeys,
-        rawKeys: event.keys?.map((value, index) => ({
-          index,
-          value,
-          name: rawKeyDefinitions[index]?.name,
-          type: rawKeyDefinitions[index]?.type,
-        })),
-        rawData: event.data?.map((value, index) => ({
-          index,
-          value,
-          name: rawDataDefinitions[index]?.name,
-          type: rawDataDefinitions[index]?.type,
-        })),
         decodedEvent: decodedEventName
           ? {
-              name: decodedEventName,
-              qualifiedName: decodedEventQualifiedName,
-              keys: eventKeys,
-              data: eventData,
-            }
+            name: decodedEventName,
+            qualifiedName: decodedEventQualifiedName,
+            keys: eventKeys,
+            data: eventData,
+          }
           : null,
       };
     },
     retry: false,
     enabled: !!eventId, // Only run query if eventId exists
   });
-  
+
   return {
     data: {
       eventId,
@@ -311,10 +187,6 @@ export function useEvent() {
       receipt: data?.receipt,
       block: data?.block,
       event: data?.event,
-      eventData: data?.eventData ?? [],
-      eventKeys: data?.eventKeys ?? [],
-      rawKeys: data?.rawKeys ?? [],
-      rawData: data?.rawData ?? [],
       decodedEvent: data?.decodedEvent ?? null,
     },
     isLoading,

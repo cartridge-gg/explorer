@@ -11,6 +11,12 @@ import {
   hash,
 } from "starknet";
 
+export type AbiEventMember = {
+  name: string;
+  type: string;
+  kind: "key" | "data";
+};
+
 // TypeNode and related types
 export interface PrimitiveType {
   type: "primitive";

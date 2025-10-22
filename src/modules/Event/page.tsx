@@ -43,13 +43,16 @@ export function Event() {
       receipt,
       block,
       event,
-      rawKeys,
-      rawData,
       decodedEvent,
     },
     isLoading,
     error,
   } = useEvent();
+
+  if (error) {
+    console.error("Error fetching event", error);
+  }
+
   const { isMobile } = useScreen();
 
   const [formats, setFormats] = useState<{
@@ -66,8 +69,8 @@ export function Event() {
 
   const [activeTab, setActiveTab] = useState<"raw" | "decoded">("raw");
 
-  const hasRawKeys = rawKeys.length > 0;
-  const hasRawData = rawData.length > 0;
+  const hasRawKeys = event?.keys.length > 0;
+  const hasRawData = event?.data.length > 0;
   const hasDecodedKeys = Boolean(decodedEvent?.keys?.length);
   const hasDecodedData = Boolean(decodedEvent?.data?.length);
   const hasDecoded = Boolean(decodedEvent && (hasDecodedKeys || hasDecodedData));
@@ -204,15 +207,6 @@ export function Event() {
                 >
                   <div className="px-[15px] py-[15px] flex flex-col gap-[20px] text-foreground">
                     <section className="flex flex-col gap-[10px]">
-                      <div className="flex items-center justify-between">
-                        <CardLabel className="uppercase">Selector</CardLabel>
-                        <span className="font-mono text-[12px] text-foreground-300 break-all">
-                          {event?.keys?.[0] ?? "—"}
-                        </span>
-                      </div>
-                    </section>
-
-                    <section className="flex flex-col gap-[10px]">
                       <div className="flex items-center justify-between gap-[12px]">
                         <CardLabel className="uppercase whitespace-nowrap">
                           Keys
@@ -245,18 +239,18 @@ export function Event() {
                               </tr>
                             </thead>
                             <tbody className="text-[13px] text-foreground">
-                              {rawKeys.map((item) => {
+                              {event?.keys.map((value: string, index: number) => {
                                 const format = formats.rawKeys ?? "hex";
                                 return (
                                   <tr
-                                    key={`raw-key-${item.index}`}
+                                    key={`raw-key-${index}`}
                                     className="bg-background-200 rounded-sm"
                                   >
                                     <td className="px-[10px] py-[6px] align-top font-medium text-foreground-300">
-                                      {item.index}
+                                      {index}
                                     </td>
                                     <td className="px-[10px] py-[6px] font-mono break-all">
-                                      {renderValue(item.value, format)}
+                                      {renderValue(value, format)}
                                     </td>
                                   </tr>
                                 );
@@ -301,35 +295,23 @@ export function Event() {
                                   Index
                                 </th>
                                 <th className="px-[10px] py-[6px] font-medium">
-                                  Field
-                                </th>
-                                <th className="px-[10px] py-[6px] font-medium">
-                                  Type
-                                </th>
-                                <th className="px-[10px] py-[6px] font-medium">
                                   Value
                                 </th>
                               </tr>
                             </thead>
                             <tbody className="text-[13px] text-foreground">
-                              {rawData.map((item) => {
+                              {event?.data.map((value: string, index: number) => {
                                 const format = formats.rawData ?? "hex";
                                 return (
                                   <tr
-                                    key={`raw-data-${item.index}`}
+                                    key={`raw-data-${index}`}
                                     className="bg-background-200 rounded-sm"
                                   >
                                     <td className="px-[10px] py-[6px] align-top font-medium text-foreground-300">
-                                      {item.index}
-                                    </td>
-                                    <td className="px-[10px] py-[6px] font-mono break-all text-foreground-400">
-                                      {item.name ?? "—"}
-                                    </td>
-                                    <td className="px-[10px] py-[6px] font-mono break-all text-foreground-300">
-                                      {item.type ?? "—"}
+                                      {index}
                                     </td>
                                     <td className="px-[10px] py-[6px] font-mono break-all">
-                                      {renderValue(item.value, format)}
+                                      {renderValue(value, format)}
                                     </td>
                                   </tr>
                                 );
