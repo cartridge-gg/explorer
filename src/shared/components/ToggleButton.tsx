@@ -30,10 +30,7 @@ export default function ToggleButton<T extends ToggleVariants>({
       className="h-min"
     >
       <TabsList
-        className={cn(
-          "h-auto p-0 select-none w-max bg-transparent",
-          className,
-        )}
+        className={cn("h-auto p-0 select-none w-max bg-transparent", className)}
       >
         {(variants as readonly string[]).map((type, index) => (
           <TabsTrigger

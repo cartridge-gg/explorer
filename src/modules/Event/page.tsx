@@ -4,10 +4,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { convertValue } from "@/shared/utils/rpc";
 import { DisplayFormatTypes } from "@/types/types";
-import {
-  PageHeader,
-  PageHeaderTitle,
-} from "@/shared/components/PageHeader";
+import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { useEvent } from "./hooks";
 import { Loading } from "@/shared/components/Loading";
 import { NotFound } from "../NotFound/page";
@@ -37,14 +34,7 @@ import FeltDisplayAsToggle from "@/shared/components/FeltDisplayAsToggle";
 
 export function Event() {
   const {
-    data: {
-      eventId,
-      txHash,
-      receipt,
-      block,
-      event,
-      decodedEvent,
-    },
+    data: { eventId, txHash, receipt, block, event, decodedEvent },
     isLoading,
     error,
   } = useEvent();
@@ -73,7 +63,9 @@ export function Event() {
   const hasRawData = event?.data.length > 0;
   const hasDecodedKeys = Boolean(decodedEvent?.keys?.length);
   const hasDecodedData = Boolean(decodedEvent?.data?.length);
-  const hasDecoded = Boolean(decodedEvent && (hasDecodedKeys || hasDecodedData));
+  const hasDecoded = Boolean(
+    decodedEvent && (hasDecodedKeys || hasDecodedData),
+  );
 
   useEffect(() => {
     if (!hasDecoded && activeTab === "decoded") {
@@ -137,7 +129,11 @@ export function Event() {
                     title="Contract Address"
                     value={event?.from_address}
                     length={isMobile ? 1 : 3}
-                    to={event?.from_address ? `/contract/${event.from_address}` : undefined}
+                    to={
+                      event?.from_address
+                        ? `/contract/${event.from_address}`
+                        : undefined
+                    }
                   />
                 </div>
 
@@ -201,10 +197,7 @@ export function Event() {
                   </TabsList>
                 </div>
                 <CardSeparator className="m-0" />
-                <TabsContent
-                  value="raw"
-                  className="mt-0 flex-1 overflow-auto"
-                >
+                <TabsContent value="raw" className="mt-0 flex-1 overflow-auto">
                   <div className="px-[15px] py-[15px] flex flex-col gap-[20px] text-foreground">
                     <section className="flex flex-col gap-[10px]">
                       <div className="flex items-center justify-between gap-[12px]">
@@ -239,22 +232,24 @@ export function Event() {
                               </tr>
                             </thead>
                             <tbody className="text-[13px] text-foreground">
-                              {event?.keys.map((value: string, index: number) => {
-                                const format = formats.rawKeys ?? "hex";
-                                return (
-                                  <tr
-                                    key={`raw-key-${index}`}
-                                    className="bg-background-200 rounded-sm"
-                                  >
-                                    <td className="px-[10px] py-[6px] align-top font-medium text-foreground-300">
-                                      {index}
-                                    </td>
-                                    <td className="px-[10px] py-[6px] font-mono break-all">
-                                      {renderValue(value, format)}
-                                    </td>
-                                  </tr>
-                                );
-                              })}
+                              {event?.keys.map(
+                                (value: string, index: number) => {
+                                  const format = formats.rawKeys ?? "hex";
+                                  return (
+                                    <tr
+                                      key={`raw-key-${index}`}
+                                      className="bg-background-200 rounded-sm"
+                                    >
+                                      <td className="px-[10px] py-[6px] align-top font-medium text-foreground-300">
+                                        {index}
+                                      </td>
+                                      <td className="px-[10px] py-[6px] font-mono break-all">
+                                        {renderValue(value, format)}
+                                      </td>
+                                    </tr>
+                                  );
+                                },
+                              )}
                             </tbody>
                           </table>
                         </div>
@@ -300,22 +295,24 @@ export function Event() {
                               </tr>
                             </thead>
                             <tbody className="text-[13px] text-foreground">
-                              {event?.data.map((value: string, index: number) => {
-                                const format = formats.rawData ?? "hex";
-                                return (
-                                  <tr
-                                    key={`raw-data-${index}`}
-                                    className="bg-background-200 rounded-sm"
-                                  >
-                                    <td className="px-[10px] py-[6px] align-top font-medium text-foreground-300">
-                                      {index}
-                                    </td>
-                                    <td className="px-[10px] py-[6px] font-mono break-all">
-                                      {renderValue(value, format)}
-                                    </td>
-                                  </tr>
-                                );
-                              })}
+                              {event?.data.map(
+                                (value: string, index: number) => {
+                                  const format = formats.rawData ?? "hex";
+                                  return (
+                                    <tr
+                                      key={`raw-data-${index}`}
+                                      className="bg-background-200 rounded-sm"
+                                    >
+                                      <td className="px-[10px] py-[6px] align-top font-medium text-foreground-300">
+                                        {index}
+                                      </td>
+                                      <td className="px-[10px] py-[6px] font-mono break-all">
+                                        {renderValue(value, format)}
+                                      </td>
+                                    </tr>
+                                  );
+                                },
+                              )}
                             </tbody>
                           </table>
                         </div>

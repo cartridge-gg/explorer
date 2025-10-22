@@ -79,9 +79,11 @@ export function useEvent() {
         throw new Error("Event not found");
       }
 
-      const contract_abi = sortedAbi(await RPC_PROVIDER.getClassAt(
-        event.from_address,
-      ).then((res) => res.abi));
+      const contract_abi = sortedAbi(
+        await RPC_PROVIDER.getClassAt(event.from_address).then(
+          (res) => res.abi,
+        ),
+      );
 
       // We can rebuild the `EmittedEvent` instead of fetching again from the chain.
       const eventsC: EmittedEvent[] = [
@@ -97,7 +99,13 @@ export function useEvent() {
 
       // `parseEvents` returns an array. However, we only have one event,
       // which we can extract by taking the first element.
-      const parsedEvent = events.parseEvents(eventsC, abiEvents, CallData.getAbiStruct(contract_abi), CallData.getAbiEnum(contract_abi), new AbiParser2(contract_abi))[0];
+      const parsedEvent = events.parseEvents(
+        eventsC,
+        abiEvents,
+        CallData.getAbiStruct(contract_abi),
+        CallData.getAbiEnum(contract_abi),
+        new AbiParser2(contract_abi),
+      )[0];
 
       let decodedEventName = "";
       let decodedEventQualifiedName = "";
@@ -126,15 +134,20 @@ export function useEvent() {
           // by using the qualified name which should be unique across the cairo project.
           Object.keys(abiEvents).forEach((key) => {
             const abiEvent = abiEvents[key];
-            if ("name" in abiEvent && abiEvent.name === decodedEventQualifiedName) {
+            if (
+              "name" in abiEvent &&
+              abiEvent.name === decodedEventQualifiedName
+            ) {
               if ("members" in abiEvent && Array.isArray(abiEvent.members)) {
-                (abiEvent.members as AbiEventMember[]).forEach(({ name, type, kind }: AbiEventMember) => {
-                  if (kind === "key") {
-                    rawKeyDefinitions.push({ name, type });
-                  } else {
-                    rawDataDefinitions.push({ name, type });
-                  }
-                });
+                (abiEvent.members as AbiEventMember[]).forEach(
+                  ({ name, type, kind }: AbiEventMember) => {
+                    if (kind === "key") {
+                      rawKeyDefinitions.push({ name, type });
+                    } else {
+                      rawDataDefinitions.push({ name, type });
+                    }
+                  },
+                );
               }
             }
           });
@@ -152,7 +165,7 @@ export function useEvent() {
               data: stringifyData(decodedEventData[name]),
             });
           });
-          rawDataDefinitions.forEach(({ name, type }) => {  
+          rawDataDefinitions.forEach(({ name, type }) => {
             eventData.push({
               input: name,
               input_type: type,
@@ -168,11 +181,11 @@ export function useEvent() {
         event,
         decodedEvent: decodedEventName
           ? {
-            name: decodedEventName,
-            qualifiedName: decodedEventQualifiedName,
-            keys: eventKeys,
-            data: eventData,
-          }
+              name: decodedEventName,
+              qualifiedName: decodedEventQualifiedName,
+              keys: eventKeys,
+              data: eventData,
+            }
           : null,
       };
     },

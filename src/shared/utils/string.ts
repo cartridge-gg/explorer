@@ -56,4 +56,4 @@ export function stringifyData(value: unknown): string {
     );
   }
   return String(value);
-};
+}
