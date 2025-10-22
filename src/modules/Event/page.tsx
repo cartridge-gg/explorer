@@ -330,12 +330,19 @@ export function Event() {
                     value="decoded"
                     className="mt-0 flex-1 overflow-auto"
                   >
+                    {/* TODO: handle the nested events without flat, where the selector could be composed of multiple felts. */}
                     <section className="px-[15px] py-[15px]">
                       <div className="flex items-center justify-between">
                         <CardLabel className="uppercase">Selector</CardLabel>
                         <span className="font-mono text-[12px] text-foreground-300 break-all">
-                          {event?.keys?.[0] ?? "—"}
+                          {decodedEvent.name}
                         </span>
+                        <CopyableInteger
+                          title={decodedEvent.name}
+                          value={event?.keys?.[0] ?? "—"}
+                          length={isMobile ? 1 : 3}
+                          to={undefined}
+                        />
                       </div>
                     </section>
 
