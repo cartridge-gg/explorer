@@ -152,12 +152,8 @@ export function useEvent() {
             }
           });
 
-          // The decoded event data contains the field name as key in the object,
-          // and the value of the field.
-          // Combining this with the ABI definitions, we can build the `EventDataItem` object.
           const decodedEventData = parsedEvent[qualifiedName];
 
-          // iterate on the raw definitions to build the event keys and data.
           rawKeyDefinitions.forEach(({ name, type }, index) => {
             eventKeys.push({
               input: name ?? `key_${index}`,
@@ -165,6 +161,7 @@ export function useEvent() {
               data: stringifyData(decodedEventData[name]),
             });
           });
+
           rawDataDefinitions.forEach(({ name, type }) => {
             eventData.push({
               input: name,
