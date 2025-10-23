@@ -172,7 +172,7 @@ export function Event() {
                 onValueChange={(value) =>
                   setActiveTab((value as "raw" | "decoded") ?? "raw")
                 }
-                className="flex flex-col h-full"
+                className="flex flex-col h-full pb-[15px]"
               >
                 <div className="px-[15px] pt-[10px] pb-[6px]">
                   <TabsList className="gap-[12px] p-0 h-8">
@@ -197,139 +197,133 @@ export function Event() {
                   </TabsList>
                 </div>
                 <CardSeparator className="m-0" />
-                <TabsContent value="raw" className="mt-0 flex-1 overflow-auto">
-                  <div className="px-[15px] py-[15px] flex flex-col gap-[20px] text-foreground">
-                    <section className="flex flex-col gap-[10px]">
-                      <div className="flex items-center justify-between gap-[12px]">
-                        <CardLabel className="uppercase whitespace-nowrap">
-                          Keys
-                        </CardLabel>
-                        {hasRawKeys ? (
-                          <FeltDisplayAsToggle
-                            asString
-                            displayAs={formats.rawKeys}
-                            onChange={(format) =>
-                              setFormats((prev) => ({
-                                ...prev,
-                                rawKeys: format,
-                              }))
-                            }
-                          />
-                        ) : null}
-                      </div>
-
+                <TabsContent
+                  value="raw"
+                  className="mt-0 overflow-auto px-[15px] py-[15px] flex flex-col gap-[20px] text-foreground"
+                >
+                  <section className="flex flex-col gap-[10px]">
+                    <div className="flex items-center justify-between gap-[12px]">
+                      <CardLabel className="uppercase whitespace-nowrap">
+                        Keys
+                      </CardLabel>
                       {hasRawKeys ? (
-                        <div className="overflow-x-auto">
-                          <table className="w-full border-separate border-spacing-y-[6px] text-left">
-                            <thead className="text-[11px] uppercase text-foreground-400">
-                              <tr>
-                                <th className="px-[10px] py-[6px] font-medium">
-                                  Index
-                                </th>
-                                <th className="px-[10px] py-[6px] font-medium">
-                                  Value
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="text-[13px] text-foreground">
-                              {event?.keys.map(
-                                (value: string, index: number) => {
-                                  const format = formats.rawKeys ?? "hex";
-                                  return (
-                                    <tr
-                                      key={`raw-key-${index}`}
-                                      className="bg-background-200 rounded-sm"
-                                    >
-                                      <td className="px-[10px] py-[6px] align-top font-medium text-foreground-300">
-                                        {index}
-                                      </td>
-                                      <td className="px-[10px] py-[6px] font-mono break-all">
-                                        {renderValue(value, format)}
-                                      </td>
-                                    </tr>
-                                  );
-                                },
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-                      ) : (
-                        <p className="text-[12px] text-foreground-300">
-                          No raw keys found.
-                        </p>
-                      )}
-                    </section>
+                        <FeltDisplayAsToggle
+                          asString
+                          displayAs={formats.rawKeys}
+                          onChange={(format) =>
+                            setFormats((prev) => ({
+                              ...prev,
+                              rawKeys: format,
+                            }))
+                          }
+                        />
+                      ) : null}
+                    </div>
 
-                    <CardSeparator className="my-0" />
-
-                    <section className="flex flex-col gap-[10px]">
-                      <div className="flex items-center justify-between gap-[12px]">
-                        <CardLabel className="uppercase whitespace-nowrap">
-                          Data
-                        </CardLabel>
-                        {hasRawData ? (
-                          <FeltDisplayAsToggle
-                            asString
-                            displayAs={formats.rawData}
-                            onChange={(format) =>
-                              setFormats((prev) => ({
-                                ...prev,
-                                rawData: format,
-                              }))
-                            }
-                          />
-                        ) : null}
+                    {hasRawKeys ? (
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-separate border-spacing-y-[6px] text-left">
+                          <thead className="text-[11px] uppercase text-foreground-400">
+                            <tr>
+                              <th className="px-[10px] py-[6px] font-medium">
+                                Index
+                              </th>
+                              <th className="px-[10px] py-[6px] font-medium">
+                                Value
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="text-[13px] text-foreground">
+                            {event?.keys.map((value: string, index: number) => {
+                              const format = formats.rawKeys ?? "hex";
+                              return (
+                                <tr
+                                  key={`raw-key-${index}`}
+                                  className="bg-background-200 rounded-sm"
+                                >
+                                  <td className="px-[10px] py-[6px] align-top font-medium text-foreground-300">
+                                    {index}
+                                  </td>
+                                  <td className="px-[10px] py-[6px] font-mono break-all">
+                                    {renderValue(value, format)}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
                       </div>
+                    ) : (
+                      <p className="text-[12px] text-foreground-300">
+                        No raw keys found.
+                      </p>
+                    )}
+                  </section>
 
+                  <CardSeparator className="my-0" />
+
+                  <section className="flex flex-col gap-[10px]">
+                    <div className="flex items-center justify-between gap-[12px]">
+                      <CardLabel className="uppercase whitespace-nowrap">
+                        Data
+                      </CardLabel>
                       {hasRawData ? (
-                        <div className="overflow-x-auto">
-                          <table className="w-full border-separate border-spacing-y-[6px] text-left">
-                            <thead className="text-[11px] uppercase text-foreground-400">
-                              <tr>
-                                <th className="px-[10px] py-[6px] font-medium">
-                                  Index
-                                </th>
-                                <th className="px-[10px] py-[6px] font-medium">
-                                  Value
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="text-[13px] text-foreground">
-                              {event?.data.map(
-                                (value: string, index: number) => {
-                                  const format = formats.rawData ?? "hex";
-                                  return (
-                                    <tr
-                                      key={`raw-data-${index}`}
-                                      className="bg-background-200 rounded-sm"
-                                    >
-                                      <td className="px-[10px] py-[6px] align-top font-medium text-foreground-300">
-                                        {index}
-                                      </td>
-                                      <td className="px-[10px] py-[6px] font-mono break-all">
-                                        {renderValue(value, format)}
-                                      </td>
-                                    </tr>
-                                  );
-                                },
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-                      ) : (
-                        <p className="text-[12px] text-foreground-300">
-                          No raw data found.
-                        </p>
-                      )}
-                    </section>
-                  </div>
+                        <FeltDisplayAsToggle
+                          asString
+                          displayAs={formats.rawData}
+                          onChange={(format) =>
+                            setFormats((prev) => ({
+                              ...prev,
+                              rawData: format,
+                            }))
+                          }
+                        />
+                      ) : null}
+                    </div>
+
+                    {hasRawData ? (
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-separate border-spacing-y-[6px] text-left">
+                          <thead className="text-[11px] uppercase text-foreground-400">
+                            <tr>
+                              <th className="px-[10px] py-[6px] font-medium">
+                                Index
+                              </th>
+                              <th className="px-[10px] py-[6px] font-medium">
+                                Value
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="text-[13px] text-foreground">
+                            {event?.data.map((value: string, index: number) => {
+                              const format = formats.rawData ?? "hex";
+                              return (
+                                <tr
+                                  key={`raw-data-${index}`}
+                                  className="bg-background-200 rounded-sm"
+                                >
+                                  <td className="px-[10px] py-[6px] align-top font-medium text-foreground-300">
+                                    {index}
+                                  </td>
+                                  <td className="px-[10px] py-[6px] font-mono break-all">
+                                    {renderValue(value, format)}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-[12px] text-foreground-300">
+                        No raw data found.
+                      </p>
+                    )}
+                  </section>
                 </TabsContent>
 
                 {hasDecoded ? (
-                  <TabsContent
-                    value="decoded"
-                    className="mt-0 flex-1 overflow-auto"
-                  >
+                  <TabsContent value="decoded" className="mt-0 overflow-auto">
                     {/* TODO: handle the nested events without flat, where the selector could be composed of multiple felts. */}
                     <section className="px-[15px] py-[15px]">
                       <div className="flex items-center justify-between">
