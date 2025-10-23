@@ -11,6 +11,7 @@ import {
   Tabs,
   TabsContent,
   CopyIcon,
+  InfoIcon,
 } from "@cartridge/ui";
 import {
   Breadcrumb,
@@ -41,12 +42,34 @@ import { useScrollTo } from "@/shared/hooks/useScrollTo";
 import { toast } from "sonner";
 import { Editor } from "@/shared/components/editor";
 import { Selector } from "@/shared/components/Selector";
+import { JsonSchemaForm } from "@/shared/components/form";
 
 interface FormState {
-  inputs: { name: string; value: string }[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  inputs: any[];
   result: unknown;
   hasCalled: boolean;
   loading: boolean;
+}
+
+// Utility to recursively flatten __oneOfSelected__ at any depth
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function flattenOneOf(value: any): any {
+  if (Array.isArray(value)) {
+    return value.map(flattenOneOf);
+  }
+  if (value && typeof value === "object") {
+    if ("__oneOfSelected__" in value && "__oneOfValue__" in value) {
+      return flattenOneOf(value.__oneOfValue__);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const out: Record<string, any> = {};
+    for (const k in value) {
+      out[k] = flattenOneOf(value[k]);
+    }
+    return out;
+  }
+  return value;
 }
 
 export function JsonRpcPlayground() {
@@ -85,6 +108,10 @@ export function JsonRpcPlayground() {
   const [form, setForm] = useState<Record<string, FormState>>({});
   const [activeTab, setActiveTab] = useState("request");
 
+  useEffect(() => {
+    console.log("selected: ", selected);
+  }, [selected]);
+
   // Scroll to selected method hook
   const { scrollContainerRef, setItemRef } = useScrollTo({
     item: selected,
@@ -94,40 +121,184 @@ export function JsonRpcPlayground() {
   const onMethodChange = useCallback(
     (method: Method) => {
       setSelected(method);
-      setForm((prev) => ({
-        ...prev,
-        [method.name]: prev[method.name] ?? {
-          inputs: method.params?.map((p) => ({ name: p.name, value: "" })),
-          result: null,
-          hasCalled: false,
-          loading: false,
-        },
-      }));
+      setForm((prev) => {
+        const existingForm = prev[method.name];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let initialInputs: any[] = method.params?.map(() => "") || [];
+
+        // For estimate fee, initialize with proper structure for auto-population
+        if (method.name === "starknet_estimateFee" && !existingForm) {
+          initialInputs =
+            method.params?.map((param, i) => {
+              if (param.name === "request" && i === 0) {
+                // Initialize with empty array for transactions
+                return [];
+              }
+              return "";
+            }) || [];
+        }
+
+        return {
+          ...prev,
+          [method.name]: existingForm ?? {
+            inputs: initialInputs,
+            result: null,
+            hasCalled: false,
+            loading: false,
+          },
+        };
+      });
       navigate(`#${method.name}`);
     },
     [navigate],
   );
 
+  // Helper function to auto-populate implied fields for estimate fee
+  const autoPopulateImpliedFields = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (paramName: string, value: any, allInputs: any[]) => {
+      if (!selected || selected.name !== "starknet_estimateFee")
+        return allInputs;
+
+      // If the first parameter (request) is being changed and contains transaction type
+      if (paramName === "request" && value && typeof value === "object") {
+        const newInputs = [...allInputs];
+
+        // Check if it's an array of transactions
+        if (Array.isArray(value)) {
+          const updatedTransactions = value.map((tx) => {
+            if (
+              tx &&
+              typeof tx === "object" &&
+              tx.__oneOfSelected__ !== undefined
+            ) {
+              const txCopy = { ...tx };
+              const selectedBranch = tx.__oneOfSelected__;
+
+              // Get transaction type mapping based on schema oneOf order
+              const getTransactionTypeAndVersion = (branchIndex: number) => {
+                // This mapping should match the order in the OpenRPC schema
+                const typeMap: Record<
+                  number,
+                  { type: string; version: string }
+                > = {
+                  0: { type: "INVOKE", version: "0x3" },
+                  1: { type: "DECLARE", version: "0x3" },
+                  2: { type: "DEPLOY_ACCOUNT", version: "0x3" },
+                  3: { type: "INVOKE", version: "0x1" },
+                  4: { type: "DECLARE", version: "0x2" },
+                  5: { type: "DEPLOY_ACCOUNT", version: "0x1" },
+                };
+                return (
+                  typeMap[branchIndex] || { type: "INVOKE", version: "0x3" }
+                );
+              };
+
+              // Auto-populate based on transaction type selection
+              if (
+                txCopy.__oneOfValue__ &&
+                typeof txCopy.__oneOfValue__ === "object"
+              ) {
+                const txValue = { ...txCopy.__oneOfValue__ };
+                const { type, version } =
+                  getTransactionTypeAndVersion(selectedBranch);
+
+                // Only set if not already specified by user
+                if (!txValue.type || txValue.type === "") {
+                  txValue.type = type;
+                }
+                if (!txValue.version || txValue.version === "") {
+                  txValue.version = version;
+                }
+
+                txCopy.__oneOfValue__ = txValue;
+              }
+
+              return txCopy;
+            }
+            return tx;
+          });
+
+          newInputs[0] = updatedTransactions;
+        }
+
+        return newInputs;
+      }
+
+      return allInputs;
+    },
+    [selected],
+  );
+
   const onParamChange = useCallback(
-    (i: number, value?: string) => {
-      if (!selected || typeof value === "undefined") return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (i: number, value: any) => {
+      if (!selected) return;
       setForm((prev) => {
         const newForm = { ...prev };
         if (!newForm[selected.name]) {
           newForm[selected.name] = {
-            inputs:
-              selected.params?.map((p) => ({ name: p.name, value: "" })) || [],
+            inputs: selected.params?.map(() => "") || [],
             result: null,
             hasCalled: false,
             loading: false,
           };
         }
-        newForm[selected.name].inputs[i].value = value;
+
+        const currentInputs = [...newForm[selected.name].inputs];
+        currentInputs[i] = value;
+
+        // Auto-populate implied fields for estimate fee
+        const paramName = selected.params?.[i]?.name || "";
+        const updatedInputs = autoPopulateImpliedFields(
+          paramName,
+          value,
+          currentInputs,
+        );
+
+        newForm[selected.name].inputs = updatedInputs;
         return newForm;
       });
     },
-    [selected],
+    [selected, autoPopulateImpliedFields],
   );
+
+  // Replace parametersSection with JsonSchemaForm for each param, using all-fields mode for top-level oneOf
+  const parametersSection = useMemo(() => {
+    if (!selected?.params || selected.params.length === 0) return null;
+
+    return (
+      <div className="flex flex-col gap-4">
+        {selected.params.map((param, i) => (
+          <div key={param.name} className="flex flex-col gap-1">
+            <CardLabel className="text-[12px]/[16px] font-semibold tracking-[0.24px] text-foreground-400">
+              {formatSnakeCaseToDisplayValue(param.name)}
+            </CardLabel>
+            <h2 className="text-[12px]">{param.description}</h2>
+            <JsonSchemaForm
+              schema={param.schema}
+              value={
+                form[selected?.name]?.inputs[i] ||
+                (param.schema &&
+                typeof param.schema === "object" &&
+                "type" in param.schema
+                  ? param.schema.type === "object"
+                    ? {}
+                    : param.schema.type === "array"
+                      ? []
+                      : ""
+                  : "")
+              }
+              onChange={(v) => {
+                onParamChange(i, v);
+              }}
+              disabled={form[selected?.name]?.loading}
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }, [selected, form, onParamChange]);
 
   const requestJSON = useMemo(() => {
     if (!selected || !form[selected.name]) return;
@@ -137,17 +308,7 @@ export function JsonRpcPlayground() {
       {
         jsonrpc: "2.0",
         method: selected.name,
-        params: inputs?.map((p) => {
-          if (typeof p.value === "undefined") {
-            return "";
-          }
-
-          try {
-            return JSON.parse(p.value);
-          } catch {
-            return p.value;
-          }
-        }),
+        params: inputs?.map(flattenOneOf),
       },
       null,
       2,
@@ -162,31 +323,6 @@ export function JsonRpcPlayground() {
     return JSON.stringify(result, null, 2);
   }, [selected, form]);
 
-  const parametersSection = useMemo(() => {
-    if (!selected?.params || selected.params.length === 0) return null;
-
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-[15px]">
-        {selected.params.map((param, i) => (
-          <div key={i} className="flex flex-col gap-[8px]">
-            <CardLabel className="text-[12px]/[16px] font-semibold tracking-[0.24px] text-foreground-400">
-              {formatSnakeCaseToDisplayValue(param.name)}
-            </CardLabel>
-            <div className="relative flex items-center w-full">
-              <Input
-                placeholder={param.name}
-                value={form[selected?.name]?.inputs[i]?.value || ""}
-                onChange={(e) => onParamChange(i, e.target.value)}
-                containerClassName="w-full"
-                className="bg-input focus-visible:bg-input border-none caret-foreground font-sans px-[10px] py-[5px] h-[30px] rounded-sm"
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }, [selected, form, onParamChange]);
-
   const onExecute = useCallback(async () => {
     if (!selected) return;
 
@@ -198,13 +334,7 @@ export function JsonRpcPlayground() {
       },
     }));
     const f = form[selected.name];
-    const params = f.inputs.map((p) => {
-      try {
-        return JSON.parse(p.value);
-      } catch {
-        return p.value;
-      }
-    });
+    const params = f.inputs.map(flattenOneOf);
     const res = await fetch(getRpcUrl(), {
       headers: {
         "Content-Type": "application/json",
@@ -254,14 +384,31 @@ export function JsonRpcPlayground() {
 
   useEffect(() => {
     if (!methods.length) return;
-    setSelected(methods[0]);
-    setForm((prev) => ({
-      ...prev,
-      [methods[0].name]: {
-        ...prev[methods[0].name],
-        inputs: methods[0].params?.map((p) => ({ name: p.name, value: "" })),
-      },
-    }));
+    const firstMethod = methods[0];
+    setSelected(firstMethod);
+    setForm((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let initialInputs: any[] = firstMethod.params?.map(() => "") || [];
+
+      // For estimate fee, initialize with proper structure
+      if (firstMethod.name === "starknet_estimateFee") {
+        initialInputs =
+          firstMethod.params?.map((param, i) => {
+            if (param.name === "request" && i === 0) {
+              return [];
+            }
+            return "";
+          }) || [];
+      }
+
+      return {
+        ...prev,
+        [firstMethod.name]: {
+          ...prev[firstMethod.name],
+          inputs: initialInputs,
+        },
+      };
+    });
   }, [methods]);
 
   useKeydownEffect((e) => {
@@ -416,9 +563,24 @@ export function JsonRpcPlayground() {
               </div>
             </CardContent>
 
-            <form className="flex flex-col p-[15px] gap-[30px] justify-between h-auto">
+            <form className="flex flex-col p-[15px] gap-[30px] justify-between h-auto md:h-[300px] overflow-y-scroll">
               <CardContent className="p-0">
-                {/* New custom parameters implementation */}
+                {selected?.name === "starknet_estimateFee" && (
+                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <div className="flex items-start gap-2">
+                      <InfoIcon className="text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="text-sm font-medium text-blue-800">
+                          Auto-population Active
+                        </h4>
+                        <p className="text-xs text-blue-700 mt-1">
+                          Transaction type and version fields are automatically
+                          populated when you select a transaction type.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {parametersSection}
               </CardContent>
 

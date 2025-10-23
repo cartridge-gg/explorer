@@ -51,7 +51,10 @@ import { Badge } from "@/shared/components/badge";
 import { DataTable } from "@/shared/components/data-table";
 import { MultiFilter } from "@/shared/components/filter";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { truncateString } from "@/shared/utils/string";
+import {
+  formatSnakeCaseToDisplayValue,
+  truncateString,
+} from "@/shared/utils/string";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { TransactionType } from "@/types/types";
 
@@ -130,11 +133,7 @@ export function Block() {
       return types.map((type) => {
         return {
           key: type,
-          value: type
-            .toLowerCase()
-            .split("_")
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ") as Capitalize<typeof type>,
+          value: formatSnakeCaseToDisplayValue(type),
         };
       });
     }, []);
