@@ -35,3 +35,25 @@ export function toHash(str: string) {
 export function isNumber(str: string): boolean {
   return !isNaN(str as unknown as number);
 }
+
+/**
+ * Stringify the data to a human readable format.
+ * @param value - The value to stringify. Which usually represents a data fetched from the chain.
+ * @returns The stringified data.
+ */
+export function stringifyData(value: unknown): string {
+  if (typeof value === "bigint") {
+    return `0x${value.toString(16)}`;
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => stringifyData(item)).join(", ")}]`;
+  }
+  if (typeof value === "object" && value !== null) {
+    return JSON.stringify(
+      Object.fromEntries(
+        Object.entries(value).map(([k, v]) => [k, stringifyData(v)]),
+      ),
+    );
+  }
+  return String(value);
+}
