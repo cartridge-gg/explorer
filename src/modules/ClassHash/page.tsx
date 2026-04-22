@@ -1,11 +1,5 @@
 import { truncateString } from "@/shared/utils/string";
-import {
-  BookIcon,
-  cn,
-  ScrollIcon,
-  PulseIcon,
-  SearchIcon,
-} from "@cartridge/ui";
+import { BookIcon, cn, ScrollIcon, PulseIcon, SearchIcon } from "@cartridge/ui";
 import { Input } from "@/shared/components/ui/input";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import {

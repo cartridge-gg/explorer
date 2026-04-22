@@ -3,13 +3,7 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { RPC_PROVIDER } from "@/services/rpc";
 import { Contract as StarknetContract } from "starknet";
-import {
-  BookIcon,
-  cn,
-  SearchIcon,
-  PlusIcon,
-  ListIcon,
-} from "@cartridge/ui";
+import { BookIcon, cn, SearchIcon, PlusIcon, ListIcon } from "@cartridge/ui";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Skeleton } from "@/shared/components/ui/skeleton";

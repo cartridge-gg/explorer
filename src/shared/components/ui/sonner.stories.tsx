@@ -15,10 +15,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => (
     <>
-      <Button
-        variant="secondary"
-        onClick={() => toast.success("Saved!")}
-      >
+      <Button variant="secondary" onClick={() => toast.success("Saved!")}>
         Fire toast
       </Button>
       <Toaster />

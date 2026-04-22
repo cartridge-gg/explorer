@@ -1,10 +1,6 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import {
-  AlertIcon,
-  SpinnerIcon,
-  TimesCircleIcon,
-} from "@cartridge/ui";
+import { AlertIcon, SpinnerIcon, TimesCircleIcon } from "@cartridge/ui";
 
 import { cn } from "@/lib/utils";
 
