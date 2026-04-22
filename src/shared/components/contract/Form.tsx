@@ -20,7 +20,7 @@ import {
 import { useAccount } from "@starknet-react/core";
 import { Link } from "react-router-dom";
 import AddIcon from "@/shared/icons/Add";
-import { Button } from "@cartridge/ui";
+import { Button } from "@/shared/components/ui/button";
 import { useCallCartDispatch } from "@/store/ShoppingCartProvider";
 import { ParamForm } from "@/shared/components/form";
 import { toast } from "sonner";

@@ -2,12 +2,12 @@ import { truncateString } from "@/shared/utils/string";
 import {
   BookIcon,
   cn,
-  Input,
   ScrollIcon,
-  Skeleton,
   PulseIcon,
   SearchIcon,
 } from "@cartridge/ui";
+import { Input } from "@/shared/components/ui/input";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
   Breadcrumb,
   BreadcrumbItem,

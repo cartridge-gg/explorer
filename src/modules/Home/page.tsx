@@ -1,6 +1,9 @@
 import { SearchBar } from "@/shared/components/search-bar";
 import { Link } from "react-router-dom";
-import { cn, Network, Skeleton, Spinner, WedgeIcon } from "@cartridge/ui";
+import { Network, WedgeIcon } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/shared/components/ui/skeleton";
+import { Spinner } from "@/shared/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import { RPC_PROVIDER } from "@/services/rpc";
 import { useCallback, useEffect, useMemo, useRef } from "react";

@@ -1,4 +1,5 @@
-import { cn, Skeleton } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import type { Chain } from "@starknet-react/chains";
 import { useCallback, useMemo } from "react";
 import { getChecksumAddress } from "starknet";

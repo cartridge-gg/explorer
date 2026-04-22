@@ -5,11 +5,11 @@ import {
   GasIcon,
   StackDiamondIcon,
   cn,
-  Skeleton,
   ListIcon,
   PulseIcon,
   WedgeIcon,
 } from "@cartridge/ui";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import { toast } from "sonner";
 import {
   Card,

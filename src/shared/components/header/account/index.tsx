@@ -1,6 +1,7 @@
 import { useAccount } from "@starknet-react/core";
 import { ConnectButton } from "./connect";
-import { Button, Spinner } from "@cartridge/ui";
+import { Button } from "@/shared/components/ui/button";
+import { Spinner } from "@/shared/components/ui/spinner";
 import { useScreen } from "@/shared/hooks/useScreen";
 import { Connected } from "./connected";
 

@@ -1,17 +1,16 @@
 import { Table as TableType, flexRender } from "@tanstack/react-table";
+import { ArrowIcon, ArrowToLineIcon } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
+import { Button } from "@/shared/components/ui/button";
+import { Spinner } from "@/shared/components/ui/spinner";
 import {
-  ArrowIcon,
-  ArrowToLineIcon,
-  Button,
-  cn,
-  Spinner,
+  Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@cartridge/ui";
-import { Table } from "@/shared/components/primitives/table";
+} from "@/shared/components/ui/table";
 
 interface DataTableProps<T> extends React.HTMLAttributes<HTMLDivElement> {
   table: TableType<T>;

@@ -1,10 +1,12 @@
-export { Accordion, AccordionContent } from "@cartridge/ui";
-
 import {
-  cn,
+  Accordion,
+  AccordionContent,
   AccordionItem as UIAccordionItem,
   AccordionTrigger as UIAccordionTrigger,
-} from "@cartridge/ui";
+} from "@/shared/components/ui/accordion";
+import { cn } from "@/lib/utils";
+
+export { Accordion, AccordionContent };
 
 export function AccordionItem({
   className,

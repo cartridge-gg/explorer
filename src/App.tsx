@@ -13,7 +13,7 @@ import { ClassHash } from "@/modules/ClassHash/page";
 import { JsonRpcPlayground } from "@/modules/JsonRpc/page";
 import { NotFound } from "@/modules/NotFound/page";
 import { World } from "@/modules/World/page";
-import { cn } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
 import { DotBackground } from "./shared/components/dotted-background";
 // import { TailwindIndicator } from "./shared/components/tailwind-indicator";
 

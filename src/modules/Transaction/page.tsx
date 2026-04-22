@@ -9,13 +9,13 @@ import {
   GasIcon,
   StackOvalIcon,
   ListIcon,
-  Skeleton,
   PulseIcon,
   PencilIcon,
   Tabs as UITabs,
   TabsContent as UITabsContent,
   cn,
 } from "@cartridge/ui";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
   Card,
   CardHeader,

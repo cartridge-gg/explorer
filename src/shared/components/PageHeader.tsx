@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/shared/components/card";
-import { cn } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
 
 export function PageHeader({

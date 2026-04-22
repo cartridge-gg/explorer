@@ -2,12 +2,12 @@ import { CopyableInteger } from "@/shared/components/copyable-integer";
 import {
   DialogClose,
   FnIcon,
-  Input,
-  Skeleton,
   Tabs,
   TabsContent,
   TimesIcon,
 } from "@cartridge/ui";
+import { Input } from "@/shared/components/ui/input";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import { FeltDisplayer } from "@/shared/components/felt-displayer";
 import {
   Dialog,

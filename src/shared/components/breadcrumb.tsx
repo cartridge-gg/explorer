@@ -1,5 +1,5 @@
 import React from "react";
-import { cn } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
 
 export {
   Breadcrumb,

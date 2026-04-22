@@ -1,6 +1,11 @@
-export { Sheet, SheetTrigger } from "@cartridge/ui";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent as UISheetContent,
+} from "@/shared/components/ui/sheet";
+import { cn } from "@/lib/utils";
 
-import { SheetContent as UISheetContent, cn } from "@cartridge/ui";
+export { Sheet, SheetTrigger };
 
 export function SheetContent({
   className,

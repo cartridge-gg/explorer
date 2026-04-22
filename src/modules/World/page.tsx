@@ -7,9 +7,9 @@ import {
   SelectItem,
   SelectContent,
   cn,
-  Input,
   GlobeIcon,
 } from "@cartridge/ui";
+import { Input } from "@/shared/components/ui/input";
 import {
   Breadcrumb,
   BreadcrumbItem,

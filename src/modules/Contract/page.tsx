@@ -6,13 +6,13 @@ import { Contract as StarknetContract } from "starknet";
 import {
   BookIcon,
   cn,
-  Input,
-  Skeleton,
   SearchIcon,
-  Button,
   PlusIcon,
   ListIcon,
 } from "@cartridge/ui";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { useBalances } from "@/shared/hooks/useBalances";
 import {

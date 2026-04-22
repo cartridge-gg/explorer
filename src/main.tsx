@@ -12,7 +12,7 @@ import { getBasePath } from "./services/rpc";
 import { PostHogProvider } from "./store/PostHogProvider";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { SonnerToaster } from "@cartridge/ui";
+import { Toaster as SonnerToaster } from "@/shared/components/ui/sonner";
 
 dayjs.extend(relativeTime);
 
