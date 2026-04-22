@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { Card, CardContent } from "./card";
-import { CloneIcon, cn, WedgeIcon } from "@cartridge/ui";
+import { CloneIcon, WedgeIcon } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { To, useNavigate } from "react-router-dom";
 

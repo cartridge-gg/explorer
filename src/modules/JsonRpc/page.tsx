@@ -3,8 +3,6 @@ import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
 import { useSpecVersion } from "@/shared/hooks/useSpecVersion";
 import {
   cn,
-  Button,
-  Input,
   TerminalIcon,
   SearchIcon,
   Badge,
@@ -12,6 +10,8 @@ import {
   TabsContent,
   CopyIcon,
 } from "@cartridge/ui";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
 import {
   Breadcrumb,
   BreadcrumbItem,

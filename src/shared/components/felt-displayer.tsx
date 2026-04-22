@@ -1,4 +1,4 @@
-import { cn } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { shortString } from "starknet";

@@ -1,4 +1,5 @@
-import { cn, TabsList, TabsTrigger } from "@cartridge/ui";
+import { TabsList, TabsTrigger } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
 
 export interface SelectorKV {
   value: string;

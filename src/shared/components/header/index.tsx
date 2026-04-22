@@ -7,8 +7,8 @@ import {
   DialogTrigger,
   SearchIcon,
   Separator,
-  Skeleton,
 } from "@cartridge/ui";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import useChain from "@/shared/hooks/useChain";
 import { Network } from "@/shared/components/network";
 import { SearchBar } from "@/shared/components/search-bar";

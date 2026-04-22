@@ -2,18 +2,17 @@ import { useScreen } from "@/shared/hooks/useScreen";
 import { truncateString } from "@/shared/utils/string";
 import { useCallCart, useCallCartDispatch } from "@/store/ShoppingCartProvider";
 import ControllerConnector from "@cartridge/connector/controller";
+import { TrashIcon, ArrowIcon } from "@cartridge/ui";
 import {
-  Button,
   Table,
   TableRow,
   TableBody,
   TableCell,
   TableHead,
-  TrashIcon,
-  ArrowIcon,
   TableHeader,
-  Skeleton,
-} from "@cartridge/ui";
+} from "@/shared/components/ui/table";
+import { Button } from "@/shared/components/ui/button";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useAccount, useDisconnect, useStarkName } from "@starknet-react/core";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";

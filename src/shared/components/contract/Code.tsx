@@ -4,9 +4,9 @@ import {
   TabsContent,
   CodeIcon,
   CardHeaderRight,
-  Button,
   CopyIcon,
 } from "@cartridge/ui";
+import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardHeader,

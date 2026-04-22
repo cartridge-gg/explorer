@@ -1,13 +1,12 @@
+import { CloneIcon, ExternalIcon } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
 import {
-  CloneIcon,
-  cn,
-  ExternalIcon,
-  Skeleton,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@cartridge/ui";
+} from "@/shared/components/ui/tooltip";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";

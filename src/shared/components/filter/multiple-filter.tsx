@@ -1,7 +1,6 @@
 import {
   cn,
   FilterIcon,
-  Button,
   Popover,
   PopoverTrigger,
   PopoverContent,
@@ -9,6 +8,7 @@ import {
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
 } from "@cartridge/ui";
+import { Button } from "@/shared/components/ui/button";
 import React, { useState } from "react";
 
 interface MultiSelectProps {

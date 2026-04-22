@@ -1,5 +1,9 @@
 import { useCallback, useRef, useState } from "react";
-import { cn, Input, SearchIcon, Skeleton, Spinner } from "@cartridge/ui";
+import { SearchIcon } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
+import { Input } from "@/shared/components/ui/input";
+import { Skeleton } from "@/shared/components/ui/skeleton";
+import { Spinner } from "@/shared/components/ui/spinner";
 import { useKeydownEffect } from "@/shared/hooks/useKeydownEffect";
 import { Badge } from "@/shared/components/badge";
 import { useIsFocused } from "@/shared/hooks/useIsFocused";

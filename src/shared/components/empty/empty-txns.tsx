@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardContent } from "../card";
-import { cn } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
 
 interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
   message?: string;

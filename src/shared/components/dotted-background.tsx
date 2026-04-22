@@ -1,4 +1,4 @@
-import { cn } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
 
 export function DotBackground({ className }: { className?: string }) {
   return (

@@ -1,12 +1,12 @@
+import { Badge } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
 import {
-  cn,
-  Input,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-  Badge,
-} from "@cartridge/ui";
+} from "@/shared/components/ui/tooltip";
+import { Input } from "@/shared/components/ui/input";
 import { Monaco } from "@monaco-editor/react";
 import { InfoIcon } from "lucide-react";
 import { editor } from "monaco-editor";

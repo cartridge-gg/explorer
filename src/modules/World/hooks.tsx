@@ -15,7 +15,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@cartridge/ui";
+} from "@/shared/components/ui/tooltip";
 import { Editor } from "@/shared/components/editor";
 
 export function useWorld() {

@@ -1,4 +1,6 @@
-import { CloneIcon, cn, Skeleton } from "@cartridge/ui";
+import { CloneIcon } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 

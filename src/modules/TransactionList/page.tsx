@@ -10,7 +10,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { RPC_PROVIDER } from "@/services/rpc";
 import { PageHeader, PageHeaderTitle } from "@/shared/components/PageHeader";
-import { cn, Spinner } from "@cartridge/ui";
+import { cn } from "@/lib/utils";
+import { Spinner } from "@/shared/components/ui/spinner";
 import {
   Breadcrumb,
   BreadcrumbList,
