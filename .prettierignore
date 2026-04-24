@@ -1,0 +1,10 @@
+# Agent tooling (canonical in .agents/, symlinked into .claude/ and .cursor/)
+.agents/
+.claude/
+.cursor/
+AGENTS.md
+AGENT.md
+CLAUDE.md
+CLAUDE.legacy.md
+AGENT.legacy.md
+
